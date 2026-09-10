@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warden — TPE1 UX/UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Flex:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --fondo:#19042A;
+    --superficie:#2C0849;
+    --borde:#3F0D68;
+    --texto:#ECDBFA;
+    --texto-suave:#CBA0EE;
+    --acento:#52D1DC;
+    --foco:#EEF434;
+    --display:'Orbitron',sans-serif;
+    --ui:'Roboto Flex',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    min-height:100vh;
+    display:grid;
+    place-items:center;
+    padding:32px;
+    background:var(--fondo);
+    color:var(--texto);
+    font:400 16px/1.5 var(--ui);
+  }
+  main{width:100%;max-width:52ch}
+  h1{
+    font:700 32px/1.2 var(--display);
+    margin:0 0 8px;
+    color:var(--texto);
+  }
+  .materia{
+    margin:0 0 40px;
+    color:var(--texto-suave);
+  }
+  ul{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+  a{
+    display:block;
+    padding:24px;
+    border:2px solid var(--borde);
+    border-radius:16px;
+    background:var(--superficie);
+    color:var(--acento);
+    text-decoration:none;
+    font-weight:500;
+  }
+  a:hover{border-color:var(--acento)}
+  a:focus-visible{outline:3px solid var(--foco);outline-offset:2px}
+  a span{
+    display:block;
+    margin-top:4px;
+    color:var(--texto-suave);
+    font-weight:400;
+    font-size:14px;
+  }
+  footer{margin-top:40px;color:var(--texto-suave);font-size:14px}
+</style>
+</head>
+<body>
+<main>
+  <h1>Warden</h1>
+  <p class="materia">Plataforma de juegos online. Trabajo práctico de UX/UI, etapa 1. TUDAI — UNICEN.</p>
+
+  <ul>
+    <li>
+      <a href="https://www.figma.com/proto/SwopODf4aQVWWVlXS6gCKd/Warden-Games?node-id=278-2268&amp;p=f&amp;viewport=390%2C404%2C0.11&amp;t=MQoDbXRDUkZEEq2W-1&amp;scaling=min-zoom&amp;content-scaling=fixed&amp;starting-point-node-id=278%3A2268&amp;page-id=128%3A672">
+        Ver el prototipo navegable
+        <span>Home, registro e ingreso, y la pantalla de juego con Neon Circuit.</span>
+      </a>
+    </li>
+    <li>
+      <a href="https://www.figma.com/design/SwopODf4aQVWWVlXS6gCKd/Warden-Games?node-id=353-2659&amp;t=qwUYfj0TyeYM5DMA-1">
+        Ver el archivo de Figma
+        <span>Design system completo: paleta, tipografía, iconos y componentes.</span>
+      </a>
+    </li>
+  </ul>
+
+  <footer>Grupo 24 — Agustín Muzi y Francisco Fernández</footer>
+</main>
+</body>
+</html>
