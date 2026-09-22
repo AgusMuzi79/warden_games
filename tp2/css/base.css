@@ -1,0 +1,76 @@
+/*
+  base.css — Reset y estilos globales
+  Depende de tokens.css (debe importarse antes en el <head>).
+*/
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font: 400 var(--fs-body)/1.5 var(--font-ui);
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  margin: 0 0 var(--space-sm);
+  line-height: 1.2;
+}
+
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+
+p {
+  margin: 0 0 var(--space-md);
+  color: var(--color-texto-suave);
+}
+
+a {
+  color: var(--color-acento);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+}
+
+main {
+  display: block;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--space-lg);
+}

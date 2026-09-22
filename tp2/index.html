@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Warden Games — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Roboto+Flex:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/home.css">
+</head>
+<body>
+
+  <!-- Loading simulado: se muestra al cargar la Home y se oculta desde loading.js -->
+  <div id="loading" class="loading-overlay" aria-busy="true" aria-live="polite">
+    <p>Cargando Warden Games…</p>
+  </div>
+
+  <header class="site-header">
+    <span class="site-header__logo">Warden Games</span>
+    <nav class="site-nav" aria-label="Navegación principal">
+      <a href="./index.html" aria-current="page">Home</a>
+      <a href="./login.html">Ingresar</a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- TODO: sección hero de bienvenida -->
+    <section id="hero">
+      <h1>Warden Games</h1>
+      <p>Plataforma de mini juegos online.</p>
+    </section>
+
+    <!-- TODO: carrusel de juegos disponibles (ver js/carousel.js) -->
+    <section id="carousel" aria-label="Catálogo de juegos">
+      <!-- TODO: tarjetas de juego generadas dinámicamente -->
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Grupo 24 — Agustín Muzi y Francisco Fernández. TUDAI — UNICEN.</p>
+  </footer>
+
+  <script src="./js/api.js"></script>
+  <script src="./js/loading.js"></script>
+  <script src="./js/carousel.js"></script>
+  <script src="./js/home.js"></script>
+</body>
+</html>

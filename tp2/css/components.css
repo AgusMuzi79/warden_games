@@ -1,0 +1,120 @@
+/*
+  components.css — Componentes reutilizables
+  Header/nav, botones, cards, inputs. Depende de tokens.css y base.css.
+*/
+
+/* Header / nav */
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.site-header__logo {
+  font-family: var(--font-display);
+  color: var(--color-texto);
+  font-weight: 700;
+  font-size: var(--fs-h3);
+}
+
+.site-nav {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.site-nav a {
+  color: var(--color-texto-suave);
+  font-weight: 500;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--color-acento);
+}
+
+/* Botones */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-pill);
+  border: 2px solid transparent;
+  font: 500 var(--fs-body) var(--font-ui);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.btn-primary {
+  background: var(--color-acento);
+  color: var(--color-fondo);
+}
+
+.btn-primary:hover {
+  background: #7FDEE6;
+  text-decoration: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--color-borde);
+  color: var(--color-texto);
+}
+
+.btn-secondary:hover {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+  text-decoration: none;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Cards */
+.card {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-md);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Inputs */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.field label {
+  font-size: var(--fs-small);
+  color: var(--color-texto-suave);
+}
+
+.field input {
+  background: var(--color-fondo);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-sm);
+  padding: var(--space-sm) var(--space-md);
+  color: var(--color-texto);
+  font: 400 var(--fs-body) var(--font-ui);
+}
+
+.field input:focus-visible {
+  border-color: var(--color-acento);
+}
+
+/* Footer */
+.site-footer {
+  padding: var(--space-lg);
+  text-align: center;
+  color: var(--color-texto-suave);
+  font-size: var(--fs-small);
+  border-top: 1px solid var(--color-borde);
+}
