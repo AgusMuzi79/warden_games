@@ -1,87 +1,72 @@
 /*
   components.css — Componentes reutilizables
-  Header/nav, botones, cards, inputs. Depende de variables.css y base.css.
+  Botones, cards, inputs. Depende de variables.css y base.css.
+  Header vive en header.css, footer en footer.css.
 */
-
-/* Header / nav */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--espaciado-4) var(--espaciado-6);
-  border-bottom: 1px solid var(--primario-o1);
-}
-
-.site-header__logo {
-  font-family: var(--font-display);
-  color: var(--primario-c3);
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.site-nav {
-  display: flex;
-  gap: var(--espaciado-4);
-}
-
-.site-nav a {
-  color: var(--primario-c1);
-  font-weight: 500;
-}
-
-.site-nav a:hover,
-.site-nav a[aria-current="page"] {
-  color: var(--acento);
-}
 
 /* Botones */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--espaciado-2);
-  padding: var(--espaciado-2) var(--espaciado-6);
-  border-radius: var(--radio-sm);
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-6);
   border: 2px solid transparent;
-  font: 500 16px var(--font-ui);
+  border-radius: var(--radio-sm);
+  font: 500 16px/1 var(--font-ui);
   cursor: pointer;
   text-decoration: none;
-  transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  background: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
 }
 
-.btn-primary {
-  background: var(--acento);
-  color: var(--fondo);
-}
+.btn--primario            { background: var(--primario); color: var(--primario-c3); }
+.btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); }
+.btn--primario:active     { background: var(--primario-o1); }
 
-.btn-primary:hover {
-  background: var(--acento-c3);
-  color: var(--fondo);
-  text-decoration: none;
-}
+.btn--secundario          { border-color: var(--acento); color: var(--acento); }
+.btn--secundario:hover    { background: var(--primario-o2); }
+.btn--secundario:active   { background: var(--primario-o1); }
 
-.btn-secondary {
-  background: transparent;
-  border-color: var(--primario-o1);
-  color: var(--primario-c3);
-}
+.btn--terciario           { color: var(--acento); }
+.btn--terciario:hover     { background: var(--primario-o2); }
 
-.btn-secondary:hover {
-  border-color: var(--acento);
-  color: var(--acento);
-  text-decoration: none;
+.btn--destructivo         { border-color: var(--error); color: var(--error); }
+.btn--destructivo:hover   { background: var(--error); color: var(--fondo); }
+.btn--destructivo:active  { background: var(--error); color: var(--fondo); }
+
+.btn:disabled {
+  background: var(--primario-o2);
+  color: var(--primario-c1);
+  border-color: transparent;
+  cursor: not-allowed;
 }
 
 .btn:active {
   transform: scale(0.98);
 }
 
-/* Cards
-   background, border-radius, elevación en hover/focus (transform + z-index)
-   ya vienen definidos en variables.css; acá solo se agrega el borde y el padding. */
+/* Cards — el hover se levanta por encima de las vecinas.
+   En Figma esto no se puede mostrar porque el z-index es
+   estatico; aca si. */
 .card {
+  position: relative;
   border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-md);
   padding: var(--espaciado-6);
+  background: var(--primario-o2);
+  transition: transform 150ms ease-out;
+}
+
+.card:hover,
+.card:focus-within {
+  transform: scale(1.06);
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .card:hover, .card:focus-within { transform: none; }
 }
 
 /* Inputs */
@@ -108,13 +93,4 @@
 
 .field input:focus-visible {
   border-color: var(--acento);
-}
-
-/* Footer */
-.site-footer {
-  padding: var(--espaciado-6);
-  text-align: center;
-  color: var(--primario-c1);
-  font-size: 14px;
-  border-top: 1px solid var(--primario-o1);
 }

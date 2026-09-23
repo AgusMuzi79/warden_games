@@ -1,13 +1,12 @@
 /* ============================================================
    Warden — variables
-   Generado desde el design system de Figma.
+   Generado basado en el design system de Figma.
    ============================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Roboto+Flex:wght@400;500&display=swap');
 
 :root {
   /* ---- Color: base ---- */
   --fondo:            #19042A;
+  --superficie:       var(--primario-o2);
 
   /* ---- Color: primario (violeta) ---- */
   --primario-c3:     #ECDBFA;
@@ -77,66 +76,3 @@
   outline-offset: 2px;
 }
 
-/* ============================================================
-   Boton — el color es consecuencia del rol, no una opcion.
-   Ratios verificados contra el relleno de cada estado.
-   ============================================================ */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--control-alto);
-  padding: 0 var(--espaciado-6);
-  border: 2px solid transparent;
-  border-radius: var(--radio-sm);
-  font: 500 16px/1 var(--font-ui);
-  cursor: pointer;
-  background: none;
-}
-
-.btn--primario            { background: var(--primario); color: var(--primario-c3); }
-.btn--primario:hover      { background: var(--primario-c1); }
-.btn--primario:active     { background: var(--primario-o1); }
-
-.btn--secundario          { border-color: var(--acento); color: var(--acento); }
-.btn--secundario:hover    { background: var(--primario-o2); }
-.btn--secundario:active   { background: var(--primario-o1); }
-
-.btn--terciario           { color: var(--acento); }
-.btn--terciario:hover     { background: var(--primario-o2); }
-
-.btn--destructivo         { border-color: var(--error); color: var(--error); }
-.btn--destructivo:hover   { background: var(--error); color: var(--fondo); }
-.btn--destructivo:active  { background: var(--error); color: var(--error); }
-
-.btn:disabled {
-  background: var(--primario-o2);
-  color: var(--primario-c1);
-  border-color: transparent;
-  cursor: not-allowed;
-}
-
-/* ============================================================
-   Card — el hover se levanta por encima de las vecinas.
-   En Figma esto no se puede mostrar porque el z-index es
-   estatico; aca si.
-   ============================================================ */
-
-.card {
-  position: relative;
-  border-radius: var(--radio-md);
-  background: var(--primario-o2);
-  transition: transform 150ms ease-out;
-}
-
-.card:hover,
-.card:focus-within {
-  transform: scale(1.06);
-  z-index: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .card { transition: none; }
-  .card:hover, .card:focus-within { transform: none; }
-}
