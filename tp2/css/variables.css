@@ -1,6 +1,6 @@
 /* ============================================================
    Warden — variables
-   Generado desde el design system de Figma.
+   Generado basado en el design system de Figma.
    ============================================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Roboto+Flex:wght@400;500&display=swap');
@@ -78,8 +78,7 @@
 }
 
 /* ============================================================
-   Boton — el color es consecuencia del rol, no una opcion.
-   Ratios verificados contra el relleno de cada estado.
+   Botones
    ============================================================ */
 
 .btn {

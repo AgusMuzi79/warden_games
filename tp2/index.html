@@ -13,11 +13,10 @@
 
   <!-- Loading simulado: se muestra al cargar la Home y se oculta desde loading.js -->
   <div id="loading" class="loading-overlay" aria-busy="true" aria-live="polite">
-    <p>Cargando Warden Games…</p>
   </div>
 
   <header class="site-header">
-    <span class="site-header__logo">Warden Games</span>
+    <span class="site-header__logo">Warden</span>
     <nav class="site-nav" aria-label="Navegación principal">
       <a href="./index.html" aria-current="page">Home</a>
       <a href="./login.html">Ingresar</a>
@@ -37,9 +36,140 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <p>Grupo 24 — Agustín Muzi y Francisco Fernández. TUDAI — UNICEN.</p>
-  </footer>
+<footer class="footer">
+  <div class="footer__inner">
+
+    <!-- Sponsors -->
+    <section class="sponsors" aria-labelledby="sponsors-title">
+      <div class="sponsors__row">
+        <h2 class="footer__label" id="sponsors-title">Sponsors</h2>
+        <ul class="sponsors__list">
+          <li><a href="#">Voltio</a></li>
+          <li><a href="#">Kraven</a></li>
+          <li><a href="#">NodoSur</a></li>
+          <li><a href="#">Hexa</a></li>
+          <li><a href="#">Cuenca</a></li>
+          <li><a href="#">Pixelería</a></li>
+          <li><a href="#">Uncas Games</a></li>
+        </ul>
+      </div>
+      <a class="sponsors__mail" href="mailto:sponsors@warden.gg">sponsors@warden.gg</a>
+    </section>
+
+    <hr class="footer__divider">
+
+    <!-- Marca + navegación -->
+    <div class="footer__grid">
+
+      <div class="brand">
+        <a class="brand__logo" href="index.html" aria-label="Warden, ir al inicio">
+          <img src="assets/img/logo.svg" alt="" width="44" height="44">
+          <span>Warden</span>
+        </a>
+        <p class="brand__tagline">Miles de juegos, cero instalaciones. Entrás, jugás, seguís con tu día.</p>
+
+        <ul class="social" aria-label="Redes sociales de Warden">
+          <li><a href="#" aria-label="Warden en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Warden en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Warden en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Warden en YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+        </ul>
+      </div>
+
+      <nav class="footer__col" aria-labelledby="col-jugar">
+        <h2 class="footer__label" id="col-jugar">Jugar</h2>
+        <ul>
+          <li><a href="#">Destacados</a></li>
+          <li><a href="#">Últimos</a></li>
+          <li><a href="#">Recientes</a></li>
+          <li><a href="#">Top 100</a></li>
+          <li><a href="#">Actualizados</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="col-devs">
+        <h2 class="footer__label" id="col-devs">Devs</h2>
+        <ul>
+          <li><a href="#">Publicá tu juego</a></li>
+          <li><a href="#">Documentación</a></li>
+          <li><a href="#">Ingresos</a></li>
+          <li><a href="#">Estado de la API</a></li>
+          <li><a href="#">Foro</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="col-comunidad">
+        <h2 class="footer__label" id="col-comunidad">Comunidad</h2>
+        <ul>
+          <li><a href="#">Torneos</a></li>
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">Embajadores</a></li>
+          <li><a href="#">Convivencia</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="col-ayuda">
+        <h2 class="footer__label" id="col-ayuda">Ayuda</h2>
+        <ul>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Preguntas</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Estado del servicio</a></li>
+          <li><a href="#">Accesibilidad</a></li>
+        </ul>
+      </nav>
+
+    </div>
+
+    <hr class="footer__divider">
+
+    <!-- Newsletter + empresa -->
+    <div class="footer__bottom">
+
+      <section class="newsletter" aria-labelledby="newsletter-title">
+        <h2 class="newsletter__title" id="newsletter-title">No te pierdas ningún lanzamiento</h2>
+        <p class="newsletter__copy">Un mail por semana con los juegos nuevos y los torneos que se vienen.</p>
+        <form class="newsletter__form" action="#" method="post" novalidate>
+          <label class="sr-only" for="newsletter-email">Tu correo electrónico</label>
+          <input type="email" id="newsletter-email" name="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
+          <button type="submit">Suscribirse</button>
+        </form>
+      </section>
+
+      <section class="company" aria-labelledby="company-title">
+        <h2 class="footer__label company__title" id="company-title">Warden Interactive S.R.L.</h2>
+        <address>
+          Av. Reforma Universitaria, Aulas Comunes 1 - Tandil, Argentina.<br>
+          CUIT 30-12345678-6<br>
+          <a href="mailto:hola@warden.gg">hola@warden.gg</a> - <a href="mailto:soporte@warden.gg">soporte@warden.gg</a><br>
+          <a href="tel:+541155550182">+54 11 5555-0182</a> - lun a vie de 9 a 18 hs
+        </address>
+      </section>
+
+    </div>
+
+    <hr class="footer__divider">
+
+    <!-- Barra legal -->
+    <div class="legal">
+      <nav aria-label="Información legal">
+        <ul class="legal__links">
+          <li><a href="#">Términos y condiciones</a></li>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Cookies</a></li>
+          <li><a href="#">Botón de arrepentimiento</a></li>
+          <li><a href="#">Defensa de las y los consumidores</a></li>
+        </ul>
+      </nav>
+      <div class="legal__meta">
+        <p>© 2026 Warden Interactive S.R.L. Todos los derechos reservados.</p>
+        <p>v4.2.1 · build 20260909</p>
+      </div>
+    </div>
+
+  </div>
+</footer>
 
   <script src="./js/api.js"></script>
   <script src="./js/loading.js"></script>
