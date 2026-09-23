@@ -14,7 +14,7 @@ Grupo 24: Agustín Muzi y Francisco Fernández.
   login.html             → Login / Registro
   juego.html             → Página del juego (Peg Solitaire)
   css/
-    tokens.css           → variables: colores, tipografía, espaciados, radios, sombras
+    variables.css        → design tokens de Figma: colores, tipografía, espaciados, radios
     base.css             → reset y estilos globales
     components.css       → botones (con hovers), cards, header, inputs
     home.css

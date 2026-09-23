@@ -1,6 +1,6 @@
 /*
   components.css — Componentes reutilizables
-  Header/nav, botones, cards, inputs. Depende de tokens.css y base.css.
+  Header/nav, botones, cards, inputs. Depende de variables.css y base.css.
 */
 
 /* Header / nav */
@@ -8,30 +8,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-md) var(--space-lg);
-  border-bottom: 1px solid var(--color-borde);
+  padding: var(--espaciado-4) var(--espaciado-6);
+  border-bottom: 1px solid var(--primario-o1);
 }
 
 .site-header__logo {
   font-family: var(--font-display);
-  color: var(--color-texto);
+  color: var(--primario-c3);
   font-weight: 700;
-  font-size: var(--fs-h3);
+  font-size: 20px;
 }
 
 .site-nav {
   display: flex;
-  gap: var(--space-md);
+  gap: var(--espaciado-4);
 }
 
 .site-nav a {
-  color: var(--color-texto-suave);
+  color: var(--primario-c1);
   font-weight: 500;
 }
 
 .site-nav a:hover,
 .site-nav a[aria-current="page"] {
-  color: var(--color-acento);
+  color: var(--acento);
 }
 
 /* Botones */
@@ -39,35 +39,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-sm) var(--space-lg);
-  border-radius: var(--radius-pill);
+  gap: var(--espaciado-2);
+  padding: var(--espaciado-2) var(--espaciado-6);
+  border-radius: var(--radio-sm);
   border: 2px solid transparent;
-  font: 500 var(--fs-body) var(--font-ui);
+  font: 500 16px var(--font-ui);
   cursor: pointer;
   text-decoration: none;
   transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
 .btn-primary {
-  background: var(--color-acento);
-  color: var(--color-fondo);
+  background: var(--acento);
+  color: var(--fondo);
 }
 
 .btn-primary:hover {
-  background: #7FDEE6;
+  background: var(--acento-c3);
+  color: var(--fondo);
   text-decoration: none;
 }
 
 .btn-secondary {
   background: transparent;
-  border-color: var(--color-borde);
-  color: var(--color-texto);
+  border-color: var(--primario-o1);
+  color: var(--primario-c3);
 }
 
 .btn-secondary:hover {
-  border-color: var(--color-acento);
-  color: var(--color-acento);
+  border-color: var(--acento);
+  color: var(--acento);
   text-decoration: none;
 }
 
@@ -75,46 +76,45 @@
   transform: scale(0.98);
 }
 
-/* Cards */
+/* Cards
+   background, border-radius, elevación en hover/focus (transform + z-index)
+   ya vienen definidos en variables.css; acá solo se agrega el borde y el padding. */
 .card {
-  background: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radius-md);
-  padding: var(--space-lg);
-  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--primario-o1);
+  padding: var(--espaciado-6);
 }
 
 /* Inputs */
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xs);
-  margin-bottom: var(--space-md);
+  gap: var(--espaciado-1);
+  margin-bottom: var(--espaciado-4);
 }
 
 .field label {
-  font-size: var(--fs-small);
-  color: var(--color-texto-suave);
+  font-size: 14px;
+  color: var(--primario-c1);
 }
 
 .field input {
-  background: var(--color-fondo);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-md);
-  color: var(--color-texto);
-  font: 400 var(--fs-body) var(--font-ui);
+  background: var(--fondo);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  padding: var(--espaciado-2) var(--espaciado-4);
+  color: var(--primario-c3);
+  font: 400 16px var(--font-ui);
 }
 
 .field input:focus-visible {
-  border-color: var(--color-acento);
+  border-color: var(--acento);
 }
 
 /* Footer */
 .site-footer {
-  padding: var(--space-lg);
+  padding: var(--espaciado-6);
   text-align: center;
-  color: var(--color-texto-suave);
-  font-size: var(--fs-small);
-  border-top: 1px solid var(--color-borde);
+  color: var(--primario-c1);
+  font-size: 14px;
+  border-top: 1px solid var(--primario-o1);
 }
