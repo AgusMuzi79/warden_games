@@ -65,13 +65,11 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ## Tipografía
 
-### Orbitron solo desde 18px
-- **Qué:** Orbitron para títulos y labels de 18px o más; Roboto Flex para todo lo demás.
-- **Por qué:** Orbitron es una fuente display de formas geométricas y anchas; en tamaños
-  chicos pierde legibilidad. Roboto Flex está pensada para interfaz.
-- **Ajustes respecto de Figma:** los títulos de columna y los sponsors del footer pasaron
-  a 18px (mismo estilo que `.t-label`); el placeholder del newsletter y el estado
-  "Partida guardada" del header del juego pasaron a Roboto Flex.
+### Orbitron solo en títulos
+- **Qué:** Orbitron para h1–h3 y logo; Roboto Flex para todo lo demás.
+- **Por qué:** corrección del TPE1. Orbitron es decorativa y en textos chicos, labels
+  e inputs pierde legibilidad. La reservamos para jerarquía y marca.
+- **Antes:** usábamos Orbitron desde 18px, lo que igual la dejaba en demasiados lugares.
 
 ### Tildes y voseo
 - **Qué:** corregimos textos de Figma sin tilde ("Últimos", "Documentación", "Botón", "menú").
@@ -172,6 +170,38 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Loading de la Home
+
+### Spinner circular con el % adentro
+- **Qué:** un aro (`::before` con borde, uno de sus lados de otro color) que gira con
+  `@keyframes`, con el número de 0 a 100 centrado adentro.
+- **Por qué:** es la forma más simple de las permitidas por el enunciado (spinner, círculo
+  o cuadrado) y la más asociada a "cargando" para quien lo ve. El número va adentro en vez
+  de debajo para que ocupe menos alto y quede más compacto.
+- **Cómo:** el aro que gira es un `::before` absoluto que ocupa todo el spinner; el texto
+  del % es un elemento aparte con `z-index: 1` para quedar siempre arriba, así no hace
+  falta contra-rotarlo para que no gire con el aro.
+
+### Contador real de 0 a 100% en 5 segundos
+- **Qué:** `loading.js` suma 1% cada 50ms (100 pasos × 50ms = 5000ms) y al llegar a 100
+  oculta el overlay con el atributo `hidden`.
+- **Por qué:** el enunciado pide "loading simulado de 5 segundos con % de avance visible";
+  un contador reproducible es más simple de explicar que una animación por `requestAnimationFrame`.
+
+### El resto de la página queda `inert` mientras carga
+- **Qué:** mientras el loading está visible, el header, el `main` y el footer tienen el
+  atributo `inert`.
+- **Por qué:** sin esto, alguien podría tabular o hacer click en contenido tapado por el
+  overlay. `inert` es nativo de HTML, no hace falta JS para bloquear foco elemento por elemento.
+
+### El % es decorativo para lectores de pantalla
+- **Qué:** el spinner y el número tienen `aria-hidden="true"`; en cambio hay un texto fijo
+  ("Cargando catálogo de juegos…") dentro del `role="status"` que se lee una sola vez.
+- **Por qué:** anunciar el número cambiando 100 veces en 5 segundos sería spam para quien
+  usa lector de pantalla. Un solo anuncio al aparecer el loading alcanza.
+
+---
+
 ## Componentes
 
 ### Cards que se elevan sobre las vecinas en hover
@@ -180,13 +210,36 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   también con teclado. En Figma no se puede mostrar el z-index dinámico; en código sí.
 - **Movimiento reducido:** se desactiva con `prefers-reduced-motion`.
 
+### Las 3 animaciones de hover de los botones
+- **Qué:** primario y destructivo se elevan (`translateY` + sombra) al pasar el mouse;
+  secundario tiene un relleno que entra deslizando de izquierda a derecha (`::before`
+  con `scaleX`); terciario tiene un subrayado que crece de izquierda a derecha (`::after`
+  con `scaleX`). Son 3 animaciones distintas repartidas en los 4 estilos de botón.
+- **Por qué:** el enunciado pide 3 animaciones de hover distintas en botones. Elegimos
+  variantes con significado (elevar = "esto es la acción principal", rellenar y subrayar
+  = variantes de menor jerarquía) en vez de 3 efectos arbitrarios sin relación con el uso
+  de cada botón.
+- **Token nuevo:** `--sombra-elevacion` en `variables.css` (un `rgba` con transparencia)
+  para la sombra del hover, porque ningún token de color existente tiene alfa.
+- **`appearance: none` en `.btn`:** lo agregamos porque, sin él, algunos navegadores le
+  aplican su propio estilo nativo de botón (bordes, colores) por encima del nuestro. Con
+  `appearance: none` el botón se ve igual en todos lados y depende solo de nuestro CSS.
+- **Movimiento reducido:** con `prefers-reduced-motion`, ninguna transición corre —el
+  relleno y el subrayado aparecen de golpe en vez de animados, y los botones no se elevan.
+- **Descartado:** un shake/vibración en destructivo (más llamativo para "acción peligrosa"
+  pero sumaba una 4ª animación distinta cuando el enunciado pide 3, y hacía más difícil
+  de explicar por qué solo ese botón tiembla).
+
 ---
 
 ## Pendientes de decidir
 
-- Qué despliega el menú hamburguesa.
 - Hex de `--superficie` (fondo de header y footer).
-- Las 3 animaciones de hover de botones.
-- Tipo de transición del carrusel.
-- Diseño del loading (forma de la animación y ubicación del %).
+- Tipo de transición del carrusel de recomendados.
 - Animación de registro exitoso.
+- Estilo final del componente `.link` (falta ver la captura de Figma).
+- Qué contenido lleva el menú hamburguesa, y cómo unificarlo visualmente con el
+  menú de usuario (hoy son muy distintos entre sí).
+- Qué va en el panel de marca del splash de login de 2 columnas.
+- Qué es la "galería" de la página del juego (falta ver la captura de Figma;
+  hoy el tablero y la galería no están construidos todavía).

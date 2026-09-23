@@ -13,6 +13,15 @@ Decisiones ya tomadas y su justificación: @DECISIONES.md
 
 ---
 
+## Referencias de diseño (capturas de Figma)
+
+Te vamos a pasar capturas de Figma como referencia visual. **Figma no se actualiza:
+el código y este archivo son la fuente de verdad.** Si una captura contradice lo que
+ya está implementado o una regla de acá (tokens, Orbitron solo en títulos, tildes,
+contraste), gana el código y la regla. Avisá la diferencia en lugar de copiarla.
+
+---
+
 ## Restricciones del enunciado — TPE2 (no negociables)
 
 > Estas restricciones son **de esta entrega**. El proyecto sigue en próximas entregas
@@ -86,7 +95,9 @@ Lo general va primero y lo específico al final. No agregues estilos de una pág
   `--primario-o1/o2`, `--acento-c3`, `--acento`, `--acento-o2/o3`, `--error`, `--exito`,
   `--foco`, `--espaciado-1/2/3/4/6/8`, `--radio-sm/md/xl`, `--control-alto` (44px),
   `--control-target` (24px), `--font-display` (Orbitron), `--font-ui` (Roboto Flex).
-- **Orbitron solo desde 18px.** Todo lo que sea menor va en Roboto Flex.
+- **Orbitron solo en títulos (h1–h3) y el logo.** Todo lo demás (labels, botones,
+  inputs, menús, textos chicos) va en Roboto Flex. Corrección del profesor: priorizar
+  accesibilidad sobre estética.
 - Nombres de clases estilo BEM: `.bloque`, `.bloque__elemento`, `.bloque--variante`
   (ej: `.header__avatar--invitado`, `.btn--primario`).
 - Evitar `!important`. Única excepción aceptada: `[hidden] { display: none !important; }`.
@@ -140,14 +151,4 @@ Lo general va primero y lo específico al final. No agregues estilos de una pág
 
 ## Deuda conocida (revisar si ya está resuelta)
 
-- `.btn` y `.card` definidos en `variables.css` y en `components.css` con nombres
-  distintos (`.btn--primario` vs `.btn-primary`). Unificar en `components.css` con `--`.
-- `.btn--primario:hover`: texto `--primario-c3` sobre `--primario-c1`, sin contraste.
-  Texto en hover debe ser `--fondo`.
-- `.btn--destructivo:active`: texto y fondo del mismo color.
-- Hovers actuales son solo cambio de color: faltan las 3 animaciones de hover.
-- Fuentes cargadas dos veces (`@import` en `variables.css` + `<link>`). Dejar solo el
-  `<link>` con preconnect, incluyendo Orbitron 600.
-- `.site-header`, `.site-nav` y `.site-footer` en `components.css` ya no se usan.
-- Falta el token `--superficie` (fondo de header y footer en Figma).
-- `.sr-only` está en `footer.css`: mover a `base.css`.
+Sin pendientes por ahora.
