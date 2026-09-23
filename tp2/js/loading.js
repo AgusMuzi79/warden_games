@@ -1,3 +1,23 @@
 // loading.js — Simulación de carga en la Home
-// TODO: mostrar el overlay #loading al iniciar, ocultarlo tras un delay simulado
-// (o cuando resuelva la carga real de datos) y manejar el estado con aria-busy.
+
+const overlay = document.getElementById('loading');
+const numero = document.getElementById('loading-num');
+const bloqueados = document.querySelectorAll('.header, main, .footer');
+
+bloqueados.forEach((el) => el.setAttribute('inert', ''));
+
+const DURACION_MS = 5000;
+const PASOS = 100;
+const intervalo = DURACION_MS / PASOS;
+let porcentaje = 0;
+
+const timer = setInterval(() => {
+  porcentaje += 1;
+  numero.textContent = porcentaje;
+
+  if (porcentaje >= PASOS) {
+    clearInterval(timer);
+    overlay.hidden = true;
+    bloqueados.forEach((el) => el.removeAttribute('inert'));
+  }
+}, intervalo);

@@ -28,6 +28,7 @@
 
   /* ---- Color: utilidad ---- */
   --foco:             #EEF434;
+  --sombra-elevacion: rgba(0, 0, 0, 0.35);
 
   /* ---- Espaciado ---- */
   --espaciado-1:      4px;

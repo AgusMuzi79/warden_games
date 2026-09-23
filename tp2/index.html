@@ -18,7 +18,11 @@
 <body>
 
   <!-- Loading simulado: se muestra al cargar la Home y se oculta desde loading.js -->
-  <div id="loading" class="loading-overlay" aria-busy="true" aria-live="polite">
+  <div id="loading" class="loading-overlay" role="status" aria-busy="true">
+    <p class="sr-only">Cargando catálogo de juegos…</p>
+    <div class="loading__spinner" aria-hidden="true">
+      <span class="loading__pct"><span id="loading-num">0</span>%</span>
+    </div>
   </div>
 
   <header class="header">
@@ -204,9 +208,9 @@
   </div>
 </footer>
 
-  <script src="./js/api.js"></script>
-  <script src="./js/loading.js"></script>
-  <script src="./js/carousel.js"></script>
-  <script src="./js/home.js"></script>
+  <script src="./js/api.js" defer></script>
+  <script src="./js/loading.js" defer></script>
+  <script src="./js/carousel.js" defer></script>
+  <script src="./js/home.js" defer></script>
 </body>
 </html>

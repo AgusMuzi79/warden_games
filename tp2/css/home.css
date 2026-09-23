@@ -1,4 +1,50 @@
 /*
   home.css — Estilos específicos de la Home (loading, hero, carrusel de juegos)
-  TODO: implementar estilos de loading overlay, hero y carrusel de juegos.
+  TODO: implementar estilos de hero y carrusel de juegos.
 */
+
+/* Loading simulado */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  background: var(--fondo);
+}
+
+.loading__spinner {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+}
+
+.loading__spinner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 6px solid var(--primario-o1);
+  border-top-color: var(--acento);
+  border-radius: 50%;
+  animation: girar 1s linear infinite;
+}
+
+.loading__pct {
+  position: relative;
+  z-index: 1;
+  font: 600 20px/1 var(--font-display);
+  color: var(--primario-c3);
+}
+
+@keyframes girar {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading__spinner::before {
+    animation: none;
+  }
+}

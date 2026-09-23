@@ -6,9 +6,11 @@
 
 /* Botones */
 .btn {
+  appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  position: relative;
   min-height: var(--control-alto);
   padding: 0 var(--espaciado-6);
   border: 2px solid transparent;
@@ -17,23 +19,76 @@
   cursor: pointer;
   text-decoration: none;
   background: none;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Primario y destructivo: se elevan y tiran sombra al pasar el mouse (animación 1) */
 .btn--primario            { background: var(--primario); color: var(--primario-c3); }
-.btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); }
-.btn--primario:active     { background: var(--primario-o1); }
-
-.btn--secundario          { border-color: var(--acento); color: var(--acento); }
-.btn--secundario:hover    { background: var(--primario-o2); }
-.btn--secundario:active   { background: var(--primario-o1); }
-
-.btn--terciario           { color: var(--acento); }
-.btn--terciario:hover     { background: var(--primario-o2); }
+.btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); transform: translateY(-3px); box-shadow: 0 6px 14px var(--sombra-elevacion); }
+.btn--primario:active     { background: var(--primario-o1); transform: translateY(0) scale(0.98); box-shadow: none; }
 
 .btn--destructivo         { border-color: var(--error); color: var(--error); }
-.btn--destructivo:hover   { background: var(--error); color: var(--fondo); }
-.btn--destructivo:active  { background: var(--error); color: var(--fondo); }
+.btn--destructivo:hover   { background: var(--error); color: var(--fondo); transform: translateY(-3px); box-shadow: 0 6px 14px var(--sombra-elevacion); }
+.btn--destructivo:active  { background: var(--error); color: var(--fondo); transform: translateY(0) scale(0.98); box-shadow: none; }
+
+/* Secundario: el relleno entra deslizando de izquierda a derecha (animación 2) */
+.btn--secundario {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+.btn--secundario::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--acento);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease-out;
+}
+
+.btn--secundario:hover,
+.btn--secundario:focus-visible {
+  color: var(--fondo);
+}
+
+.btn--secundario:hover::before,
+.btn--secundario:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.btn--secundario:active::before {
+  background: var(--primario-o1);
+}
+
+/* Terciario: el subrayado crece de izquierda a derecha (animación 3) */
+.btn--terciario {
+  color: var(--acento);
+}
+
+.btn--terciario::after {
+  content: "";
+  position: absolute;
+  left: var(--espaciado-6);
+  right: var(--espaciado-6);
+  bottom: 6px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease-out;
+}
+
+.btn--terciario:hover::after,
+.btn--terciario:focus-visible::after {
+  transform: scaleX(1);
+}
 
 .btn:disabled {
   background: var(--primario-o2);
@@ -42,8 +97,20 @@
   cursor: not-allowed;
 }
 
-.btn:active {
-  transform: scale(0.98);
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn--secundario::before,
+  .btn--terciario::after {
+    transition: none;
+  }
+
+  .btn--primario:hover,
+  .btn--primario:active,
+  .btn--destructivo:hover,
+  .btn--destructivo:active,
+  .btn:active {
+    transform: none;
+  }
 }
 
 /* Cards — el hover se levanta por encima de las vecinas.
