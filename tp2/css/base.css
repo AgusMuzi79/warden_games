@@ -37,8 +37,13 @@ body {
   font: 400 16px/1.5 var(--font-ui);
 }
 
-h1, h2, h3, h4 {
+h1, h2, h3 {
   font-family: var(--font-display);
+  margin: 0 0 var(--espaciado-2);
+  line-height: 1.2;
+}
+
+h4 {
   margin: 0 0 var(--espaciado-2);
   line-height: 1.2;
 }

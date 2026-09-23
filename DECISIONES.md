@@ -71,6 +71,18 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   e inputs pierde legibilidad. La reservamos para jerarquía y marca.
 - **Antes:** usábamos Orbitron desde 18px, lo que igual la dejaba en demasiados lugares.
 
+### Limpieza de Orbitron fuera de h1-h3 (segunda corrección)
+- **Qué:** sacamos Orbitron de `h4` (regla vieja en `base.css` lo incluía), de `.t-label`
+  (`variables.css`) y de `.sponsors__list a` (`footer.css`) — pasan a `--font-ui`.
+- **Por qué:** quedaron de la regla anterior ("Orbitron desde 18px") y el profesor marcó
+  de nuevo "demasiado uso de la fuente futurista". `.t-label` y `h4` no se usan todavía
+  en ninguna página, pero como son parte del design system los corregimos antes de que
+  alguien los use mal. `.sponsors__list a` son links de marcas dentro de una lista, no
+  títulos: no entran en la excepción de h1-h3.
+- **Se mantiene igual:** `.footer__label` y `.newsletter__title` siguen en Orbitron
+  porque son `h2` en el HTML (entran en la regla), aunque se vean como labels chicos.
+  Decisión explícita: para el profesor pesa más que sean headings reales que cómo se ven.
+
 ### Tildes y voseo
 - **Qué:** corregimos textos de Figma sin tilde ("Últimos", "Documentación", "Botón", "menú").
 - **Por qué:** consistencia y corrección del contenido; el diseño se actualizó igual.
@@ -210,25 +222,50 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   también con teclado. En Figma no se puede mostrar el z-index dinámico; en código sí.
 - **Movimiento reducido:** se desactiva con `prefers-reduced-motion`.
 
-### Las 3 animaciones de hover de los botones
-- **Qué:** primario y destructivo se elevan (`translateY` + sombra) al pasar el mouse;
-  secundario tiene un relleno que entra deslizando de izquierda a derecha (`::before`
-  con `scaleX`); terciario tiene un subrayado que crece de izquierda a derecha (`::after`
-  con `scaleX`). Son 3 animaciones distintas repartidas en los 4 estilos de botón.
-- **Por qué:** el enunciado pide 3 animaciones de hover distintas en botones. Elegimos
-  variantes con significado (elevar = "esto es la acción principal", rellenar y subrayar
-  = variantes de menor jerarquía) en vez de 3 efectos arbitrarios sin relación con el uso
-  de cada botón.
-- **Token nuevo:** `--sombra-elevacion` en `variables.css` (un `rgba` con transparencia)
-  para la sombra del hover, porque ningún token de color existente tiene alfa.
+### Las 4 animaciones de hover de los botones (revisado en la 2ª corrección)
+- **Qué:** primario se eleva (`translateY` + sombra); secundario tiene un relleno que
+  entra deslizando de izquierda a derecha (`::before` con `scaleX`); terciario tiene un
+  subrayado que crece de izquierda a derecha (`::after` con `scaleX`); destructivo tiene
+  un pulso/resplandor rojo que crece y se desvanece (`@keyframes` sobre `box-shadow`,
+  en loop mientras dura el hover). 4 animaciones distintas para los 4 estilos de botón.
+- **Por qué:** el enunciado pide un mínimo de 3 animaciones de hover distintas; al
+  principio primario y destructivo compartían la de elevar. La 2ª corrección del TPE1
+  pidió explícitamente que las 4 variantes tengan hover distinto entre sí, así que
+  sumamos una 4ª. Para destructivo buscamos algo que comunique "cuidado" sin ser tan
+  brusco como un shake (más fácil de explicar en la defensa) y que sea mecánicamente
+  distinto a los otros tres (animación con `@keyframes`, no con `transition`).
+- **Token nuevo:** `--sombra-elevacion` (rgba sin alfa en ningún token existente, para
+  la sombra del hover de primario) y `--resplandor-error` (rgba de `--error`, para el
+  pulso de destructivo), ambos en `variables.css`.
 - **`appearance: none` en `.btn`:** lo agregamos porque, sin él, algunos navegadores le
   aplican su propio estilo nativo de botón (bordes, colores) por encima del nuestro. Con
   `appearance: none` el botón se ve igual en todos lados y depende solo de nuestro CSS.
-- **Movimiento reducido:** con `prefers-reduced-motion`, ninguna transición corre —el
-  relleno y el subrayado aparecen de golpe en vez de animados, y los botones no se elevan.
-- **Descartado:** un shake/vibración en destructivo (más llamativo para "acción peligrosa"
-  pero sumaba una 4ª animación distinta cuando el enunciado pide 3, y hacía más difícil
-  de explicar por qué solo ese botón tiembla).
+- **Movimiento reducido:** con `prefers-reduced-motion`, ninguna transición ni animación
+  corre. Primario no se eleva, secundario y terciario aparecen de golpe, y destructivo
+  muestra el resplandor fijo (sin loop) para no perder el feedback de hover.
+- **Reemplaza una decisión anterior:** antes habíamos descartado una 4ª animación para
+  destructivo (un shake) porque el enunciado pedía 3 como mínimo, no exactamente 3. La
+  corrección del profesor cambió el criterio: ahora se pide explícitamente que sean 4
+  distintas, una por variante.
+
+### Componente `.link`
+- **Qué:** texto con color `--acento` y subrayado animado que crece de izquierda a
+  derecha en hover/foco (`::after` con `scaleX`), reutilizando la misma animación que
+  `.btn--terciario` en vez de sumar una 5ª.
+- **Por qué:** faltaba un componente para links de texto dentro de una oración (ej.
+  "¿No tenés cuenta? Registrate" en el splash de login), distinto del `<a>` genérico de
+  `base.css` (que solo subraya con `text-decoration`, sin animación) y de los links de
+  navegación del header/footer.
+- **Pendiente:** el estilo final depende de la captura de Figma del componente link,
+  que todavía no vimos. Este es un default razonable mientras tanto.
+
+### Botón de newsletter unificado a `.btn`
+- **Qué:** el botón "Suscribirse" del footer tenía su propio estilo hardcodeado en
+  `footer.css` en vez de usar `.btn--secundario`. Se unificó: ahora es
+  `<button class="btn btn--secundario">` y `footer.css` solo le agrega `flex-shrink: 0`.
+- **Por qué:** era el tipo de botón "suelto" que señalaba la corrección "muchos botones
+  diferentes" — un componente que ya existía (`.btn--secundario`) se estaba reinventando
+  en otro archivo.
 
 ---
 
@@ -237,7 +274,8 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - Hex de `--superficie` (fondo de header y footer).
 - Tipo de transición del carrusel de recomendados.
 - Animación de registro exitoso.
-- Estilo final del componente `.link` (falta ver la captura de Figma).
+- Estilo final del componente `.link` (hay un default en `components.css`; falta
+  confirmar contra la captura de Figma cuando la tengamos).
 - Qué contenido lleva el menú hamburguesa, y cómo unificarlo visualmente con el
   menú de usuario (hoy son muy distintos entre sí).
 - Qué va en el panel de marca del splash de login de 2 columnas.

@@ -26,14 +26,20 @@
   transform: scale(0.98);
 }
 
-/* Primario y destructivo: se elevan y tiran sombra al pasar el mouse (animación 1) */
+/* Primario: se eleva y tira sombra al pasar el mouse (animación 1) */
 .btn--primario            { background: var(--primario); color: var(--primario-c3); }
 .btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); transform: translateY(-3px); box-shadow: 0 6px 14px var(--sombra-elevacion); }
 .btn--primario:active     { background: var(--primario-o1); transform: translateY(0) scale(0.98); box-shadow: none; }
 
+/* Destructivo: pulso/resplandor rojo que crece y se desvanece (animación 4) */
 .btn--destructivo         { border-color: var(--error); color: var(--error); }
-.btn--destructivo:hover   { background: var(--error); color: var(--fondo); transform: translateY(-3px); box-shadow: 0 6px 14px var(--sombra-elevacion); }
-.btn--destructivo:active  { background: var(--error); color: var(--fondo); transform: translateY(0) scale(0.98); box-shadow: none; }
+.btn--destructivo:hover   { background: var(--error); color: var(--fondo); animation: pulso-error 1.2s ease-out infinite; }
+.btn--destructivo:active  { background: var(--error); color: var(--fondo); animation: none; box-shadow: none; }
+
+@keyframes pulso-error {
+  0%   { box-shadow: 0 0 0 0 var(--resplandor-error); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
 
 /* Secundario: el relleno entra deslizando de izquierda a derecha (animación 2) */
 .btn--secundario {
@@ -106,11 +112,49 @@
 
   .btn--primario:hover,
   .btn--primario:active,
-  .btn--destructivo:hover,
-  .btn--destructivo:active,
   .btn:active {
     transform: none;
   }
+
+  .btn--destructivo:hover {
+    animation: none;
+    box-shadow: 0 0 0 4px var(--resplandor-error);
+  }
+}
+
+/* Link de texto (ej. "¿No tenés cuenta? Registrate") — mismo subrayado
+   animado que .btn--terciario, pero no es un botón. */
+.link {
+  position: relative;
+  display: inline-block;
+  color: var(--acento);
+}
+
+.link,
+.link:hover {
+  text-decoration: none;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease-out;
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link::after { transition: none; }
 }
 
 /* Cards — el hover se levanta por encima de las vecinas.

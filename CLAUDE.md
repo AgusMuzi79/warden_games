@@ -10,6 +10,7 @@ defensa tenemos que poder explicar cada línea**. Eso define cómo trabajamos co
 Entrega: 30/09/2026 23:59, desde el branch `gh-pages`.
 
 Decisiones ya tomadas y su justificación: @DECISIONES.md
+Etapas de la corrección en curso (qué está hecho, qué falta, quién puede tomarlo): @ETAPAS.md
 
 ---
 

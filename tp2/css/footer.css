@@ -35,7 +35,7 @@
   margin: var(--espaciado-8) 0;
 }
 
-/* Mismo estilo que .t-label: Orbitron 18px (regla: Orbitron solo desde 18px) */
+/* Son <h2>: entran en la regla "Orbitron en h1-h3" aunque se vean como labels chicos */
 .footer__label {
   margin: 0 0 var(--espaciado-4);
   font: 500 18px/1.4 var(--font-display);
@@ -63,7 +63,7 @@
 }
 
 .sponsors__list a {
-  font: 500 18px/1.4 var(--font-display);
+  font: 500 18px/1.4 var(--font-ui);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -162,22 +162,8 @@
   color: var(--primario-c1);
 }
 
-.newsletter__form button {
+.newsletter__form .btn {
   flex-shrink: 0;
-  min-height: var(--control-alto);
-  padding: 0 var(--espaciado-4);
-  background: transparent;
-  border: 1px solid var(--acento);
-  border-radius: var(--radio-sm);
-  color: var(--acento);
-  font: inherit;
-  cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.newsletter__form button:hover {
-  background: var(--acento);
-  color: var(--fondo);
 }
 
 .company__title {

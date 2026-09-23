@@ -29,6 +29,7 @@
   /* ---- Color: utilidad ---- */
   --foco:             #EEF434;
   --sombra-elevacion: rgba(0, 0, 0, 0.35);
+  --resplandor-error: rgba(248, 113, 113, 0.55);
 
   /* ---- Espaciado ---- */
   --espaciado-1:      4px;
@@ -48,7 +49,7 @@
   --control-target:   24px;  /* minimo WCAG 2.2 SC 2.5.8 (AA) */
 
   /* ---- Tipografia ----
-     Orbitron solo de 18px para arriba. Roboto Flex todo el resto. */
+     Orbitron solo en h1-h3 y el logo. Roboto Flex todo el resto. */
   --font-display:     'Orbitron', sans-serif;
   --font-ui:          'Roboto Flex', system-ui, sans-serif;
 }
@@ -61,7 +62,7 @@
 .t-h1       { font: 700 32px/1.20 var(--font-display); }
 .t-h2       { font: 600 24px/1.25 var(--font-display); }
 .t-h3       { font: 600 20px/1.30 var(--font-display); }
-.t-label    { font: 500 18px/1.40 var(--font-display);
+.t-label    { font: 500 18px/1.40 var(--font-ui);
               letter-spacing: 0.05em;
               text-transform: uppercase; }
 .t-body-l   { font: 400 16px/1.50 var(--font-ui); }
