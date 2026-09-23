@@ -1,38 +1,8 @@
 /*
   components.css — Componentes reutilizables
-  Header/nav, botones, cards, inputs. Depende de variables.css y base.css.
+  Botones, cards, inputs. Depende de variables.css y base.css.
+  Header vive en header.css, footer en footer.css.
 */
-
-/* Header / nav */
-.site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--espaciado-4) var(--espaciado-6);
-  border-bottom: 1px solid var(--primario-o1);
-}
-
-.site-header__logo {
-  font-family: var(--font-display);
-  color: var(--primario-c3);
-  font-weight: 700;
-  font-size: 20px;
-}
-
-.site-nav {
-  display: flex;
-  gap: var(--espaciado-4);
-}
-
-.site-nav a {
-  color: var(--primario-c1);
-  font-weight: 500;
-}
-
-.site-nav a:hover,
-.site-nav a[aria-current="page"] {
-  color: var(--acento);
-}
 
 /* Botones */
 .btn {
@@ -123,13 +93,4 @@
 
 .field input:focus-visible {
   border-color: var(--acento);
-}
-
-/* Footer */
-.site-footer {
-  padding: var(--espaciado-6);
-  text-align: center;
-  color: var(--primario-c1);
-  font-size: 14px;
-  border-top: 1px solid var(--primario-o1);
 }

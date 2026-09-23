@@ -1,18 +1,15 @@
 /* =========================================================
    Footer — mobile first
-   Usa los tokens de variables.css. Requiere agregar ahí:
-   --superficie: <hex del fondo del footer en Figma>;
+   Usa los tokens de variables.css (--superficie = --primario-o2).
    ========================================================= */
 
 .footer {
-  background: var(--superficie, var(--fondo));
+  background: var(--superficie);
   color: var(--primario-c3);
   font: 400 14px/1.6 var(--font-ui);
 }
 
 .footer__inner {
-  max-width: 75rem;
-  margin-inline: auto;
   padding: 2rem 1.25rem;
 }
 
@@ -266,7 +263,7 @@
 
   .brand {
     grid-column: auto; /* en desktop vuelve a ser una columna más */
-  }
+  } 
 
   .legal__links {
     justify-content: space-between;

@@ -7,9 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Roboto+Flex:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
   <link rel="stylesheet" href="./css/variables.css">
   <link rel="stylesheet" href="./css/base.css">
   <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/header.css">
   <link rel="stylesheet" href="./css/footer.css">
   <link rel="stylesheet" href="./css/home.css">
 </head>
@@ -19,13 +21,40 @@
   <div id="loading" class="loading-overlay" aria-busy="true" aria-live="polite">
   </div>
 
-  <header class="site-header">
-    <span class="site-header__logo">Warden</span>
-    <nav class="site-nav" aria-label="Navegación principal">
-      <a href="./index.html" aria-current="page">Home</a>
-      <a href="./login.html">Ingresar</a>
-    </nav>
-  </header>
+  <header class="header">
+  <div class="header__start">
+    <button class="header__icon-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
+      <i class="ph ph-list" aria-hidden="true"></i>
+    </button>
+    <a class="header__logo" href="index.html" aria-label="Warden, ir al inicio">
+      <img src="assets/img/logo.png" alt="" width="32" height="32">
+      <span>Warden</span>
+    </a>
+  </div>
+ 
+  <form class="header__search" role="search" action="#">
+    <label class="sr-only" for="buscar">Buscar juegos</label>
+    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+    <input type="search" id="buscar" name="q" placeholder="Buscar juegos" autocomplete="off">
+  </form>
+ 
+  <div class="header__actions">
+    <a class="header__icon-btn" href="#" aria-label="Carrito">
+      <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
+    </a>
+
+    <!-- Con sesión -->
+    <a class="header__avatar" href="#" aria-label="Mi cuenta" data-sesion="usuario" hidden>
+      <img src="assets/img/avatar.jpg" alt="" width="36" height="36">
+    </a>
+
+    <!-- Sin sesión -->
+    <a class="header__avatar header__avatar--invitado" href="login.html" aria-label="Iniciar sesión" data-sesion="invitado">
+      <i class="ph ph-user" aria-hidden="true"></i>
+    </a>
+  </div>
+</header>
+
 
   <main>
     <!-- TODO: sección hero de bienvenida -->
@@ -67,7 +96,7 @@
 
       <div class="brand">
         <a class="brand__logo" href="index.html" aria-label="Warden, ir al inicio">
-          <img src="assets/img/logo.svg" alt="" width="44" height="44">
+          <img src="assets/img/logo.png" alt="" width="44" height="44">
           <span>Warden</span>
         </a>
         <p class="brand__tagline">Miles de juegos, cero instalaciones. Entrás, jugás, seguís con tu día.</p>
