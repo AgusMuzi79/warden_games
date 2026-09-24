@@ -735,5 +735,7 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   precio.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
-- Qué es la "galería" de la página del juego (falta ver la captura de Figma;
-  hoy el tablero y la galería no están construidos todavía).
+- La página del juego sin `<h1>` (PR #4, ver `ETAPAS.md` Etapa 4): rompe la
+  regla del proyecto de "un solo h1 por página" (no es un requisito de la
+  cátedra, es algo que nos autoimpusimos). Fran lo documentó como excepción
+  puntual; falta que lo charlemos los tres antes de aceptarlo.

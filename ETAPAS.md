@@ -127,13 +127,23 @@ Detalle en `DECISIONES.md`.
 
 ---
 
-## ⬜ Etapa 4 — Juego (Peg Solitaire)
+## 🔶 Etapa 4 — Juego / "Neon Circuit" (a cargo de Fran)
 
-Archivos: `juego.html`, `juego.css`, `js/juego.js`.
+En progreso, a medio hacer (así lo marcó Fran): [PR #4](https://github.com/AgusMuzi79/warden_games/pull/4),
+rama `fran`. Tablero (solo visual, sin lógica de movimientos todavía),
+panel lateral (ficha, Ayuda, Compartir), Comunidad con reseñas reales y
+"Dejá tu reseña" (rating con radios en CSS puro). Todo documentado en
+`DECISIONES.md` ("Página del juego").
 
-- Grilla del tablero (`#board` hoy está vacío, sin CSS).
-- Definir y construir la "galería" (falta ver la captura de Figma para saber
-  qué es exactamente).
+**Para discutir entre los tres antes de mergear:** la página se queda sin
+`<h1>` (decisión de Fran, documentada como excepción puntual). Rompe la
+regla del proyecto "un solo h1 por página" (`CLAUDE.md`, accesibilidad) —
+no es un requisito de la cátedra, es algo que nos autoimpusimos, así que
+vale la pena que lo veamos los tres antes de aceptar la excepción, no
+mergearlo de hecho porque a Fran le resolvía el diseño de esa pantalla.
+
+No se toca todavía: se espera a que Fran la termine antes de revisarla en
+detalle o traerla a `agus`.
 
 ---
 
