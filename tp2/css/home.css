@@ -48,12 +48,12 @@
   }
 }
 
-/* Banner "Destacados" — los slides van uno al lado del otro, recortados en
-   diagonal (clip-path) y superpuestos (margin-left negativo), así el
-   siguiente asoma al costado del activo todo el tiempo, no solo al cambiar.
-   La pista se desliza con transform para que el activo quede alineado a la
-   izquierda del viewport. El h1 de la página va acá arriba, visible, en
-   vez del hero de texto que había antes. */
+/* Banner "Destacados" — carrusel coverflow: la card activa queda de frente
+   al centro; las de los costados se corren, se achican y giran en el eje Y
+   (perspective + rotateY + translateZ), como si se alejaran hacia el
+   fondo. carousel.js calcula el transform de cada una según su distancia a
+   la activa. El h1 de la página va acá arriba, visible, en vez del hero de
+   texto que había antes. */
 .banner__titulo {
   margin-bottom: var(--espaciado-4);
 }
@@ -63,30 +63,31 @@
   overflow: hidden;
   aspect-ratio: 16 / 9;
   max-height: 420px;
-  border-radius: var(--radio-md);
   background: var(--fondo);
+  /* Le da profundidad a los hijos con transform 3D (perspective). */
+  perspective: 1400px;
 }
 
-.banner__pista {
-  display: flex;
+.banner__escena {
+  position: relative;
+  width: 100%;
   height: 100%;
-  transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+  transform-style: preserve-3d;
 }
 
 .banner__slide {
-  position: relative;
-  flex: 0 0 82%;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 62%;
   height: 100%;
-  margin-left: -14%;
+  margin-left: -31%; /* centrado: la mitad de su propio ancho */
+  border-radius: var(--radio-md);
+  overflow: hidden;
   background-size: cover;
   background-position: center;
-  /* Corta el borde izquierdo en diagonal, para que el anterior asome ahí. */
-  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%);
-}
-
-.banner__slide--primero {
-  margin-left: 0;
-  clip-path: none;
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+  transition: transform 0.6s ease, opacity 0.6s ease;
 }
 
 .banner__etiqueta,
@@ -152,7 +153,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .banner__pista {
+  .banner__slide {
     transition: none;
   }
 

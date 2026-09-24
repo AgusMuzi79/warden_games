@@ -322,38 +322,50 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   falta repetirla como título de página. "Destacados" describe mejor lo que
   hay ahí (una selección curada, no un saludo genérico).
 
-### Slides en paralelogramo que asoman al costado (como la referencia), no un wipe de transición
-- **Qué:** los slides van uno al lado del otro dentro de `.banner__pista` (un
-  `flex`), cada uno con `flex: 0 0 82%` y `margin-left: -14%` para
-  superponerse con el anterior, y un `clip-path` que le corta el borde
-  izquierdo en diagonal (`polygon(18% 0, 100% 0, 100% 100%, 0 100%)`). La
-  pista se desliza con `transform: translateX()` para alinear el slide
-  activo contra el borde izquierdo del viewport.
-- **Por qué:** la primera versión hacía un wipe animado (`clip-path` en
-  `@keyframes`) que solo mostraba un slide a pantalla completa, con el corte
-  diagonal apareciendo nada más durante el cambio. No se parecía a la
-  referencia: ahí el slide siguiente (y en este caso, con el margen a los
-  dos lados, también el anterior) se ve asomando **todo el tiempo**, no solo
-  al cambiar. Este enfoque arma esa composición real en vez de simularla con
-  una animación.
-- **Cómo se resuelve el asomo de los dos lados:** el corte diagonal es
-  siempre en el borde IZQUIERDO de cada slide. El slide activo, al tener su
-  propia esquina superior izquierda recortada, deja ver al anterior por ese
-  hueco (asoma a la izquierda); y como el activo solo ocupa el 82% de su
-  ancho, el que sigue en la pista ya arranca a ocupar el resto del viewport
-  (asoma a la derecha). No hace falta lógica extra para ninguno de los dos
-  casos, sale solo del layout.
-- **Texto solo en el slide activo:** `.banner__etiqueta` y `.banner__nombre`
+### Carrusel coverflow: perspective + rotateY + translateZ, no un recorte plano
+- **Qué:** `.banner__viewport` tiene `perspective: 1400px` y `.banner__escena`
+  (adentro) tiene `transform-style: preserve-3d`. Cada card
+  (`.banner__slide`) es un cuadrado centrado (`position: absolute; left:50%;
+  margin-left:-31%`) al que `carousel.js` le calcula un `transform` en JS
+  según su distancia (offset) a la activa: `translateX` para correrla al
+  costado, `translateZ` negativo para mandarla "para atrás", `rotateY` para
+  que gire como si se alejara, y `scale` para achicarla. La activa
+  (offset 0) queda sin transform, de frente.
+- **Por qué:** las dos versiones anteriores (wipe con `clip-path` y después
+  slides en paralelogramo con `clip-path` diagonal) eran técnicas 2D — un
+  recorte, no una rotación real. La referencia es un carrusel "coverflow"
+  (tipo iTunes viejo): eso es específicamente perspectiva 3D, no se puede
+  simular bien con `clip-path`. Con `perspective`/`rotateY`/`translateZ` se
+  arma la técnica correcta en vez de aproximarla.
+- **`offsetCircular()`:** la distancia de cada card a la activa se calcula
+  con ciclo corto (si hay 5 cards y la activa es la 0, la card 4 está a
+  distancia -1, no -4), para que ir de la última a la primera gire para el
+  lado corto en vez de cruzar toda la fila.
+- **Solo se ven 2 posiciones de cada lado (`MAX_VISIBLES`):** las cards más
+  lejanas se esconden con `opacity: 0` en vez de seguir achicándose hasta
+  desaparecer solas — con 5 destacados en total, alcanza para que siempre
+  se vea la activa + 2 de cada lado como mucho.
+- **Texto solo en la card activa:** `.banner__etiqueta` y `.banner__nombre`
   están en `opacity: 0` por default y solo se muestran en
-  `.banner__slide--activo`, para que los textos de los juegos que asoman no
-  se mezclen con los del activo.
+  `.banner__slide--activo`, para no mezclar el texto de la activa con el de
+  las que están giradas al costado.
+- **Descartado — click en las cards del costado para saltar a ellas:** se
+  probó (cada card llamaba a `irA()` con su propio índice, como los dots),
+  pero el hit-testing de Chrome no coincide con la posición visual de una
+  card rotada en 3D cuando el `perspective` está en un ancestro y no en el
+  padre inmediato — es una limitación real del navegador, no algo del CSS
+  que se pueda ajustar. Se sacó en vez de dejar un click que a veces
+  respondía y a veces no; los dots ya cubren la navegación de forma
+  confiable y accesible.
 
-### Se eligen los 4 juegos mejor puntuados como "Destacados"
+### Se eligen los 5 juegos mejor puntuados como "Destacados"
 - **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma
-  los primeros 4. Sin badge de precio (el Figma tenía "$9.99"): no existe
+  los primeros 5. Sin badge de precio (el Figma tenía "$9.99"): no existe
   ningún sistema de compras todavía.
 - **Por qué:** dato real (no inventado), sin necesitar un criterio editorial
-  de "qué es lo nuevo de la semana" que no tenemos cómo sostener.
+  de "qué es lo nuevo de la semana" que no tenemos cómo sostener. Son 5 y no
+  4 para que, con `MAX_VISIBLES: 2`, siempre haya alguna card en cada
+  posición visible del coverflow (activa + 2 a cada lado).
 - **Pendiente:** hay que armar un sistema de compras real (es parte del
   enunciado, no opcional) — se deja para una etapa aparte. Cuando exista, ahí
   vuelve el precio al banner.
@@ -374,8 +386,7 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   en qué punto del ciclo anterior se había pausado. Reprogramar el timer de
   cero en cada cambio es más simple de razonar y de explicar.
 - **Movimiento reducido:** con `prefers-reduced-motion`, no arranca el
-  autoplay y la pista cambia de posición directo, sin el deslizamiento
-  animado.
+  autoplay y las cards cambian de posición directo, sin el giro animado.
 
 ---
 

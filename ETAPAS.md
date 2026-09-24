@@ -69,23 +69,26 @@ Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
 
 Detalle en `DECISIONES.md`.
 
-### ✅ 3b. Banner "Destacados": carrusel con slides en paralelogramo (estilo Glide.js)
+### ✅ 3b. Banner "Destacados": carrusel coverflow (perspective + rotateY)
 Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
 - El `<h1>` de la página ahora es "Destacados" (arriba de todo, visible).
-- 4 slides con los juegos mejor puntuados de la API, uno al lado del otro,
-  recortados en diagonal (`clip-path`) y superpuestos: el activo ocupa la
-  mayor parte y el anterior/siguiente asoman a los costados todo el tiempo
-  (no solo durante el cambio) — como el
-  [carrusel de Glide.js en Dribbble](https://dribbble.com/shots/2178325-Glide-js-Simple-responsive-and-fast-jquery-carousel-slider)
-  que tomamos de referencia. La pista se desliza con `transform` al cambiar.
+- 5 cards con los juegos mejor puntuados de la API. La activa queda de
+  frente al centro; las de los costados se corren, se achican y giran en 3D
+  (`perspective` + `rotateY` + `translateZ`), como si se alejaran hacia el
+  fondo — el clásico carrusel "coverflow" (tipo iTunes viejo).
 - Autoplay cada 6s, dots para navegar manual. Se pausa con hover o con foco
   de teclado (sin botón de pausa visible). Es la única animación de
   transición entre imágenes de la Home (junto con la galería del juego en
   la etapa 4) — las filas de categorías/recomendados no la llevan.
 - Sin badge de precio todavía (no hay sistema de compras armado, ver "Plus").
-- (La primera versión hacía un wipe de `clip-path` en un solo slide a
-  pantalla completa — no se parecía a la referencia porque no había nada
-  asomando en reposo. Se rehizo, ver `DECISIONES.md`.)
+- Sin click en las cards del costado para saltar a ellas: se probó, pero el
+  hit-testing de Chrome no coincide con la posición visual de una card
+  rotada en 3D (limitación real del navegador). Los dots son la forma de
+  navegar, confiable y accesible.
+- (Hubo dos versiones anteriores que no se parecían a la referencia: un wipe
+  de `clip-path` en un solo slide, y después slides en paralelogramo plano
+  con `clip-path` diagonal — ninguna de las dos es en realidad "3D". Se
+  rehizo con la técnica correcta, ver `DECISIONES.md`.)
 
 Detalle en `DECISIONES.md`.
 
