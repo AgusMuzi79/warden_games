@@ -214,13 +214,13 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
-## Catálogo de la Home (Etapa 3a)
+## Catálogo de la Home (Etapa 3)
 
 ### Se consume la API de la cátedra en vez de inventar datos
 - **Qué:** `api.js` define `BASE_URL = 'https://vj.interfaces.jima.com.ar/api'` y
   `obtenerJuegos()`, que hace `fetch(BASE_URL)` y devuelve la lista (~80 juegos
-  reales con nombre, imagen y rating). `home.js` la usa para armar las cards
-  del `#carousel`.
+  reales con nombre, imagen, rating y géneros). `home.js` la usa para armar
+  las filas de juegos.
 - **Por qué:** resuelve dos cosas a la vez — el requisito de "datos reales"
   (títulos de largos distintos, imágenes de colores variados) y el "Plus" de
   consumir la API de la cátedra — sin inventar contenido ni necesitar assets
@@ -233,11 +233,55 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   no depender de assets — dejó de hacer falta en cuanto encontramos que la API
   ya provee portadas reales y con licencia para este uso académico.
 
+### Filas por categoría (invitado) o "Recomendados" (con sesión), no un catálogo único
+- **Qué:** se sacó la grilla única de "Recomendados" de la primera versión de
+  la 3a. Ahora `#filas-juegos` se llena distinto según el estado del avatar
+  del header (`.header__avatar[data-sesion="usuario"]` oculto o no):
+  - **Invitado:** una fila por cada categoría fija (`CATEGORIAS` en `home.js`:
+    Acción, Shooters, RPG, Aventura), filtrando el catálogo por
+    `genres[].name`.
+  - **Con sesión:** una sola fila "Recomendados", filtrando el catálogo por
+    el género de un juego que simulamos que la persona ya jugó
+    (`JUEGO_JUGADO` en `home.js`).
+- **Por qué:** así lo define el diseño de la Home: el invitado explora por
+  categoría, quien tiene cuenta ve algo personalizado. No tiene sentido
+  mostrar "Recomendados" a alguien de quien no sabemos nada.
+- **`JUEGO_JUGADO` con género explícito, no `genres[0]`:** al principio se
+  tomaba el primer género del juego "jugado" para buscar similares, pero el
+  orden de `genres[]` en la API no es confiable (ej. "The Witcher 3" trae
+  `Action` antes que `RPG`), y terminaba recomendando por el género
+  equivocado. Se hardcodea el género junto con el nombre.
+- **Sin login real ni historial de partidas:** no hay backend de sesión
+  (`data-sesion` sigue siendo un estado fijo en el HTML, ver "Estado de sesión
+  en el avatar" en `## Header`) ni datos de qué jugó cada usuario (con un solo
+  juego construido, Peg Solitaire, no hay historial real que trackear). Tanto
+  el "hay sesión" como el "juego ya jugado" son simulados a propósito para
+  esta entrega.
+
+### Cada fila es un carrusel de scroll nativo, no el banner animado
+- **Qué:** `.carrusel__pista` es un `flex` con `overflow-x: auto` y
+  `scroll-snap`; se desplaza con scroll horizontal nativo (mouse, trackpad,
+  scrollbar), sin JS de por medio.
+- **Por qué:** la animación con transición (el `clip-path` en diagonal tipo
+  Glide.js) va reservada para el banner "Destacados" de arriba, que todavía
+  no se construyó. Estas filas de categorías/recomendados son "carruseles
+  normales, sin animación" por diseño, y el scroll nativo ya cumple con
+  "que se desplace".
+
+### Cards horizontales (16:9), no verticales
+- **Qué:** `.game-card__image` usa `aspect-ratio: 16 / 9`.
+- **Por qué:** correción sobre la primera versión de la 3a, que las tenía en
+  3:4 (verticales). Las cards de estas filas tienen que ser horizontales.
+
 ### Datos de respaldo si la API falla
-- **Qué:** `home.js` tiene `JUEGOS_DE_RESPALDO`, 4 juegos reales con sus datos
-  hardcodeados, que se muestran si el `fetch` a la API falla.
+- **Qué:** `home.js` tiene `JUEGOS_DE_RESPALDO`, 5 juegos reales con género
+  incluido, elegidos para cubrir las 4 categorías fijas y el simulado de
+  "Recomendados".
 - **Por qué:** la Home no puede depender de que un servicio externo esté
-  siempre arriba. Sin esto, un corte de la API dejaría el catálogo vacío.
+  siempre arriba. Sin esto, un corte de la API dejaría todas las filas vacías.
+- **Una fila vacía no se muestra:** si una categoría (o "Recomendados") queda
+  sin ningún juego que matchee, `crearFila()` devuelve `null` y no se agrega
+  nada, en vez de mostrar un título sin contenido debajo.
 
 ### El fetch de datos no depende del loading simulado
 - **Qué:** `home.js` pide los juegos apenas carga la página, en paralelo con
@@ -246,15 +290,18 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** mantener cada archivo con una sola responsabilidad (loading.js
   no sabe nada de juegos, home.js no toca el overlay). En la práctica el
   fetch de este JSON tarda mucho menos que los 5 segundos simulados, así que
-  las cards ya están listas cuando el loading se oculta.
+  las filas ya están listas cuando el loading se oculta.
 
-### `<h2>Recomendados</h2>` antes de las cards
-- **Qué:** se agregó un `<h2 id="carousel-titulo">` visible dentro de
-  `#carousel`, con la sección apuntando a él vía `aria-labelledby` (mismo
-  patrón que las columnas del footer). Los títulos de cada juego son `<h3>`.
-- **Por qué:** sin el `h2`, los títulos de juego como `<h3>` saltarían un
-  nivel justo después del `<h1>` de la Home, rompiendo el outline del
-  documento.
+### `<h2>` por fila, no un catálogo con un solo título
+- **Qué:** cada fila que arma `home.js` es un `<section>` con su propio
+  `<h2>` (el nombre de la categoría, o "Recomendados") y `aria-labelledby`
+  apuntando a ese `h2` — mismo patrón que las columnas del footer. Los
+  títulos de cada juego son `<h3>`, dentro de esa jerarquía.
+- **Por qué:** sin un `h2` por sección, los títulos de juego como `<h3>`
+  saltarían un nivel justo después del `<h1>` de la Home, rompiendo el
+  outline del documento. Como ahora hay varias filas (no una sola), cada una
+  necesita su propio heading para que un lector de pantalla pueda saltar
+  entre ellas.
 
 ### Los íconos de Phosphor deben ser de la variante "regular"
 - **Qué:** el rating de cada card usa `ph-star`, no `ph-star-fill`.

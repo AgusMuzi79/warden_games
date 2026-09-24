@@ -49,23 +49,37 @@ tab está activo (mismo problema que ya tuvimos con `.btn`, comentado en el PR).
 
 ## 🔶 Etapa 3 — Home (a cargo de Agus)
 
-### ✅ 3a. Catálogo real desde la API de la cátedra
+La Home queda con: banner "Destacados" arriba (con skew y transición
+animada), y abajo, según el estado del avatar del header
+(`data-sesion="usuario"` oculto o no): filas por categoría para invitado, o
+una fila "Recomendados" para quien tiene sesión.
+
+### ✅ 3a. Catálogo real desde la API + filas por categoría/recomendados
 Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
 - `api.js` pide `https://vj.interfaces.jima.com.ar/api` (la API de
-  jimartinezabadias, ~80 juegos reales con nombre/imagen/rating).
-- `home.js` arma las cards (`.card.game-card`) dentro de `.carousel__grid`,
-  con datos de respaldo hardcodeados si la API falla.
-- Grilla mobile-first (2 → 3 → 4 columnas). Todavía NO es el carrusel con
-  transición — eso es la 3b.
-- Se sumó `<h2>Recomendados</h2>` antes de las cards para no saltear niveles
-  de título.
+  jimartinezabadias, ~80 juegos reales con nombre/imagen/rating/género).
+- `home.js` arma una fila por categoría fija (Acción, Shooters, RPG,
+  Aventura) para invitado, o una fila "Recomendados" (simulada por género)
+  si `data-sesion="usuario"` está visible en el header. Cards horizontales
+  (16:9), cada fila con scroll nativo (sin animación — eso es solo del
+  banner). Datos de respaldo hardcodeados si la API falla.
+- `<h2>` propio por cada fila para no saltear niveles de título.
+- (La primera versión de la 3a era una única grilla "Recomendados" para
+  todos, con cards verticales — se descartó, ver `DECISIONES.md`.)
 
 Detalle en `DECISIONES.md`.
 
-### ⬜ 3b. Convertir la grilla en carrusel con transición animada
-Archivos: `home.css`, `js/carousel.js`.
-- Recorrer las cards de a una/pocas con controles prev/next accesibles.
-- Definir la transición (fade, scale o clip-path).
+### ⬜ 3b. Banner "Destacados": carrusel con skew y transición animada
+Archivos: `index.html` (reemplaza el `#hero` actual), `home.css`,
+`js/carousel.js`.
+- Referencia: [Glide.js en Dribbble](https://dribbble.com/shots/2178325-Glide-js-Simple-responsive-and-fast-jquery-carousel-slider)
+  — el slide activo ocupa casi todo el ancho, el siguiente asoma desde el
+  costado con un corte diagonal (`clip-path`, no un fade).
+- El `<h1>` de la página pasa a ser "Destacados" (hoy sigue diciendo "Warden
+  Games" en el `#hero` viejo, todavía no tocado).
+- Esta es la única animación de transición entre imágenes de la Home (junto
+  con la galería del juego en la etapa 4) — las filas de categorías y
+  recomendados NO llevan esta animación.
 
 ### ⬜ 3c. Unificar menú hamburguesa y menú de usuario
 Archivos: `index.html`, `header.css`, `js/menu.js` (nuevo).

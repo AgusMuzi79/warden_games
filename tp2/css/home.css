@@ -49,23 +49,32 @@
   }
 }
 
-/* Catálogo de juegos — mobile first, grilla que se ensancha con el viewport.
-   En la etapa 3b esto pasa a ser un carrusel; por ahora es una grilla fija. */
-#carousel {
-  margin-top: var(--espaciado-6);
+/* Filas de juegos (categorías para invitado, "Recomendados" con sesión).
+   Cada fila es un carrusel simple: scroll horizontal nativo, sin JS de
+   transición — eso queda reservado para el banner "Destacados" (etapa 3b). */
+#filas-juegos {
+  margin-top: var(--espaciado-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
 }
 
-.carousel__titulo {
+.carrusel__titulo {
   margin-bottom: var(--espaciado-4);
 }
 
-.carousel__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.carrusel__pista {
+  display: flex;
   gap: var(--espaciado-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: var(--espaciado-2); /* lugar para la sombra del hover de .card */
 }
 
 .game-card {
+  flex: 0 0 auto;
+  width: 260px;
+  scroll-snap-align: start;
   padding: 0;
   overflow: hidden;
   display: flex;
@@ -74,7 +83,7 @@
 
 .game-card__image {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
@@ -90,16 +99,4 @@
   margin: var(--espaciado-1) var(--espaciado-3) var(--espaciado-3);
   color: var(--acento);
   font: 400 14px/1 var(--font-ui);
-}
-
-@media (min-width: 48rem) {
-  .carousel__grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 64rem) {
-  .carousel__grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
 }
