@@ -255,7 +255,7 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** al principio "Recomendados" reemplazaba a las categorías por
   completo con sesión — pero tener cuenta no debería significar perder la
   forma de explorar por categoría, solo sumarle algo personalizado arriba.
-  Es lo mismo que ya lista el menú hamburguesa (mismas 4 categorías), así
+  Es lo mismo que ya lista el menú hamburguesa (mismas categorías), así
   que ahora Home y hamburguesa muestran el mismo universo de categorías
   sin importar si hay sesión o no.
 - **`JUEGO_JUGADO` con género explícito, no `genres[0]`:** al principio se
@@ -619,14 +619,25 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 ### Contenido del hamburguesa: 2 secciones + un botón de contacto, no una lista de 7
 - **Qué:** "Jugar" (Destacados, Últimos, Recientes, Top 100, Actualizados —
   los mismos links que ya están en la columna "Jugar" del footer) y
-  "Categorías" (Acción, Shooters, RPG, Aventura — las mismas 4 categorías
-  que arma `home.js` para invitados), más un botón "Contáctanos"
-  (`mailto:hola@warden.gg`, el mismo mail que usa el footer).
+  "Categorías" (las mismas 8 categorías que arma `home.js`), más un botón
+  "Contáctanos" (`mailto:hola@warden.gg`, el mismo mail que usa el footer).
 - **Por qué:** la corrección pedía más contenido, organizado en secciones
   (referencia: el menú de CrazyGames, con íconos por ítem). En vez de
   inventar secciones o páginas que no existen, se reutiliza vocabulario que
   el sitio ya tiene en el footer y en la Home — nada nuevo que mantener ni
   explicar en la defensa.
+
+### De 4 a 8 categorías, elegidas por cuántos juegos reales tienen
+- **Qué:** se suman Indie, Plataformas, Puzzle y Estrategia a las 4 que ya
+  había (Acción, Shooters, RPG, Aventura), en `CATEGORIAS` (`home.js`) y en
+  el hamburguesa (siempre las mismas en los dos lugares).
+- **Por qué:** se eligieron mirando cuántos juegos reales matchean cada
+  género en el catálogo de la API (de 70 en Acción a 2 en Estrategia) — no
+  quedan géneros con 0 o 1 solo juego, que harían una fila casi vacía o que
+  ni se llegue a mostrar (`crearFila()` no agrega nada si no hay resultados).
+- **`JUEGOS_DE_RESPALDO` también se actualiza:** se suman "Limbo" (Indie +
+  Plataformas) y "Company of Heroes 2" (Estrategia) para que, si la API
+  falla, las categorías nuevas igual tengan algo real para mostrar.
 
 ### El avatar con sesión pasa de `<a>` a `<button>`
 - **Qué:** `data-sesion="usuario"` era un `<a href="#">`; ahora es un
