@@ -69,18 +69,23 @@ Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
 
 Detalle en `DECISIONES.md`.
 
-### ✅ 3b. Banner "Destacados": carrusel con wipe diagonal y transición animada
+### ✅ 3b. Banner "Destacados": carrusel con slides en paralelogramo (estilo Glide.js)
 Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
 - El `<h1>` de la página ahora es "Destacados" (arriba de todo, visible).
-- 4 slides con los juegos mejor puntuados de la API. Transición con
-  `clip-path` animado (wipe diagonal, inspirado en el carrusel de
-  [Glide.js en Dribbble](https://dribbble.com/shots/2178325-Glide-js-Simple-responsive-and-fast-jquery-carousel-slider)
-  pero resuelto distinto — más simple que calcular el "peek" a mano).
+- 4 slides con los juegos mejor puntuados de la API, uno al lado del otro,
+  recortados en diagonal (`clip-path`) y superpuestos: el activo ocupa la
+  mayor parte y el anterior/siguiente asoman a los costados todo el tiempo
+  (no solo durante el cambio) — como el
+  [carrusel de Glide.js en Dribbble](https://dribbble.com/shots/2178325-Glide-js-Simple-responsive-and-fast-jquery-carousel-slider)
+  que tomamos de referencia. La pista se desliza con `transform` al cambiar.
 - Autoplay cada 6s, dots para navegar manual. Se pausa con hover o con foco
   de teclado (sin botón de pausa visible). Es la única animación de
   transición entre imágenes de la Home (junto con la galería del juego en
   la etapa 4) — las filas de categorías/recomendados no la llevan.
 - Sin badge de precio todavía (no hay sistema de compras armado, ver "Plus").
+- (La primera versión hacía un wipe de `clip-path` en un solo slide a
+  pantalla completa — no se parecía a la referencia porque no había nada
+  asomando en reposo. Se rehizo, ver `DECISIONES.md`.)
 
 Detalle en `DECISIONES.md`.
 

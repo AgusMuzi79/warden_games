@@ -62,11 +62,15 @@
 
   <main>
     <!-- Banner "Destacados": arma los slides js/carousel.js con los juegos
-         mejor puntuados de la API. Transición con wipe diagonal (clip-path). -->
+         mejor puntuados de la API. Los slides van uno al lado del otro,
+         recortados en diagonal (clip-path), y la pista se desliza para que
+         el activo ocupe la mayor parte y el siguiente asome al costado. -->
     <section id="banner" aria-labelledby="banner-titulo">
       <h1 id="banner-titulo" class="banner__titulo">Destacados</h1>
       <div class="banner__viewport">
-        <!-- Slides generados por carousel.js -->
+        <div class="banner__pista">
+          <!-- Slides generados por carousel.js -->
+        </div>
       </div>
       <div class="banner__dots">
         <!-- Dots generados por carousel.js -->

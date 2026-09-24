@@ -1,12 +1,23 @@
 // carousel.js — Banner "Destacados" de la Home
-// Depende de api.js (obtenerJuegos) y de #banner (.banner__viewport, .banner__dots).
+// Depende de api.js (obtenerJuegos) y de #banner (.banner__pista, .banner__dots).
+//
+// Los slides van uno al lado del otro dentro de .banner__pista (un flex que
+// se desliza con transform). Cada slide tiene un clip-path que le corta el
+// borde izquierdo en diagonal y se superpone al anterior (margin-left
+// negativo), así el que viene "atrás" asoma por ese corte todo el tiempo,
+// no solo durante el cambio.
 
-const viewport = document.querySelector('.banner__viewport');
+const pista = document.querySelector('.banner__pista');
 const dotsContenedor = document.querySelector('.banner__dots');
 const banner = document.getElementById('banner');
 
 const DURACION_AUTOPLAY_MS = 6000;
 const CANTIDAD_DESTACADOS = 4;
+
+// Ancho de cada slide y cuánto se solapan con el anterior, en % del viewport.
+const ANCHO_SLIDE = 82;
+const SOLAPE = 14;
+const PASO = ANCHO_SLIDE - SOLAPE; // cuánto se corre la pista por cada slide
 
 const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -23,20 +34,15 @@ let dots = [];
 let indiceActivo = 0;
 let timerAutoplay = null;
 
-// Cada vez que un slide entra, sube por encima de todos los anteriores.
-// Así el que entra tapa al que estaba con su propio wipe, sin tener que
-// esconder al anterior a mano ni coordinar dos animaciones a la vez.
-let contadorZIndex = 1;
-
 function elegirDestacados(juegos) {
   return [...juegos].sort((a, b) => b.rating - a.rating).slice(0, CANTIDAD_DESTACADOS);
 }
 
-function crearSlide(juego, id) {
+function crearSlide(juego, esPrimero) {
   const slide = document.createElement('div');
-  slide.id = id;
   slide.className = 'banner__slide';
   slide.style.backgroundImage = `url("${juego.background_image}")`;
+  if (esPrimero) slide.classList.add('banner__slide--primero');
 
   const etiqueta = document.createElement('span');
   etiqueta.className = 'banner__etiqueta';
@@ -50,13 +56,12 @@ function crearSlide(juego, id) {
   return slide;
 }
 
-function crearDot(index, idSlide, esActivo) {
+function crearDot(index, esActivo) {
   const dot = document.createElement('button');
   dot.type = 'button';
   dot.className = 'banner__dot' + (esActivo ? ' banner__dot--activo' : '');
   dot.setAttribute('aria-label', `Ir al destacado ${index + 1}`);
   dot.setAttribute('aria-current', String(esActivo));
-  dot.setAttribute('aria-controls', idSlide);
   dot.addEventListener('click', () => irA(index));
   return dot;
 }
@@ -64,23 +69,19 @@ function crearDot(index, idSlide, esActivo) {
 function irA(index) {
   if (index === indiceActivo) return;
 
+  slides[indiceActivo].classList.remove('banner__slide--activo');
   dots[indiceActivo].classList.remove('banner__dot--activo');
   dots[indiceActivo].setAttribute('aria-current', 'false');
 
   indiceActivo = index;
 
-  const slide = slides[indiceActivo];
-  slide.style.zIndex = ++contadorZIndex;
-  // Reinicia la animación aunque el slide ya la haya jugado antes (ciclo).
-  slide.classList.remove('banner__slide--activo');
-  void slide.offsetWidth;
-  slide.classList.add('banner__slide--activo');
-
+  slides[indiceActivo].classList.add('banner__slide--activo');
   dots[indiceActivo].classList.add('banner__dot--activo');
   dots[indiceActivo].setAttribute('aria-current', 'true');
 
-  // Cualquier cambio de slide (manual o automático) reinicia la cuenta,
-  // para que clickear un dot no se sienta pisado por el autoplay al toque.
+  pista.style.transform = `translateX(-${indiceActivo * PASO}%)`;
+
+  // Cualquier cambio (manual o automático) reinicia la cuenta del autoplay.
   programarSiguiente();
 }
 
@@ -88,10 +89,9 @@ function siguiente() {
   irA((indiceActivo + 1) % slides.length);
 }
 
-// setTimeout que se reprograma solo, en vez de un setInterval con un flag
-// de "pausado": así pausar es directamente cancelar el timer pendiente, y
-// reanudar es arrancar uno nuevo de cero — sin ambigüedad de en qué punto
-// del intervalo anterior había quedado.
+// setTimeout que se reprograma solo: pausar es cancelarlo, reanudar es
+// armar uno nuevo de cero (sin flag de "pausado" ni ambigüedad de en qué
+// punto del ciclo anterior había quedado).
 function programarSiguiente() {
   clearTimeout(timerAutoplay);
   if (prefiereMovimientoReducido || slides.length < 2) return;
@@ -118,20 +118,18 @@ function iniciarAutoplay() {
 function renderizarBanner(juegos) {
   const destacados = elegirDestacados(juegos);
 
-  viewport.innerHTML = '';
+  pista.innerHTML = '';
   dotsContenedor.innerHTML = '';
   indiceActivo = 0;
-  contadorZIndex = 1;
+  pista.style.transform = 'translateX(0%)';
 
-  slides = destacados.map((juego, i) => crearSlide(juego, `banner-slide-${i}`));
-  dots = destacados.map((_, i) => crearDot(i, `banner-slide-${i}`, i === 0));
+  slides = destacados.map((juego, i) => crearSlide(juego, i === 0));
+  dots = destacados.map((_, i) => crearDot(i, i === 0));
 
-  slides.forEach((slide) => viewport.append(slide));
-  dots.forEach((dot) => dotsContenedor.append(dot));
-
-  // El primero también entra con el wipe, como "tada" de bienvenida.
-  slides[0].style.zIndex = contadorZIndex;
   slides[0].classList.add('banner__slide--activo');
+
+  slides.forEach((slide) => pista.append(slide));
+  dots.forEach((dot) => dotsContenedor.append(dot));
 
   iniciarAutoplay();
 }

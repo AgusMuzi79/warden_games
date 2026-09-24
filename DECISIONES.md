@@ -322,24 +322,31 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   falta repetirla como título de página. "Destacados" describe mejor lo que
   hay ahí (una selección curada, no un saludo genérico).
 
-### Wipe diagonal por `clip-path`, no el "peek" de Glide.js
-- **Qué:** cada slide (`.banner__slide`) ocupa todo el banner y arranca con
-  un `clip-path` en forma de paralelogramo grande, afuera a la derecha
-  (invisible). Al activarse, corre `@keyframes banner-wipe`, que anima ese
-  `clip-path` hasta el rectángulo completo — un corte diagonal barriendo la
-  pantalla, no un fade parejo.
-- **Por qué:** la referencia (un carrusel estilo Glide.js) muestra el slide
-  siguiente "asomando" desde el costado con un corte diagonal, calculado a
-  mano en JS según cuántos slides hay y su ancho. Un wipe con `clip-path` da
-  el mismo lenguaje visual (corte en diagonal, no un fade) con mucho menos
-  código: es una sola animación CSS, sin medir anchos ni mover múltiples
-  slides en simultáneo.
-- **Sin overlap real entre slides:** por eso no hace falta "esconder" al
-  slide anterior a mano. Cada vez que un slide se activa, sube su propio
-  `z-index` (siempre más alto que todos los anteriores) y queda con su
-  `clip-path` en el rectángulo completo para siempre — como el que entra
-  siempre tapa a todos los de abajo, no hace falta coordinar cuándo se oculta
-  el que sale.
+### Slides en paralelogramo que asoman al costado (como la referencia), no un wipe de transición
+- **Qué:** los slides van uno al lado del otro dentro de `.banner__pista` (un
+  `flex`), cada uno con `flex: 0 0 82%` y `margin-left: -14%` para
+  superponerse con el anterior, y un `clip-path` que le corta el borde
+  izquierdo en diagonal (`polygon(18% 0, 100% 0, 100% 100%, 0 100%)`). La
+  pista se desliza con `transform: translateX()` para alinear el slide
+  activo contra el borde izquierdo del viewport.
+- **Por qué:** la primera versión hacía un wipe animado (`clip-path` en
+  `@keyframes`) que solo mostraba un slide a pantalla completa, con el corte
+  diagonal apareciendo nada más durante el cambio. No se parecía a la
+  referencia: ahí el slide siguiente (y en este caso, con el margen a los
+  dos lados, también el anterior) se ve asomando **todo el tiempo**, no solo
+  al cambiar. Este enfoque arma esa composición real en vez de simularla con
+  una animación.
+- **Cómo se resuelve el asomo de los dos lados:** el corte diagonal es
+  siempre en el borde IZQUIERDO de cada slide. El slide activo, al tener su
+  propia esquina superior izquierda recortada, deja ver al anterior por ese
+  hueco (asoma a la izquierda); y como el activo solo ocupa el 82% de su
+  ancho, el que sigue en la pista ya arranca a ocupar el resto del viewport
+  (asoma a la derecha). No hace falta lógica extra para ninguno de los dos
+  casos, sale solo del layout.
+- **Texto solo en el slide activo:** `.banner__etiqueta` y `.banner__nombre`
+  están en `opacity: 0` por default y solo se muestran en
+  `.banner__slide--activo`, para que los textos de los juegos que asoman no
+  se mezclen con los del activo.
 
 ### Se eligen los 4 juegos mejor puntuados como "Destacados"
 - **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma
@@ -367,8 +374,8 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   en qué punto del ciclo anterior se había pausado. Reprogramar el timer de
   cero en cada cambio es más simple de razonar y de explicar.
 - **Movimiento reducido:** con `prefers-reduced-motion`, no arranca el
-  autoplay y el wipe no anima — el slide activo aparece directo en su estado
-  final.
+  autoplay y la pista cambia de posición directo, sin el deslizamiento
+  animado.
 
 ---
 
