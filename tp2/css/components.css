@@ -180,6 +180,141 @@
   .card:hover, .card:focus-within { transform: none; }
 }
 
+/* Menú desplegable — mismo componente para el menú hamburguesa y el de
+   cuenta (unificados en la 2ª corrección: antes tenían estilos distintos).
+   Quien lo posiciona respecto al botón que lo abre es header.css. */
+.menu-dropdown {
+  position: absolute;
+  /* Más alto que las cards del banner coverflow (llegan a z-index: 100),
+     si no quedaban tapados donde se superponen en pantalla. */
+  z-index: 200;
+  width: 280px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-md);
+  background: var(--superficie);
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+}
+
+.menu-dropdown__titulo {
+  margin: 0 0 var(--espaciado-2);
+  color: var(--primario-c1);
+  font: 600 12px/1.4 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.menu-dropdown__seccion ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-1);
+}
+
+.menu-dropdown__seccion a {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-2);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font: 500 15px/1.4 var(--font-ui);
+  transition: background-color 0.15s ease;
+}
+
+.menu-dropdown__seccion a:hover,
+.menu-dropdown__seccion a:focus-visible {
+  background: var(--primario-o2);
+  text-decoration: none;
+}
+
+.menu-dropdown__seccion i {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--acento);
+}
+
+.menu-dropdown__divisor {
+  border: 0;
+  border-top: 1px solid var(--primario-o1);
+  margin: var(--espaciado-3) 0;
+}
+
+.menu-dropdown__seccion--contacto .btn {
+  width: 100%;
+}
+
+/* ---------- Cabecera del menú de cuenta (avatar + nombre) ---------- */
+.menu-dropdown__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+}
+
+.menu-dropdown__cabecera img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.menu-dropdown__nombre {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.menu-dropdown__usuario {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1.3 var(--font-ui);
+}
+
+.menu-dropdown__social {
+  display: flex;
+  gap: var(--espaciado-1);
+  margin: 0 0 var(--espaciado-3);
+}
+
+.menu-dropdown__social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font-size: 20px;
+  transition: background-color 0.15s ease;
+}
+
+.menu-dropdown__social a:hover {
+  background: var(--primario-o2);
+  text-decoration: none;
+}
+
+.menu-dropdown__cerrar-sesion {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-2);
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--error);
+  font: 500 15px var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.menu-dropdown__cerrar-sesion:hover {
+  background: var(--primario-o2);
+}
+
 /* Inputs */
 .field {
   display: flex;
