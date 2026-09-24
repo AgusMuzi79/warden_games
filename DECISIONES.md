@@ -617,6 +617,41 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Sesión simulada persistida en `localStorage`
+
+### `js/sesion.js` nuevo: la sesión sobrevive la navegación de login.html a index.html
+- **Qué:** hasta ahora, `data-sesion` era un estado fijo en el HTML de cada
+  página (Home siempre invitado, juego siempre con sesión) — no había forma
+  de "loguearte" de verdad y que se notara en otra página. `sesion.js` guarda
+  una clave (`warden-sesion`) en `localStorage` cuando `iniciarSesion()` se
+  llama, y al cargar cualquier página que lo importe, `aplicarEstadoSesion()`
+  togglea los dos avatares del header según esa clave.
+- **Por qué:** completar el flujo que pide el enunciado: login/registro con
+  datos válidos tiene que llevarte a la sesión iniciada. Sin backend, la
+  única forma de que ese estado "viaje" de `login.html` a `index.html` es
+  guardarlo en el navegador.
+- **`localStorage`, no una cookie ni un query param:** no hace falta que
+  viaje al servidor (no hay servidor), y a diferencia de un query param
+  (`?sesion=1`) no se pierde si alguien navega a mano o recarga.
+- **No hace falta un segundo `index.html`:** se evaluó tener una página
+  aparte para el estado logueado, pero hubiera duplicado header, footer,
+  banner y toda la lógica de filas de `home.js` para lograr lo mismo que ya
+  hace `home.js` leyendo el estado del avatar — la única pieza que faltaba
+  era que ese estado se pudiera "encender" desde otra página.
+- **`sesion.js` se carga antes que `home.js`/`menu.js`:** los scripts con
+  `defer` corren en el orden en que aparecen en el HTML. `aplicarEstadoSesion()`
+  tiene que correr antes de que `home.js` decida qué filas armar, si no
+  arma las filas con el estado viejo.
+- **Toca `js/login.js` (de Fran):** se le agregan dos llamadas a
+  `iniciarSesion()` (login y registro exitosos, antes de cada redirect a
+  `index.html`). El resto del archivo no cambia.
+- **"Cerrar sesión" ahora hace algo:** antes solo cerraba el menú (era un
+  placeholder). Ahora llama a `cerrarSesion()` (borra la clave) y recarga la
+  página — la forma más simple de que la Home se vuelva a armar en estado
+  invitado sin duplicar la lógica de renderizado de `home.js`.
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para

@@ -1,6 +1,7 @@
 // menu.js — Menús desplegables del header (hamburguesa y cuenta)
 // Depende de que cada botón que abre un menú tenga aria-controls apuntando
-// al id de su panel, y aria-expanded para saber si está abierto.
+// al id de su panel, y aria-expanded para saber si está abierto. También
+// depende de sesion.js (cerrarSesion) para el botón "Cerrar sesión".
 
 const disparadores = [...document.querySelectorAll('[aria-controls][aria-expanded]')]
   .map((boton) => ({ boton, panel: document.getElementById(boton.getAttribute('aria-controls')) }))
@@ -40,6 +41,16 @@ disparadores.forEach(({ boton, panel }) => {
     }
   });
 });
+
+// "Cerrar sesión" (simulado: no hay backend, ver sesion.js) vuelve a
+// invitado y recarga para que la Home se arme de nuevo con ese estado.
+const botonCerrarSesion = document.querySelector('.menu-dropdown__cerrar-sesion');
+if (botonCerrarSesion) {
+  botonCerrarSesion.addEventListener('click', () => {
+    cerrarSesion();
+    window.location.reload();
+  });
+}
 
 // Cierra si se clickea afuera de cualquier menú abierto.
 document.addEventListener('click', () => {

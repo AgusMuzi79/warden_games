@@ -138,6 +138,10 @@ Archivos: `juego.html`, `juego.css`, `js/juego.js`.
 ## Plus (sin fecha todavía)
 
 - ✅ Catálogo de juegos (`obtenerJuegos()` en `js/api.js`, usado por la Home).
+- ✅ Sesión simulada persistida (`js/sesion.js`): login/registro exitosos
+  guardan el estado en `localStorage` y la Home ya arranca mostrando el
+  avatar y "Recomendados" al volver. Sigue sin ser una cuenta real (no hay
+  backend ni `api.js` de por medio todavía en el login).
 - ⬜ Login/registro reales contra la API (`js/login.js` hoy solo valida el
   form, no llama a `api.js` todavía).
 - ⬜ Guardado de puntajes.
