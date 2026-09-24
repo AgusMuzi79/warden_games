@@ -262,11 +262,10 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Qué:** `.carrusel__pista` es un `flex` con `overflow-x: auto` y
   `scroll-snap`; se desplaza con scroll horizontal nativo (mouse, trackpad,
   scrollbar), sin JS de por medio.
-- **Por qué:** la animación con transición (el `clip-path` en diagonal tipo
-  Glide.js) va reservada para el banner "Destacados" de arriba, que todavía
-  no se construyó. Estas filas de categorías/recomendados son "carruseles
-  normales, sin animación" por diseño, y el scroll nativo ya cumple con
-  "que se desplace".
+- **Por qué:** la animación con transición (el `clip-path` en diagonal, ver
+  banner "Destacados" más abajo) queda reservada para ese banner. Estas filas
+  de categorías/recomendados son "carruseles normales, sin animación" por
+  diseño, y el scroll nativo ya cumple con "que se desplace".
 
 ### Cards horizontales (16:9), no verticales
 - **Qué:** `.game-card__image` usa `aspect-ratio: 16 / 9`.
@@ -311,6 +310,65 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   ícono no se rompe visualmente, directamente no aparece nada, sin error en
   consola. Vale la pena recordarlo para cualquier ícono nuevo que se agregue
   en el resto del proyecto.
+
+---
+
+## Banner "Destacados" (Etapa 3b)
+
+### Reemplaza al `#hero` de texto; el `<h1>` pasa a ser "Destacados"
+- **Qué:** el `#hero` con "Warden Games" + bajada se saca. El banner es lo
+  primero que se ve al entrar, y su `<h1>` visible dice "Destacados".
+- **Por qué:** la marca "Warden" ya está en el logo del header, no hace
+  falta repetirla como título de página. "Destacados" describe mejor lo que
+  hay ahí (una selección curada, no un saludo genérico).
+
+### Wipe diagonal por `clip-path`, no el "peek" de Glide.js
+- **Qué:** cada slide (`.banner__slide`) ocupa todo el banner y arranca con
+  un `clip-path` en forma de paralelogramo grande, afuera a la derecha
+  (invisible). Al activarse, corre `@keyframes banner-wipe`, que anima ese
+  `clip-path` hasta el rectángulo completo — un corte diagonal barriendo la
+  pantalla, no un fade parejo.
+- **Por qué:** la referencia (un carrusel estilo Glide.js) muestra el slide
+  siguiente "asomando" desde el costado con un corte diagonal, calculado a
+  mano en JS según cuántos slides hay y su ancho. Un wipe con `clip-path` da
+  el mismo lenguaje visual (corte en diagonal, no un fade) con mucho menos
+  código: es una sola animación CSS, sin medir anchos ni mover múltiples
+  slides en simultáneo.
+- **Sin overlap real entre slides:** por eso no hace falta "esconder" al
+  slide anterior a mano. Cada vez que un slide se activa, sube su propio
+  `z-index` (siempre más alto que todos los anteriores) y queda con su
+  `clip-path` en el rectángulo completo para siempre — como el que entra
+  siempre tapa a todos los de abajo, no hace falta coordinar cuándo se oculta
+  el que sale.
+
+### Se eligen los 4 juegos mejor puntuados como "Destacados"
+- **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma
+  los primeros 4. Sin badge de precio (el Figma tenía "$9.99"): no existe
+  ningún sistema de compras todavía.
+- **Por qué:** dato real (no inventado), sin necesitar un criterio editorial
+  de "qué es lo nuevo de la semana" que no tenemos cómo sostener.
+- **Pendiente:** hay que armar un sistema de compras real (es parte del
+  enunciado, no opcional) — se deja para una etapa aparte. Cuando exista, ahí
+  vuelve el precio al banner.
+
+### Autoplay que se pausa con hover o foco, sin botón de pausa
+- **Qué:** `programarSiguiente()` arma un `setTimeout` que se reprograma
+  solo cada vez que cambia el slide (manual o automático). `pointerenter` /
+  `focusin` sobre el banner lo cancelan (`pausarAutoplay`); `pointerleave` /
+  `focusout` lo vuelven a armar de cero.
+- **Por qué:** WCAG pide que algo que se mueve solo por más de 5 segundos se
+  pueda pausar. En vez de un botón de pausa visible (que no pidieron), se
+  pausa con hover — y también con foco de teclado, así alguien que navega
+  sin mouse puede pararlo igual llegando a los dots con Tab, sin depender de
+  un puntero.
+- **Descartado:** un solo `setInterval` seguido con un flag de "pausado" que
+  salteaba ticks. Funciona, pero al reanudar podía tardar hasta el doble del
+  intervalo configurado en volver a avanzar, porque no había forma de saber
+  en qué punto del ciclo anterior se había pausado. Reprogramar el timer de
+  cero en cada cambio es más simple de razonar y de explicar.
+- **Movimiento reducido:** con `prefers-reduced-motion`, no arranca el
+  autoplay y el wipe no anima — el slide activo aparece directo en su estado
+  final.
 
 ---
 
@@ -371,13 +429,12 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ## Pendientes de decidir
 
-- Hex de `--superficie` (fondo de header y footer).
-- Tipo de transición del carrusel de recomendados.
-- Animación de registro exitoso.
+- Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
+  una etapa aparte; mientras no exista, el banner "Destacados" no muestra
+  precio.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
 - Qué contenido lleva el menú hamburguesa, y cómo unificarlo visualmente con el
   menú de usuario (hoy son muy distintos entre sí).
-- Qué va en el panel de marca del splash de login de 2 columnas.
 - Qué es la "galería" de la página del juego (falta ver la captura de Figma;
   hoy el tablero y la galería no están construidos todavía).

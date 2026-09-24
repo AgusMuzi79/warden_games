@@ -1,6 +1,5 @@
 /*
-  home.css — Estilos específicos de la Home (loading, hero, catálogo de juegos)
-  TODO: convertir #carousel en el carrusel con transición animada (etapa 3b).
+  home.css — Estilos específicos de la Home (loading, banner, filas de juegos)
 */
 
 /* Loading simulado */
@@ -46,6 +45,106 @@
 @media (prefers-reduced-motion: reduce) {
   .loading__spinner::before {
     animation: none;
+  }
+}
+
+/* Banner "Destacados" — carrusel con wipe diagonal por clip-path.
+   El h1 de la página va acá arriba, visible, en vez del hero de texto que
+   había antes. */
+.banner__titulo {
+  margin-bottom: var(--espaciado-4);
+}
+
+.banner__viewport {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
+  border-radius: var(--radio-md);
+  background: var(--fondo);
+}
+
+.banner__slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  /* Oculto por default: un paralelogramo grande, afuera a la derecha. */
+  clip-path: polygon(140% -10%, 220% -10%, 220% 110%, 120% 110%);
+}
+
+.banner__slide--activo {
+  animation: banner-wipe 0.9s ease-out forwards;
+}
+
+@keyframes banner-wipe {
+  from {
+    clip-path: polygon(140% -10%, 220% -10%, 220% 110%, 120% 110%);
+  }
+  to {
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+}
+
+.banner__etiqueta {
+  position: absolute;
+  left: var(--espaciado-4);
+  top: var(--espaciado-4);
+  padding: var(--espaciado-1) var(--espaciado-3);
+  border-radius: 999px;
+  background: var(--acento);
+  color: var(--fondo);
+  font: 600 12px/1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.banner__nombre {
+  position: absolute;
+  left: var(--espaciado-4);
+  right: var(--espaciado-4);
+  bottom: var(--espaciado-4);
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 22px/1.3 var(--font-display);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+.banner__dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--espaciado-2);
+  margin-top: var(--espaciado-4);
+}
+
+.banner__dot {
+  width: var(--control-target);
+  height: var(--control-target);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--primario-o1);
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.banner__dot:hover {
+  background: var(--primario-c1);
+}
+
+.banner__dot--activo {
+  background: var(--acento);
+  transform: scale(1.2);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner__slide--activo {
+    animation: none;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .banner__dot {
+    transition: none;
   }
 }
 

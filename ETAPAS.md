@@ -69,17 +69,20 @@ Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
 
 Detalle en `DECISIONES.md`.
 
-### ⬜ 3b. Banner "Destacados": carrusel con skew y transición animada
-Archivos: `index.html` (reemplaza el `#hero` actual), `home.css`,
-`js/carousel.js`.
-- Referencia: [Glide.js en Dribbble](https://dribbble.com/shots/2178325-Glide-js-Simple-responsive-and-fast-jquery-carousel-slider)
-  — el slide activo ocupa casi todo el ancho, el siguiente asoma desde el
-  costado con un corte diagonal (`clip-path`, no un fade).
-- El `<h1>` de la página pasa a ser "Destacados" (hoy sigue diciendo "Warden
-  Games" en el `#hero` viejo, todavía no tocado).
-- Esta es la única animación de transición entre imágenes de la Home (junto
-  con la galería del juego en la etapa 4) — las filas de categorías y
-  recomendados NO llevan esta animación.
+### ✅ 3b. Banner "Destacados": carrusel con wipe diagonal y transición animada
+Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
+- El `<h1>` de la página ahora es "Destacados" (arriba de todo, visible).
+- 4 slides con los juegos mejor puntuados de la API. Transición con
+  `clip-path` animado (wipe diagonal, inspirado en el carrusel de
+  [Glide.js en Dribbble](https://dribbble.com/shots/2178325-Glide-js-Simple-responsive-and-fast-jquery-carousel-slider)
+  pero resuelto distinto — más simple que calcular el "peek" a mano).
+- Autoplay cada 6s, dots para navegar manual. Se pausa con hover o con foco
+  de teclado (sin botón de pausa visible). Es la única animación de
+  transición entre imágenes de la Home (junto con la galería del juego en
+  la etapa 4) — las filas de categorías/recomendados no la llevan.
+- Sin badge de precio todavía (no hay sistema de compras armado, ver "Plus").
+
+Detalle en `DECISIONES.md`.
 
 ### ⬜ 3c. Unificar menú hamburguesa y menú de usuario
 Archivos: `index.html`, `header.css`, `js/menu.js` (nuevo).
@@ -104,3 +107,10 @@ Archivos: `juego.html`, `juego.css`, `js/juego.js`.
 - ⬜ Login/registro reales contra la API (`js/login.js` hoy solo valida el
   form, no llama a `api.js` todavía).
 - ⬜ Guardado de puntajes.
+
+## ⬜ Sistema de compras
+
+Lo pide el enunciado, no es opcional — a diferencia de los ítems de "Plus".
+Todavía no está planificado en detalle (qué se compra, con qué método, dónde
+vive el carrito del header). Cuando se arme, el banner "Destacados" recupera
+el badge de precio que tiene en el Figma pero que sacamos por ahora.

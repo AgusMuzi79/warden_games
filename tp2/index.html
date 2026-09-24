@@ -61,13 +61,17 @@
 
 
   <main>
-    <!-- TODO: sección hero de bienvenida -->
-    <section id="hero">
-      <h1>Warden Games</h1>
-      <p>Plataforma de mini juegos online.</p>
+    <!-- Banner "Destacados": arma los slides js/carousel.js con los juegos
+         mejor puntuados de la API. Transición con wipe diagonal (clip-path). -->
+    <section id="banner" aria-labelledby="banner-titulo">
+      <h1 id="banner-titulo" class="banner__titulo">Destacados</h1>
+      <div class="banner__viewport">
+        <!-- Slides generados por carousel.js -->
+      </div>
+      <div class="banner__dots">
+        <!-- Dots generados por carousel.js -->
+      </div>
     </section>
-
-    <!-- TODO: banner "Destacados" con skew y transición animada (etapa 3b) -->
 
     <!-- Filas generadas por home.js: categorías por género para invitado,
          o "Recomendados" si el avatar del header tiene data-sesion="usuario" -->
