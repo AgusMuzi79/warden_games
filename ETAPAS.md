@@ -36,7 +36,7 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 
-## ✅ Etapa 2 — Login: splash de 2 columnas
+## ✅ Etapa 2 — Login: splash de 2 columnas (a cargo de Fran)
 
 Archivos: `login.html`, `login.css`, `js/login.js`.
 
@@ -55,16 +55,73 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 
-## ⬜ Etapa 3 — Home
+## ✅ Etapa 3 — Home (a cargo de Agus)
 
-Archivos: `index.html`, `home.css`, `js/carousel.js`, `js/home.js`, `header.css`.
+La Home queda con: banner "Destacados" arriba (carrusel coverflow), y
+abajo, según el estado del avatar del header (`data-sesion="usuario"`
+oculto o no): filas por categoría para invitado, o una fila "Recomendados"
+para quien tiene sesión. El menú hamburguesa y el de cuenta, en el header
+de todas las páginas, comparten el mismo estilo de dropdown.
 
-- Cards de juego con nombre real e imagen en `#carousel` (datos reales, largos
-  y colores distintos — no hay ni una todavía).
-- Carrusel de recomendados con transición animada (fade/scale/clip-path — a
-  definir cuál).
-- Unificar menú hamburguesa y menú de usuario en un solo componente visual
-  (hoy son muy distintos entre sí). Agregar más ítems al menú hamburguesa.
+### ✅ 3a. Catálogo real desde la API + filas por categoría/recomendados
+Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
+- `api.js` pide `https://vj.interfaces.jima.com.ar/api` (la API de
+  jimartinezabadias, ~80 juegos reales con nombre/imagen/rating/género).
+- `home.js` arma una fila por categoría fija (Acción, Shooters, RPG,
+  Aventura) para invitado, o una fila "Recomendados" (simulada por género)
+  si `data-sesion="usuario"` está visible en el header. Cards horizontales
+  (16:9), cada fila con scroll nativo (sin animación — eso es solo del
+  banner). Datos de respaldo hardcodeados si la API falla.
+- `<h2>` propio por cada fila para no saltear niveles de título.
+- (La primera versión de la 3a era una única grilla "Recomendados" para
+  todos, con cards verticales — se descartó, ver `DECISIONES.md`.)
+
+Detalle en `DECISIONES.md`.
+
+### ✅ 3b. Banner "Destacados": carrusel coverflow (perspective + rotateY)
+Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
+- El `<h1>` de la página ahora es "Destacados" (arriba de todo, visible).
+- 5 cards con los juegos mejor puntuados de la API. La activa queda de
+  frente al centro; las de los costados se corren, se achican y giran en 3D
+  (`perspective` + `rotateY` + `translateZ`), como si se alejaran hacia el
+  fondo — el clásico carrusel "coverflow" (tipo iTunes viejo).
+- Autoplay cada 6s, dots para navegar manual, y también se puede clickear
+  cualquier card visible del costado para saltar directo a ella. Se pausa
+  con hover o con foco de teclado (sin botón de pausa visible). Es la única
+  animación de transición entre imágenes de la Home (junto con la galería
+  del juego en la etapa 4) — las filas de categorías/recomendados no la
+  llevan.
+- Sin badge de precio todavía (no hay sistema de compras armado, ver "Plus").
+- Las cards no se recortan a los costados (`.banner__viewport` sin
+  `overflow: hidden`) y las imágenes van con `background-size: cover`
+  (llenan la card, sin dejar franjas vacías).
+- (Hubo dos versiones anteriores que no se parecían a la referencia: un wipe
+  de `clip-path` en un solo slide, y después slides en paralelogramo plano
+  con `clip-path` diagonal — ninguna de las dos es en realidad "3D". Se
+  rehizo con la técnica correcta, ver `DECISIONES.md`.)
+
+Detalle en `DECISIONES.md`.
+
+### ✅ 3c. Unificar menú hamburguesa y menú de usuario
+Archivos: `index.html`, `components.css` (el componente `.menu-dropdown`
+compartido), `header.css` (posicionamiento), `js/menu.js` (nuevo).
+- Ninguno de los dos existía en el código todavía. Se construyeron los dos
+  con el mismo componente visual (card redondeada, divisores, mismo
+  espaciado) — antes tenían estructuras distintas (panel ancho vs. card
+  angosta), calcado del estilo del menú de cuenta.
+- Hamburguesa: 3 secciones — "Jugar" (5 links, iguales al footer),
+  "Categorías" (4, iguales a las de `home.js`) y un botón "Contáctanos"
+  (`mailto:`). Cada item con ícono, estilo CrazyGames simplificado.
+- Cuenta: cabecera (avatar + nombre + @usuario), items de cuenta, redes
+  sociales, "Cerrar sesión" — calcado de la captura de Figma.
+- El avatar con sesión pasa de `<a>` a `<button>` (ahora abre un menú, no
+  navega). `js/menu.js` maneja abrir/cerrar, click afuera, Escape (con
+  foco de vuelta al botón), y que solo un menú esté abierto a la vez.
+- Bug real encontrado al probarlo: el dropdown (z-index 50) quedaba tapado
+  por las cards del banner coverflow (z-index hasta 100) donde se
+  superponían. Se subió a z-index 200.
+
+Detalle en `DECISIONES.md`.
 
 ---
 
@@ -80,5 +137,18 @@ Archivos: `juego.html`, `juego.css`, `js/juego.js`.
 
 ## Plus (sin fecha todavía)
 
-- `js/api.js`: consumir la API de la cátedra (login/registro reales, catálogo
-  de juegos, puntajes). Hoy es un stub sin lógica.
+- ✅ Catálogo de juegos (`obtenerJuegos()` en `js/api.js`, usado por la Home).
+- ✅ Sesión simulada persistida (`js/sesion.js`): login/registro exitosos
+  guardan el estado en `localStorage` y la Home ya arranca mostrando el
+  avatar y "Recomendados" al volver. Sigue sin ser una cuenta real (no hay
+  backend ni `api.js` de por medio todavía en el login).
+- ⬜ Login/registro reales contra la API (`js/login.js` hoy solo valida el
+  form, no llama a `api.js` todavía).
+- ⬜ Guardado de puntajes.
+
+## ⬜ Sistema de compras
+
+Lo pide el enunciado, no es opcional — a diferencia de los ítems de "Plus".
+Todavía no está planificado en detalle (qué se compra, con qué método, dónde
+vive el carrito del header). Cuando se arme, el banner "Destacados" recupera
+el badge de precio que tiene en el Figma pero que sacamos por ahora.

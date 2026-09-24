@@ -103,6 +103,11 @@ document.addEventListener('DOMContentLoaded', () => {
     formRegister.hidden = true;
     document.getElementById('registerSuccess').hidden = false;
 
+    // Simula que la cuenta queda logueada (ver sesion.js: no hay backend
+    // todavía, así que esto es lo que hace que la Home ya te muestre con
+    // sesión al llegar).
+    iniciarSesion();
+
     // Deja ver la animación un momento y recién ahí lleva al home.
     setTimeout(() => {
       window.location.href = 'index.html';
@@ -132,6 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Punto de integración: reemplazar por la llamada real al backend / API.
     console.log('Login listo para enviar:', { email, password, remember });
+
+    // Simula que la cuenta queda logueada (ver sesion.js).
+    iniciarSesion();
 
     // Login exitoso lleva al home, como en cualquier sitio.
     window.location.href = 'index.html';
