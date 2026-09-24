@@ -63,6 +63,9 @@
   overflow: hidden;
   aspect-ratio: 16 / 9;
   max-height: 420px;
+  /* Con max-height, el ancho se achica para mantener la proporción 16:9;
+     sin esto quedaría pegado a la izquierda en vez de centrado. */
+  margin-inline: auto;
   background: var(--fondo);
   /* Le da profundidad a los hijos con transform 3D (perspective). */
   perspective: 1400px;

@@ -388,6 +388,18 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Movimiento reducido:** con `prefers-reduced-motion`, no arranca el
   autoplay y las cards cambian de posición directo, sin el giro animado.
 
+### `margin-inline: auto` en el viewport, porque `aspect-ratio` + `max-height` le achica el ancho
+- **Qué:** `.banner__viewport` quedaba pegado a la izquierda en vez de
+  centrado en pantallas anchas. Se arregla con `margin-inline: auto`.
+- **Por qué:** el viewport tiene `aspect-ratio: 16/9` y `max-height: 420px`.
+  Cuando el ancho disponible haría que, a 16:9, la altura supere esos
+  420px, el navegador achica el ANCHO de la caja para mantener la
+  proporción — no solo la altura. Al quedar más angosta que su contenedor,
+  una caja de bloque normal no se centra sola, se pega al borde de inicio
+  (izquierda). Con `margin-inline: auto` sí se centra, como una imagen con
+  `max-width` que también necesita `display:block; margin:auto` para no
+  quedar pegada a un lado.
+
 ---
 
 ## Componentes
