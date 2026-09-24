@@ -394,21 +394,26 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   distancia -1, no -4), para que ir de la última a la primera gire para el
   lado corto en vez de cruzar toda la fila.
 - **Bug encontrado al probarlo — una card "daba la vuelta" barriendo toda
-  la pantalla:** avanzar un solo paso (activo pasa de 1 a 2, por ejemplo)
-  hace que la card que queda justo en el extremo opuesto salte de golpe de
-  `offset -2` a `offset +2` — es matemáticamente correcto (el lado corto
-  cambia de dirección para esa card en ese punto), pero si se anima con el
-  `transition` normal, la animación interpola en línea recta de un extremo
-  al otro, barriendo por encima de las cards del medio en el camino. Se
-  detecta ese salto grande comparando contra el offset anterior de esa
-  card específica (guardado en `dataset.offset`) y, solo en ese caso
-  puntual, se le saca la transición (`transition: none`, forzando reflow)
-  para que salte directo en vez de barrer. El resto de las cards, que
-  cambian de a un paso genuino, siguen animando normal.
-- **Solo se ven 2 posiciones de cada lado (`MAX_VISIBLES`):** las cards más
-  lejanas se esconden con `opacity: 0` en vez de seguir achicándose hasta
-  desaparecer solas — con 5 destacados en total, alcanza para que siempre
-  se vea la activa + 2 de cada lado como mucho.
+  la pantalla, corregido bajando `MAX_VISIBLES` de 2 a 1:** avanzar un solo
+  paso (activo pasa de 1 a 2, por ejemplo) hace que la card que queda justo
+  en el extremo opuesto salte de golpe de `offset -2` a `offset +2` — es
+  matemáticamente correcto (el lado corto cambia de dirección para esa
+  card en ese punto), pero animado con el `transition` normal, la
+  interpolación en línea recta de un extremo al otro barre por encima de
+  las cards del medio en el camino.
+  - **Primer intento (descartado):** detectar ese salto grande contra el
+    offset anterior de la card (`dataset.offset`) y sacarle la transición
+    justo ahí (`transition: none`, forzando reflow) para que apareciera
+    directo en la nueva posición en vez de barrer. Funcionaba (ya no
+    barría), pero se sentía igual de raro: la card desaparecía de un lado
+    y aparecía de golpe en el otro, un corte demasiado brusco.
+  - **Solución real:** el salto solo puede pasar en la distancia MÁXIMA
+    posible (con 5 destacados, esa distancia es 2 — el piso de 5/2). Si esa
+    distancia directamente no se muestra (`MAX_VISIBLES: 1` en vez de 2),
+    la card en cuestión ya está oculta (`opacity: 0`) tanto antes como
+    después del salto, así que nadie lo ve — sin ningún truco de
+    transición. Como efecto secundario, ahora se ven 3 cards en total
+    (activa + 1 de cada lado) en vez de 5, un coverflow más despejado.
 - **Texto solo en la card activa:** `.banner__etiqueta` y `.banner__nombre`
   están en `opacity: 0` por default y solo se muestran en
   `.banner__slide--activo`, para no mezclar el texto de la activa con el de
@@ -444,9 +449,8 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   los primeros 5. Sin badge de precio (el Figma tenía "$9.99"): no existe
   ningún sistema de compras todavía.
 - **Por qué:** dato real (no inventado), sin necesitar un criterio editorial
-  de "qué es lo nuevo de la semana" que no tenemos cómo sostener. Son 5 y no
-  4 para que, con `MAX_VISIBLES: 2`, siempre haya alguna card en cada
-  posición visible del coverflow (activa + 2 a cada lado).
+  de "qué es lo nuevo de la semana" que no tenemos cómo sostener. 5 le da
+  variedad a los dots sin que la vuelta completa se sienta demasiado corta.
 - **Pendiente:** hay que armar un sistema de compras real (es parte del
   enunciado, no opcional) — se deja para una etapa aparte. Cuando exista, ahí
   vuelve el precio al banner.
