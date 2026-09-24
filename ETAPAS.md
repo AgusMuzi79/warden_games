@@ -68,13 +68,43 @@ Archivos: `index.html`, `home.css`, `js/carousel.js`, `js/home.js`, `header.css`
 
 ---
 
-## ⬜ Etapa 4 — Juego (Peg Solitaire)
+## ✅ Etapa 4 — Juego (Peg Solitaire / "Neon Circuit" en la interfaz)
 
-Archivos: `juego.html`, `juego.css`, `js/juego.js`.
+Archivos: `juego.html`, `juego.css`, `js/juego.js`, `js/compartir.js`,
+`js/resena.js`.
 
-- Grilla del tablero (`#board` hoy está vacío, sin CSS).
-- Definir y construir la "galería" (falta ver la captura de Figma para saber
-  qué es exactamente).
+A partir de las capturas de Figma que pasó Fran, la página del juego trae
+bastante más que la grilla y la galería. Se dividió en partes.
+
+- ✅ 4a. Breadcrumb ("Inicio > Puzzle > Neon Circuit"), `h1` renombrado a
+  "Neon Circuit" y marco de la card del tablero (con el placeholder "Botón"
+  de Figma como rótulo, sin función todavía).
+- ✅ 4b. Paleta de colores propia del tablero (tokens nuevos en
+  `variables.css`) + grilla de 33 posiciones + estados de ficha (activa,
+  descargada, seleccionada, destino) + leyenda de símbolos. Solo visual,
+  sin lógica de movimientos todavía. Fuera de alcance por ahora: tableros
+  de otro tamaño y "puentes" (tablero 21+).
+- ✅ 4c. Panel lateral: ficha del juego (miniatura, categoría, dev, rating,
+  "jugando ahora"/"tu récord") + acordeón de Ayuda (`<details>`/`<summary>`)
+  + atajos de teclado (Z/R/Esc).
+- ✅ 4d. Sección "Sobre el juego" (texto descriptivo, escrito para este
+  juego, no copiado de la captura).
+- ✅ 4e. Galería: 6 tiles con gradientes CSS armados con la paleta del
+  tablero (sin fotos reales todavía, `aria-hidden` hasta que las haya).
+- ✅ 4f. Comunidad (3 reseñas reales y distintas, no repetidas) + Compartir
+  (redes, mail, "Copiar" link funcional) + "Dejá tu reseña" (puntaje con
+  radios en CSS puro, sin JS). Sin enlaces relacionados: se sacaron, no se
+  van a usar.
+- ✅ 4g. Pase final de layout, con 3 correcciones de Fran contra Figma:
+  - Compartir pasó a vivir en el panel lateral, debajo de Ayuda (no debajo
+    de la Galería).
+  - Se sacó la sección "Enlaces relacionados".
+  - Comunidad y "Dejá tu reseña" pasaron a ir uno al lado del otro (reusan
+    el mismo `.juego-layout` de 2 columnas).
+- ⬜ 4f. Comunidad (reseñas con contenido real y distinto) + Compartir +
+  enlaces relacionados + "Dejá tu reseña".
+
+Detalle de las decisiones de la 4a en `DECISIONES.md`.
 
 ---
 

@@ -1,4 +1,676 @@
 /*
-  juego.css — Estilos específicos de la página del juego (Peg Solitaire)
-  TODO: implementar estilos del tablero, fichas y controles del juego.
+  juego.css — Estilos específicos de la página del juego (Peg Solitaire /
+  "Neon Circuit" en la interfaz)
 */
+
+/* ============================================================
+   Ruta de navegación (breadcrumb) — Etapa 4, parte 1
+   Roboto Flex, no Orbitron: es navegación, no un título (h1-h3).
+   ============================================================ */
+.breadcrumb {
+  margin-bottom: var(--espaciado-6);
+}
+
+.breadcrumb__lista {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-2);
+  font: 500 14px/1 var(--font-ui);
+}
+
+.breadcrumb__item {
+  color: var(--primario-c1);
+}
+
+/* Separador ">" entre items, generado con CSS: no es texto real, así que
+   no hace falta ocultarlo de los lectores de pantalla aparte. */
+.breadcrumb__item + .breadcrumb__item::before {
+  content: "›";
+  margin-right: var(--espaciado-2);
+  color: var(--primario-o1);
+}
+
+.breadcrumb__item a {
+  color: inherit;
+}
+
+.breadcrumb__item a:hover {
+  color: var(--acento);
+}
+
+.breadcrumb__item[aria-current="page"] {
+  color: var(--primario-c3);
+}
+
+/* ============================================================
+   Tablero — Etapa 4, parte 1: solo el marco de la card.
+   El grid de 33 fichas (parte 2) se arma dentro de este mismo #board,
+   en js/juego.js.
+   ============================================================ */
+.tablero {
+  position: relative;
+  margin-top: var(--espaciado-8);
+  padding: var(--espaciado-8) var(--espaciado-6) var(--espaciado-6);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+/* Etiqueta placeholder del mock de Figma (ahí decía "Botón", sin función
+   definida todavía). En vez de un <button> sin ninguna acción real, es un
+   rótulo fijo con el nombre del juego. */
+.tablero__etiqueta {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  padding: var(--espaciado-1) var(--espaciado-4);
+  border: 1px solid var(--acento);
+  border-radius: var(--radio-md);
+  background: var(--fondo);
+  color: var(--acento);
+  font: 600 14px/1 var(--font-ui);
+}
+
+/* ---------- Grid de posiciones (parte 2) ----------
+   7x7 con forma de cruz clásica (33 posiciones válidas + huecos invisibles
+   en las esquinas). js/juego.js arma un <div class="tablero__hueco ..."> por
+   celda; acá solo el tamaño/color de cada estado. */
+.tablero__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 44px);
+  grid-template-rows: repeat(7, 44px);
+  gap: var(--espaciado-2);
+  justify-content: center;
+  margin: var(--espaciado-6) 0;
+}
+
+.tablero__hueco {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+
+/* Esquinas fuera de la cruz: ocupan su lugar en el grid pero no se ven. */
+.tablero__hueco--vacio {
+  visibility: hidden;
+}
+
+.tablero__hueco--activo {
+  border: 3px dashed var(--tablero-activo);
+  box-shadow: 0 0 10px var(--tablero-activo);
+}
+
+.tablero__hueco--descargado {
+  background: var(--tablero-descargado);
+}
+
+.tablero__hueco--seleccionado {
+  border: 3px dashed var(--tablero-seleccionado);
+  box-shadow: 0 0 10px var(--tablero-seleccionado);
+}
+
+.tablero__hueco--destino {
+  border: 2px solid var(--tablero-destino);
+}
+
+/* ---------- Leyenda ---------- */
+.tablero__leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-4);
+  padding-top: var(--espaciado-4);
+  border-top: 1px solid var(--primario-o1);
+  color: var(--primario-c1);
+  font: 500 13px/1 var(--font-ui);
+}
+
+.tablero__leyenda li {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-2);
+}
+
+.tablero__muestra {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.tablero__muestra--activo {
+  border: 2px dashed var(--tablero-activo);
+}
+
+.tablero__muestra--descargado {
+  background: var(--tablero-descargado);
+  border: 1px solid var(--primario-o1);
+}
+
+.tablero__muestra--seleccionado {
+  border: 2px dashed var(--tablero-seleccionado);
+}
+
+.tablero__muestra--destino {
+  border: 2px solid var(--tablero-destino);
+}
+
+.tablero__leyenda-salto i {
+  font-size: 14px;
+}
+
+/* ============================================================
+   Layout tablero + panel lateral — Etapa 4, parte 3
+   Solo desktop (regla del proyecto: la página del juego no necesita
+   mobile first), por eso no hay @media acá.
+   ============================================================ */
+.juego-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: var(--espaciado-6);
+  margin-top: var(--espaciado-6);
+}
+
+.juego-layout__principal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+/* Ya suman su propio espacio con el gap de arriba: sin esto, quedarían
+   con el doble (su margin-top propio + el gap del flex). */
+.juego-layout__principal .tablero,
+.juego-layout__principal .sobre-juego,
+.juego-layout__principal .galeria {
+  margin-top: 0;
+}
+
+.panel-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+/* ---------- Ficha del juego ---------- */
+.ficha-juego,
+.ayuda {
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.ficha-juego__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  margin-bottom: var(--espaciado-4);
+}
+
+/* Miniatura con la paleta del tablero, en vez de una imagen (no hay
+   asset todavía — ver "Pendientes de decidir"). */
+.ficha-juego__miniatura {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radio-md);
+  background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-seleccionado) 60%, var(--tablero-destino));
+}
+
+.ficha-juego__nombre {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.ficha-juego__categoria {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1.3 var(--font-ui);
+}
+
+.ficha-juego__rating {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-1);
+  margin: 0 0 var(--espaciado-4);
+  color: var(--acento);
+  font: 500 14px/1 var(--font-ui);
+}
+
+.ficha-juego__resenas {
+  color: var(--primario-c1);
+}
+
+.ficha-juego__stats {
+  display: flex;
+  gap: var(--espaciado-6);
+  margin: 0;
+  padding-top: var(--espaciado-3);
+  border-top: 1px solid var(--primario-o1);
+}
+
+.ficha-juego__stats dt {
+  color: var(--primario-c1);
+  font: 400 12px/1.4 var(--font-ui);
+}
+
+.ficha-juego__stats dd {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+/* ---------- Ayuda (acordeón con <details>/<summary>) ---------- */
+.ayuda h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 20px;
+}
+
+.ayuda__tecla {
+  padding: var(--espaciado-1) var(--espaciado-2);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c1);
+  font: 500 12px/1 var(--font-ui);
+}
+
+.ayuda__item {
+  border-top: 1px solid var(--primario-o1);
+}
+
+.ayuda__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--control-alto);
+  color: var(--primario-c3);
+  font: 600 15px/1.3 var(--font-ui);
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Chrome/Safari agregan su propio triángulo aparte de list-style */
+.ayuda__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.ayuda__item summary::after {
+  content: "+";
+  color: var(--acento);
+  font-size: 18px;
+}
+
+.ayuda__item[open] summary::after {
+  content: "−";
+}
+
+.ayuda__item p {
+  margin: 0 0 var(--espaciado-3);
+  color: var(--primario-c1);
+  font-size: 14px;
+}
+
+.ayuda__atajos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+  margin-top: var(--espaciado-4);
+  padding-top: var(--espaciado-4);
+  border-top: 1px solid var(--primario-o1);
+  color: var(--primario-c1);
+  font: 400 14px/1 var(--font-ui);
+}
+
+.ayuda__atajos li {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+}
+
+.ayuda__atajos kbd {
+  min-width: 28px;
+  padding: var(--espaciado-1) var(--espaciado-2);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  color: var(--primario-c3);
+  font: 600 12px/1 var(--font-ui);
+  text-align: center;
+}
+
+/* ============================================================
+   Sobre el juego — Etapa 4, parte 4
+   ============================================================ */
+.sobre-juego {
+  margin-top: var(--espaciado-8);
+  max-width: 70ch;
+}
+
+.sobre-juego p {
+  margin: 0;
+}
+
+/* ============================================================
+   Galería — Etapa 4, parte 5
+   6 tiles con gradientes de la paleta del tablero. Sin fotos reales
+   todavía (ver DECISIONES.md, "Pendientes de decidir").
+   ============================================================ */
+.galeria {
+  margin-top: var(--espaciado-8);
+}
+
+.galeria__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--espaciado-4);
+}
+
+.galeria__cabecera h2 {
+  margin: 0;
+}
+
+.galeria__contador {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1 var(--font-ui);
+}
+
+.galeria__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--espaciado-4);
+}
+
+.galeria__tile {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radio-md);
+}
+
+.galeria__tile--1 { background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-destino)); }
+.galeria__tile--2 { background: linear-gradient(135deg, var(--tablero-seleccionado), var(--primario-o1)); }
+.galeria__tile--3 { background: linear-gradient(135deg, var(--tablero-destino), var(--tablero-activo) 70%); }
+.galeria__tile--4 { background: linear-gradient(135deg, var(--acento), var(--tablero-destino)); }
+.galeria__tile--5 { background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-seleccionado)); }
+.galeria__tile--6 { background: linear-gradient(135deg, var(--primario), var(--tablero-seleccionado) 60%, var(--tablero-activo)); }
+
+/* ============================================================
+   Compartir — Etapa 4, parte 6
+   ============================================================ */
+.compartir {
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.compartir__redes {
+  display: flex;
+  gap: var(--espaciado-2);
+  margin: var(--espaciado-4) 0;
+}
+
+.compartir__redes a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font-size: 20px;
+  transition: background-color 0.2s ease;
+}
+
+.compartir__redes a:hover {
+  background: var(--primario-o2);
+  text-decoration: none;
+}
+
+.compartir__acciones {
+  display: flex;
+  gap: var(--espaciado-3);
+  margin-bottom: var(--espaciado-4);
+}
+
+.compartir__acciones .btn {
+  flex: 1;
+}
+
+.compartir__link {
+  display: flex;
+  gap: var(--espaciado-2);
+}
+
+.compartir__link input {
+  flex: 1;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-3);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  color: var(--primario-c1);
+  font: 400 14px/1 var(--font-ui);
+}
+
+.compartir__copiar {
+  appearance: none;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-4);
+  border: 1px solid var(--acento);
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--acento);
+  font: 600 14px/1 var(--font-ui);
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.compartir__copiar:hover {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+/* ============================================================
+   Comunidad — Etapa 4, parte 6
+   ============================================================ */
+.comunidad {
+  min-width: 0;
+}
+
+.comunidad__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--espaciado-4);
+}
+
+.comunidad__cabecera h2 {
+  margin: 0;
+}
+
+.comunidad__contador {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1 var(--font-ui);
+}
+
+.comunidad__lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.resena {
+  padding: var(--espaciado-4) 0;
+  border-top: 1px solid var(--primario-o1);
+}
+
+.resena__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  margin-bottom: var(--espaciado-3);
+}
+
+/* Iniciales en vez de foto: no hay avatares reales de la comunidad. */
+.resena__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--fondo);
+  font: 600 14px/1 var(--font-ui);
+}
+
+.resena__avatar--1 { background: var(--primario-c1); }
+.resena__avatar--2 { background: var(--acento); }
+.resena__avatar--3 { background: var(--tablero-seleccionado); }
+
+.resena__nombre {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.resena__fecha {
+  margin-left: var(--espaciado-2);
+  color: var(--primario-c1);
+  font: 400 13px/1.4 var(--font-ui);
+}
+
+.resena__puntaje {
+  margin: 0;
+  color: var(--tablero-seleccionado);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+.resena__texto {
+  margin: 0 0 var(--espaciado-3);
+  color: var(--primario-c1);
+}
+
+.resena__acciones {
+  display: flex;
+  gap: var(--espaciado-4);
+}
+
+.resena__util,
+.resena__responder {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primario-c1);
+  font: 500 13px/1 var(--font-ui);
+  cursor: pointer;
+}
+
+.resena__util:hover,
+.resena__responder:hover {
+  color: var(--acento);
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Dejá tu reseña — Etapa 4, parte 6
+   Puntaje con radios + labels (CSS puro, sin JS): el truco es poner las
+   estrellas al revés en el HTML (5,4,3,2,1) y darlas vuelta visualmente
+   con row-reverse, así "esta y las siguientes en el HTML" son, en
+   pantalla, "esta y las anteriores" — la selección natural de un rating.
+   ============================================================ */
+.resena-form {
+  padding: var(--espaciado-6);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.resena-form form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+.resena-form__puntaje {
+  padding: 0;
+  border: 0;
+}
+
+.resena-form__puntaje legend {
+  margin-bottom: var(--espaciado-2);
+  padding: 0;
+  color: var(--primario-c1);
+  font: 500 14px/1 var(--font-ui);
+}
+
+.estrellas {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: var(--espaciado-1);
+  width: fit-content;
+}
+
+.estrellas input {
+  position: absolute;
+  width: var(--control-target);
+  height: var(--control-target);
+  opacity: 0;
+}
+
+.estrellas label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-target);
+  height: var(--control-target);
+  color: var(--primario-o1);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.estrellas label::before {
+  content: "★";
+}
+
+.estrellas input:checked ~ label,
+.estrellas label:hover,
+.estrellas label:hover ~ label {
+  color: var(--tablero-seleccionado);
+}
+
+/* El input queda invisible (opacity: 0), así que el foco de teclado se
+   muestra en su label, no en él. */
+.estrellas input:focus-visible + label {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.resena-form textarea {
+  min-height: 96px;
+  padding: var(--espaciado-3);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  color: var(--primario-c3);
+  font: 400 14px/1.5 var(--font-ui);
+  resize: vertical;
+}
+
+.resena-form__contador {
+  margin: var(--espaciado-1) 0 0;
+  text-align: right;
+  color: var(--primario-c1);
+  font: 400 12px/1 var(--font-ui);
+}

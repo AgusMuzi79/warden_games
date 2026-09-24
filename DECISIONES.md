@@ -277,6 +277,211 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Página del juego (Etapa 4)
+
+A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
+(ver `ETAPAS.md`). Esta sección junta las decisiones de cada una.
+
+### Nombre visible: "Neon Circuit"
+- **Qué:** el `h1`, el `<title>` y la ficha del juego dicen "Neon Circuit",
+  no "Peg Solitaire".
+- **Por qué:** así lo llama la captura de Figma. Es el nombre de fantasía
+  que le puso la cátedra al mock; el juego que programamos abajo sigue
+  siendo Peg Solitaire (reglas, tablero de 33), pero de cara a la interfaz
+  usamos el nombre real del diseño para no tener que inventar ni traducir
+  ningún texto de la ficha, la ayuda o las reseñas.
+
+### Breadcrumb en `--font-ui`, no en Orbitron
+- **Qué:** `<nav class="breadcrumb">` con "Inicio > Puzzle > Neon Circuit",
+  en Roboto Flex 14px. El separador "›" es un `::before` generado por CSS.
+- **Por qué:** en el mock estaba con una tipografía grande, angulosa, que
+  parece Orbitron — pero es navegación, no un título (h1-h3), así que le
+  aplica la regla general del proyecto. "Puzzle" queda como texto plano, sin
+  link: las categorías de la Home son filtros (`home.js`), no páginas
+  propias, así que no hay a dónde linkear todavía.
+
+### Paleta propia del tablero, no la del sitio
+- **Qué:** los colores de las fichas (activa, descargada, seleccionada,
+  destino) van a ser tokens nuevos en `variables.css`, con prefijo
+  `--tablero-*`, en vez de reusar `--primario`/`--acento` aunque algún tono
+  se le parezca.
+- **Por qué:** decisión de Fran y Agus — el tablero tiene su propio lenguaje
+  visual (neón sobre fondo oscuro) pensado aparte del design system general
+  del sitio. Van en `variables.css` y no en `juego.css` siguiendo el mismo
+  criterio que ya usamos con `--sombra-elevacion`/`--resplandor-error`:
+  tokens únicos para todo el proyecto, aunque los use un solo componente.
+  (Los hex concretos se definen en la parte 2, junto con la grilla.)
+
+### El placeholder "Botón" de Figma se muestra como rótulo, no como control
+- **Qué:** arriba de la card del tablero, en vez de un `<button>` sin ninguna
+  acción definida, hay un `<p class="tablero__etiqueta">` con el nombre del
+  juego ("Neon Circuit"), superpuesto al borde superior de la card.
+- **Por qué:** en Figma ese elemento está sin definir (dice literalmente
+  "Botón", sin ícono ni texto real). Armar un botón clickeable que no hace
+  nada sería confuso para quien navega con teclado o lector de pantalla.
+  Cuando se sepa qué función cumple, se resuelve en una parte aparte.
+
+### Grid del tablero generado por JS, no hardcodeado en el HTML
+- **Qué:** `js/juego.js` arma las 33 posiciones del tablero clásico (forma
+  de cruz: filas de 3-3-7-7-7-3-3 sobre una grilla de 7x7) recorriendo las
+  49 celdas y decidiendo con `esPosicionValida()` cuáles son parte de la
+  cruz. Las que no lo son quedan como huecos invisibles (`.tablero__hueco--vacio`,
+  `visibility: hidden`) que igual ocupan su lugar en el CSS Grid, para no
+  romper la forma. El centro arranca "descargado" (vacío); el resto,
+  "activo".
+- **Por qué:** es la misma idea que ya usamos en `carousel.js`/`home.js` —
+  contenido que se arma en JS en vez de escribir 33 `<div>` a mano en el
+  HTML, más fácil de ajustar si el tamaño del tablero cambia a futuro.
+
+### El grid de fichas es `aria-hidden` por ahora
+- **Qué:** `#tablero-grid` tiene `aria-hidden="true"`.
+- **Por qué:** todavía no hay clicks ni navegación por teclado sobre las
+  fichas (eso es lógica de juego, una parte aparte). Sin eso, un lector de
+  pantalla solo encontraría 33 `<div>` sin ninguna acción ni información
+  útil — sería ruido, no contenido. Se saca este atributo en cuanto el
+  tablero sea interactivo de verdad.
+- **La leyenda sí queda accesible:** las muestras de color (`<span>` de cada
+  estado) son decorativas y están `aria-hidden`, pero el texto de al lado
+  ("Nodo activo", "Descargado", etc.) no — describe algo real del diseño
+  aunque el tablero en sí todavía no funcione.
+
+### Paleta del tablero: valores elegidos
+- **Qué:** `--tablero-activo: #FF6A1A` (naranja), `--tablero-descargado:
+  #0B0710` (casi negro), `--tablero-seleccionado: #3FE8E4` (celeste-cian),
+  `--tablero-destino: #B79CF0` (violeta claro).
+- **Por qué:** estimados a ojo de la captura de Figma. Quedan como
+  "pendiente de ajustar" (ver esa sección al final del archivo) hasta
+  compararlos en pantalla contra el diseño real.
+
+### Panel lateral: tablero + ficha/Ayuda/Compartir en dos columnas, solo desktop
+- **Qué:** `.juego-layout` es un grid de 2 columnas: `.juego-layout__principal`
+  (tablero, "Sobre el juego" y Galería, apilados) y `.panel-lateral`
+  (ficha del juego, Ayuda y Compartir, apilados). 320px fijo para el panel,
+  el resto para la columna principal. Sin `@media`, porque la página del
+  juego no necesita mobile first (regla del proyecto).
+- **Por qué:** así está en la captura de Figma que confirmó Fran — Compartir
+  va debajo de Ayuda, en la misma columna lateral, no debajo de la Galería.
+  Al principio Compartir había quedado como sección suelta a ancho completo
+  porque se armó antes de tener esa captura puntual del layout completo.
+
+### Acordeón de Ayuda con `<details>`/`<summary>`, no JS a mano
+- **Qué:** cada ítem ("Cómo se juega", "Objetivo", "Puentes", "Puntaje") es
+  un `<details>`; el primero con el atributo `open`. El signo "+"/"−" es un
+  `::after` sobre `summary` que cambia solo con el selector `[open]`.
+- **Por qué:** es exactamente el comportamiento que hace falta (expandir/
+  colapsar, uno a la vez o varios juntos, todo announced correctamente por
+  lectores de pantalla) y el navegador ya lo resuelve solo, sin estado en
+  JS ni manejo de foco a mano — a diferencia del selector de Login (que sí
+  necesitó ARIA de tabs a mano porque el comportamiento ahí es "tabs", no
+  "acordeón").
+- **Contenido de "Puentes" y "Puntaje":** son reglas del juego terminado
+  (todavía no programadas — la lógica de movimientos es de una etapa
+  aparte). El texto de "Puentes" aclara que este tablero clásico de 33 no
+  los usa, en vez de prometer algo que no está.
+
+### Miniatura de la ficha del juego: gradiente con la paleta del tablero
+- **Qué:** `.ficha-juego__miniatura` es un `linear-gradient` con
+  `--tablero-activo`, `--tablero-seleccionado` y `--tablero-destino`, no una
+  imagen.
+- **Por qué:** todavía no hay ningún asset real para Neon Circuit (se
+  resuelve más adelante, junto con las fotos de la galería). Reusar la
+  paleta del tablero mantiene la miniatura coherente con el resto de la
+  página sin depender de un archivo nuevo.
+
+### "Sobre el juego": texto propio, no copiado de la captura
+- **Qué:** `.sobre-juego` es un párrafo simple (`max-width: 70ch` para que
+  las líneas no queden demasiado largas de leer), con un texto escrito para
+  este juego puntual, no una copia literal de Figma (la captura estaba muy
+  chica para transcribir bien).
+- **Por qué:** describe la mecánica real que ya está definida (saltos en
+  línea recta, 33 nodos, objetivo de terminar con el mínimo posible),
+  consistente con el resto de la página en vez de un texto genérico.
+
+### Galería con gradientes de la paleta del tablero, `aria-hidden` por ahora
+- **Qué:** `.galeria__grid` tiene 6 `<li>` sin contenido, cada uno con un
+  `linear-gradient` distinto combinando los tokens `--tablero-*` (y algún
+  color del sitio, como `--acento`/`--primario`, para variar más). Toda la
+  lista tiene `aria-hidden="true"`.
+- **Por qué:** decisión de Fran y Agus — todavía no hay capturas reales del
+  juego (se resuelven en otra parte), y unos gradientes lisos sin `alt` no
+  aportan nada a quien usa lector de pantalla; mejor ocultarlos que anunciar
+  6 elementos vacíos. Cuando haya fotos reales con su `alt` correspondiente,
+  se saca el `aria-hidden`.
+
+### Reseñas de Comunidad: 3 distintas, no la misma repetida
+- **Qué:** 3 reseñas con nombre, fecha, puntaje y largo de texto distintos
+  (una larga, una media, una cortita), en vez de copiar la captura de Figma
+  que repite el mismo texto de "Malena F." tres veces.
+- **Por qué:** es justo el tipo de dato repetido/genérico que el enunciado
+  pide evitar. Los avatares son un círculo con iniciales (sin foto real
+  todavía), con un color distinto por reseña.
+- **Estrellas con caracteres Unicode, no íconos:** `★`/`☆` como texto,
+  `aria-hidden` en el visual y un `sr-only` al lado con el puntaje en
+  palabras ("Puntaje: 5 de 5"). Evita depender de un ícono "relleno" que no
+  existe en la hoja de Phosphor que carga el proyecto (ver el bug que le
+  marcamos a Agus en el PR de la Home: la hoja `regular` no trae `-fill`).
+
+### "Dejá tu reseña": el puntaje es CSS puro (radios + labels), sin JS
+- **Qué:** `.estrellas` es un `<fieldset>` con 5 `<input type="radio">` en
+  orden inverso (5,4,3,2,1) + sus `<label>`, dado vuelta visualmente con
+  `flex-direction: row-reverse`. Con `input:checked ~ label` y
+  `label:hover ~ label` (combinador de hermanos siguientes) se pinta la
+  estrella elegida y todas las anteriores en pantalla.
+- **Por qué:** es el truco clásico de "rating con radios": nace accesible
+  (son inputs de verdad, con foco y selección por teclado) y no hace falta
+  ninguna línea de JS. El input queda invisible (`opacity: 0`) pero sigue
+  ocupando su lugar, así que el foco de teclado se redirige a su label con
+  `input:focus-visible + label`.
+- **Sin eco numérico ("4/5") al lado:** en Figma aparece, pero como no hay
+  JS enganchado al puntaje, ese número quedaría desactualizado en cuanto
+  alguien tocara otra estrella. Mejor no mostrarlo que mostrar uno
+  incorrecto.
+
+### Contador de caracteres y botón "Copiar", en archivos propios
+- **Qué:** `js/resena.js` (contador del textarea, actualiza un `<span>` en
+  cada `input`) y `js/compartir.js` (copia el link con
+  `navigator.clipboard.writeText` y cambia el texto del botón a "¡Copiado!"
+  por 2 segundos) son archivos nuevos, no se sumaron a `juego.js`.
+- **Por qué:** `juego.js` es la lógica del tablero (una responsabilidad
+  puntual); estos dos son widgets sueltos de la página, sin relación entre
+  sí ni con el juego. Separarlos sigue el mismo criterio que ya usa el
+  proyecto en la Home (`carousel.js`, `home.js`, `menu.js` aparte).
+
+### Compartir sin backend real
+- **Qué:** los botones de redes sociales y "Mensaje" son placeholders
+  (`href="#"`, sin navegar a ningún lado todavía). El único que hace algo
+  real es "Copiar".
+- **Por qué:** no hay integraciones reales armadas (compartir a redes,
+  mensajería interna) — se deja para cuando exista esa lógica. "Copiar" sí
+  se resolvió porque es una sola función del navegador (`clipboard`), sin
+  ninguna dependencia externa.
+
+### Comunidad y "Dejá tu reseña" reusan el layout de 2 columnas
+- **Qué:** el mismo `.juego-layout` que ya arma tablero + panel lateral se
+  reusa para esta fila: Comunidad (columna ancha) y "Dejá tu reseña"
+  (columna de 320px), uno al lado del otro.
+- **Por qué:** confirmado con la captura de Figma que pasó Fran — es
+  exactamente el mismo layout de 2 columnas, así que reusar la clase evita
+  duplicar el mismo CSS con otro nombre.
+
+### "Enlaces relacionados" se sacó de la página
+- **Qué:** se sacó por completo la sección con los 4 links (WardenDevs,
+  Sitio Oficial, Red Prisma, Ajedrez) que estaba debajo de Compartir, junto
+  con su CSS (`.enlaces-relacionados*`).
+- **Por qué:** decisión de Fran — no la vamos a usar. No hay ninguna de esas
+  páginas/juegos armada todavía y no está en el plan sumarlas.
+
+### Números de la ficha ("Jugando ahora", "Tu récord", rating) simulados
+- **Qué:** 4.7 de rating, 1.284 reseñas, 8.412 jugando ahora, 3 nodos de
+  récord — son valores fijos en el HTML, no vienen de ningún lado.
+- **Por qué:** Neon Circuit es nuestro propio juego (no viene de la API de
+  la cátedra, que trae juegos de terceros para el catálogo de la Home). No
+  hay backend de puntajes ni de sesiones concurrentes todavía (`js/api.js`,
+  ítem "Plus" pendiente), así que son simulados a propósito, mismo criterio
+  que ya se usó para "Partida guardada" y el estado de sesión del header.
+
+---
+
 ## Componentes
 
 ### Cards que se elevan sobre las vecinas en hover
@@ -340,5 +545,5 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   confirmar contra la captura de Figma cuando la tengamos).
 - Qué contenido lleva el menú hamburguesa, y cómo unificarlo visualmente con el
   menú de usuario (hoy son muy distintos entre sí).
-- Qué es la "galería" de la página del juego (falta ver la captura de Figma;
-  hoy el tablero y la galería no están construidos todavía).
+- Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
+  estimados a ojo de la captura de Figma, falta compararlos en pantalla.

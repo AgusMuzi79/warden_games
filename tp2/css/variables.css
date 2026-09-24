@@ -31,6 +31,15 @@
   --sombra-elevacion: rgba(0, 0, 0, 0.35);
   --resplandor-error: rgba(248, 113, 113, 0.55);
 
+  /* ---- Color: tablero (página del juego) ----
+     Paleta propia del tablero de Peg Solitaire / "Neon Circuit", separada
+     a propósito del violeta/celeste del resto del sitio (ver DECISIONES.md,
+     "Página del juego"). Pendiente de ajustar a ojo contra Figma. */
+  --tablero-activo:        #FF6A1A;
+  --tablero-descargado:    #0B0710;
+  --tablero-seleccionado:  #3FE8E4;
+  --tablero-destino:       #B79CF0;
+
   /* ---- Espaciado ---- */
   --espaciado-1:      4px;
   --espaciado-2:      8px;
