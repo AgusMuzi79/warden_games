@@ -85,6 +85,7 @@
 }
 
 .auth-switch__btn {
+  appearance: none;
   flex: 1;
   min-height: var(--control-alto);
   padding: var(--espaciado-2);
@@ -153,6 +154,7 @@
 /* Área táctil de 44px (--control-alto) aunque el ícono sea de 20px,
    igual que .header__icon-btn en header.css. */
 .toggle-pass {
+  appearance: none;
   position: absolute;
   top: 50%;
   right: 0;
