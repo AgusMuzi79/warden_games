@@ -76,15 +76,16 @@ Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
   frente al centro; las de los costados se corren, se achican y giran en 3D
   (`perspective` + `rotateY` + `translateZ`), como si se alejaran hacia el
   fondo — el clásico carrusel "coverflow" (tipo iTunes viejo).
-- Autoplay cada 6s, dots para navegar manual. Se pausa con hover o con foco
-  de teclado (sin botón de pausa visible). Es la única animación de
-  transición entre imágenes de la Home (junto con la galería del juego en
-  la etapa 4) — las filas de categorías/recomendados no la llevan.
+- Autoplay cada 6s, dots para navegar manual, y también se puede clickear
+  cualquier card visible del costado para saltar directo a ella. Se pausa
+  con hover o con foco de teclado (sin botón de pausa visible). Es la única
+  animación de transición entre imágenes de la Home (junto con la galería
+  del juego en la etapa 4) — las filas de categorías/recomendados no la
+  llevan.
 - Sin badge de precio todavía (no hay sistema de compras armado, ver "Plus").
-- Sin click en las cards del costado para saltar a ellas: se probó, pero el
-  hit-testing de Chrome no coincide con la posición visual de una card
-  rotada en 3D (limitación real del navegador). Los dots son la forma de
-  navegar, confiable y accesible.
+- Las cards no se recortan a los costados (`.banner__viewport` sin
+  `overflow: hidden`) y las imágenes van con `background-size: cover`
+  (llenan la card, sin dejar franjas vacías).
 - (Hubo dos versiones anteriores que no se parecían a la referencia: un wipe
   de `clip-path` en un solo slide, y después slides en paralelogramo plano
   con `clip-path` diagonal — ninguna de las dos es en realidad "3D". Se

@@ -15,6 +15,7 @@ const DURACION_AUTOPLAY_MS = 6000;
 const CANTIDAD_DESTACADOS = 5;
 
 // Cuánto se corre cada card según su distancia (offset) a la activa.
+const PERSPECTIVE_PX = 1400;  // va en el transform de cada card, no en un ancestro (ver DECISIONES.md)
 const PASO_X_PORCENTAJE = 60; // desplazamiento horizontal por posición
 const PASO_Z_PX = 160;        // cuánto se manda para atrás en Z por posición
 const ROTACION_GRADOS = 35;   // cuánto gira en Y cada card corrida
@@ -63,13 +64,17 @@ function actualizarPosiciones() {
     if (distancia > MAX_VISIBLES) {
       slide.style.opacity = '0';
       slide.style.zIndex = '0';
+      slide.style.pointerEvents = 'none';
       return;
     }
+
+    slide.style.pointerEvents = 'auto';
 
     const escala = 1 - distancia * ACHIQUE_POR_POSICION;
     const opacidad = distancia === 0 ? 1 : Math.max(OPACIDAD_MINIMA, 1 - distancia * 0.35);
 
     slide.style.transform = `
+      perspective(${PERSPECTIVE_PX}px)
       translateX(${offset * PASO_X_PORCENTAJE}%)
       translateZ(${-distancia * PASO_Z_PX}px)
       rotateY(${-direccion * ROTACION_GRADOS}deg)
@@ -80,10 +85,11 @@ function actualizarPosiciones() {
   });
 }
 
-function crearSlide(juego) {
+function crearSlide(juego, index) {
   const slide = document.createElement('div');
   slide.className = 'banner__slide';
   slide.style.backgroundImage = `url("${juego.background_image}")`;
+  slide.addEventListener('click', () => irA(index));
 
   const etiqueta = document.createElement('span');
   etiqueta.className = 'banner__etiqueta';
@@ -160,7 +166,7 @@ function renderizarBanner(juegos) {
   dotsContenedor.innerHTML = '';
   indiceActivo = 0;
 
-  slides = destacados.map((juego) => crearSlide(juego));
+  slides = destacados.map((juego, i) => crearSlide(juego, i));
   dots = destacados.map((_, i) => crearDot(i, i === 0));
 
   slides.forEach((slide) => escena.append(slide));

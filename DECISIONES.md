@@ -323,20 +323,36 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   hay ahí (una selección curada, no un saludo genérico).
 
 ### Carrusel coverflow: perspective + rotateY + translateZ, no un recorte plano
-- **Qué:** `.banner__viewport` tiene `perspective: 1400px` y `.banner__escena`
-  (adentro) tiene `transform-style: preserve-3d`. Cada card
-  (`.banner__slide`) es un cuadrado centrado (`position: absolute; left:50%;
-  margin-left:-31%`) al que `carousel.js` le calcula un `transform` en JS
-  según su distancia (offset) a la activa: `translateX` para correrla al
-  costado, `translateZ` negativo para mandarla "para atrás", `rotateY` para
-  que gire como si se alejara, y `scale` para achicarla. La activa
-  (offset 0) queda sin transform, de frente.
+- **Qué:** cada card (`.banner__slide`) es un cuadrado centrado
+  (`position: absolute; left:50%; margin-left:-31%`) al que `carousel.js` le
+  calcula un `transform` en JS según su distancia (offset) a la activa:
+  `perspective()` primero (ver más abajo por qué va ahí y no en un
+  ancestro), `translateX` para correrla al costado, `translateZ` negativo
+  para mandarla "para atrás", `rotateY` para que gire como si se alejara, y
+  `scale` para achicarla. La activa (offset 0) queda sin esas
+  transformaciones, de frente.
 - **Por qué:** las dos versiones anteriores (wipe con `clip-path` y después
   slides en paralelogramo con `clip-path` diagonal) eran técnicas 2D — un
   recorte, no una rotación real. La referencia es un carrusel "coverflow"
   (tipo iTunes viejo): eso es específicamente perspectiva 3D, no se puede
   simular bien con `clip-path`. Con `perspective`/`rotateY`/`translateZ` se
   arma la técnica correcta en vez de aproximarla.
+- **`perspective()` en el `transform` de cada card, no en `.banner__viewport`:**
+  la primera versión ponía `perspective: 1400px` en `.banner__viewport` (un
+  ancestro) y `transform-style: preserve-3d` en `.banner__escena`. Visualmente
+  andaba bien, pero el hit-testing de clicks quedaba roto: `elementFromPoint`
+  y los clicks reales no coincidían con la posición visual de una card
+  rotada — es una limitación conocida de Chrome con `perspective` heredada
+  de un ancestro en vez de puesta en el propio elemento transformado. Se
+  resolvió pasando `perspective()` a ser la primera función dentro del
+  `transform` de cada `.banner__slide`, sacando `perspective` del viewport y
+  `preserve-3d` de la escena. El resultado visual es prácticamente el mismo
+  (cada card arma su propio punto de fuga en vez de compartir uno), pero los
+  clicks ya coinciden con lo que se ve.
+- **`.banner__viewport` sin `overflow: hidden`:** las cards de los costados
+  se ven completas, no recortadas por los bordes del contenedor. No hace
+  falta recortar nada verticalmente tampoco: todas las cards miden el 100%
+  del alto del viewport, no hay overflow en ese eje.
 - **`offsetCircular()`:** la distancia de cada card a la activa se calcula
   con ciclo corto (si hay 5 cards y la activa es la 0, la card 4 está a
   distancia -1, no -4), para que ir de la última a la primera gire para el
@@ -349,14 +365,12 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   están en `opacity: 0` por default y solo se muestran en
   `.banner__slide--activo`, para no mezclar el texto de la activa con el de
   las que están giradas al costado.
-- **Descartado — click en las cards del costado para saltar a ellas:** se
-  probó (cada card llamaba a `irA()` con su propio índice, como los dots),
-  pero el hit-testing de Chrome no coincide con la posición visual de una
-  card rotada en 3D cuando el `perspective` está en un ancestro y no en el
-  padre inmediato — es una limitación real del navegador, no algo del CSS
-  que se pueda ajustar. Se sacó en vez de dejar un click que a veces
-  respondía y a veces no; los dots ya cubren la navegación de forma
-  confiable y accesible.
+- **Click en cualquier card visible para saltar a ella:** cada card llama a
+  `irA()` con su propio índice al clickearla, igual que los dots. No hace
+  falta que sea la inmediata siguiente — clickear una card 2 posiciones más
+  allá salta directo ahí. Antes de resolver el problema de hit-testing (ver
+  arriba) esto se había sacado por no ser confiable; ahora que el click
+  coincide con lo que se ve, se volvió a agregar.
 
 ### Se eligen los 5 juegos mejor puntuados como "Destacados"
 - **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma
