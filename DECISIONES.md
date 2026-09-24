@@ -365,12 +365,25 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   están en `opacity: 0` por default y solo se muestran en
   `.banner__slide--activo`, para no mezclar el texto de la activa con el de
   las que están giradas al costado.
+- **`.banner__nombre` en `--font-ui`, no `--font-display` (bug marcado por
+  Fran en el PR #3):** es un `<p>`, no un título — se había quedado con
+  Orbitron de un copy/paste. Mismo problema de "demasiado Orbitron" que ya
+  se corrigió dos veces antes, esta vez lo agarró una revisión en vez de
+  una corrección del profesor.
 - **Click en cualquier card visible para saltar a ella:** cada card llama a
   `irA()` con su propio índice al clickearla, igual que los dots. No hace
   falta que sea la inmediata siguiente — clickear una card 2 posiciones más
   allá salta directo ahí. Antes de resolver el problema de hit-testing (ver
   arriba) esto se había sacado por no ser confiable; ahora que el click
   coincide con lo que se ve, se volvió a agregar.
+- **Las cards no son alcanzables por teclado, solo con mouse (marcado por
+  Fran en el PR #3, no se cambia):** clickear una card del costado es un
+  atajo con mouse; no tienen `tabindex` ni rol de botón. Es intencional, no
+  un olvido: los dots ya cubren la navegación completa por teclado, y
+  convertir cada card en su propio tab-stop metería 5 paradas de Tab extra
+  para algo que los dots ya resuelven — el patrón ARIA de carruseles en
+  general evita eso mismo (los controles de navegación son el tab-stop, no
+  cada slide).
 - **Sin atenuar la opacidad de las cards del costado:** al principio las
   cards a distancia 1-2 bajaban de opacidad (hasta un mínimo de 0.35), para
   que se notara más cuál era la activa. Se sacó al sacar el `overflow:
