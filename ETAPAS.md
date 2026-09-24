@@ -36,20 +36,22 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 
-## ⬜ Etapa 2 — Login: splash de 2 columnas
+## ✅ Etapa 2 — Login: splash de 2 columnas
 
-Archivos: `login.html`, `login.css` (hoy vacío), `js/login.js`.
+Archivos: `login.html`, `login.css`, `js/login.js`.
 
-- Sacar `<header>` y `<footer>` de la página (regla: sin nav ni footer).
-- Sacar los `<h2>` de "Iniciar sesión" / "Registrarse". El `<h1>` pasa a ser el
-  título del panel de marca.
-- Layout de 2 columnas: panel de marca (logo + texto — contenido a definir) +
-  panel con el formulario activo.
-- **Decisión a tomar:** ¿alternar login/registro con tabs, o con un link (usando
-  `.link` de la etapa 1) tipo "¿No tenés cuenta? Registrate"? Propuesta: el
-  link, es más simple.
-- Animación al registrarse correctamente (pide el enunciado del TPE2, no solo
-  la corrección).
+- ✅ Sin `<header>` ni `<footer>` en la página.
+- ✅ `<h1>` como título del panel de marca (ya no hay `<h2>` de "Iniciar
+  sesión"/"Registrarse": los forms se distinguen por el selector de arriba).
+- ✅ Layout de 2 columnas: `.auth-brand` (logo con animación de flotar +
+  "Warden Games" + bajada) y `.auth-panel` (el form activo).
+- ✅ **Decisión tomada:** se alterna con el selector `.auth-switch` (2 botones,
+  el activo relleno de violeta), como en la captura de Figma — no con un link
+  suelto (se probó esa opción primero, pero era redundante contra el selector).
+- ✅ Animación al registrarse correctamente (bloque `.auth-success` con
+  fade + scale).
+
+Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 

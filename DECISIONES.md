@@ -214,6 +214,69 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Login / Registro
+
+### Splash de 2 columnas (Etapa 2)
+- **Qué:** `.auth-shell` parte la pantalla en 2 con CSS grid: `.auth-brand`
+  (logo con una animación de flotar, el `h1` de la página y una bajada) a la
+  izquierda, `.auth-panel` (el `.auth-card` con los forms) a la derecha. Es
+  el único `<main>` de la página; ya no usa el ancho máximo centrado de
+  `base.css`, lo pisa `.auth-shell` con más especificidad.
+- **Por qué:** lo pide `ETAPAS.md`. Al no tener `.header`, la página no tenía
+  ningún lugar para la marca; el panel de marca cumple esa función y de paso
+  resuelve dónde va el `h1` obligatorio de la página.
+- **Contenido del panel de marca:** logo (`assets/img/logo.png`, el mismo de
+  header/footer) + "Warden Games" + una bajada corta. Sin form ni links: es
+  puramente de presentación.
+- **Solo desktop:** sin media queries, porque la regla del proyecto dice que
+  login no necesita mobile first.
+
+### Alternar Crear Cuenta / Ingresar: se volvió al selector de arriba (no el link)
+- **Qué:** `.auth-switch`, un `role="tablist"` de 2 botones (`.auth-switch__btn`,
+  `role="tab"` + `aria-selected` + `aria-controls`) arriba de la card. Cada
+  `<form>` es su `role="tabpanel"` con `aria-labelledby` al botón. Se sacó el
+  link (`.hint-text` + `.link`) que habíamos puesto en su lugar.
+- **Por qué:** es como está en la captura de Figma que pasó Fran — un selector
+  tipo pill, con la opción activa como botón violeta sólido. Tener el link
+  *además* del selector sería redundante (las dos cosas alternan lo mismo),
+  así que se sacó el link en vez de sumar ambos.
+- **Reemplaza una decisión anterior:** habíamos elegido el link porque
+  `ETAPAS.md` lo proponía por más simple y evitaba la semántica de tabs. Se
+  volvió atrás para respetar el diseño real, pero esta vez sí se le puso el
+  ARIA de tabs completo (con lo que ya sabíamos que iba a hacer falta).
+- **Descartado:** dejar el link y el selector juntos, como se ve en la
+  captura — mismo resultado funcional con más código y más texto para
+  mantener y explicar en la defensa.
+
+### Animación de registro exitoso: reemplazar el form por un bloque de éxito
+- **Qué:** al mandar bien el form de registro, `login.js` le pone `hidden` al
+  `<form id="formRegister">` y se lo saca a `<div id="registerSuccess">`, que
+  tiene un ícono de check, un título y un texto. El bloque entra con
+  `@keyframes auth-success-pop` (fade + scale, 0.4s).
+- **Por qué:** el enunciado pide una animación al registrarse correctamente.
+  Reemplazar el form (en vez de superponerle un modal) evita que quede un
+  formulario ya enviado detrás, y comunica con claridad que la acción
+  terminó. `role="status"` en el bloque hace que el lector de pantalla lo
+  anuncie solo, sin mover el foco.
+- **Descartado:** un `alert()` nativo (lo que había antes) no es una animación
+  y además bloquea el hilo; un modal aparte sumaba otro componente para algo
+  que ya tiene su lugar (el mismo espacio del form).
+- **Movimiento reducido:** con `prefers-reduced-motion`, el bloque aparece
+  directo, sin la animación.
+
+### Login y registro exitosos llevan al home
+- **Qué:** si el login pasa la validación, redirige directo a `index.html`
+  (`window.location.href`). Si el registro sale bien, deja ver la animación
+  de éxito 2.5s y recién ahí redirige también a `index.html`.
+- **Por qué:** es el comportamiento esperado en cualquier sitio (entrar o
+  registrarte te lleva adentro). Los 2.5s en el registro son para que la
+  animación se alcance a ver antes de navegar a otra página.
+- **Sin backend real todavía:** como no hay API conectada, "éxito" hoy es
+  "pasó la validación del formulario", no una cuenta real verificada. Eso
+  lo resuelve `js/api.js` (ítem "Plus" pendiente).
+
+---
+
 ## Componentes
 
 ### Cards que se elevan sobre las vecinas en hover
@@ -273,11 +336,9 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 - Hex de `--superficie` (fondo de header y footer).
 - Tipo de transición del carrusel de recomendados.
-- Animación de registro exitoso.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
 - Qué contenido lleva el menú hamburguesa, y cómo unificarlo visualmente con el
   menú de usuario (hoy son muy distintos entre sí).
-- Qué va en el panel de marca del splash de login de 2 columnas.
 - Qué es la "galería" de la página del juego (falta ver la captura de Figma;
   hoy el tablero y la galería no están construidos todavía).
