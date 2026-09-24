@@ -20,7 +20,6 @@ const PASO_X_PORCENTAJE = 60; // desplazamiento horizontal por posición
 const PASO_Z_PX = 160;        // cuánto se manda para atrás en Z por posición
 const ROTACION_GRADOS = 35;   // cuánto gira en Y cada card corrida
 const ACHIQUE_POR_POSICION = 0.14; // cuánto se achica por cada posición de distancia
-const OPACIDAD_MINIMA = 0.35;
 const MAX_VISIBLES = 2; // cuántas cards se ven de cada lado antes de esconderse
 
 const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -71,7 +70,6 @@ function actualizarPosiciones() {
     slide.style.pointerEvents = 'auto';
 
     const escala = 1 - distancia * ACHIQUE_POR_POSICION;
-    const opacidad = distancia === 0 ? 1 : Math.max(OPACIDAD_MINIMA, 1 - distancia * 0.35);
 
     slide.style.transform = `
       perspective(${PERSPECTIVE_PX}px)
@@ -80,7 +78,7 @@ function actualizarPosiciones() {
       rotateY(${-direccion * ROTACION_GRADOS}deg)
       scale(${escala})
     `;
-    slide.style.opacity = String(opacidad);
+    slide.style.opacity = '1';
     slide.style.zIndex = String(100 - distancia);
   });
 }

@@ -371,6 +371,12 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   allá salta directo ahí. Antes de resolver el problema de hit-testing (ver
   arriba) esto se había sacado por no ser confiable; ahora que el click
   coincide con lo que se ve, se volvió a agregar.
+- **Sin atenuar la opacidad de las cards del costado:** al principio las
+  cards a distancia 1-2 bajaban de opacidad (hasta un mínimo de 0.35), para
+  que se notara más cuál era la activa. Se sacó al sacar el `overflow:
+  hidden` del viewport: ahora que se ve la imagen completa de cada card (no
+  un pedazo recortado), ya se distingue bien cuál es cuál solo con el
+  tamaño, el giro y la posición — no hace falta además oscurecerlas.
 
 ### Se eligen los 5 juegos mejor puntuados como "Destacados"
 - **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma
