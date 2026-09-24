@@ -244,19 +244,20 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   no depender de assets — dejó de hacer falta en cuanto encontramos que la API
   ya provee portadas reales y con licencia para este uso académico.
 
-### Filas por categoría (invitado) o "Recomendados" (con sesión), no un catálogo único
+### Con sesión: "Recomendados" arriba, categorías igual que a un invitado abajo
 - **Qué:** se sacó la grilla única de "Recomendados" de la primera versión de
-  la 3a. Ahora `#filas-juegos` se llena distinto según el estado del avatar
-  del header (`.header__avatar[data-sesion="usuario"]` oculto o no):
-  - **Invitado:** una fila por cada categoría fija (`CATEGORIAS` en `home.js`:
-    Acción, Shooters, RPG, Aventura), filtrando el catálogo por
-    `genres[].name`.
-  - **Con sesión:** una sola fila "Recomendados", filtrando el catálogo por
-    el género de un juego que simulamos que la persona ya jugó
-    (`JUEGO_JUGADO` en `home.js`).
-- **Por qué:** así lo define el diseño de la Home: el invitado explora por
-  categoría, quien tiene cuenta ve algo personalizado. No tiene sentido
-  mostrar "Recomendados" a alguien de quien no sabemos nada.
+  la 3a. `#filas-juegos` arma las categorías fijas siempre (`CATEGORIAS` en
+  `home.js`: Acción, Shooters, RPG, Aventura, filtrando el catálogo por
+  `genres[].name`), y si hay sesión (`.header__avatar[data-sesion="usuario"]`
+  visible) le agrega arriba de todo una fila "Recomendados", filtrando por
+  el género de un juego que simulamos que la persona ya jugó
+  (`JUEGO_JUGADO` en `home.js`).
+- **Por qué:** al principio "Recomendados" reemplazaba a las categorías por
+  completo con sesión — pero tener cuenta no debería significar perder la
+  forma de explorar por categoría, solo sumarle algo personalizado arriba.
+  Es lo mismo que ya lista el menú hamburguesa (mismas 4 categorías), así
+  que ahora Home y hamburguesa muestran el mismo universo de categorías
+  sin importar si hay sesión o no.
 - **`JUEGO_JUGADO` con género explícito, no `genres[0]`:** al principio se
   tomaba el primer género del juego "jugado" para buscar similares, pero el
   orden de `genres[]` en la API no es confiable (ej. "The Witcher 3" trae
@@ -271,12 +272,36 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ### Cada fila es un carrusel de scroll nativo, no el banner animado
 - **Qué:** `.carrusel__pista` es un `flex` con `overflow-x: auto` y
-  `scroll-snap`; se desplaza con scroll horizontal nativo (mouse, trackpad,
-  scrollbar), sin JS de por medio.
-- **Por qué:** la animación con transición (el `clip-path` en diagonal, ver
-  banner "Destacados" más abajo) queda reservada para ese banner. Estas filas
-  de categorías/recomendados son "carruseles normales, sin animación" por
-  diseño, y el scroll nativo ya cumple con "que se desplace".
+  `scroll-snap`; se desplaza con scroll (trackpad, arrastrando con mouse,
+  flechas, touch nativo en mobile), sin transición animada.
+- **Por qué:** la animación con transición (el coverflow, ver banner
+  "Destacados" más abajo) queda reservada para ese banner. Estas filas de
+  categorías/recomendados son "carruseles normales, sin animación" por
+  diseño.
+
+### Flechas + arrastre con mouse (`js/carrusel-fila.js`), scrollbar oculta
+- **Qué:** cada fila suma una cabecera (`.carrusel__cabecera`) con el título
+  a la izquierda y dos flechas a la derecha (`.carrusel__flecha`), que
+  desplazan la pista un 90% de su ancho visible (`scrollBy` con
+  `behavior: smooth`) y se deshabilitan solas al llegar a una punta. La
+  pista también se puede arrastrar con el mouse (`pointerdown` +
+  `pointermove`, solo para `pointerType: 'mouse'` — el touch ya scrollea
+  nativo). La scrollbar del navegador se oculta (`scrollbar-width: none` +
+  `::-webkit-scrollbar { display: none }`).
+- **Por qué:** en desktop no hay forma táctil de arrastrar como en mobile;
+  el mouse-drag lo simula. Las flechas son la alternativa para quien no
+  quiere arrastrar (o navega con mouse pero prefiere clickear). La
+  scrollbar nativa quedaba fea y era redundante con flechas + arrastre.
+- **`.game-card:hover` (scale 1.06) se recortaba contra el borde de la
+  fila:** `overflow-x: auto` obliga, por spec de CSS, a que `overflow-y`
+  también recorte aunque no se lo pida explícitamente — así que el hover
+  que agranda la card se cortaba arriba/abajo. Se le agregó `padding: 12px`
+  a `.carrusel__pista` (deja lugar para el crecimiento) compensado con
+  `margin: -12px` (para que el layout no se corra).
+- **Solo mouse arrastra, no touch:** en touch ya funciona el scroll nativo
+  del navegador; agregar la misma lógica ahí lo duplicaría y podría pelear
+  con el scroll nativo (movimiento doble). Se filtra por
+  `evento.pointerType === 'mouse'`.
 
 ### Cards horizontales (16:9), no verticales
 - **Qué:** `.game-card__image` usa `aspect-ratio: 16 / 9`.

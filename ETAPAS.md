@@ -58,20 +58,22 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 ## ✅ Etapa 3 — Home (a cargo de Agus)
 
 La Home queda con: banner "Destacados" arriba (carrusel coverflow), y
-abajo, según el estado del avatar del header (`data-sesion="usuario"`
-oculto o no): filas por categoría para invitado, o una fila "Recomendados"
-para quien tiene sesión. El menú hamburguesa y el de cuenta, en el header
-de todas las páginas, comparten el mismo estilo de dropdown.
+abajo las filas por categoría fija (siempre), más una fila "Recomendados"
+arriba de todo si hay sesión (`data-sesion="usuario"` visible en el
+header). El menú hamburguesa y el de cuenta, en el header de todas las
+páginas, comparten el mismo estilo de dropdown.
 
 ### ✅ 3a. Catálogo real desde la API + filas por categoría/recomendados
-Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
+Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`,
+`js/carrusel-fila.js` (nuevo).
 - `api.js` pide `https://vj.interfaces.jima.com.ar/api` (la API de
   jimartinezabadias, ~80 juegos reales con nombre/imagen/rating/género).
 - `home.js` arma una fila por categoría fija (Acción, Shooters, RPG,
-  Aventura) para invitado, o una fila "Recomendados" (simulada por género)
-  si `data-sesion="usuario"` está visible en el header. Cards horizontales
-  (16:9), cada fila con scroll nativo (sin animación — eso es solo del
-  banner). Datos de respaldo hardcodeados si la API falla.
+  Aventura) siempre, y le suma "Recomendados" (simulada por género) arriba
+  de todo si `data-sesion="usuario"` está visible en el header. Cards
+  horizontales (16:9), cada fila navegable con scroll nativo, arrastrando
+  con mouse o con flechas (`carrusel-fila.js`) — sin transición animada,
+  eso es solo del banner. Datos de respaldo hardcodeados si la API falla.
 - `<h2>` propio por cada fila para no saltear niveles de título.
 - (La primera versión de la 3a era una única grilla "Recomendados" para
   todos, con cards verticales — se descartó, ver `DECISIONES.md`.)

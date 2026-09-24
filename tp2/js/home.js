@@ -69,11 +69,32 @@ function crearFila(titulo, juegos) {
   h2.id = idTitulo;
   h2.textContent = titulo;
 
+  const flechaIzquierda = document.createElement('button');
+  flechaIzquierda.type = 'button';
+  flechaIzquierda.className = 'carrusel__flecha';
+  flechaIzquierda.setAttribute('aria-label', `Ver anteriores en ${titulo}`);
+  flechaIzquierda.innerHTML = '<i class="ph ph-caret-left" aria-hidden="true"></i>';
+
+  const flechaDerecha = document.createElement('button');
+  flechaDerecha.type = 'button';
+  flechaDerecha.className = 'carrusel__flecha';
+  flechaDerecha.setAttribute('aria-label', `Ver más en ${titulo}`);
+  flechaDerecha.innerHTML = '<i class="ph ph-caret-right" aria-hidden="true"></i>';
+
+  const flechas = document.createElement('div');
+  flechas.className = 'carrusel__flechas';
+  flechas.append(flechaIzquierda, flechaDerecha);
+
+  const cabecera = document.createElement('div');
+  cabecera.className = 'carrusel__cabecera';
+  cabecera.append(h2, flechas);
+
   const pista = document.createElement('div');
   pista.className = 'carrusel__pista';
   juegos.slice(0, 10).forEach((juego) => pista.append(crearCard(juego)));
 
-  fila.append(h2, pista);
+  fila.append(cabecera, pista);
+  activarCarrusel(pista, flechaIzquierda, flechaDerecha);
   return fila;
 }
 
@@ -101,11 +122,12 @@ function renderizarCategorias(juegos) {
 
 function renderizarFilas(juegos) {
   contenedor.innerHTML = '';
+  // Con sesión: "Recomendados" arriba, y las categorías igual que a un
+  // invitado debajo. Sin sesión: solo las categorías.
   if (haySesionIniciada()) {
     renderizarRecomendados(juegos);
-  } else {
-    renderizarCategorias(juegos);
   }
+  renderizarCategorias(juegos);
 }
 
 obtenerJuegos()
