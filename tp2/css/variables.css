@@ -39,6 +39,7 @@
   --tablero-descargado:    #0B0710;
   --tablero-seleccionado:  #3FE8E4;
   --tablero-destino:       #B79CF0;
+  --tablero-grilla:        rgba(155, 75, 221, 0.15);
 
   /* ---- Espaciado ---- */
   --espaciado-1:      4px;

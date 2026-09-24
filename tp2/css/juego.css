@@ -48,28 +48,57 @@
    en js/juego.js.
    ============================================================ */
 .tablero {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   margin-top: var(--espaciado-8);
-  padding: var(--espaciado-8) var(--espaciado-6) var(--espaciado-6);
   border-radius: var(--radio-xl);
+  /* La cabecera es de otro color; sin esto, se saldría de las esquinas
+     redondeadas de la card en vez de seguirlas. */
+  overflow: hidden;
   background: var(--superficie);
+}
+
+/* Franja de cabecera, de un violeta más claro que el cuerpo — así se ve en
+   Figma, no es la etiqueta flotando sola sobre la grilla. */
+.tablero__cabecera {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: var(--espaciado-3) 0;
+  background: var(--primario-o1);
+}
+
+/* flex + justify-content: center reparte el espacio de sobra (cuando la
+   card queda más alta que el grid, para igualar al panel lateral) arriba y
+   abajo del grid+leyenda, en vez de dejarlo todo apilado como aire al
+   final de la card. */
+.tablero__cuerpo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--espaciado-6);
+  /* Grilla tenue de fondo (como el "papel cuadriculado" de Figma). El
+     background-image respeta el border-radius de .tablero solo, así que
+     no hace falta repetirlo acá. */
+  background-image:
+    linear-gradient(var(--tablero-grilla) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tablero-grilla) 1px, transparent 1px);
+  background-size: 28px 28px;
 }
 
 /* Etiqueta placeholder del mock de Figma (ahí decía "Botón", sin función
    definida todavía). En vez de un <button> sin ninguna acción real, es un
    rótulo fijo con el nombre del juego. */
 .tablero__etiqueta {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translate(-50%, -50%);
   margin: 0;
-  padding: var(--espaciado-1) var(--espaciado-4);
-  border: 1px solid var(--acento);
-  border-radius: var(--radio-md);
+  padding: var(--espaciado-2) var(--espaciado-6);
+  border: 2px solid var(--acento);
+  border-radius: 999px;
   background: var(--fondo);
   color: var(--acento);
   font: 600 14px/1 var(--font-ui);
+  box-shadow: 0 0 8px var(--acento);
 }
 
 /* ---------- Grid de posiciones (parte 2) ----------
@@ -78,16 +107,21 @@
    celda; acá solo el tamaño/color de cada estado. */
 .tablero__grid {
   display: grid;
-  grid-template-columns: repeat(7, 44px);
-  grid-template-rows: repeat(7, 44px);
-  gap: var(--espaciado-2);
+  grid-template-columns: repeat(7, 56px);
+  grid-template-rows: repeat(7, 56px);
+  /* row-gap y column-gap por separado (no "gap" a secas): más separación
+     entre columnas para ocupar más ancho, sin agrandar la ficha ni tocar
+     el alto, que ya estaba bien. */
+  row-gap: var(--espaciado-3);
+  column-gap: var(--espaciado-8);
   justify-content: center;
   margin: var(--espaciado-6) 0;
 }
 
 .tablero__hueco {
-  width: 44px;
-  height: 44px;
+  position: relative;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
 }
 
@@ -96,21 +130,46 @@
   visibility: hidden;
 }
 
-.tablero__hueco--activo {
-  border: 3px dashed var(--tablero-activo);
-  box-shadow: 0 0 10px var(--tablero-activo);
+/* 3 anillos concéntricos (sólido afuera, punteado en el medio, sólido
+   adentro) sobre un fondo negro (el mismo que "descargado"): así se ve en
+   Figma, no transparente mostrando la grilla de atrás. --color-ficha evita
+   repetir el color de cada estado en los 3 anillos y el resplandor. */
+.tablero__hueco--activo,
+.tablero__hueco--seleccionado {
+  background: var(--tablero-descargado);
+  border: 2px solid var(--color-ficha);
+  box-shadow: 0 0 8px var(--color-ficha);
 }
+
+/* Anillo punteado, en el medio de la banda entre el aro de afuera y el de adentro. */
+.tablero__hueco--activo::before,
+.tablero__hueco--seleccionado::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 2px dashed var(--color-ficha);
+  border-radius: 50%;
+}
+
+/* Anillo sólido interno, chico: deja un hueco negro bien visible en el centro. */
+.tablero__hueco--activo::after,
+.tablero__hueco--seleccionado::after {
+  content: "";
+  position: absolute;
+  inset: 17px;
+  border: 2px solid var(--color-ficha);
+  border-radius: 50%;
+}
+
+.tablero__hueco--activo { --color-ficha: var(--tablero-activo); }
+.tablero__hueco--seleccionado { --color-ficha: var(--tablero-seleccionado); }
 
 .tablero__hueco--descargado {
   background: var(--tablero-descargado);
 }
 
-.tablero__hueco--seleccionado {
-  border: 3px dashed var(--tablero-seleccionado);
-  box-shadow: 0 0 10px var(--tablero-seleccionado);
-}
-
 .tablero__hueco--destino {
+  background: var(--tablero-descargado);
   border: 2px solid var(--tablero-destino);
 }
 
@@ -123,7 +182,9 @@
   padding-top: var(--espaciado-4);
   border-top: 1px solid var(--primario-o1);
   color: var(--primario-c1);
-  font: 500 13px/1 var(--font-ui);
+  font: 600 12px/1 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .tablero__leyenda li {
@@ -133,27 +194,50 @@
 }
 
 .tablero__muestra {
+  position: relative;
   display: inline-block;
   width: 16px;
   height: 16px;
   border-radius: 50%;
 }
 
-.tablero__muestra--activo {
-  border: 2px dashed var(--tablero-activo);
+/* Mismos 3 anillos que las fichas del tablero (parte 2, arriba), sobre el
+   mismo fondo negro: son el mismo dibujo, no uno simplificado. */
+.tablero__muestra--activo,
+.tablero__muestra--seleccionado {
+  background: var(--tablero-descargado);
+  border: 1.5px solid var(--color-ficha);
 }
+
+.tablero__muestra--activo::before,
+.tablero__muestra--seleccionado::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px dashed var(--color-ficha);
+  border-radius: 50%;
+}
+
+.tablero__muestra--activo::after,
+.tablero__muestra--seleccionado::after {
+  content: "";
+  position: absolute;
+  inset: 4.5px;
+  border: 1px solid var(--color-ficha);
+  border-radius: 50%;
+}
+
+.tablero__muestra--activo { --color-ficha: var(--tablero-activo); }
+.tablero__muestra--seleccionado { --color-ficha: var(--tablero-seleccionado); }
 
 .tablero__muestra--descargado {
   background: var(--tablero-descargado);
   border: 1px solid var(--primario-o1);
 }
 
-.tablero__muestra--seleccionado {
-  border: 2px dashed var(--tablero-seleccionado);
-}
-
 .tablero__muestra--destino {
-  border: 2px solid var(--tablero-destino);
+  background: var(--tablero-descargado);
+  border: 1.5px solid var(--tablero-destino);
 }
 
 .tablero__leyenda-salto i {
@@ -168,7 +252,9 @@
 .juego-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
-  align-items: start;
+  /* stretch (no start): así el tablero llega hasta abajo de Ayuda/Compartir,
+     en vez de quedar más corto que el panel lateral. */
+  align-items: stretch;
   gap: var(--espaciado-6);
   margin-top: var(--espaciado-6);
 }
@@ -177,6 +263,13 @@
   display: flex;
   flex-direction: column;
   gap: var(--espaciado-8);
+}
+
+/* El tablero absorbe el espacio de sobra para que la columna llegue a la
+   misma altura que el panel lateral; "Sobre el juego" y la Galería miden
+   lo que necesitan, no más. */
+.juego-layout__principal .tablero {
+  flex: 1;
 }
 
 /* Ya suman su propio espacio con el gap de arriba: sin esto, quedarían

@@ -49,13 +49,6 @@
       </ol>
     </nav>
 
-    <h1>Neon Circuit</h1>
-
-    <!-- TODO: controles del juego (reiniciar, deshacer, puntaje) -->
-    <section id="controls" aria-label="Controles del juego">
-      <button type="button" class="btn btn--secundario" id="btn-reiniciar">Reiniciar</button>
-    </section>
-
     <!-- Columna de contenido + panel lateral, una al lado de la otra
          (solo desktop). -->
     <div class="juego-layout">
@@ -68,28 +61,35 @@
              placeholder de Figma ("Botón", sin función definida todavía).
              Parte 2: grid de 33 fichas (js/juego.js) + leyenda. -->
         <section id="board" class="tablero" aria-label="Tablero de Peg Solitaire">
-          <p class="tablero__etiqueta">Neon Circuit</p>
 
-          <!-- Grid generado por js/juego.js (33 posiciones). aria-hidden porque
-               todavía no hay lógica de movimientos ni navegación por teclado
-               (parte 2 de la Etapa 4, solo visual) — se saca cuando eso exista. -->
-          <div class="tablero__grid" id="tablero-grid" aria-hidden="true"></div>
+          <!-- Cabecera de la card: franja de otro color con el placeholder
+               "Botón" de Figma (sin función definida todavía, ver DECISIONES.md). -->
+          <div class="tablero__cabecera">
+            <p class="tablero__etiqueta">Neon Circuit</p>
+          </div>
 
-          <!-- Leyenda de símbolos: las muestras de color son decorativas
-               (aria-hidden), el texto de al lado ya describe cada estado. -->
-          <ul class="tablero__leyenda">
-            <li><span class="tablero__muestra tablero__muestra--activo" aria-hidden="true"></span>Nodo activo</li>
-            <li><span class="tablero__muestra tablero__muestra--descargado" aria-hidden="true"></span>Descargado</li>
-            <li><span class="tablero__muestra tablero__muestra--seleccionado" aria-hidden="true"></span>Seleccionado</li>
-            <li><span class="tablero__muestra tablero__muestra--destino" aria-hidden="true"></span>Destino</li>
-            <li class="tablero__leyenda-salto">
-              Salto válido:
-              <i class="ph ph-arrow-up" aria-hidden="true"></i>
-              <i class="ph ph-arrow-down" aria-hidden="true"></i>
-              <i class="ph ph-arrow-left" aria-hidden="true"></i>
-              <i class="ph ph-arrow-right" aria-hidden="true"></i>
-            </li>
-          </ul>
+          <div class="tablero__cuerpo">
+            <!-- Grid generado por js/juego.js (33 posiciones). aria-hidden porque
+                 todavía no hay lógica de movimientos ni navegación por teclado
+                 (parte 2 de la Etapa 4, solo visual) — se saca cuando eso exista. -->
+            <div class="tablero__grid" id="tablero-grid" aria-hidden="true"></div>
+
+            <!-- Leyenda de símbolos: las muestras de color son decorativas
+                 (aria-hidden), el texto de al lado ya describe cada estado. -->
+            <ul class="tablero__leyenda">
+              <li><span class="tablero__muestra tablero__muestra--activo" aria-hidden="true"></span>Nodo activo</li>
+              <li><span class="tablero__muestra tablero__muestra--descargado" aria-hidden="true"></span>Descargado</li>
+              <li><span class="tablero__muestra tablero__muestra--seleccionado" aria-hidden="true"></span>Seleccionado</li>
+              <li><span class="tablero__muestra tablero__muestra--destino" aria-hidden="true"></span>Destino</li>
+              <li class="tablero__leyenda-salto">
+                Salto válido:
+                <i class="ph ph-arrow-up" aria-hidden="true"></i>
+                <i class="ph ph-arrow-down" aria-hidden="true"></i>
+                <i class="ph ph-arrow-left" aria-hidden="true"></i>
+                <i class="ph ph-arrow-right" aria-hidden="true"></i>
+              </li>
+            </ul>
+          </div>
         </section>
 
         <!-- "Sobre el juego" (Etapa 4, parte 4). -->

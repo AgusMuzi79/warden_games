@@ -585,6 +585,95 @@ A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
   ("Nodo activo", "Descargado", etc.) no — describe algo real del diseño
   aunque el tablero en sí todavía no funcione.
 
+### La card del tablero crece hasta igualar al panel lateral
+- **Qué:** `.juego-layout` pasó de `align-items: start` a `stretch`, y
+  `.tablero` (dentro de `.juego-layout__principal`) tiene `flex: 1` — así
+  absorbe el espacio de sobra hasta quedar tan alto como el panel lateral
+  (ficha + Ayuda + Compartir), en vez de quedar más bajo. "Sobre el juego"
+  y la Galería, debajo, miden lo que necesitan, sin estirarse.
+- **Por qué:** Fran lo pidió al ver que la card del tablero quedaba más
+  corta que la del panel lateral. `.tablero` y `.tablero__cuerpo` pasaron a
+  `display: flex; flex-direction: column` para que ese espacio de sobra lo
+  reparta `justify-content: center` alrededor del grid + la leyenda, en vez
+  de quedar como aire apilado abajo de todo.
+
+### Fichas más grandes (44px → 56px), y el ancho se resuelve con el gap, no con la ficha
+- **Qué:** el grid de fichas y cada `.tablero__hueco` pasaron de 44px a
+  56px, con los anillos internos reescalados en proporción (`inset: 8px` y
+  `17px`, antes `6px` y `13px`). Para ocupar más ancho de la card, en vez
+  de agrandar la ficha de nuevo, `.tablero__grid` separó `gap` en
+  `row-gap` (`--espaciado-3`, sin cambios) y `column-gap`
+  (`--espaciado-8`, más grande).
+- **Por qué:** con la card más grande, el tablero quedaba chico dentro de
+  tanto espacio. Subir la ficha a 56px resolvió el alto ("quedaba
+  perfecto", según Fran). Para el ancho, agrandar la ficha de nuevo también
+  la hacía más alta (es un círculo, ancho y alto van juntos) — separar el
+  gap horizontal del vertical resuelve el ancho sin tocar el alto que ya
+  estaba bien.
+
+### La etiqueta del título va sobre una cabecera propia, no flotando sola
+- **Qué:** `.tablero` se dividió en `.tablero__cabecera` (franja de arriba,
+  fondo `--primario-o1`, más clara) y `.tablero__cuerpo` (donde van la
+  grilla de fondo, el grid de fichas y la leyenda). El placeholder "Botón"
+  vive centrado dentro de la cabecera. Se sacó el truco de
+  `position: absolute` + `transform` que la hacía flotar sobre el borde
+  superior de la card; ahora es un elemento normal, centrado con flexbox
+  dentro de su propia franja. `.tablero` pasó a tener `overflow: hidden`
+  para que esa franja respete las esquinas redondeadas de la card.
+- **Por qué:** en Figma no es una etiqueta flotando sola sobre la grilla —
+  hay una franja de cabecera de otro color detrás, como el header de una
+  card. Fran lo marcó comparando directo contra la captura.
+
+### Fondo negro debajo de los anillos, y hueco central más grande
+- **Qué:** las fichas "activa"/"seleccionada"/"destino" ahora tienen
+  `background: var(--tablero-descargado)` (el mismo negro del estado
+  "descargado"), y se agrandó el espacio entre los 3 anillos (`inset: 6px`
+  y `13px`, antes `9px` y `16px`).
+- **Por qué:** sin fondo propio, se veía la grilla violeta de atrás
+  mezclada con el resplandor de los anillos — un efecto "naranja
+  difuminado" en vez del hueco negro limpio de Figma. El resplandor
+  (`box-shadow`, hacia afuera del borde) sigue intacto, solo que ahora
+  tiene un fondo negro sólido detrás para contrastar en vez de transparencia.
+
+### Anillo de las fichas: son 3 (no 2), y la leyenda usa el mismo dibujo
+- **Qué:** las fichas "activa"/"seleccionada" no son un borde sólido +
+  un punteado; son 3 anillos concéntricos (sólido afuera, punteado bien en
+  el medio de la banda, sólido chico adentro) con el centro hueco de
+  verdad. Se agregó un tercer anillo con `::after` (antes solo estaba el
+  `::before` punteado, que quedaba pegado al hueco central en vez de ir
+  centrado en la banda). Los íconos de la leyenda (`.tablero__muestra`)
+  usan exactamente el mismo dibujo a escala, no una versión simplificada.
+- **Por qué:** Fran comparó contra el zoom real de Figma — ahí se ve que
+  son 3 trazos, no 2, y que la leyenda tiene que ser igual a la ficha
+  grande, no un ícono aparte.
+
+### Ajustes visuales del tablero contra la captura de Figma (ronda 2)
+Fran comparó el resultado con la captura real de Figma y marcó 3 diferencias,
+más una que sumamos nosotros al revisar:
+- **Fondo con grilla:** `.tablero` tenía un fondo violeta liso; Figma tiene
+  una grilla tenue de líneas. Se agregó con dos `linear-gradient` de 1px
+  (uno horizontal, uno vertical) repetidos cada 28px, con un token nuevo
+  `--tablero-grilla` (rgba de `--primario`, bien tenue). El
+  `background-image` respeta el `border-radius` de la card solo, sin
+  necesitar `overflow: hidden` — importante, porque eso hubiera cortado la
+  mitad de arriba de la etiqueta del título.
+- **Fichas con anillo doble:** `.tablero__hueco--activo`/`--seleccionado`
+  tenían un solo `border: 3px dashed`, que se veía como gajos en vez de un
+  aro prolijo. Ahora son dos capas: un borde sólido (con resplandor) en el
+  propio `div`, más un `::before` punteado más adentro (`inset: 6px`) —
+  igual que en Figma. Una variable CSS local (`--color-ficha`) evita repetir
+  el color de cada estado en los 3 lugares que lo usan (borde, resplandor,
+  anillo interno).
+- **Marco del título:** poco padding y sin resplandor. Se le subió el
+  padding, el grosor del borde (1px → 2px) y se sumó un `box-shadow` sutil
+  del mismo color, para que combine con el resto de la estética "neón" del
+  tablero.
+- **Leyenda en mayúsculas:** de nuestra cuenta, comparando las dos capturas
+  — el estilo "técnico" de Figma usa mayúsculas con letras espaciadas.
+  Se resolvió con `text-transform: uppercase` y `letter-spacing`, sin sumar
+  ninguna fuente nueva (sigue en `--font-ui`, achicado a 12px para que no
+  se vea grande al ir en mayúsculas).
+
 ### Paleta del tablero: valores elegidos
 - **Qué:** `--tablero-activo: #FF6A1A` (naranja), `--tablero-descargado:
   #0B0710` (casi negro), `--tablero-seleccionado: #3FE8E4` (celeste-cian),
@@ -695,6 +784,31 @@ A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
   mensajería interna) — se deja para cuando exista esa lógica. "Copiar" sí
   se resolvió porque es una sola función del navegador (`clipboard`), sin
   ninguna dependencia externa.
+
+### Excepción puntual: la página del juego se queda sin `h1`
+- **Qué:** se sacó el `<h1>Neon Circuit</h1>` de `juego.html`. La página
+  arranca directo con el breadcrumb (que ya termina en "Neon Circuit" como
+  página actual) y sigue con `h2` en adelante.
+- **Por qué:** decisión explícita de Fran, sabiendo que contradice la regla
+  general del proyecto ("un solo `h1` por página") — se dejó pasar puntual
+  para esta página porque el nombre del juego ya queda claro en el
+  breadcrumb, justo arriba, y repetirlo como título grande se sentía
+  redundante. No se aplica al resto del sitio: Home y Login siguen
+  necesitando su `h1`.
+- **Costo asumido:** sin `h1`, alguien que navegue saltando de heading en
+  heading (lectores de pantalla) no tiene un punto de entrada claro al
+  contenido principal, y la página pierde el título de mayor jerarquía para
+  buscadores. Se acepta ese costo puntualmente acá.
+
+### Se sacó el botón "Reiniciar" suelto debajo del `h1`
+- **Qué:** se sacó la `<section id="controls">` con el botón "Reiniciar"
+  que quedaba entre el `h1` y el tablero, de una versión vieja de la página
+  (de antes de tener las capturas de Figma).
+- **Por qué:** decisión de Fran — no está en el diseño y, sin lógica de
+  juego todavía, no hacía nada (no tenía ningún `addEventListener`
+  enganchado). "Reiniciar tablero" ya está como atajo de teclado (`R`) en
+  el panel de Ayuda; si hace falta un botón real más adelante, se agrega
+  ahí como acción del juego, no suelto en la parte de arriba.
 
 ### Comunidad y "Dejá tu reseña" reusan el layout de 2 columnas
 - **Qué:** el mismo `.juego-layout` que ya arma tablero + panel lateral se
