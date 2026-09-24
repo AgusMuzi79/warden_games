@@ -194,6 +194,17 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   del % es un elemento aparte con `z-index: 1` para quedar siempre arriba, así no hace
   falta contra-rotarlo para que no gire con el aro.
 
+### `z-index: 500` en el overlay (bug encontrado después de armar el banner)
+- **Qué:** `.loading-overlay` tenía `z-index: 100`. Al armar el banner
+  coverflow, la card activa también llega a `z-index: 100` (empatan), y por
+  orden de aparición en el HTML (el banner está después del overlay) el
+  banner ganaba el empate — el spinner quedaba tapado por la card activa
+  mientras cargaba.
+- **Por qué 500 y no, por ejemplo, 101:** tiene que quedar por encima de
+  cualquier cosa que se agregue más adelante con su propio z-index alto
+  (los menús del header ya están en 200). Mientras el loading está visible,
+  nada más de la página debería poder pintarse por encima.
+
 ### Contador real de 0 a 100% en 5 segundos
 - **Qué:** `loading.js` suma 1% cada 50ms (100 pasos × 50ms = 5000ms) y al llegar a 100
   oculta el overlay con el atributo `hidden`.
