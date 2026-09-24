@@ -47,12 +47,13 @@ tab está activo (mismo problema que ya tuvimos con `.btn`, comentado en el PR).
 
 ---
 
-## 🔶 Etapa 3 — Home (a cargo de Agus)
+## ✅ Etapa 3 — Home (a cargo de Agus)
 
-La Home queda con: banner "Destacados" arriba (con skew y transición
-animada), y abajo, según el estado del avatar del header
-(`data-sesion="usuario"` oculto o no): filas por categoría para invitado, o
-una fila "Recomendados" para quien tiene sesión.
+La Home queda con: banner "Destacados" arriba (carrusel coverflow), y
+abajo, según el estado del avatar del header (`data-sesion="usuario"`
+oculto o no): filas por categoría para invitado, o una fila "Recomendados"
+para quien tiene sesión. El menú hamburguesa y el de cuenta, en el header
+de todas las páginas, comparten el mismo estilo de dropdown.
 
 ### ✅ 3a. Catálogo real desde la API + filas por categoría/recomendados
 Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
@@ -93,10 +94,26 @@ Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
 
 Detalle en `DECISIONES.md`.
 
-### ⬜ 3c. Unificar menú hamburguesa y menú de usuario
-Archivos: `index.html`, `header.css`, `js/menu.js` (nuevo).
-- Mismo componente de dropdown para los dos, contenido a definir (propuesta:
-  hamburguesa = navegación del sitio, usuario = cuenta).
+### ✅ 3c. Unificar menú hamburguesa y menú de usuario
+Archivos: `index.html`, `components.css` (el componente `.menu-dropdown`
+compartido), `header.css` (posicionamiento), `js/menu.js` (nuevo).
+- Ninguno de los dos existía en el código todavía. Se construyeron los dos
+  con el mismo componente visual (card redondeada, divisores, mismo
+  espaciado) — antes tenían estructuras distintas (panel ancho vs. card
+  angosta), calcado del estilo del menú de cuenta.
+- Hamburguesa: 3 secciones — "Jugar" (5 links, iguales al footer),
+  "Categorías" (4, iguales a las de `home.js`) y un botón "Contáctanos"
+  (`mailto:`). Cada item con ícono, estilo CrazyGames simplificado.
+- Cuenta: cabecera (avatar + nombre + @usuario), items de cuenta, redes
+  sociales, "Cerrar sesión" — calcado de la captura de Figma.
+- El avatar con sesión pasa de `<a>` a `<button>` (ahora abre un menú, no
+  navega). `js/menu.js` maneja abrir/cerrar, click afuera, Escape (con
+  foco de vuelta al botón), y que solo un menú esté abierto a la vez.
+- Bug real encontrado al probarlo: el dropdown (z-index 50) quedaba tapado
+  por las cards del banner coverflow (z-index hasta 100) donde se
+  superponían. Se subió a z-index 200.
+
+Detalle en `DECISIONES.md`.
 
 ---
 

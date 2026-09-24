@@ -27,30 +27,98 @@
 
   <header class="header">
   <div class="header__start">
-    <button class="header__icon-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
-      <i class="ph ph-list" aria-hidden="true"></i>
-    </button>
+    <div class="menu-hamburguesa">
+      <button class="header__icon-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
+        <i class="ph ph-list" aria-hidden="true"></i>
+      </button>
+
+      <div id="menu-principal" class="menu-dropdown menu-dropdown--hamburguesa" hidden>
+        <nav class="menu-dropdown__seccion" aria-labelledby="menu-jugar-titulo">
+          <h2 class="menu-dropdown__titulo" id="menu-jugar-titulo">Jugar</h2>
+          <ul>
+            <li><a href="#"><i class="ph ph-star" aria-hidden="true"></i> Destacados</a></li>
+            <li><a href="#"><i class="ph ph-sparkle" aria-hidden="true"></i> Últimos</a></li>
+            <li><a href="#"><i class="ph ph-clock" aria-hidden="true"></i> Recientes</a></li>
+            <li><a href="#"><i class="ph ph-trophy" aria-hidden="true"></i> Top 100</a></li>
+            <li><a href="#"><i class="ph ph-arrows-clockwise" aria-hidden="true"></i> Actualizados</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <nav class="menu-dropdown__seccion" aria-labelledby="menu-categorias-titulo">
+          <h2 class="menu-dropdown__titulo" id="menu-categorias-titulo">Categorías</h2>
+          <ul>
+            <li><a href="#"><i class="ph ph-lightning" aria-hidden="true"></i> Acción</a></li>
+            <li><a href="#"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> Shooters</a></li>
+            <li><a href="#"><i class="ph ph-sword" aria-hidden="true"></i> RPG</a></li>
+            <li><a href="#"><i class="ph ph-compass" aria-hidden="true"></i> Aventura</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <div class="menu-dropdown__seccion menu-dropdown__seccion--contacto">
+          <a class="btn btn--secundario" href="mailto:hola@warden.gg">Contáctanos</a>
+        </div>
+      </div>
+    </div>
+
     <a class="header__logo" href="index.html" aria-label="Warden, ir al inicio">
       <img src="assets/img/logo.png" alt="" width="32" height="32">
       <span>Warden</span>
     </a>
   </div>
- 
+
   <form class="header__search" role="search" action="#">
     <label class="sr-only" for="buscar">Buscar juegos</label>
     <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
     <input type="search" id="buscar" name="q" placeholder="Buscar juegos" autocomplete="off">
   </form>
- 
+
   <div class="header__actions">
     <a class="header__icon-btn" href="#" aria-label="Carrito">
       <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
     </a>
 
     <!-- Con sesión -->
-    <a class="header__avatar" href="#" aria-label="Mi cuenta" data-sesion="usuario" hidden>
-      <img src="assets/img/avatar.jpg" alt="" width="36" height="36">
-    </a>
+    <div class="menu-cuenta">
+      <button class="header__avatar" type="button" aria-label="Mi cuenta" aria-expanded="false" aria-controls="menu-perfil" data-sesion="usuario" hidden>
+        <img src="assets/img/avatar.jpg" alt="" width="36" height="36">
+      </button>
+
+      <div id="menu-perfil" class="menu-dropdown menu-dropdown--perfil" hidden>
+        <div class="menu-dropdown__cabecera">
+          <img src="assets/img/avatar.jpg" alt="" width="48" height="48">
+          <div>
+            <p class="menu-dropdown__nombre">Nombre Apellido</p>
+            <p class="menu-dropdown__usuario">@username</p>
+          </div>
+        </div>
+
+        <hr class="menu-dropdown__divisor">
+
+        <nav class="menu-dropdown__seccion" aria-label="Cuenta">
+          <ul>
+            <li><a href="#">Mi perfil</a></li>
+            <li><a href="#">Mis juegos</a></li>
+            <li><a href="#">Favoritos</a></li>
+            <li><a href="#">Logros</a></li>
+            <li><a href="#">Configuración</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <ul class="menu-dropdown__social" aria-label="Redes sociales">
+          <li><a href="#" aria-label="Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <button type="button" class="menu-dropdown__cerrar-sesion">Cerrar sesión</button>
+      </div>
+    </div>
 
     <!-- Sin sesión -->
     <a class="header__avatar header__avatar--invitado" href="login.html" aria-label="Iniciar sesión" data-sesion="invitado">
@@ -221,5 +289,6 @@
   <script src="./js/loading.js" defer></script>
   <script src="./js/carousel.js" defer></script>
   <script src="./js/home.js" defer></script>
+  <script src="./js/menu.js" defer></script>
 </body>
 </html>

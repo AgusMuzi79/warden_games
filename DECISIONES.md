@@ -485,6 +485,75 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Menús desplegables del header (Etapa 3c)
+
+### Un solo componente `.menu-dropdown` para hamburguesa y cuenta
+- **Qué:** ninguno de los dos menús existía todavía en el código (el botón
+  hamburguesa y el avatar estaban armados pero sin nada atrás). Se
+  construyeron los dos juntos, compartiendo el mismo componente visual:
+  card flotante con bordes redondeados, fondo `--superficie`, divisores
+  (`<hr>`) entre secciones, mismo espaciado e íconos en `--acento`.
+- **Por qué:** la corrección pedía "unificar" el estilo — el hamburguesa (una
+  lista plana de categorías, panel de ancho completo) y el de cuenta (card
+  angosta con cabecera) tenían estructuras visuales distintas. Se calcó el
+  estilo del menú de cuenta (el que le había gustado más al profesor) y se
+  le aplicó también al hamburguesa.
+- **`z-index: 200`, más alto que el banner:** el coverflow de "Destacados"
+  usa z-index hasta 100 en sus cards. La primera versión del dropdown tenía
+  z-index 50 y quedaba tapado por las cards del banner donde se
+  superponían en pantalla (un bug real, no solo teórico — se vio al probarlo:
+  la mitad de los items del menú de cuenta desaparecían detrás del banner).
+
+### Contenido del hamburguesa: 2 secciones + un botón de contacto, no una lista de 7
+- **Qué:** "Jugar" (Destacados, Últimos, Recientes, Top 100, Actualizados —
+  los mismos links que ya están en la columna "Jugar" del footer) y
+  "Categorías" (Acción, Shooters, RPG, Aventura — las mismas 4 categorías
+  que arma `home.js` para invitados), más un botón "Contáctanos"
+  (`mailto:hola@warden.gg`, el mismo mail que usa el footer).
+- **Por qué:** la corrección pedía más contenido, organizado en secciones
+  (referencia: el menú de CrazyGames, con íconos por ítem). En vez de
+  inventar secciones o páginas que no existen, se reutiliza vocabulario que
+  el sitio ya tiene en el footer y en la Home — nada nuevo que mantener ni
+  explicar en la defensa.
+
+### El avatar con sesión pasa de `<a>` a `<button>`
+- **Qué:** `data-sesion="usuario"` era un `<a href="#">`; ahora es un
+  `<button type="button" aria-expanded aria-controls="menu-perfil">`. El
+  avatar sin sesión (`data-sesion="invitado"`) sigue siendo `<a
+  href="login.html">`.
+- **Por qué:** ahora que tiene un dropdown atrás, la acción es "abrir un
+  menú" (una interacción local), no "navegar a otra página" — eso es
+  semánticamente un botón, no un link. El de invitado sí navega de verdad
+  (a `login.html`), por eso se queda como `<a>`.
+- **`appearance: none` en `.header__avatar`:** al pasar a `<button>` para el
+  caso con sesión, hacía falta el mismo reset que ya tiene `.btn` — si no,
+  el navegador le pinta su fondo nativo encima (el mismo bug ya documentado
+  para `.btn` y para `.auth-switch__btn` de Fran en el PR de login).
+
+### `js/menu.js`: un solo archivo maneja los dos menús
+- **Qué:** busca todos los botones con `aria-controls` + `aria-expanded` y
+  les engancha abrir/cerrar, cerrar al clickear afuera, cerrar con Escape
+  (devolviendo el foco al botón), y que solo uno quede abierto a la vez.
+  Clickear un link o "Cerrar sesión" adentro también cierra el menú.
+- **Por qué:** son links placeholder (`href="#"`), no navegan a ningún
+  lado — sin este cierre automático, el menú se quedaría abierto para
+  siempre después de clickear algo adentro.
+- **"Cerrar sesión" no cambia el estado de sesión:** solo cierra el menú.
+  No hay login real todavía (`data-sesion` sigue siendo un estado fijo en
+  el HTML), así que no hay nada real que "cerrar". Cambiar el avatar
+  visible de vuelta a invitado se deja para cuando haya sesión real.
+
+### Imagen de avatar con sesión: la que pasó Agus (no libre de derechos)
+- **Qué:** `assets/img/avatar.jpg` es un collage de arte de Spider-Man
+  (personaje de Marvel), no una imagen propia ni de stock libre.
+- **Por qué:** decisión explícita de Agus, sabiendo que no es una imagen con
+  derechos propios, para los fines de este TP. Si en algún momento hay que
+  sacarlo (por ejemplo si se comparte el link más ampliamente), reemplazar
+  ese archivo por una imagen propia o de stock no rompe nada más: el resto
+  del sitio solo lo referencia por esa ruta.
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
@@ -492,7 +561,5 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   precio.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
-- Qué contenido lleva el menú hamburguesa, y cómo unificarlo visualmente con el
-  menú de usuario (hoy son muy distintos entre sí).
 - Qué es la "galería" de la página del juego (falta ver la captura de Figma;
   hoy el tablero y la galería no están construidos todavía).
