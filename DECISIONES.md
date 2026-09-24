@@ -400,6 +400,14 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   `max-width` que también necesita `display:block; margin:auto` para no
   quedar pegada a un lado.
 
+### Dots como barritas finitas (estilo Steam), no círculos
+- **Qué:** `.banner__dot` es un botón de 28×24px sin nada visible propio; la
+  barrita (4px de alto, bien angosta) es un `::before` adentro.
+- **Por qué:** los círculos de `--control-target` (24px) quedaban grandes
+  para un indicador de posición. Separar "botón" (área táctil, 24px) de
+  "barrita" (lo que se ve, 4px) deja el tamaño del área táctil intacto sin
+  que el indicador visual tenga que ser igual de grande.
+
 ---
 
 ## Componentes
