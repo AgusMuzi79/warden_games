@@ -393,6 +393,18 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   con ciclo corto (si hay 5 cards y la activa es la 0, la card 4 está a
   distancia -1, no -4), para que ir de la última a la primera gire para el
   lado corto en vez de cruzar toda la fila.
+- **Bug encontrado al probarlo — una card "daba la vuelta" barriendo toda
+  la pantalla:** avanzar un solo paso (activo pasa de 1 a 2, por ejemplo)
+  hace que la card que queda justo en el extremo opuesto salte de golpe de
+  `offset -2` a `offset +2` — es matemáticamente correcto (el lado corto
+  cambia de dirección para esa card en ese punto), pero si se anima con el
+  `transition` normal, la animación interpola en línea recta de un extremo
+  al otro, barriendo por encima de las cards del medio en el camino. Se
+  detecta ese salto grande comparando contra el offset anterior de esa
+  card específica (guardado en `dataset.offset`) y, solo en ese caso
+  puntual, se le saca la transición (`transition: none`, forzando reflow)
+  para que salte directo en vez de barrer. El resto de las cards, que
+  cambian de a un paso genuino, siguen animando normal.
 - **Solo se ven 2 posiciones de cada lado (`MAX_VISIBLES`):** las cards más
   lejanas se esconden con `opacity: 0` en vez de seguir achicándose hasta
   desaparecer solas — con 5 destacados en total, alcanza para que siempre

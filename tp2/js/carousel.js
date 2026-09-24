@@ -53,10 +53,21 @@ function offsetCircular(index) {
 }
 
 function actualizarPosiciones() {
+  const total = slides.length;
+
   slides.forEach((slide, index) => {
     const offset = offsetCircular(index);
     const distancia = Math.abs(offset);
     const direccion = Math.sign(offset);
+
+    // Offset que tenía esta card antes de este cambio. Si el salto es
+    // grande (cruzó de un extremo visible al otro, ej. de -2 a +2), es la
+    // vuelta del ciclo: si se anima con el transition normal, la card
+    // barre TODA la pantalla por encima de las demás para llegar ahí. En
+    // ese caso puntual salta directo, sin transición.
+    const offsetAnterior = slide.dataset.offset === undefined ? offset : Number(slide.dataset.offset);
+    const dioLaVuelta = Math.abs(offset - offsetAnterior) > total / 2;
+    slide.dataset.offset = String(offset);
 
     slide.classList.toggle('banner__slide--activo', offset === 0);
 
@@ -70,14 +81,23 @@ function actualizarPosiciones() {
     slide.style.pointerEvents = 'auto';
 
     const escala = 1 - distancia * ACHIQUE_POR_POSICION;
-
-    slide.style.transform = `
+    const transform = `
       perspective(${PERSPECTIVE_PX}px)
       translateX(${offset * PASO_X_PORCENTAJE}%)
       translateZ(${-distancia * PASO_Z_PX}px)
       rotateY(${-direccion * ROTACION_GRADOS}deg)
       scale(${escala})
     `;
+
+    if (dioLaVuelta) {
+      slide.style.transition = 'none';
+      slide.style.transform = transform;
+      void slide.offsetWidth; // fuerza a aplicar el "none" antes de sacarlo
+      slide.style.transition = '';
+    } else {
+      slide.style.transform = transform;
+    }
+
     slide.style.opacity = '1';
     slide.style.zIndex = String(100 - distancia);
   });
