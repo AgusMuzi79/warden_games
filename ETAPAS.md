@@ -36,14 +36,22 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 
-## 🔶 Etapa 2 — Login: splash de 2 columnas (a cargo de Fran)
+## ✅ Etapa 2 — Login: splash de 2 columnas (a cargo de Fran)
 
-En revisión: [PR #2](https://github.com/AgusMuzi79/warden_games/pull/2), rama `fran`.
-Splash de 2 columnas, selector Crear Cuenta/Ingresar con tabs, animación de
-registro exitoso y toggle de contraseña. Falta corregir antes de mergear a
-`main`: a `.auth-switch__btn` y `.toggle-pass` les falta `appearance: none`,
-así que el navegador les pinta su fondo nativo encima y no se distingue cuál
-tab está activo (mismo problema que ya tuvimos con `.btn`, comentado en el PR).
+Archivos: `login.html`, `login.css`, `js/login.js`.
+
+- ✅ Sin `<header>` ni `<footer>` en la página.
+- ✅ `<h1>` como título del panel de marca (ya no hay `<h2>` de "Iniciar
+  sesión"/"Registrarse": los forms se distinguen por el selector de arriba).
+- ✅ Layout de 2 columnas: `.auth-brand` (logo con animación de flotar +
+  "Warden Games" + bajada) y `.auth-panel` (el form activo).
+- ✅ **Decisión tomada:** se alterna con el selector `.auth-switch` (2 botones,
+  el activo relleno de violeta), como en la captura de Figma — no con un link
+  suelto (se probó esa opción primero, pero era redundante contra el selector).
+- ✅ Animación al registrarse correctamente (bloque `.auth-success` con
+  fade + scale).
+
+Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 
