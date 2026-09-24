@@ -214,6 +214,59 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Catálogo de la Home (Etapa 3a)
+
+### Se consume la API de la cátedra en vez de inventar datos
+- **Qué:** `api.js` define `BASE_URL = 'https://vj.interfaces.jima.com.ar/api'` y
+  `obtenerJuegos()`, que hace `fetch(BASE_URL)` y devuelve la lista (~80 juegos
+  reales con nombre, imagen y rating). `home.js` la usa para armar las cards
+  del `#carousel`.
+- **Por qué:** resuelve dos cosas a la vez — el requisito de "datos reales"
+  (títulos de largos distintos, imágenes de colores variados) y el "Plus" de
+  consumir la API de la cátedra — sin inventar contenido ni necesitar assets
+  propios que no teníamos.
+- **`/api` y no `/api/v2`:** `/v2` suma imágenes optimizadas y descripciones,
+  pero las descripciones vienen en inglés (la API está armada sobre datos de
+  RAWG). Como no las mostramos en las cards, no vale la pena mezclar idiomas
+  en una interfaz que tiene que estar en español.
+- **Descartado:** armar cards con imágenes ilustradas (gradiente + ícono) para
+  no depender de assets — dejó de hacer falta en cuanto encontramos que la API
+  ya provee portadas reales y con licencia para este uso académico.
+
+### Datos de respaldo si la API falla
+- **Qué:** `home.js` tiene `JUEGOS_DE_RESPALDO`, 4 juegos reales con sus datos
+  hardcodeados, que se muestran si el `fetch` a la API falla.
+- **Por qué:** la Home no puede depender de que un servicio externo esté
+  siempre arriba. Sin esto, un corte de la API dejaría el catálogo vacío.
+
+### El fetch de datos no depende del loading simulado
+- **Qué:** `home.js` pide los juegos apenas carga la página, en paralelo con
+  el contador de 5 segundos de `loading.js`; no hay comunicación entre los dos
+  archivos.
+- **Por qué:** mantener cada archivo con una sola responsabilidad (loading.js
+  no sabe nada de juegos, home.js no toca el overlay). En la práctica el
+  fetch de este JSON tarda mucho menos que los 5 segundos simulados, así que
+  las cards ya están listas cuando el loading se oculta.
+
+### `<h2>Recomendados</h2>` antes de las cards
+- **Qué:** se agregó un `<h2 id="carousel-titulo">` visible dentro de
+  `#carousel`, con la sección apuntando a él vía `aria-labelledby` (mismo
+  patrón que las columnas del footer). Los títulos de cada juego son `<h3>`.
+- **Por qué:** sin el `h2`, los títulos de juego como `<h3>` saltarían un
+  nivel justo después del `<h1>` de la Home, rompiendo el outline del
+  documento.
+
+### Los íconos de Phosphor deben ser de la variante "regular"
+- **Qué:** el rating de cada card usa `ph-star`, no `ph-star-fill`.
+- **Por qué:** el proyecto solo carga la hoja de estilos
+  `@phosphor-icons/web/src/regular/style.css`. Los nombres de ícono con sufijo
+  de otro peso (`-fill`, `-bold`, `-duotone`, etc.) no existen en esa hoja: el
+  ícono no se rompe visualmente, directamente no aparece nada, sin error en
+  consola. Vale la pena recordarlo para cualquier ícono nuevo que se agregue
+  en el resto del proyecto.
+
+---
+
 ## Componentes
 
 ### Cards que se elevan sobre las vecinas en hover

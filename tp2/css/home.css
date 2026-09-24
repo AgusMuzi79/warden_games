@@ -1,6 +1,6 @@
 /*
-  home.css — Estilos específicos de la Home (loading, hero, carrusel de juegos)
-  TODO: implementar estilos de hero y carrusel de juegos.
+  home.css — Estilos específicos de la Home (loading, hero, catálogo de juegos)
+  TODO: convertir #carousel en el carrusel con transición animada (etapa 3b).
 */
 
 /* Loading simulado */
@@ -46,5 +46,60 @@
 @media (prefers-reduced-motion: reduce) {
   .loading__spinner::before {
     animation: none;
+  }
+}
+
+/* Catálogo de juegos — mobile first, grilla que se ensancha con el viewport.
+   En la etapa 3b esto pasa a ser un carrusel; por ahora es una grilla fija. */
+#carousel {
+  margin-top: var(--espaciado-6);
+}
+
+.carousel__titulo {
+  margin-bottom: var(--espaciado-4);
+}
+
+.carousel__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--espaciado-4);
+}
+
+.game-card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.game-card__image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.game-card__title {
+  margin: var(--espaciado-3) var(--espaciado-3) 0;
+  font-size: 16px;
+}
+
+.game-card__rating {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-1);
+  margin: var(--espaciado-1) var(--espaciado-3) var(--espaciado-3);
+  color: var(--acento);
+  font: 400 14px/1 var(--font-ui);
+}
+
+@media (min-width: 48rem) {
+  .carousel__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 64rem) {
+  .carousel__grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

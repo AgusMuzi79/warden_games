@@ -36,33 +36,41 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 
 ---
 
-## ⬜ Etapa 2 — Login: splash de 2 columnas
+## 🔶 Etapa 2 — Login: splash de 2 columnas (a cargo de Fran)
 
-Archivos: `login.html`, `login.css` (hoy vacío), `js/login.js`.
-
-- Sacar `<header>` y `<footer>` de la página (regla: sin nav ni footer).
-- Sacar los `<h2>` de "Iniciar sesión" / "Registrarse". El `<h1>` pasa a ser el
-  título del panel de marca.
-- Layout de 2 columnas: panel de marca (logo + texto — contenido a definir) +
-  panel con el formulario activo.
-- **Decisión a tomar:** ¿alternar login/registro con tabs, o con un link (usando
-  `.link` de la etapa 1) tipo "¿No tenés cuenta? Registrate"? Propuesta: el
-  link, es más simple.
-- Animación al registrarse correctamente (pide el enunciado del TPE2, no solo
-  la corrección).
+En revisión: [PR #2](https://github.com/AgusMuzi79/warden_games/pull/2), rama `fran`.
+Splash de 2 columnas, selector Crear Cuenta/Ingresar con tabs, animación de
+registro exitoso y toggle de contraseña. Falta corregir antes de mergear a
+`main`: a `.auth-switch__btn` y `.toggle-pass` les falta `appearance: none`,
+así que el navegador les pinta su fondo nativo encima y no se distingue cuál
+tab está activo (mismo problema que ya tuvimos con `.btn`, comentado en el PR).
 
 ---
 
-## ⬜ Etapa 3 — Home
+## 🔶 Etapa 3 — Home (a cargo de Agus)
 
-Archivos: `index.html`, `home.css`, `js/carousel.js`, `js/home.js`, `header.css`.
+### ✅ 3a. Catálogo real desde la API de la cátedra
+Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
+- `api.js` pide `https://vj.interfaces.jima.com.ar/api` (la API de
+  jimartinezabadias, ~80 juegos reales con nombre/imagen/rating).
+- `home.js` arma las cards (`.card.game-card`) dentro de `.carousel__grid`,
+  con datos de respaldo hardcodeados si la API falla.
+- Grilla mobile-first (2 → 3 → 4 columnas). Todavía NO es el carrusel con
+  transición — eso es la 3b.
+- Se sumó `<h2>Recomendados</h2>` antes de las cards para no saltear niveles
+  de título.
 
-- Cards de juego con nombre real e imagen en `#carousel` (datos reales, largos
-  y colores distintos — no hay ni una todavía).
-- Carrusel de recomendados con transición animada (fade/scale/clip-path — a
-  definir cuál).
-- Unificar menú hamburguesa y menú de usuario en un solo componente visual
-  (hoy son muy distintos entre sí). Agregar más ítems al menú hamburguesa.
+Detalle en `DECISIONES.md`.
+
+### ⬜ 3b. Convertir la grilla en carrusel con transición animada
+Archivos: `home.css`, `js/carousel.js`.
+- Recorrer las cards de a una/pocas con controles prev/next accesibles.
+- Definir la transición (fade, scale o clip-path).
+
+### ⬜ 3c. Unificar menú hamburguesa y menú de usuario
+Archivos: `index.html`, `header.css`, `js/menu.js` (nuevo).
+- Mismo componente de dropdown para los dos, contenido a definir (propuesta:
+  hamburguesa = navegación del sitio, usuario = cuenta).
 
 ---
 
@@ -78,5 +86,7 @@ Archivos: `juego.html`, `juego.css`, `js/juego.js`.
 
 ## Plus (sin fecha todavía)
 
-- `js/api.js`: consumir la API de la cátedra (login/registro reales, catálogo
-  de juegos, puntajes). Hoy es un stub sin lógica.
+- ✅ Catálogo de juegos (`obtenerJuegos()` en `js/api.js`, usado por la Home).
+- ⬜ Login/registro reales contra la API (`js/login.js` hoy solo valida el
+  form, no llama a `api.js` todavía).
+- ⬜ Guardado de puntajes.
