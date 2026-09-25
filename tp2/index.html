@@ -81,9 +81,27 @@
   </form>
 
   <div class="header__actions">
-    <a class="header__icon-btn" href="#" aria-label="Carrito">
-      <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
-    </a>
+    <div class="menu-carrito">
+      <button class="header__icon-btn" type="button" aria-label="Carrito" aria-expanded="false" aria-controls="menu-carrito-panel">
+        <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
+        <span class="carrito__contador" id="carrito-contador" hidden>0</span>
+      </button>
+
+      <div id="menu-carrito-panel" class="menu-dropdown menu-dropdown--carrito" hidden>
+        <h2 class="menu-dropdown__titulo">Carrito</h2>
+
+        <p class="carrito__vacio" id="carrito-vacio">Todavía no agregaste ningún juego.</p>
+
+        <ul class="carrito__lista" id="carrito-lista">
+          <!-- Ítems generados por carrito.js -->
+        </ul>
+
+        <div class="carrito__acciones">
+          <a href="#" class="btn btn--secundario">Seguir comprando</a>
+          <a href="#" class="btn btn--primario">Pagar carrito</a>
+        </div>
+      </div>
+    </div>
 
     <!-- Con sesión -->
     <div class="menu-cuenta">
@@ -291,6 +309,7 @@
 
   <script src="./js/api.js" defer></script>
   <script src="./js/sesion.js" defer></script>
+  <script src="./js/carrito.js" defer></script>
   <script src="./js/loading.js" defer></script>
   <script src="./js/carousel.js" defer></script>
   <script src="./js/carrusel-fila.js" defer></script>

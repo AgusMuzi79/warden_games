@@ -1267,6 +1267,156 @@ corrigieron directo, sin cambiar el diseño:
 
 ---
 
+## Carrito de compras (parte 1: motor + header + filas de la Home)
+
+No es el sistema de compras real que pide el enunciado (eso sigue en
+"Pendientes de decidir": falta método de pago, precios reales, etc.). Esto
+es la mecánica de agregar/quitar juegos y verlos en el header, para no
+bloquear esa parte de la interfaz hasta que exista un backend de pagos.
+
+- **`js/carrito.js` nuevo, mismo patrón que `sesion.js`:** guarda el
+  carrito en `localStorage` (clave `warden-carrito`) como un array de
+  `{id, nombre, imagen}`. Se carga antes que `home.js` (que agrega juegos
+  al carrito) y no depende de ningún otro archivo.
+- **Sin cantidad, un juego entra una sola vez:** son licencias digitales,
+  no unidades de supermercado — no tiene sentido "comprar 2" del mismo
+  juego. El botón de la card alterna entre "Agregar al carrito" y "Quitar
+  del carrito" en vez de sumar de a uno.
+- **Qué juegos son "de pago", simulado:** no hay precios reales todavía
+  (ver "Pendientes de decidir"), así que `esDePago(id)` en `carrito.js`
+  decide de forma determinística por `id % 3 === 0` — no con
+  `Math.random()` en cada render, que haría que un juego ya agregado al
+  carrito "dejara" de tener el botón al recargar la página. Solo esas
+  cards muestran el botón; las demás quedan como estaban.
+- **El ícono de carrito del header ya existía como placeholder** (`<a
+  href="#">` sin funcionalidad). Se convirtió en un botón que abre un
+  desplegable, reusando el mismo componente `.menu-dropdown` que ya
+  comparten el menú de cuenta y el hamburguesa — no un componente nuevo.
+- **`menu.js` no se tocó:** ya busca genéricamente cualquier botón con
+  `aria-controls` + `aria-expanded` y lo conecta (abrir/cerrar, click
+  afuera, Escape). El botón del carrito sigue ese mismo patrón, así que
+  quedó enganchado solo.
+- **El botón "Quitar" de cada ítem frena la propagación del click
+  (`stopPropagation`):** el listener de `menu.js` que cierra cualquier
+  menú abierto al clickear en cualquier lado (adentro o afuera) no
+  distingue el origen del click. Sin frenarlo ahí, sacar un ítem cerraría
+  todo el desplegable en vez de dejarlo abierto para sacar varios.
+- **"Seguir comprando" y "Pagar carrito" son links (`<a href="#">`), no
+  botones:** así heredan gratis el cierre automático del desplegable que
+  `menu.js` ya aplica a cualquier link de adentro de un menú (mismo
+  criterio que "Mi perfil", "Favoritos", etc. en el menú de cuenta).
+  "Pagar carrito" no lleva a ningún lado todavía — no existe sistema de
+  compras real (ver "Pendientes de decidir").
+- **Numerito del carrito, oculto con `[hidden]` si está vacío:** en vez de
+  mostrar "0" todo el tiempo. Mismo criterio que el resto del proyecto
+  para estados vacíos (ej. una fila de categoría sin resultados no se
+  muestra).
+
+### Bug real: el botón de la card no respondía al click con mouse
+- **Qué:** el arrastre de `carrusel-fila.js` hace `pointerdown.preventDefault()`
+  sobre toda la pista, para evitar el "fantasma" de arrastrar una imagen. Por
+  la spec de Pointer Events, cancelar el `pointerdown` también cancela los
+  eventos de mouse de compatibilidad que vienen después — incluido el
+  `click`. Como el botón "Agregar al carrito" vive dentro de la pista, un
+  click que arrancaba justo sobre el botón quedaba comido por ese
+  `preventDefault()` de la fila, sin ningún error visible.
+- **Por qué se corrigió así:** en el listener de `pointerdown` de
+  `carrusel-fila.js`, si `evento.target.closest('button, a')` frena antes de
+  arrancar el arrastre (`return` temprano) — el `preventDefault()` nunca se
+  llama para ese click, así que el navegador sí dispara el `click` normal
+  sobre el botón. El arrastre en el resto de la card (imagen, texto) sigue
+  igual.
+
+### El botón pasa de texto a ícono, superpuesto en la esquina de la imagen
+- **Qué:** `.game-card__carrito` dejó de ser un `.btn--secundario` con
+  texto debajo de la card — ahora es un botón solo-ícono
+  (`ph-shopping-cart-simple`), circular, superpuesto en la esquina inferior
+  derecha de la imagen (`.game-card__media` pasa a `position: relative`
+  para anclarlo). El estado "ya está en el carrito" se comunica con
+  `aria-pressed` (no con cambiar el texto, que ya no existe): CSS lo lee
+  con el selector de atributo `[aria-pressed="true"]` y lo pinta relleno
+  con `--acento`, más `transform: scale(0.9)` — queda "hundido" a
+  propósito, para que se note de un vistazo cuál ya se agregó sin tener
+  que leer nada.
+- **Por qué:** pedido explícito — menos intrusivo sobre la card (no le
+  agrega una fila entera de alto) y el estado "pressed" persistente es más
+  directo que un cambio de texto para comunicar "ya lo agregaste".
+- **Sigue siendo accesible sin texto visible:** `aria-label` dinámico
+  ("Agregar/Quitar `<nombre>` del carrito", `carrito.js`) y el ícono con
+  `aria-hidden`, mismo patrón que cualquier otro control de solo ícono del
+  proyecto (44px de área táctil, `--control-alto`, aunque el ícono se vea
+  chico).
+- **Token nuevo `--fondo-o1`:** rgba de `--fondo` al 75%, para que el
+  círculo del botón se distinga incluso sobre imágenes claras — ninguno de
+  los tokens existentes era una versión translúcida de `--fondo`.
+
+## Carrito de compras (parte 2: banner Destacados)
+
+- **`crearBotonCarrito()` se mudó a `carrito.js`:** hasta acá vivía
+  duplicada la lógica (crear el botón, el ícono, el `aria-pressed`, el
+  click) en `home.js`. Ahora es una función compartida
+  (`crearBotonCarrito(juego, clase)`, la `clase` es lo único que cambia
+  entre `.game-card__carrito` y `.banner__carrito`) — `carousel.js` la
+  reusa igual que `home.js`, en vez de reescribirla.
+- **`evento.stopPropagation()` en el click, ahora sí necesario:** cada
+  `.banner__slide` tiene su propio listener de click (`irA(index)`) — sin
+  frenar la propagación, clickear el ícono de carrito también dispararía
+  ese click del slide (sin romper nada porque la card ya está activa
+  cuando el ícono es clickeable, pero no hace falta que compitan).
+- **Neon Circuit no tiene ícono de carrito:** es nuestro propio juego, no
+  algo que salga del catálogo de la API — ya tiene su propia acción real
+  (el botón "Jugar" que aparece en hover). `crearSlide()` lo excluye por
+  comparación de referencia (`juego !== NEON_CIRCUIT`).
+- **El ícono va arriba a la derecha, no abajo a la derecha como en las
+  filas de la Home:** se probó abajo primero (mismo lugar que
+  `.game-card__carrito`), pero `.banner__nombre` (el título del juego) ya
+  ocupa esa franja de punta a punta — un título largo como "Counter-Strike:
+  Global Offensive" quedaba tapado por el círculo. Arriba a la derecha
+  queda simétrico a la etiqueta "Destacado" (arriba a la izquierda) y no
+  compite con ningún otro texto.
+- **Visible solo si la card está activa, sin necesidad de hover:** mismo
+  criterio de "invisible y no alcanzable por Tab si no está activa" que ya
+  usa el botón "Jugar" (una card rotada al costado no debería ser un
+  tab-stop). A diferencia de "Jugar", no hace falta además pasar el mouse
+  para verlo una vez activa — es un ícono chico en una esquina, no una
+  superposición grande que tape el resto de la card.
+- **Bug real encontrado al probarlo — el click no le pegaba al ícono:**
+  con el botón del tamaño real del ícono (44px, en la esquina), clickear
+  ahí no hacía nada; `boton.click()` desde consola sí agregaba el juego,
+  así que el handler estaba bien enganchado. Se confirmó con
+  `document.elementFromPoint()` en el centro exacto del botón: devolvía
+  `.banner__escena` (un ancestro), no el botón. Es la misma familia del
+  bug de hit-testing que ya está documentado para el propio coverflow
+  ("Carrusel coverflow: perspective + rotateY..." más arriba) — dentro de
+  un ancestro con `perspective()` en su `transform` (acá, el propio
+  `.banner__slide`), las coordenadas de click no siempre coinciden con la
+  posición visual de un hijo chico y absolutamente posicionado.
+  - **Solución, igual que ya se usa para "Jugar":** el `<button>` pasa a
+    cubrir toda la card (`inset: 0`, sin fondo ni borde propios) en vez de
+    ser del tamaño del ícono. El círculo que se ve sigue siendo chico —
+    ahora es un `<span class="carrito-icono">` interno, anclado arriba a
+    la derecha — pero el ÁREA que reacciona al click es toda la card, así
+    que cualquier desvío del hit-testing sigue cayendo adentro.
+  - **Por qué no se notó con "Jugar":** ese botón YA cubría toda la card
+    desde el principio (fue diseñado así, ver "Neon Circuit es clickeable"
+    más arriba) — el bug existe igual ahí, pero como el área objetivo es
+    del tamaño de toda la card, un desvío de unos pocos píxeles no alcanza
+    a sacar el punto de click afuera. Con un blanco de 44px sí alcanza.
+  - **Consecuencia asumida:** clickear en cualquier parte de la card activa
+    de un juego "de pago" (no solo el ícono) agrega/quita del carrito —
+    igual que clickear en cualquier parte de la card activa de Neon Circuit
+    ya llevaba a "Jugar", no solo su ícono. Es la misma mecánica que ya
+    estaba aceptada en el banner, aplicada al nuevo botón por la misma
+    razón técnica.
+- **`DESTACADOS_DE_RESPALDO` (`carousel.js`) suma `id`:** no los tenía
+  (el respaldo de `carousel.js` es una lista aparte de la de `home.js`,
+  con sus propios juegos). Sin `id`, `esDePago()` no tiene con qué decidir.
+  Se usaron ids fuera del rango real de la API (101-105) para que no
+  choquen si algún día conviven datos reales y de respaldo en la misma
+  sesión.
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
