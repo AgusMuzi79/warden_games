@@ -4,6 +4,8 @@
 // avanzar/retroceder de a una "página" de cards. home.js llama a
 // activarCarrusel() por cada fila que arma.
 
+const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
 function activarCarrusel(pista, flechaIzquierda, flechaDerecha) {
   let arrastrando = false;
   let inicioX = 0;
@@ -47,12 +49,14 @@ function activarCarrusel(pista, flechaIzquierda, flechaDerecha) {
     flechaDerecha.disabled = pista.scrollLeft >= finalDeScroll - 1;
   }
 
+  const comportamiento = prefiereMovimientoReducido ? 'auto' : 'smooth';
+
   flechaIzquierda.addEventListener('click', () => {
-    pista.scrollBy({ left: -pista.clientWidth * 0.9, behavior: 'smooth' });
+    pista.scrollBy({ left: -pista.clientWidth * 0.9, behavior: comportamiento });
   });
 
   flechaDerecha.addEventListener('click', () => {
-    pista.scrollBy({ left: pista.clientWidth * 0.9, behavior: 'smooth' });
+    pista.scrollBy({ left: pista.clientWidth * 0.9, behavior: comportamiento });
   });
 
   pista.addEventListener('scroll', actualizarFlechas);

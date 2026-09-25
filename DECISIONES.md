@@ -303,6 +303,18 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   con el scroll nativo (movimiento doble). Se filtra por
   `evento.pointerType === 'mouse'`.
 
+### Las flechas también respetan `prefers-reduced-motion` (revisión de Fran antes de mergear)
+- **Qué:** `carrusel-fila.js` suma `prefiereMovimientoReducido` (mismo chequeo
+  que ya usa `carousel.js`) y, si está activo, el click en las flechas
+  desplaza la pista con `behavior: 'auto'` en vez de `'smooth'`.
+- **Por qué:** el `scrollBy({ behavior: 'smooth' })` original es una
+  animación (el scroll se anima), pero es JavaScript, no CSS — el
+  `@media (prefers-reduced-motion: reduce)` de `home.css` no lo alcanza.
+  Se había escapado en la revisión inicial del PR: rompía la regla propia
+  del proyecto ("toda animación tiene que respetar `prefers-reduced-motion`",
+  `CLAUDE.md`). El arrastre con mouse no necesita el mismo chequeo porque
+  ahí el movimiento lo genera la persona, no una animación del sitio.
+
 ### Cards horizontales (16:9), no verticales
 - **Qué:** `.game-card__image` usa `aspect-ratio: 16 / 9`.
 - **Por qué:** correción sobre la primera versión de la 3a, que las tenía en
