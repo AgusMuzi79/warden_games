@@ -295,6 +295,78 @@
   text-decoration: none;
 }
 
+/* ---------- Carrito ---------- */
+.carrito__vacio {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 14px/1.4 var(--font-ui);
+}
+
+.carrito__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+}
+
+.carrito__item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-2);
+}
+
+.carrito__item img {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radio-sm);
+  object-fit: cover;
+}
+
+.carrito__item-nombre {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--primario-c3);
+  font: 500 14px/1.3 var(--font-ui);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ícono solo, área táctil de 44px aunque el ícono sea chico (mismo criterio
+   que .header__icon-btn). */
+.carrito__quitar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--primario-c1);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.carrito__quitar:hover {
+  background: var(--primario-o2);
+  color: var(--error);
+}
+
+.carrito__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+  margin-top: var(--espaciado-3);
+}
+
+.carrito__acciones .btn {
+  width: 100%;
+}
+
 .menu-dropdown__cerrar-sesion {
   appearance: none;
   display: block;

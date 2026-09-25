@@ -343,3 +343,13 @@
   color: var(--acento);
   font: 400 14px/1 var(--font-ui);
 }
+
+/* Solo en las cards "de pago" (simulado, ver carrito.js). Achica el .btn
+   genérico (min-height 44px de base) para que entre cómodo en la card. */
+.game-card__carrito {
+  width: calc(100% - (var(--espaciado-3) * 2));
+  margin: 0 var(--espaciado-3) var(--espaciado-3);
+  min-height: 36px;
+  padding: 0 var(--espaciado-3);
+  font-size: 13px;
+}

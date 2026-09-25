@@ -27,17 +27,32 @@ const JUEGO_JUGADO = { nombre: 'The Witcher 3: Wild Hunt', genero: 'RPG' };
 // Si la API falla, mostramos estos juegos reales igual, con género
 // suficiente para cubrir las 8 categorías y el simulado de "Recomendados".
 const JUEGOS_DE_RESPALDO = [
-  { name: 'Grand Theft Auto V', background_image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg', rating: 4.47, genres: [{ name: 'Action' }] },
-  { name: 'The Witcher 3: Wild Hunt', background_image: 'https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg', rating: 4.64, genres: [{ name: 'Action' }, { name: 'RPG' }] },
-  { name: 'Portal 2', background_image: 'https://media.rawg.io/media/games/2ba/2bac0e87cf45e5b508f227d281c9252a.jpg', rating: 4.58, genres: [{ name: 'Shooter' }, { name: 'Puzzle' }] },
-  { name: 'Counter-Strike: Global Offensive', background_image: 'https://media.rawg.io/media/games/736/73619bd336c894d6941d926bfd563946.jpg', rating: 3.57, genres: [{ name: 'Shooter' }] },
-  { name: 'Life is Strange', background_image: 'https://media.rawg.io/media/games/562/562553814dd54e001a541e4ee83a591c.jpg', rating: 4.12, genres: [{ name: 'Adventure' }] },
-  { name: 'Limbo', background_image: 'https://media.rawg.io/media/games/942/9424d6bb763dc38d9378b488603c87fa.jpg', rating: 4.14, genres: [{ name: 'Indie' }, { name: 'Platformer' }] },
-  { name: 'Company of Heroes 2', background_image: 'https://media.rawg.io/media/games/0bd/0bd5646a3d8ee0ac3314bced91ea306d.jpg', rating: 3.1, genres: [{ name: 'Strategy' }] },
+  { id: 1, name: 'Grand Theft Auto V', background_image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg', rating: 4.47, genres: [{ name: 'Action' }] },
+  { id: 2, name: 'The Witcher 3: Wild Hunt', background_image: 'https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg', rating: 4.64, genres: [{ name: 'Action' }, { name: 'RPG' }] },
+  { id: 3, name: 'Portal 2', background_image: 'https://media.rawg.io/media/games/2ba/2bac0e87cf45e5b508f227d281c9252a.jpg', rating: 4.58, genres: [{ name: 'Shooter' }, { name: 'Puzzle' }] },
+  { id: 4, name: 'Counter-Strike: Global Offensive', background_image: 'https://media.rawg.io/media/games/736/73619bd336c894d6941d926bfd563946.jpg', rating: 3.57, genres: [{ name: 'Shooter' }] },
+  { id: 5, name: 'Life is Strange', background_image: 'https://media.rawg.io/media/games/562/562553814dd54e001a541e4ee83a591c.jpg', rating: 4.12, genres: [{ name: 'Adventure' }] },
+  { id: 6, name: 'Limbo', background_image: 'https://media.rawg.io/media/games/942/9424d6bb763dc38d9378b488603c87fa.jpg', rating: 4.14, genres: [{ name: 'Indie' }, { name: 'Platformer' }] },
+  { id: 7, name: 'Company of Heroes 2', background_image: 'https://media.rawg.io/media/games/0bd/0bd5646a3d8ee0ac3314bced91ea306d.jpg', rating: 3.1, genres: [{ name: 'Strategy' }] },
 ];
 
 function esDeGenero(juego, genero) {
   return juego.genres.some((g) => g.name === genero);
+}
+
+// Solo los juegos "de pago" (simulado, ver carrito.js) muestran este botón.
+function crearBotonCarrito(juego) {
+  const boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = 'btn btn--secundario game-card__carrito';
+  boton.dataset.carritoId = juego.id;
+  boton.textContent = textoBotonCarrito(estaEnElCarrito(juego.id));
+
+  boton.addEventListener('click', () => {
+    alternarCarrito({ id: juego.id, nombre: juego.name, imagen: juego.background_image });
+  });
+
+  return boton;
 }
 
 function crearCard(juego) {
@@ -59,6 +74,7 @@ function crearCard(juego) {
   rating.innerHTML = `<i class="ph ph-star" aria-hidden="true"></i> ${juego.rating.toFixed(1)}`;
 
   card.append(imagen, titulo, rating);
+  if (esDePago(juego.id)) card.append(crearBotonCarrito(juego));
   return card;
 }
 

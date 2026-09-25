@@ -1267,6 +1267,53 @@ corrigieron directo, sin cambiar el diseño:
 
 ---
 
+## Carrito de compras (parte 1: motor + header + filas de la Home)
+
+No es el sistema de compras real que pide el enunciado (eso sigue en
+"Pendientes de decidir": falta método de pago, precios reales, etc.). Esto
+es la mecánica de agregar/quitar juegos y verlos en el header, para no
+bloquear esa parte de la interfaz hasta que exista un backend de pagos.
+
+- **`js/carrito.js` nuevo, mismo patrón que `sesion.js`:** guarda el
+  carrito en `localStorage` (clave `warden-carrito`) como un array de
+  `{id, nombre, imagen}`. Se carga antes que `home.js` (que agrega juegos
+  al carrito) y no depende de ningún otro archivo.
+- **Sin cantidad, un juego entra una sola vez:** son licencias digitales,
+  no unidades de supermercado — no tiene sentido "comprar 2" del mismo
+  juego. El botón de la card alterna entre "Agregar al carrito" y "Quitar
+  del carrito" en vez de sumar de a uno.
+- **Qué juegos son "de pago", simulado:** no hay precios reales todavía
+  (ver "Pendientes de decidir"), así que `esDePago(id)` en `carrito.js`
+  decide de forma determinística por `id % 3 === 0` — no con
+  `Math.random()` en cada render, que haría que un juego ya agregado al
+  carrito "dejara" de tener el botón al recargar la página. Solo esas
+  cards muestran el botón; las demás quedan como estaban.
+- **El ícono de carrito del header ya existía como placeholder** (`<a
+  href="#">` sin funcionalidad). Se convirtió en un botón que abre un
+  desplegable, reusando el mismo componente `.menu-dropdown` que ya
+  comparten el menú de cuenta y el hamburguesa — no un componente nuevo.
+- **`menu.js` no se tocó:** ya busca genéricamente cualquier botón con
+  `aria-controls` + `aria-expanded` y lo conecta (abrir/cerrar, click
+  afuera, Escape). El botón del carrito sigue ese mismo patrón, así que
+  quedó enganchado solo.
+- **El botón "Quitar" de cada ítem frena la propagación del click
+  (`stopPropagation`):** el listener de `menu.js` que cierra cualquier
+  menú abierto al clickear en cualquier lado (adentro o afuera) no
+  distingue el origen del click. Sin frenarlo ahí, sacar un ítem cerraría
+  todo el desplegable en vez de dejarlo abierto para sacar varios.
+- **"Seguir comprando" y "Pagar carrito" son links (`<a href="#">`), no
+  botones:** así heredan gratis el cierre automático del desplegable que
+  `menu.js` ya aplica a cualquier link de adentro de un menú (mismo
+  criterio que "Mi perfil", "Favoritos", etc. en el menú de cuenta).
+  "Pagar carrito" no lleva a ningún lado todavía — no existe sistema de
+  compras real (ver "Pendientes de decidir").
+- **Numerito del carrito, oculto con `[hidden]` si está vacío:** en vez de
+  mostrar "0" todo el tiempo. Mismo criterio que el resto del proyecto
+  para estados vacíos (ej. una fila de categoría sin resultados no se
+  muestra).
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
