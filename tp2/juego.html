@@ -60,13 +60,13 @@
       <!-- Tablero (Etapa 4). Parte 1: marco de la card y la etiqueta
            placeholder de Figma ("Botón", sin función definida todavía).
            Parte 2: grid de 33 fichas (js/juego.js) + leyenda. -->
-      <section id="board" class="tablero" aria-label="Tablero de Peg Solitaire">
+      <section id="board" class="tablero" aria-label="Tablero de Neon Circuit">
 
         <!-- Cabecera de la card: franja de otro color con el placeholder
              "Botón" de Figma (sin función definida todavía, ver DECISIONES.md).
              Oculta mientras se ve la portada (la imagen ya trae el nombre del
              juego) — js/juego.js la muestra al clickear "Jugar". -->
-        <div class="tablero__cabecera" id="tablero-cabecera" hidden>
+        <div class="tablero__cabecera" id="tablero-cabecera" tabindex="-1" hidden>
           <p class="tablero__etiqueta">Neon Circuit</p>
         </div>
 
@@ -292,7 +292,7 @@
       <section class="resena-form" aria-labelledby="resena-form-titulo">
         <h2 id="resena-form-titulo">Dejá tu reseña</h2>
 
-        <form action="#" method="post" novalidate>
+        <form id="form-resena" action="#" method="post" novalidate>
           <fieldset class="resena-form__puntaje">
             <legend>Tu puntaje</legend>
             <div class="estrellas">
@@ -316,6 +316,7 @@
           </div>
 
           <button type="submit" class="btn btn--primario">Publicar</button>
+          <p class="resena-form__estado" id="resena-estado" role="status"></p>
         </form>
       </section>
 

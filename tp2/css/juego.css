@@ -766,8 +766,8 @@
 
 .estrellas input {
   position: absolute;
-  width: var(--control-target);
-  height: var(--control-target);
+  width: var(--control-alto);
+  height: var(--control-alto);
   opacity: 0;
 }
 
@@ -775,8 +775,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--control-target);
-  height: var(--control-target);
+  width: var(--control-alto);
+  height: var(--control-alto);
   color: var(--primario-o1);
   font-size: 22px;
   line-height: 1;
@@ -816,4 +816,10 @@
   text-align: right;
   color: var(--primario-c1);
   font: 400 12px/1 var(--font-ui);
+}
+
+.resena-form__estado {
+  margin: 0;
+  color: var(--exito);
+  font: 500 14px/1 var(--font-ui);
 }
