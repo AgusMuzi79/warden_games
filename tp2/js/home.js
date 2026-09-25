@@ -41,12 +41,17 @@ function esDeGenero(juego, genero) {
 }
 
 // Solo los juegos "de pago" (simulado, ver carrito.js) muestran este botón.
+// Ícono solo, superpuesto en la esquina inferior derecha de la imagen —
+// aria-pressed refleja si ya está en el carrito, y carrito.js lo mantiene
+// actualizado (ver actualizarBotonesDeCarrito) ante cualquier cambio.
 function crearBotonCarrito(juego) {
   const boton = document.createElement('button');
   boton.type = 'button';
-  boton.className = 'btn btn--secundario game-card__carrito';
+  boton.className = 'game-card__carrito';
   boton.dataset.carritoId = juego.id;
-  boton.textContent = textoBotonCarrito(estaEnElCarrito(juego.id));
+  boton.dataset.carritoNombre = juego.name;
+  boton.innerHTML = '<i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>';
+  actualizarBotonCarrito(boton);
 
   boton.addEventListener('click', () => {
     alternarCarrito({ id: juego.id, nombre: juego.name, imagen: juego.background_image });
@@ -59,11 +64,16 @@ function crearCard(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
 
+  const media = document.createElement('div');
+  media.className = 'game-card__media';
+
   const imagen = document.createElement('img');
   imagen.className = 'game-card__image';
   imagen.src = juego.background_image;
   imagen.alt = '';
   imagen.loading = 'lazy';
+  media.append(imagen);
+  if (esDePago(juego.id)) media.append(crearBotonCarrito(juego));
 
   const titulo = document.createElement('h3');
   titulo.className = 'game-card__title';
@@ -73,8 +83,7 @@ function crearCard(juego) {
   rating.className = 'game-card__rating';
   rating.innerHTML = `<i class="ph ph-star" aria-hidden="true"></i> ${juego.rating.toFixed(1)}`;
 
-  card.append(imagen, titulo, rating);
-  if (esDePago(juego.id)) card.append(crearBotonCarrito(juego));
+  card.append(media, titulo, rating);
   return card;
 }
 

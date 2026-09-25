@@ -324,7 +324,12 @@
   flex-direction: column;
 }
 
+.game-card__media {
+  position: relative;
+}
+
 .game-card__image {
+  display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
@@ -344,12 +349,44 @@
   font: 400 14px/1 var(--font-ui);
 }
 
-/* Solo en las cards "de pago" (simulado, ver carrito.js). Achica el .btn
-   genérico (min-height 44px de base) para que entre cómodo en la card. */
+/* Solo en las cards "de pago" (simulado, ver carrito.js). Ícono solo,
+   superpuesto en la esquina inferior derecha de la imagen — 44px de área
+   táctil (--control-alto) aunque el ícono se vea chico, mismo criterio que
+   el resto de los controles de ícono del proyecto. */
 .game-card__carrito {
-  width: calc(100% - (var(--espaciado-3) * 2));
-  margin: 0 var(--espaciado-3) var(--espaciado-3);
-  min-height: 36px;
-  padding: 0 var(--espaciado-3);
-  font-size: 13px;
+  position: absolute;
+  right: var(--espaciado-2);
+  bottom: var(--espaciado-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 2px solid var(--acento);
+  border-radius: 50%;
+  background: var(--fondo-o1);
+  color: var(--acento);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.game-card__carrito:hover {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+/* Ya está en el carrito: queda "hundido" y relleno en vez de volver al
+   estado normal — así se nota de un vistazo cuál ya se agregó, sin
+   necesidad de leer texto. */
+.game-card__carrito[aria-pressed="true"] {
+  background: var(--acento);
+  color: var(--fondo);
+  transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card__carrito {
+    transition: none;
+  }
 }

@@ -1312,6 +1312,44 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
   para estados vacíos (ej. una fila de categoría sin resultados no se
   muestra).
 
+### Bug real: el botón de la card no respondía al click con mouse
+- **Qué:** el arrastre de `carrusel-fila.js` hace `pointerdown.preventDefault()`
+  sobre toda la pista, para evitar el "fantasma" de arrastrar una imagen. Por
+  la spec de Pointer Events, cancelar el `pointerdown` también cancela los
+  eventos de mouse de compatibilidad que vienen después — incluido el
+  `click`. Como el botón "Agregar al carrito" vive dentro de la pista, un
+  click que arrancaba justo sobre el botón quedaba comido por ese
+  `preventDefault()` de la fila, sin ningún error visible.
+- **Por qué se corrigió así:** en el listener de `pointerdown` de
+  `carrusel-fila.js`, si `evento.target.closest('button, a')` frena antes de
+  arrancar el arrastre (`return` temprano) — el `preventDefault()` nunca se
+  llama para ese click, así que el navegador sí dispara el `click` normal
+  sobre el botón. El arrastre en el resto de la card (imagen, texto) sigue
+  igual.
+
+### El botón pasa de texto a ícono, superpuesto en la esquina de la imagen
+- **Qué:** `.game-card__carrito` dejó de ser un `.btn--secundario` con
+  texto debajo de la card — ahora es un botón solo-ícono
+  (`ph-shopping-cart-simple`), circular, superpuesto en la esquina inferior
+  derecha de la imagen (`.game-card__media` pasa a `position: relative`
+  para anclarlo). El estado "ya está en el carrito" se comunica con
+  `aria-pressed` (no con cambiar el texto, que ya no existe): CSS lo lee
+  con el selector de atributo `[aria-pressed="true"]` y lo pinta relleno
+  con `--acento`, más `transform: scale(0.9)` — queda "hundido" a
+  propósito, para que se note de un vistazo cuál ya se agregó sin tener
+  que leer nada.
+- **Por qué:** pedido explícito — menos intrusivo sobre la card (no le
+  agrega una fila entera de alto) y el estado "pressed" persistente es más
+  directo que un cambio de texto para comunicar "ya lo agregaste".
+- **Sigue siendo accesible sin texto visible:** `aria-label` dinámico
+  ("Agregar/Quitar `<nombre>` del carrito", `carrito.js`) y el ícono con
+  `aria-hidden`, mismo patrón que cualquier otro control de solo ícono del
+  proyecto (44px de área táctil, `--control-alto`, aunque el ícono se vea
+  chico).
+- **Token nuevo `--fondo-o1`:** rgba de `--fondo` al 75%, para que el
+  círculo del botón se distinga incluso sobre imágenes claras — ninguno de
+  los tokens existentes era una versión translúcida de `--fondo`.
+
 ---
 
 ## Pendientes de decidir

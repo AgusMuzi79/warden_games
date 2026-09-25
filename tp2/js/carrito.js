@@ -92,19 +92,22 @@ function renderizarCarritoHeader() {
 }
 
 // ---- Botones "Agregar al carrito" de las cards (home.js, carousel.js) ----
-// Se identifican con data-carrito-id para que, ante cualquier cambio del
-// carrito (agregar, quitar, quitar desde el desplegable), todos se
-// actualicen solos sin que cada uno tenga que escuchar el evento.
+// Ícono solo (sin texto): el estado "ya agregado" se comunica con
+// aria-pressed (lector de pantalla) y su estilo en home.css (visual, queda
+// "hundido" y relleno). Se identifican con data-carrito-id para que, ante
+// cualquier cambio del carrito (agregar, quitar, quitar desde el
+// desplegable), todos se actualicen solos sin que cada uno escuche el evento.
 
-function textoBotonCarrito(enCarrito) {
-  return enCarrito ? 'Quitar del carrito' : 'Agregar al carrito';
+function actualizarBotonCarrito(boton) {
+  const id = Number(boton.dataset.carritoId);
+  const nombre = boton.dataset.carritoNombre;
+  const enCarrito = estaEnElCarrito(id);
+  boton.setAttribute('aria-pressed', String(enCarrito));
+  boton.setAttribute('aria-label', enCarrito ? `Quitar ${nombre} del carrito` : `Agregar ${nombre} al carrito`);
 }
 
 function actualizarBotonesDeCarrito() {
-  document.querySelectorAll('[data-carrito-id]').forEach((boton) => {
-    const id = Number(boton.dataset.carritoId);
-    boton.textContent = textoBotonCarrito(estaEnElCarrito(id));
-  });
+  document.querySelectorAll('[data-carrito-id]').forEach(actualizarBotonCarrito);
 }
 
 function alternarCarrito(juego) {
