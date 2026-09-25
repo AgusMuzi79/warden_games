@@ -50,28 +50,40 @@
     </nav>
 
     <!-- Columna de contenido + panel lateral, una al lado de la otra
-         (solo desktop). -->
+         (solo desktop). Grid de 2 filas: la de arriba (tablero + ficha/Ayuda)
+         y la de abajo (Sobre el juego/Galería + Compartir) miden lo mismo
+         que su vecino de fila gracias a align-items:stretch — así el
+         tablero llega exactamente hasta el borde de Ayuda, sin importar
+         cuánto texto tenga. -->
     <div class="juego-layout">
 
-      <!-- Columna principal: tablero, "Sobre el juego" y Galería, uno
-           debajo del otro. -->
-      <div class="juego-layout__principal">
+      <!-- Tablero (Etapa 4). Parte 1: marco de la card y la etiqueta
+           placeholder de Figma ("Botón", sin función definida todavía).
+           Parte 2: grid de 33 fichas (js/juego.js) + leyenda. -->
+      <section id="board" class="tablero" aria-label="Tablero de Peg Solitaire">
 
-        <!-- Tablero (Etapa 4). Parte 1: marco de la card y la etiqueta
-             placeholder de Figma ("Botón", sin función definida todavía).
-             Parte 2: grid de 33 fichas (js/juego.js) + leyenda. -->
-        <section id="board" class="tablero" aria-label="Tablero de Peg Solitaire">
+        <!-- Cabecera de la card: franja de otro color con el placeholder
+             "Botón" de Figma (sin función definida todavía, ver DECISIONES.md).
+             Oculta mientras se ve la portada (la imagen ya trae el nombre del
+             juego) — js/juego.js la muestra al clickear "Jugar". -->
+        <div class="tablero__cabecera" id="tablero-cabecera" hidden>
+          <p class="tablero__etiqueta">Neon Circuit</p>
+        </div>
 
-          <!-- Cabecera de la card: franja de otro color con el placeholder
-               "Botón" de Figma (sin función definida todavía, ver DECISIONES.md). -->
-          <div class="tablero__cabecera">
-            <p class="tablero__etiqueta">Neon Circuit</p>
+        <div class="tablero__cuerpo">
+          <!-- Portada: se ve primero, con el botón para arrancar la partida.
+               La imagen es decorativa (ya trae el nombre del juego dibujado
+               adentro), por eso alt="". -->
+          <div class="tablero__portada" id="tablero-portada">
+            <img class="tablero__portada-img" src="assets/img/portada-tronpeg-1616x1320.png" alt="">
+            <button type="button" class="btn btn--primario tablero__jugar" id="btn-jugar">Jugar</button>
           </div>
 
-          <div class="tablero__cuerpo">
-            <!-- Grid generado por js/juego.js (33 posiciones). aria-hidden porque
-                 todavía no hay lógica de movimientos ni navegación por teclado
-                 (parte 2 de la Etapa 4, solo visual) — se saca cuando eso exista. -->
+          <!-- Tablero real: oculto hasta clickear "Jugar". Grid generado por
+               js/juego.js (33 posiciones). aria-hidden porque todavía no hay
+               lógica de movimientos ni navegación por teclado (parte 2 de la
+               Etapa 4, solo visual) — se saca cuando eso exista. -->
+          <div class="tablero__juego" id="tablero-juego" hidden>
             <div class="tablero__grid" id="tablero-grid" aria-hidden="true"></div>
 
             <!-- Leyenda de símbolos: las muestras de color son decorativas
@@ -90,37 +102,13 @@
               </li>
             </ul>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- "Sobre el juego" (Etapa 4, parte 4). -->
-        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
-          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
-          <p>Neon Circuit lleva el clásico solitario de tablero a una estética de circuito de neón. Cada nodo cargado puede saltar sobre un vecino directo hacia un casillero descargado, en línea recta, y el nodo del medio se apaga con cada salto. Empezás con 33 nodos activos y un único hueco en el centro: el objetivo es terminar la partida con la menor cantidad de nodos posible, hasta llegar, si podés, a uno solo justo en el medio.</p>
-        </section>
-
-        <!-- Galería (Etapa 4, parte 5). Gradientes con la paleta del tablero,
-             sin fotos reales todavía (se resuelven más adelante). aria-hidden
-             por lo mismo: no son capturas reales, no aportan información. -->
-        <section class="galeria" aria-labelledby="galeria-titulo">
-          <div class="galeria__cabecera">
-            <h2 id="galeria-titulo">Galería</h2>
-            <p class="galeria__contador">6 capturas</p>
-          </div>
-          <ul class="galeria__grid" aria-hidden="true">
-            <li class="galeria__tile galeria__tile--1"></li>
-            <li class="galeria__tile galeria__tile--2"></li>
-            <li class="galeria__tile galeria__tile--3"></li>
-            <li class="galeria__tile galeria__tile--4"></li>
-            <li class="galeria__tile galeria__tile--5"></li>
-            <li class="galeria__tile galeria__tile--6"></li>
-          </ul>
-        </section>
-
-      </div>
-
-      <!-- Panel lateral (Etapa 4, partes 3 y 6): ficha del juego, Ayuda y
-           Compartir, apilados uno debajo del otro (ver captura de Figma:
-           Compartir va debajo de Ayuda, no debajo de la Galería). -->
+      <!-- Ficha del juego + Ayuda (Etapa 4, partes 3 y 6): misma fila que
+           el tablero, así miden exactamente lo mismo (align-items:stretch
+           en .juego-layout). Compartir queda en la fila de abajo, ver más
+           abajo — sigue viéndose debajo de Ayuda, en la misma columna. -->
       <aside class="panel-lateral" aria-label="Información del juego">
 
         <section class="ficha-juego">
@@ -181,29 +169,61 @@
           </ul>
         </section>
 
-        <section class="compartir" aria-labelledby="compartir-titulo">
-          <h2 id="compartir-titulo">Compartir</h2>
+      </aside>
 
-          <ul class="compartir__redes">
-            <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
-            <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
-            <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
-            <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
-          </ul>
+      <!-- Fila de abajo: "Sobre el juego" + Galería a la izquierda (debajo
+           del tablero), Compartir a la derecha (debajo de Ayuda — sigue en
+           la misma columna que antes, ver DECISIONES.md). -->
+      <div class="juego-layout__secundario">
 
-          <div class="compartir__acciones">
-            <a class="btn btn--secundario" href="mailto:?subject=Jug%C3%A1%20Neon%20Circuit&body=Mir%C3%A1%20este%20juego%3A%20https%3A%2F%2Fwardengames.com%2Fneon-circuit">Enviar mail</a>
-            <button type="button" class="btn btn--secundario">Mensaje</button>
-          </div>
-
-          <div class="compartir__link">
-            <label class="sr-only" for="link-juego">Enlace para compartir</label>
-            <input type="text" id="link-juego" value="wardengames.com/neon-circuit" readonly>
-            <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
-          </div>
+        <!-- "Sobre el juego" (Etapa 4, parte 4). -->
+        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
+          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
+          <p>Neon Circuit lleva el clásico solitario de tablero a una estética de circuito de neón. Cada nodo cargado puede saltar sobre un vecino directo hacia un casillero descargado, en línea recta, y el nodo del medio se apaga con cada salto. Empezás con 33 nodos activos y un único hueco en el centro: el objetivo es terminar la partida con la menor cantidad de nodos posible, hasta llegar, si podés, a uno solo justo en el medio.</p>
         </section>
 
-      </aside>
+        <!-- Galería (Etapa 4, parte 5). Gradientes con la paleta del tablero,
+             sin fotos reales todavía (se resuelven más adelante). aria-hidden
+             por lo mismo: no son capturas reales, no aportan información. -->
+        <section class="galeria" aria-labelledby="galeria-titulo">
+          <div class="galeria__cabecera">
+            <h2 id="galeria-titulo">Galería</h2>
+            <p class="galeria__contador">6 capturas</p>
+          </div>
+          <ul class="galeria__grid" aria-hidden="true">
+            <li class="galeria__tile galeria__tile--1"></li>
+            <li class="galeria__tile galeria__tile--2"></li>
+            <li class="galeria__tile galeria__tile--3"></li>
+            <li class="galeria__tile galeria__tile--4"></li>
+            <li class="galeria__tile galeria__tile--5"></li>
+            <li class="galeria__tile galeria__tile--6"></li>
+          </ul>
+        </section>
+
+      </div>
+
+      <section class="compartir" aria-labelledby="compartir-titulo">
+        <h2 id="compartir-titulo">Compartir</h2>
+
+        <ul class="compartir__redes">
+          <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <div class="compartir__acciones">
+          <a class="btn btn--secundario" href="mailto:?subject=Jug%C3%A1%20Neon%20Circuit&body=Mir%C3%A1%20este%20juego%3A%20https%3A%2F%2Fwardengames.com%2Fneon-circuit">Enviar mail</a>
+          <button type="button" class="btn btn--secundario">Mensaje</button>
+        </div>
+
+        <div class="compartir__link">
+          <label class="sr-only" for="link-juego">Enlace para compartir</label>
+          <input type="text" id="link-juego" value="wardengames.com/neon-circuit" readonly>
+          <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
+        </div>
+      </section>
+
     </div>
 
     <!-- Comunidad + "Dejá tu reseña", uno al lado del otro (mismo layout de

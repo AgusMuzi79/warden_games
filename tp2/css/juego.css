@@ -50,12 +50,18 @@
 .tablero {
   display: flex;
   flex-direction: column;
-  margin-top: var(--espaciado-8);
   border-radius: var(--radio-xl);
   /* La cabecera es de otro color; sin esto, se saldría de las esquinas
      redondeadas de la card en vez de seguirlas. */
   overflow: hidden;
   background: var(--superficie);
+  /* align-self:start saca al tablero del stretch de .juego-layout: si no,
+     cada vez que se abre otro desplegable de Ayuda (misma fila del grid),
+     el tablero se estiraba en conjunto para seguirle el alto. min-height
+     fija el alto "base" (el que tiene con Ayuda en su estado por
+     default), independiente de cuánto crezca Ayuda después. */
+  align-self: start;
+  min-height: 660px;
 }
 
 /* Franja de cabecera, de un violeta más claro que el cuerpo — así se ve en
@@ -68,16 +74,15 @@
   background: var(--primario-o1);
 }
 
-/* flex + justify-content: center reparte el espacio de sobra (cuando la
-   card queda más alta que el grid, para igualar al panel lateral) arriba y
-   abajo del grid+leyenda, en vez de dejarlo todo apilado como aire al
-   final de la card. */
 .tablero__cuerpo {
+  /* position:relative ancla la portada absoluta (más abajo) a esta caja. */
+  position: relative;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: var(--espaciado-6);
+  /* Menos padding arriba y abajo que a los costados: arriba, para acercar
+     el grid a la cabecera ("Neon Circuit"); abajo, para acercar la leyenda
+     al borde de la card (space-between de .tablero__juego ya la lleva al
+     fondo del padding; con menos padding-bottom, ese fondo queda más abajo). */
+  padding: var(--espaciado-3) var(--espaciado-6) var(--espaciado-3);
   /* Grilla tenue de fondo (como el "papel cuadriculado" de Figma). El
      background-image respeta el border-radius de .tablero solo, así que
      no hace falta repetirlo acá. */
@@ -85,6 +90,43 @@
     linear-gradient(var(--tablero-grilla) 1px, transparent 1px),
     linear-gradient(90deg, var(--tablero-grilla) 1px, transparent 1px);
   background-size: 28px 28px;
+}
+
+/* Portada: tapa toda la caja de .tablero__cuerpo (inset:0 se mide desde el
+   borde de relleno del padre, así que cubre también donde iría su padding
+   — la imagen llega de punta a punta de la card, sin recorte). */
+.tablero__portada {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tablero__portada-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Recorta la imagen para llenar el espacio sin deformarla, sea cual sea
+     su proporción original (misma técnica que el banner "Destacados" y
+     las cards de juegos de la Home). */
+  object-fit: cover;
+}
+
+.tablero__jugar {
+  /* Por encima de la imagen (que también es position:absolute). */
+  position: relative;
+}
+
+/* .tablero__juego reemplaza el rol que tenía .tablero__cuerpo antes de que
+   existiera la portada: ocupa toda la altura disponible y reparte el
+   espacio de sobra entre el grid y la leyenda con space-between. */
+.tablero__juego {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 /* Etiqueta placeholder del mock de Figma (ahí decía "Botón", sin función
@@ -107,21 +149,22 @@
    celda; acá solo el tamaño/color de cada estado. */
 .tablero__grid {
   display: grid;
-  grid-template-columns: repeat(7, 56px);
-  grid-template-rows: repeat(7, 56px);
-  /* row-gap y column-gap por separado (no "gap" a secas): más separación
-     entre columnas para ocupar más ancho, sin agrandar la ficha ni tocar
-     el alto, que ya estaba bien. */
-  row-gap: var(--espaciado-3);
-  column-gap: var(--espaciado-8);
+  grid-template-columns: repeat(7, 60px);
+  grid-template-rows: repeat(7, 60px);
+  /* Mismo gap horizontal y vertical (antes eran distintos: 12px/32px).
+     Al subir el vertical, el grid se hace más alto — se achicó la ficha
+     (68px → 60px) para compensar y no romper el alto de la card. */
+  row-gap: var(--espaciado-5);
+  column-gap: var(--espaciado-5);
   justify-content: center;
-  margin: var(--espaciado-6) 0;
+  /* Menos margen arriba que abajo: acerca el grid a la cabecera. */
+  margin: var(--espaciado-2) 0 var(--espaciado-6);
 }
 
 .tablero__hueco {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
 }
 
@@ -146,7 +189,7 @@
 .tablero__hueco--seleccionado::before {
   content: "";
   position: absolute;
-  inset: 8px;
+  inset: 9px;
   border: 2px dashed var(--color-ficha);
   border-radius: 50%;
 }
@@ -156,7 +199,7 @@
 .tablero__hueco--seleccionado::after {
   content: "";
   position: absolute;
-  inset: 17px;
+  inset: 18px;
   border: 2px solid var(--color-ficha);
   border-radius: 50%;
 }
@@ -178,8 +221,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--espaciado-4);
-  padding-top: var(--espaciado-4);
+  justify-content: center;
+  gap: var(--espaciado-3);
+  padding-top: var(--espaciado-2);
   border-top: 1px solid var(--primario-o1);
   color: var(--primario-c1);
   font: 600 12px/1 var(--font-ui);
@@ -248,35 +292,40 @@
    Layout tablero + panel lateral — Etapa 4, parte 3
    Solo desktop (regla del proyecto: la página del juego no necesita
    mobile first), por eso no hay @media acá.
+
+   Grid de 2 filas x 2 columnas (4 hijos directos de .juego-layout):
+   fila 1 = tablero | ficha+Ayuda, fila 2 = Sobre el juego+Galería | Compartir.
+   align-items: stretch hace que, en la fila 1, el tablero y el panel
+   lateral midan siempre lo mismo — sin importar cuánto texto tenga
+   Ayuda — porque CSS Grid iguala la altura de todos los ítems de una
+   misma fila por spec, no hace falta ningún cálculo manual.
    ============================================================ */
 .juego-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
-  /* stretch (no start): así el tablero llega hasta abajo de Ayuda/Compartir,
-     en vez de quedar más corto que el panel lateral. */
   align-items: stretch;
-  gap: var(--espaciado-6);
+  column-gap: var(--espaciado-6);
+  row-gap: var(--espaciado-8);
   margin-top: var(--espaciado-6);
 }
 
-.juego-layout__principal {
+/* La fila 2 no necesita igualar alturas (nadie mira si "Sobre el juego" +
+   Galería miden lo mismo que Compartir): con align-items:stretch general
+   de arriba, si no ponemos esto, un ítem más corto quedaría con una card
+   más alta que su contenido, con aire de sobra adentro. */
+.juego-layout__secundario,
+.juego-layout > .compartir {
+  align-self: start;
+}
+
+.juego-layout__secundario {
   display: flex;
   flex-direction: column;
   gap: var(--espaciado-8);
 }
 
-/* El tablero absorbe el espacio de sobra para que la columna llegue a la
-   misma altura que el panel lateral; "Sobre el juego" y la Galería miden
-   lo que necesitan, no más. */
-.juego-layout__principal .tablero {
-  flex: 1;
-}
-
-/* Ya suman su propio espacio con el gap de arriba: sin esto, quedarían
-   con el doble (su margin-top propio + el gap del flex). */
-.juego-layout__principal .tablero,
-.juego-layout__principal .sobre-juego,
-.juego-layout__principal .galeria {
+.juego-layout__secundario .sobre-juego,
+.juego-layout__secundario .galeria {
   margin-top: 0;
 }
 
@@ -302,14 +351,15 @@
   margin-bottom: var(--espaciado-4);
 }
 
-/* Miniatura con la paleta del tablero, en vez de una imagen (no hay
-   asset todavía — ver "Pendientes de decidir"). */
+/* Miniatura de la portada, recortada a cuadrado (56x56, igual que la
+   imagen fuente: 1080x1080, no hace falta object-fit/cover ni recortar
+   nada porque ya es 1:1). */
 .ficha-juego__miniatura {
   width: 56px;
   height: 56px;
   flex-shrink: 0;
   border-radius: var(--radio-md);
-  background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-seleccionado) 60%, var(--tablero-destino));
+  background: url("../assets/img/miniatura-neon-circuit.png") center / cover;
 }
 
 .ficha-juego__nombre {

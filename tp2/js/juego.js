@@ -34,3 +34,19 @@ for (let fila = 0; fila < FILAS; fila++) {
     grilla.append(casillero);
   }
 }
+
+// Portada: se ve primero, con el botón "Jugar" para arrancar la partida.
+// Al clickearlo, se oculta la portada y se muestra el tablero de una vez
+// (no hay lógica de juego todavía — eso es de una etapa aparte). La
+// cabecera con el nombre ("Neon Circuit") arranca oculta porque la
+// portada ya lo trae dibujado adentro; aparece recién con el tablero.
+const cabecera = document.getElementById('tablero-cabecera');
+const portada = document.getElementById('tablero-portada');
+const tableroJuego = document.getElementById('tablero-juego');
+const btnJugar = document.getElementById('btn-jugar');
+
+btnJugar.addEventListener('click', () => {
+  portada.hidden = true;
+  cabecera.hidden = false;
+  tableroJuego.hidden = false;
+});

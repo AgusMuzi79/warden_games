@@ -638,17 +638,110 @@ A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
   ("Nodo activo", "Descargado", etc.) no — describe algo real del diseño
   aunque el tablero en sí todavía no funcione.
 
-### La card del tablero crece hasta igualar al panel lateral
-- **Qué:** `.juego-layout` pasó de `align-items: start` a `stretch`, y
-  `.tablero` (dentro de `.juego-layout__principal`) tiene `flex: 1` — así
-  absorbe el espacio de sobra hasta quedar tan alto como el panel lateral
-  (ficha + Ayuda + Compartir), en vez de quedar más bajo. "Sobre el juego"
-  y la Galería, debajo, miden lo que necesitan, sin estirarse.
-- **Por qué:** Fran lo pidió al ver que la card del tablero quedaba más
-  corta que la del panel lateral. `.tablero` y `.tablero__cuerpo` pasaron a
-  `display: flex; flex-direction: column` para que ese espacio de sobra lo
-  reparta `justify-content: center` alrededor del grid + la leyenda, en vez
-  de quedar como aire apilado abajo de todo.
+### Portada con botón "Jugar" antes de mostrar el tablero
+- **Qué:** `.tablero__cuerpo` tiene dos hijos: `.tablero__portada`
+  (imagen `assets/img/portada-tronpeg-1616x1320.png` + botón
+  `.btn--primario` "Jugar", visible por default) y `.tablero__juego` (el
+  grid + la leyenda de siempre, con `hidden` puesto en el HTML).
+  `js/juego.js` engancha un click en el botón que hace
+  `portada.hidden = true` y `tableroJuego.hidden = false`, mostrando el
+  tablero real.
+- **Por qué:** pedido de Fran — al entrar a la página se ve una portada
+  (como en cualquier plataforma de juegos) en vez del tablero directo, y
+  recién arranca al clickear "Jugar".
+- **`object-fit: cover`, y la imagen final ya viene recortada a la
+  proporción exacta de la card:** `.tablero__portada-img` usa
+  `object-fit: cover` (misma técnica que el banner "Destacados" y las
+  cards de la Home) para que la imagen llene la card sin deformarse,
+  cualquiera sea su proporción — pero con la primera imagen que probamos
+  (cuadrada, 1080×1080) eso recortaba ~99px arriba y abajo, comiéndose
+  parte del título y de "Peg Solitaire". La card mide 808×660px mientras
+  se ve la portada (fija: con `.tablero__cabecera` oculta en ese momento,
+  el alto de `.tablero` queda solo en su `min-height`, sin nada más que
+  lo empuje). Se le pasó esa proporción exacta (808:660 ≈ 1.224:1) a la
+  IA para que exportara la imagen ya recortada así, en vez de dejar que
+  `cover` la recorte en el navegador — con la imagen ya a la proporción
+  correcta, `cover` no tiene nada que recortar.
+- **`.tablero__cuerpo` pasa a `position: relative`, y el `flex`/`space-between`
+  que tenía se mueve a `.tablero__juego`:** la portada es `position:
+  absolute; inset: 0` sobre `.tablero__cuerpo` (así tapa toda la card, de
+  punta a punta, sin el padding en el medio). Un elemento absoluto no
+  participa del `flex` del padre, así que el `justify-content:
+  space-between` que llevaba el grid+leyenda al fondo de la card se pasó
+  a `.tablero__juego` (que ahora sí es el único hijo flex real de
+  `.tablero__cuerpo` cuando la portada está oculta).
+- **Nombre de archivo:** las imágenes que va probando Fran las deja en la
+  carpeta `assets/` de la raíz del repo (no en `tp2/`); cada una se copia
+  a `tp2/assets/img/` con nombre en minúsculas, sin espacios ni el
+  carácter `×`, por la regla de rutas del proyecto (GitHub Pages
+  distingue mayúsculas).
+- **Historial de versiones probadas** (las viejas quedan en
+  `tp2/assets/img/` sin usar, por si hace falta volver atrás — no se
+  borran): `portada-tron.jpg` (arte genérico estilo Tron, decía "Grid
+  Solitaire", no el nombre real) → `portada-neon-circuit.png` (1080×1080,
+  ya con "Neon Circuit"/"Peg Solitaire", pero cuadrada, se recortaba) →
+  `portada-tronpeg-808x660.png` / `portada-tronpeg-1616x1320.png` (ya a
+  la proporción exacta de la card, sin recorte). Se usa la de
+  1616×1320 (el doble de 808×660) para que se vea nítida en pantallas de
+  alta densidad (retina).
+- **Sin derechos propios, como el avatar:** ninguna de las portadas
+  probadas es un asset propio con derechos — mismo criterio ya aceptado
+  para `avatar.jpg` (ver "Imagen de avatar con sesión"), para los fines
+  de este TP.
+- **`alt=""` en la imagen:** es decorativa — trae el nombre del juego
+  dibujado adentro y el botón "Jugar" es lo único accionable de la
+  portada.
+- **La cabecera ("Neon Circuit") también arranca oculta:** `.tablero__cabecera`
+  suma `id="tablero-cabecera"` y `hidden` en el HTML; el mismo click de
+  "Jugar" que oculta la portada la vuelve a mostrar
+  (`cabecera.hidden = false`). Pedido de Fran — con la portada ya
+  mostrando el nombre del juego dibujado adentro, la franja de arriba con
+  el mismo texto quedaba redundante mientras se ve la portada.
+
+### La card del tablero mide exactamente lo mismo que ficha + Ayuda (no todo el panel lateral)
+- **Qué:** `.juego-layout` pasó a tener 4 hijos directos en vez de 2
+  (sacamos los wrappers `.juego-layout__principal` y la parte de
+  `.panel-lateral` que envolvía a Compartir): fila 1 = `.tablero` | `.panel-lateral`
+  (ahora solo ficha-juego + Ayuda), fila 2 = `.juego-layout__secundario`
+  ("Sobre el juego" + Galería) | `.compartir`. Con `align-items: stretch`,
+  CSS Grid iguala por spec la altura de los dos ítems de una misma fila —
+  el tablero y el panel lateral miden siempre lo mismo, sin ningún cálculo
+  manual. La fila 2 usa `align-self: start` para no heredar ese estirado
+  (no hace falta que "Sobre el juego"+Galería midan lo mismo que Compartir).
+- **Por qué:** la versión anterior (`.tablero` con `flex: 1` dentro de un
+  wrapper que agrupaba las 3 secciones de la izquierda) igualaba la altura
+  del **total** de la columna izquierda contra el **total** de la derecha
+  — pero eso no garantiza que el tablero en sí llegue hasta el borde de
+  Ayuda, solo que la suma final coincida. Fran lo notó comparando contra una
+  captura: el tablero quedaba corto porque "Sobre el juego" + Galería son
+  altas y se llevaban gran parte del crecimiento. Separar en 2 filas de
+  grid ata la altura del tablero directamente a la de ficha+Ayuda, que es
+  la comparación que importa visualmente.
+- **Compartir sigue viéndose debajo de Ayuda:** al ser la fila 2, columna
+  derecha, queda en la misma posición visual de siempre (ver "Panel
+  lateral" más abajo) — solo cambió de qué elemento del HTML depende su
+  altura, no dónde se ve en pantalla.
+- **`.tablero` pierde su `margin-top` propio:** ahora que vuelve a ser un
+  hijo directo de `.juego-layout` (como en la parte 1, antes de que
+  existiera el layout de 2 columnas), ese espaciado ya lo pone el
+  `margin-top` del propio `.juego-layout`; dejar los dos sumaba doble
+  espacio.
+- **Leyenda del tablero más compacta:** `.tablero__leyenda` bajó su
+  `padding-top` (16px → 8px) y su `gap` (16px → 12px), a pedido de Fran,
+  para que ocupe menos alto de la card y el grid de fichas tenga más lugar
+  relativo dentro de ella.
+- **El tablero se desengancha del stretch después de probarlo (`align-self: start`
+  + `min-height` fijo):** con `align-items: stretch` puro, el tablero no solo
+  igualaba contra Ayuda en su estado inicial — la seguía en vivo cada vez
+  que se abría otro `<details>` (misma fila del grid, la fila crece con
+  Ayuda y el tablero la sigue). Fran probó el resultado, le gustó el alto
+  que da Ayuda en su estado por default (un solo ítem abierto), pero pidió
+  que el tablero se quede en esa altura "base" en vez de seguir creciendo
+  cada vez que se abre un desplegable más. `.tablero` pasa a
+  `align-self: start` (sale del stretch de la fila) más un `min-height: 660px`
+  que congela ese alto base — valor estimado a partir del contenido de
+  ficha+Ayuda en su estado inicial, pendiente de afinar a ojo contra la
+  pantalla real (ver "Pendientes de decidir").
 
 ### Fichas más grandes (44px → 56px), y el ancho se resuelve con el gap, no con la ficha
 - **Qué:** el grid de fichas y cada `.tablero__hueco` pasaron de 44px a
@@ -663,6 +756,23 @@ A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
   la hacía más alta (es un círculo, ancho y alto van juntos) — separar el
   gap horizontal del vertical resuelve el ancho sin tocar el alto que ya
   estaba bien.
+
+### Fichas a 68px y de vuelta a 60px: mismo gap horizontal y vertical (`--espaciado-5`, token nuevo)
+- **Qué:** al agrandar la card (ver "La card del tablero mide exactamente
+  lo mismo que ficha + Ayuda"), las fichas subieron otra vez, a 68px
+  (anillos en `inset: 10px`/`21px`), para aprovechar el espacio de sobra.
+  Fran después pidió que el gap horizontal (32px) y vertical (12px) —
+  distintos a propósito desde la decisión anterior— se acercaran a un
+  punto intermedio, probando 20px para los dos. Como no había ningún token
+  de 20px en la escala (`--espaciado-1..8` son `N × 4px`, pero saltea el 5
+  y el 7), se agregó `--espaciado-5: 20px` en vez de escribirlo a mano.
+  Subir el `row-gap` de 12px a 20px agranda el grid en alto (6 espacios ×
+  8px de más = 48px), así que la ficha bajó de 68px a 60px para
+  compensar y no romper el alto de la card — anillos reescalados de nuevo
+  en proporción (`inset: 9px`/`18px`).
+- **Por qué:** Fran lo pidió así explícitamente: un punto intermedio entre
+  las dos distancias, priorizando no romper el tamaño de la card por sobre
+  mantener la ficha lo más grande posible.
 
 ### La etiqueta del título va sobre una cabecera propia, no flotando sola
 - **Qué:** `.tablero` se dividió en `.tablero__cabecera` (franja de arriba,
@@ -736,11 +846,14 @@ más una que sumamos nosotros al revisar:
   compararlos en pantalla contra el diseño real.
 
 ### Panel lateral: tablero + ficha/Ayuda/Compartir en dos columnas, solo desktop
-- **Qué:** `.juego-layout` es un grid de 2 columnas: `.juego-layout__principal`
-  (tablero, "Sobre el juego" y Galería, apilados) y `.panel-lateral`
-  (ficha del juego, Ayuda y Compartir, apilados). 320px fijo para el panel,
-  el resto para la columna principal. Sin `@media`, porque la página del
-  juego no necesita mobile first (regla del proyecto).
+- **Qué:** `.juego-layout` es un grid de 2 columnas (320px fijo para la
+  derecha, el resto para la izquierda) y 2 filas: tablero / ficha+Ayuda
+  arriba, "Sobre el juego"+Galería / Compartir abajo. Compartir queda
+  debajo de Ayuda, en la misma columna, aunque ya no comparte wrapper HTML
+  con `.panel-lateral` — ver "La card del tablero mide exactamente lo mismo
+  que ficha + Ayuda" más arriba, que explica por qué se separó en 2 filas.
+  Sin `@media`, porque la página del juego no necesita mobile first (regla
+  del proyecto).
 - **Por qué:** así está en la captura de Figma que confirmó Fran — Compartir
   va debajo de Ayuda, en la misma columna lateral, no debajo de la Galería.
   Al principio Compartir había quedado como sección suelta a ancho completo
@@ -761,14 +874,22 @@ más una que sumamos nosotros al revisar:
   aparte). El texto de "Puentes" aclara que este tablero clásico de 33 no
   los usa, en vez de prometer algo que no está.
 
-### Miniatura de la ficha del juego: gradiente con la paleta del tablero
-- **Qué:** `.ficha-juego__miniatura` es un `linear-gradient` con
-  `--tablero-activo`, `--tablero-seleccionado` y `--tablero-destino`, no una
-  imagen.
-- **Por qué:** todavía no hay ningún asset real para Neon Circuit (se
-  resuelve más adelante, junto con las fotos de la galería). Reusar la
-  paleta del tablero mantiene la miniatura coherente con el resto de la
-  página sin depender de un archivo nuevo.
+### Miniatura de la ficha del juego: ahora con imagen real (antes, gradiente con la paleta del tablero)
+- **Qué:** `.ficha-juego__miniatura` pasó de un `linear-gradient` (con
+  `--tablero-activo`, `--tablero-seleccionado` y `--tablero-destino`) a
+  `background: url("../assets/img/miniatura-neon-circuit.png") center / cover`.
+- **Por qué antes era un gradiente:** todavía no había ningún asset real
+  para Neon Circuit. Reusar la paleta del tablero mantenía la miniatura
+  coherente con el resto de la página sin depender de un archivo nuevo.
+- **Por qué ahora es una imagen:** ya existe una portada real para el
+  juego (ver "Portada con botón Jugar"). `miniatura-neon-circuit.png` es
+  la misma imagen `tron-peg-efectos.png` que probamos para la portada
+  grande, copiada sin recortar — es 1080×1080 (1:1), el mismo cuadrado
+  que ya usa `.ficha-juego__miniatura` (56×56px), así que no hace falta
+  ningún ajuste de proporción. A ese tamaño el texto ("Neon Circuit",
+  "Peg Solitaire") no se llega a leer, queda como un ícono abstracto de
+  colores — el mismo efecto visual que ya tenía el gradiente, no una
+  regresión.
 
 ### "Sobre el juego": texto propio, no copiado de la captura
 - **Qué:** `.sobre-juego` es un párrafo simple (`max-width: 70ch` para que
@@ -1072,3 +1193,6 @@ más una que sumamos nosotros al revisar:
   regla del proyecto de "un solo h1 por página" (no es un requisito de la
   cátedra, es algo que nos autoimpusimos). Fran lo documentó como excepción
   puntual; falta que lo charlemos los tres antes de aceptarlo.
+- `min-height: 660px` del `.tablero` (altura "base", ver "Página del
+  juego"): valor estimado a partir del contenido de ficha+Ayuda, falta
+  confirmarlo/ajustarlo mirando la pantalla real.
