@@ -4,7 +4,11 @@
 // avanzar/retroceder de a una "página" de cards. home.js llama a
 // activarCarrusel() por cada fila que arma.
 
-const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Nombre distinto al de carousel.js a propósito: los scripts no usan
+// type="module" (comparten un mismo scope global), así que declarar la
+// misma constante en dos archivos tira un SyntaxError apenas carga el
+// segundo — y con eso, ni siquiera se llega a definir activarCarrusel().
+const prefiereMovimientoReducidoFilas = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function activarCarrusel(pista, flechaIzquierda, flechaDerecha) {
   let arrastrando = false;
@@ -49,7 +53,7 @@ function activarCarrusel(pista, flechaIzquierda, flechaDerecha) {
     flechaDerecha.disabled = pista.scrollLeft >= finalDeScroll - 1;
   }
 
-  const comportamiento = prefiereMovimientoReducido ? 'auto' : 'smooth';
+  const comportamiento = prefiereMovimientoReducidoFilas ? 'auto' : 'smooth';
 
   flechaIzquierda.addEventListener('click', () => {
     pista.scrollBy({ left: -pista.clientWidth * 0.9, behavior: comportamiento });

@@ -314,6 +314,21 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   del proyecto ("toda animación tiene que respetar `prefers-reduced-motion`",
   `CLAUDE.md`). El arrastre con mouse no necesita el mismo chequeo porque
   ahí el movimiento lo genera la persona, no una animación del sitio.
+- **Bug real que rompía toda la Home, encontrado después de mergear:**
+  ese primer fix declaraba `const prefiereMovimientoReducido` en
+  `carrusel-fila.js`, pero `carousel.js` ya tenía una constante global
+  con el mismo nombre. Ninguno de los dos scripts usa `type="module"`
+  (regla del proyecto), así que comparten un solo scope global — declarar
+  la misma constante dos veces tira `SyntaxError` apenas carga el segundo
+  script, y ese script entero deja de ejecutarse. Como `carrusel-fila.js`
+  cargaba después de `carousel.js`, era el que fallaba: nunca llegaba a
+  definir `activarCarrusel()`, y como `home.js` la llama al armar cada
+  fila, las categorías/recomendados fallaban en silencio (try/catch de la
+  promesa de `obtenerJuegos()` de por medio, sin ningún error visible más
+  que en la consola). El banner "Destacados" no se veía afectado porque
+  `carousel.js` no depende de nada de `carrusel-fila.js`. Se renombró a
+  `prefiereMovimientoReducidoFilas` en `carrusel-fila.js` para no
+  volver a pisar el nombre de otro script.
 
 ### Cards horizontales (16:9), no verticales
 - **Qué:** `.game-card__image` usa `aspect-ratio: 16 / 9`.
