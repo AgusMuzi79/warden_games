@@ -179,13 +179,14 @@ porque a Fran le resolvía el diseño de esa pantalla.
   guardan el estado en `localStorage` y la Home ya arranca mostrando el
   avatar y "Recomendados" al volver. Sigue sin ser una cuenta real (no hay
   backend ni `api.js` de por medio todavía en el login).
-- ⬜ Login/registro reales contra la API (`js/login.js` hoy solo valida el
-  form, no llama a `api.js` todavía).
 - ⬜ Guardado de puntajes.
 
 ## ⬜ Sistema de compras
 
 Lo pide el enunciado, no es opcional — a diferencia de los ítems de "Plus".
-Todavía no está planificado en detalle (qué se compra, con qué método, dónde
-vive el carrito del header). Cuando se arme, el banner "Destacados" recupera
-el badge de precio que tiene en el Figma pero que sacamos por ahora.
+Va a ser un placeholder, decisión nuestra: agregar juegos al carrito (parte 1,
+ya armada, ver `DECISIONES.md`), un flujo de "pagar" con un form que al
+completarse simula el ok de la compra (sin pasarela real), y que el juego
+comprado pase a figurar en "Mis juegos" (sección que todavía no existe).
+Cuando se arme, el banner "Destacados" recupera el badge de precio que tiene
+en el Figma pero que sacamos por ahora.
