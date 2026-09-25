@@ -244,19 +244,20 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   no depender de assets — dejó de hacer falta en cuanto encontramos que la API
   ya provee portadas reales y con licencia para este uso académico.
 
-### Filas por categoría (invitado) o "Recomendados" (con sesión), no un catálogo único
+### Con sesión: "Recomendados" arriba, categorías igual que a un invitado abajo
 - **Qué:** se sacó la grilla única de "Recomendados" de la primera versión de
-  la 3a. Ahora `#filas-juegos` se llena distinto según el estado del avatar
-  del header (`.header__avatar[data-sesion="usuario"]` oculto o no):
-  - **Invitado:** una fila por cada categoría fija (`CATEGORIAS` en `home.js`:
-    Acción, Shooters, RPG, Aventura), filtrando el catálogo por
-    `genres[].name`.
-  - **Con sesión:** una sola fila "Recomendados", filtrando el catálogo por
-    el género de un juego que simulamos que la persona ya jugó
-    (`JUEGO_JUGADO` en `home.js`).
-- **Por qué:** así lo define el diseño de la Home: el invitado explora por
-  categoría, quien tiene cuenta ve algo personalizado. No tiene sentido
-  mostrar "Recomendados" a alguien de quien no sabemos nada.
+  la 3a. `#filas-juegos` arma las categorías fijas siempre (`CATEGORIAS` en
+  `home.js`: Acción, Shooters, RPG, Aventura, filtrando el catálogo por
+  `genres[].name`), y si hay sesión (`.header__avatar[data-sesion="usuario"]`
+  visible) le agrega arriba de todo una fila "Recomendados", filtrando por
+  el género de un juego que simulamos que la persona ya jugó
+  (`JUEGO_JUGADO` en `home.js`).
+- **Por qué:** al principio "Recomendados" reemplazaba a las categorías por
+  completo con sesión — pero tener cuenta no debería significar perder la
+  forma de explorar por categoría, solo sumarle algo personalizado arriba.
+  Es lo mismo que ya lista el menú hamburguesa (mismas categorías), así
+  que ahora Home y hamburguesa muestran el mismo universo de categorías
+  sin importar si hay sesión o no.
 - **`JUEGO_JUGADO` con género explícito, no `genres[0]`:** al principio se
   tomaba el primer género del juego "jugado" para buscar similares, pero el
   orden de `genres[]` en la API no es confiable (ej. "The Witcher 3" trae
@@ -271,12 +272,48 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ### Cada fila es un carrusel de scroll nativo, no el banner animado
 - **Qué:** `.carrusel__pista` es un `flex` con `overflow-x: auto` y
-  `scroll-snap`; se desplaza con scroll horizontal nativo (mouse, trackpad,
-  scrollbar), sin JS de por medio.
-- **Por qué:** la animación con transición (el `clip-path` en diagonal, ver
-  banner "Destacados" más abajo) queda reservada para ese banner. Estas filas
-  de categorías/recomendados son "carruseles normales, sin animación" por
-  diseño, y el scroll nativo ya cumple con "que se desplace".
+  `scroll-snap`; se desplaza con scroll (trackpad, arrastrando con mouse,
+  flechas, touch nativo en mobile), sin transición animada.
+- **Por qué:** la animación con transición (el coverflow, ver banner
+  "Destacados" más abajo) queda reservada para ese banner. Estas filas de
+  categorías/recomendados son "carruseles normales, sin animación" por
+  diseño.
+
+### Flechas + arrastre con mouse (`js/carrusel-fila.js`), scrollbar oculta
+- **Qué:** cada fila suma una cabecera (`.carrusel__cabecera`) con el título
+  a la izquierda y dos flechas a la derecha (`.carrusel__flecha`), que
+  desplazan la pista un 90% de su ancho visible (`scrollBy` con
+  `behavior: smooth`) y se deshabilitan solas al llegar a una punta. La
+  pista también se puede arrastrar con el mouse (`pointerdown` +
+  `pointermove`, solo para `pointerType: 'mouse'` — el touch ya scrollea
+  nativo). La scrollbar del navegador se oculta (`scrollbar-width: none` +
+  `::-webkit-scrollbar { display: none }`).
+- **Por qué:** en desktop no hay forma táctil de arrastrar como en mobile;
+  el mouse-drag lo simula. Las flechas son la alternativa para quien no
+  quiere arrastrar (o navega con mouse pero prefiere clickear). La
+  scrollbar nativa quedaba fea y era redundante con flechas + arrastre.
+- **`.game-card:hover` (scale 1.06) se recortaba contra el borde de la
+  fila:** `overflow-x: auto` obliga, por spec de CSS, a que `overflow-y`
+  también recorte aunque no se lo pida explícitamente — así que el hover
+  que agranda la card se cortaba arriba/abajo. Se le agregó `padding: 12px`
+  a `.carrusel__pista` (deja lugar para el crecimiento) compensado con
+  `margin: -12px` (para que el layout no se corra).
+- **Solo mouse arrastra, no touch:** en touch ya funciona el scroll nativo
+  del navegador; agregar la misma lógica ahí lo duplicaría y podría pelear
+  con el scroll nativo (movimiento doble). Se filtra por
+  `evento.pointerType === 'mouse'`.
+
+### Las flechas también respetan `prefers-reduced-motion` (revisión de Fran antes de mergear)
+- **Qué:** `carrusel-fila.js` suma `prefiereMovimientoReducido` (mismo chequeo
+  que ya usa `carousel.js`) y, si está activo, el click en las flechas
+  desplaza la pista con `behavior: 'auto'` en vez de `'smooth'`.
+- **Por qué:** el `scrollBy({ behavior: 'smooth' })` original es una
+  animación (el scroll se anima), pero es JavaScript, no CSS — el
+  `@media (prefers-reduced-motion: reduce)` de `home.css` no lo alcanza.
+  Se había escapado en la revisión inicial del PR: rompía la regla propia
+  del proyecto ("toda animación tiene que respetar `prefers-reduced-motion`",
+  `CLAUDE.md`). El arrastre con mouse no necesita el mismo chequeo porque
+  ahí el movimiento lo genera la persona, no una animación del sitio.
 
 ### Cards horizontales (16:9), no verticales
 - **Qué:** `.game-card__image` usa `aspect-ratio: 16 / 9`.
@@ -368,10 +405,27 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   con ciclo corto (si hay 5 cards y la activa es la 0, la card 4 está a
   distancia -1, no -4), para que ir de la última a la primera gire para el
   lado corto en vez de cruzar toda la fila.
-- **Solo se ven 2 posiciones de cada lado (`MAX_VISIBLES`):** las cards más
-  lejanas se esconden con `opacity: 0` en vez de seguir achicándose hasta
-  desaparecer solas — con 5 destacados en total, alcanza para que siempre
-  se vea la activa + 2 de cada lado como mucho.
+- **Bug encontrado al probarlo — una card "daba la vuelta" barriendo toda
+  la pantalla, corregido bajando `MAX_VISIBLES` de 2 a 1:** avanzar un solo
+  paso (activo pasa de 1 a 2, por ejemplo) hace que la card que queda justo
+  en el extremo opuesto salte de golpe de `offset -2` a `offset +2` — es
+  matemáticamente correcto (el lado corto cambia de dirección para esa
+  card en ese punto), pero animado con el `transition` normal, la
+  interpolación en línea recta de un extremo al otro barre por encima de
+  las cards del medio en el camino.
+  - **Primer intento (descartado):** detectar ese salto grande contra el
+    offset anterior de la card (`dataset.offset`) y sacarle la transición
+    justo ahí (`transition: none`, forzando reflow) para que apareciera
+    directo en la nueva posición en vez de barrer. Funcionaba (ya no
+    barría), pero se sentía igual de raro: la card desaparecía de un lado
+    y aparecía de golpe en el otro, un corte demasiado brusco.
+  - **Solución real:** el salto solo puede pasar en la distancia MÁXIMA
+    posible (con 5 destacados, esa distancia es 2 — el piso de 5/2). Si esa
+    distancia directamente no se muestra (`MAX_VISIBLES: 1` en vez de 2),
+    la card en cuestión ya está oculta (`opacity: 0`) tanto antes como
+    después del salto, así que nadie lo ve — sin ningún truco de
+    transición. Como efecto secundario, ahora se ven 3 cards en total
+    (activa + 1 de cada lado) en vez de 5, un coverflow más despejado.
 - **Texto solo en la card activa:** `.banner__etiqueta` y `.banner__nombre`
   están en `opacity: 0` por default y solo se muestran en
   `.banner__slide--activo`, para no mezclar el texto de la activa con el de
@@ -407,9 +461,8 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   los primeros 5. Sin badge de precio (el Figma tenía "$9.99"): no existe
   ningún sistema de compras todavía.
 - **Por qué:** dato real (no inventado), sin necesitar un criterio editorial
-  de "qué es lo nuevo de la semana" que no tenemos cómo sostener. Son 5 y no
-  4 para que, con `MAX_VISIBLES: 2`, siempre haya alguna card en cada
-  posición visible del coverflow (activa + 2 a cada lado).
+  de "qué es lo nuevo de la semana" que no tenemos cómo sostener. 5 le da
+  variedad a los dots sin que la vuelta completa se sienta demasiado corta.
 - **Pendiente:** hay que armar un sistema de compras real (es parte del
   enunciado, no opcional) — se deja para una etapa aparte. Cuando exista, ahí
   vuelve el precio al banner.
@@ -913,14 +966,25 @@ más una que sumamos nosotros al revisar:
 ### Contenido del hamburguesa: 2 secciones + un botón de contacto, no una lista de 7
 - **Qué:** "Jugar" (Destacados, Últimos, Recientes, Top 100, Actualizados —
   los mismos links que ya están en la columna "Jugar" del footer) y
-  "Categorías" (Acción, Shooters, RPG, Aventura — las mismas 4 categorías
-  que arma `home.js` para invitados), más un botón "Contáctanos"
-  (`mailto:hola@warden.gg`, el mismo mail que usa el footer).
+  "Categorías" (las mismas 8 categorías que arma `home.js`), más un botón
+  "Contáctanos" (`mailto:hola@warden.gg`, el mismo mail que usa el footer).
 - **Por qué:** la corrección pedía más contenido, organizado en secciones
   (referencia: el menú de CrazyGames, con íconos por ítem). En vez de
   inventar secciones o páginas que no existen, se reutiliza vocabulario que
   el sitio ya tiene en el footer y en la Home — nada nuevo que mantener ni
   explicar en la defensa.
+
+### De 4 a 8 categorías, elegidas por cuántos juegos reales tienen
+- **Qué:** se suman Indie, Plataformas, Puzzle y Estrategia a las 4 que ya
+  había (Acción, Shooters, RPG, Aventura), en `CATEGORIAS` (`home.js`) y en
+  el hamburguesa (siempre las mismas en los dos lugares).
+- **Por qué:** se eligieron mirando cuántos juegos reales matchean cada
+  género en el catálogo de la API (de 70 en Acción a 2 en Estrategia) — no
+  quedan géneros con 0 o 1 solo juego, que harían una fila casi vacía o que
+  ni se llegue a mostrar (`crearFila()` no agrega nada si no hay resultados).
+- **`JUEGOS_DE_RESPALDO` también se actualiza:** se suman "Limbo" (Indie +
+  Plataformas) y "Company of Heroes 2" (Estrategia) para que, si la API
+  falla, las categorías nuevas igual tengan algo real para mostrar.
 
 ### El avatar con sesión pasa de `<a>` a `<button>`
 - **Qué:** `data-sesion="usuario"` era un `<a href="#">`; ahora es un
@@ -1004,3 +1068,7 @@ más una que sumamos nosotros al revisar:
   confirmar contra la captura de Figma cuando la tengamos).
 - Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
   estimados a ojo de la captura de Figma, falta compararlos en pantalla.
+- La página del juego sin `<h1>` (ver `ETAPAS.md` Etapa 4): rompe la
+  regla del proyecto de "un solo h1 por página" (no es un requisito de la
+  cátedra, es algo que nos autoimpusimos). Fran lo documentó como excepción
+  puntual; falta que lo charlemos los tres antes de aceptarlo.

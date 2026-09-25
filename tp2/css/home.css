@@ -187,8 +187,9 @@
 }
 
 /* Filas de juegos (categorías para invitado, "Recomendados" con sesión).
-   Cada fila es un carrusel simple: scroll horizontal nativo, sin JS de
-   transición — eso queda reservado para el banner "Destacados" (etapa 3b). */
+   Se navegan con scroll nativo, arrastrando con mouse o con las flechas
+   (carrusel-fila.js) — sin transición animada, eso queda reservado para
+   el banner "Destacados" (etapa 3b). */
 #filas-juegos {
   margin-top: var(--espaciado-8);
   display: flex;
@@ -196,8 +197,49 @@
   gap: var(--espaciado-8);
 }
 
-.carrusel__titulo {
+.carrusel__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-4);
   margin-bottom: var(--espaciado-4);
+}
+
+.carrusel__titulo {
+  margin-bottom: 0;
+}
+
+.carrusel__flechas {
+  display: flex;
+  gap: var(--espaciado-1);
+  flex-shrink: 0;
+}
+
+.carrusel__flecha {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: var(--primario-o2);
+  color: var(--primario-c3);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.carrusel__flecha:hover:not(:disabled) {
+  background: var(--primario-o1);
+  color: var(--acento);
+}
+
+.carrusel__flecha:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .carrusel__pista {
@@ -205,7 +247,26 @@
   gap: var(--espaciado-4);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding-bottom: var(--espaciado-2); /* lugar para la sombra del hover de .card */
+  cursor: grab;
+  /* overflow-x: auto obliga a que overflow-y también recorte (así lo pide
+     la spec de CSS): sin este padding, el scale(1.06) del hover de .card
+     quedaba cortado contra el borde de la fila. El margin negativo
+     compensa para que el layout no se corra. */
+  padding: 12px;
+  margin: -12px;
+  /* La scrollbar nativa se saca: se navega con las flechas o arrastrando
+     con el mouse (carrusel-fila.js) — en mobile el scroll táctil ya anda. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.carrusel__pista::-webkit-scrollbar {
+  display: none;
+}
+
+.carrusel__pista--arrastrando {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .game-card {
