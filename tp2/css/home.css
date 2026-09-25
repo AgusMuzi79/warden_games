@@ -99,6 +99,50 @@
   cursor: default;
 }
 
+/* Botón "Jugar" de Neon Circuit: solo existe en esa card (carousel.js). Con
+   visibility:hidden por default: cuando la card no es la activa (rotada al
+   costado, chica), no se ve ni es alcanzable con Tab. Recién cuando es la
+   activa pasa a visible, y ahí el hover/foco la muestra. */
+.banner__jugar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+}
+
+.banner__slide--activo .banner__jugar {
+  visibility: visible;
+}
+
+.banner__slide--activo:hover .banner__jugar,
+.banner__jugar:focus-visible {
+  opacity: 1;
+}
+
+.banner__jugar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.banner__jugar .ph-play {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--fondo);
+  font-size: 28px;
+}
+
 .banner__etiqueta,
 .banner__nombre {
   opacity: 0;
@@ -181,7 +225,8 @@
 
   .banner__etiqueta,
   .banner__nombre,
-  .banner__dot::before {
+  .banner__dot::before,
+  .banner__jugar {
     transition: none;
   }
 }

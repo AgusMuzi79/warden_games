@@ -29,6 +29,14 @@ const MAX_VISIBLES = 1;
 
 const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Nuestro propio juego: no viene de la API (esa trae juegos de terceros
+// para el catálogo), así que va hardcodeado y siempre primero, sin pelear
+// por rating contra el resto.
+const NEON_CIRCUIT = {
+  name: 'Neon Circuit',
+  background_image: 'assets/img/portada-tronpeg-1616x1320.png',
+};
+
 // Si la API falla, destacamos estos juegos reales igual.
 const DESTACADOS_DE_RESPALDO = [
   { name: 'The Witcher 3: Wild Hunt', background_image: 'https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg', rating: 4.64 },
@@ -44,7 +52,10 @@ let indiceActivo = 0;
 let timerAutoplay = null;
 
 function elegirDestacados(juegos) {
-  return [...juegos].sort((a, b) => b.rating - a.rating).slice(0, CANTIDAD_DESTACADOS);
+  const otros = [...juegos]
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, CANTIDAD_DESTACADOS - 1);
+  return [NEON_CIRCUIT, ...otros];
 }
 
 // Distancia más corta a la card activa, considerando el ciclo (si hay 5
@@ -102,6 +113,27 @@ function crearSlide(juego, index) {
   nombre.textContent = juego.name;
 
   slide.append(etiqueta, nombre);
+
+  // Es nuestro propio juego: además de poder saltar a esta card como al
+  // resto de los destacados, tiene una acción real (ir a jugar). Solo se
+  // ve/alcanza con foco cuando la card ya está activa (ver home.css).
+  if (juego === NEON_CIRCUIT) {
+    const jugar = document.createElement('a');
+    jugar.className = 'banner__jugar';
+    jugar.href = 'juego.html';
+    jugar.setAttribute('aria-label', 'Jugar a Neon Circuit');
+    // Evita que el click también dispare el irA(index) del slide: no
+    // cambiaría nada (ya está activa), pero no hace falta que compita.
+    jugar.addEventListener('click', (evento) => evento.stopPropagation());
+
+    const icono = document.createElement('i');
+    icono.className = 'ph ph-play';
+    icono.setAttribute('aria-hidden', 'true');
+
+    jugar.append(icono);
+    slide.append(jugar);
+  }
+
   return slide;
 }
 

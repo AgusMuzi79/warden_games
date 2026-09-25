@@ -471,13 +471,21 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   un pedazo recortado), ya se distingue bien cuál es cuál solo con el
   tamaño, el giro y la posición — no hace falta además oscurecerlas.
 
-### Se eligen los 5 juegos mejor puntuados como "Destacados"
+### Se eligen los 5 juegos mejor puntuados como "Destacados" — y Neon Circuit siempre primero
 - **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma
-  los primeros 5. Sin badge de precio (el Figma tenía "$9.99"): no existe
-  ningún sistema de compras todavía.
-- **Por qué:** dato real (no inventado), sin necesitar un criterio editorial
-  de "qué es lo nuevo de la semana" que no tenemos cómo sostener. 5 le da
-  variedad a los dots sin que la vuelta completa se sienta demasiado corta.
+  los primeros 4, y les suma un 5º de entrada: `NEON_CIRCUIT`, un objeto
+  hardcodeado (no viene de la API) que `elegirDestacados()` pone siempre
+  al principio del array, antes que el resto — así `indiceActivo = 0` lo
+  deja como la card activa apenas carga la página. Sin badge de precio (el
+  Figma tenía "$9.99"): no existe ningún sistema de compras todavía.
+- **Por qué:** pedido de Fran — el propio juego (Neon Circuit) tiene que
+  ser lo primero que se ve al entrar a la Home, no competir por rating
+  contra el catálogo de la API (que trae juegos de terceros, no el
+  nuestro). El resto (4, no 5) sigue siendo dato real de la API — mismo
+  criterio de siempre, sin inventar contenido.
+- **Imagen:** reusa `assets/img/portada-tronpeg-1616x1320.png`, la misma
+  portada de la página del juego — coherencia visual, sin generar un
+  asset aparte para el banner.
 - **Pendiente:** hay que armar un sistema de compras real (es parte del
   enunciado, no opcional) — se deja para una etapa aparte. Cuando exista, ahí
   vuelve el precio al banner.
@@ -511,6 +519,35 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   (izquierda). Con `margin-inline: auto` sí se centra, como una imagen con
   `max-width` que también necesita `display:block; margin:auto` para no
   quedar pegada a un lado.
+
+### Neon Circuit es clickeable: botón "Jugar" que aparece en hover
+- **Qué:** solo la card de Neon Circuit (no las de la API) tiene adentro un
+  `<a href="juego.html">` con un ícono `ph-play` centrado sobre un círculo
+  `--acento`, que lleva a la página del juego. Está oculto
+  (`opacity: 0; visibility: hidden`) salvo que esa card sea la **activa**
+  (la de adelante): recién ahí, con hover o con foco de teclado, se muestra.
+  Con `prefers-reduced-motion`, aparece directo, sin fade.
+- **Por qué:** era la única card del banner sin ninguna acción real —
+  clickearla mientras está activa no hacía nada (`irA()` no-opea si ya es la
+  activa). Al ser nuestro propio juego (no un juego de terceros de la API),
+  tiene sentido que sea el único con una acción directa a "ir a jugar".
+- **Solo visible/alcanzable cuando la card está activa, no en las laterales:**
+  las cards de los costados están rotadas en 3D y achicadas — mostrar un
+  botón de jugar ahí se vería roto (heredaría la rotación) y confundiría con
+  la acción de "saltar a esta card" que ya tienen. Además, con
+  `visibility: hidden` en ese estado, el link no queda como tab-stop
+  mientras la card no se ve de frente — evita que alguien tabee a un botón
+  invisible o girado al costado.
+- **Excepción puntual sobre "las cards no son alcanzables por teclado":**
+  la decisión de más abajo (cards laterales sin `tabindex`, solo clickeables
+  con mouse) sigue vigente para saltar de una card a otra — los dots cubren
+  esa navegación. Este botón es distinto: es una navegación real a otra
+  página, no un salto de carrusel, así que sí tiene sentido que sea un
+  `<a>` real, alcanzable con Tab.
+- **`stopPropagation` en el click del link:** el `<div>` de la card ya tiene
+  su propio listener de click (`irA(index)`), que no hace nada si la card ya
+  está activa (que es el único momento en que el botón es clickeable) — pero
+  se corta la propagación igual para que no dependa de esa coincidencia.
 
 ### Dots como barritas finitas (estilo Steam), no círculos
 - **Qué:** `.banner__dot` es un botón de 28×24px sin nada visible propio; la
