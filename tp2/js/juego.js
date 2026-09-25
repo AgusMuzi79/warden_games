@@ -49,4 +49,10 @@ btnJugar.addEventListener('click', () => {
   portada.hidden = true;
   cabecera.hidden = false;
   tableroJuego.hidden = false;
+
+  // El botón "Jugar" (que tenía el foco) desaparece con la portada: sin
+  // esto, el foco cae al <body> y quien navega con teclado o lector de
+  // pantalla queda "perdido". La cabecera es lo primero visible del
+  // tablero real, por eso recibe el foco (tabindex="-1" en el HTML).
+  cabecera.focus();
 });

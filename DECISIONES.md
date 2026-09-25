@@ -1232,6 +1232,41 @@ más una que sumamos nosotros al revisar:
 
 ---
 
+## Correcciones al PR #4 (página del juego), tras un code review
+
+Un review encontró 5 bugs reales en lo que Fran mergeó en el PR #4. Se
+corrigieron directo, sin cambiar el diseño:
+
+- **Área táctil del puntaje de reseña, de 24px a 44px:** `.estrellas
+  label`/`.estrellas input` usaban `--control-target` (24px, el mínimo
+  WCAG). Es un control de ícono (una estrella, sin texto visible), y la
+  regla del proyecto pide `--control-alto` (44px) para esos casos — mismo
+  criterio que ya se usa en el header y en el botón de mostrar contraseña
+  del login.
+- **El form de "Dejá tu reseña" hacía submit real:** sin `preventDefault()`,
+  clickear "Publicar" recargaba la página (perdiendo el puntaje y el texto
+  ya escritos) y de paso reiniciaba el resto de la página (el tablero volvía
+  a la portada). Se le agregó un handler en `resena.js` que previene el
+  submit, resetea el form y muestra un mensaje (`role="status"`,
+  `#resena-estado`) confirmando el envío. Sigue sin backend (ver
+  "Pendientes de decidir"): "publicar" hoy es solo feedback visual, no
+  guarda la reseña en ningún lado.
+- **`compartir.js` sin manejar el error de `clipboard.writeText()`:** la API
+  de portapapeles necesita un contexto seguro (https o localhost) y puede
+  fallar al abrir el archivo con `file://`, que es como se prueba en local.
+  Ahora un `try/catch` cambia el texto del botón a "No se pudo copiar" en
+  vez de quedar como una promesa rechazada sin ningún feedback.
+- **Se perdía el foco al clickear "Jugar":** el botón `#btn-jugar` (que
+  tenía el foco) se ocultaba junto con la portada sin mover el foco a
+  ningún lado, así que quedaba en el `<body>`. Se le agregó `tabindex="-1"`
+  a `#tablero-cabecera` (lo primero visible del tablero real) y
+  `juego.js` le hace `.focus()` al mostrarla.
+- **`aria-label="Tablero de Peg Solitaire"` desactualizado:** el resto del
+  PR había renombrado todo a "Neon Circuit" menos ese atributo. Se corrigió
+  a `aria-label="Tablero de Neon Circuit"`.
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
