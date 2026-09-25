@@ -58,20 +58,22 @@ Detalle completo de las decisiones en `DECISIONES.md`.
 ## ✅ Etapa 3 — Home (a cargo de Agus)
 
 La Home queda con: banner "Destacados" arriba (carrusel coverflow), y
-abajo, según el estado del avatar del header (`data-sesion="usuario"`
-oculto o no): filas por categoría para invitado, o una fila "Recomendados"
-para quien tiene sesión. El menú hamburguesa y el de cuenta, en el header
-de todas las páginas, comparten el mismo estilo de dropdown.
+abajo las filas por categoría fija (siempre), más una fila "Recomendados"
+arriba de todo si hay sesión (`data-sesion="usuario"` visible en el
+header). El menú hamburguesa y el de cuenta, en el header de todas las
+páginas, comparten el mismo estilo de dropdown.
 
 ### ✅ 3a. Catálogo real desde la API + filas por categoría/recomendados
-Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`.
+Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`,
+`js/carrusel-fila.js` (nuevo).
 - `api.js` pide `https://vj.interfaces.jima.com.ar/api` (la API de
   jimartinezabadias, ~80 juegos reales con nombre/imagen/rating/género).
 - `home.js` arma una fila por categoría fija (Acción, Shooters, RPG,
-  Aventura) para invitado, o una fila "Recomendados" (simulada por género)
-  si `data-sesion="usuario"` está visible en el header. Cards horizontales
-  (16:9), cada fila con scroll nativo (sin animación — eso es solo del
-  banner). Datos de respaldo hardcodeados si la API falla.
+  Aventura) siempre, y le suma "Recomendados" (simulada por género) arriba
+  de todo si `data-sesion="usuario"` está visible en el header. Cards
+  horizontales (16:9), cada fila navegable con scroll nativo, arrastrando
+  con mouse o con flechas (`carrusel-fila.js`) — sin transición animada,
+  eso es solo del banner. Datos de respaldo hardcodeados si la API falla.
 - `<h2>` propio por cada fila para no saltear niveles de título.
 - (La primera versión de la 3a era una única grilla "Recomendados" para
   todos, con cards verticales — se descartó, ver `DECISIONES.md`.)
@@ -125,13 +127,23 @@ Detalle en `DECISIONES.md`.
 
 ---
 
-## ⬜ Etapa 4 — Juego (Peg Solitaire)
+## 🔶 Etapa 4 — Juego / "Neon Circuit" (a cargo de Fran)
 
-Archivos: `juego.html`, `juego.css`, `js/juego.js`.
+En progreso, a medio hacer (así lo marcó Fran): [PR #4](https://github.com/AgusMuzi79/warden_games/pull/4),
+rama `fran`. Tablero (solo visual, sin lógica de movimientos todavía),
+panel lateral (ficha, Ayuda, Compartir), Comunidad con reseñas reales y
+"Dejá tu reseña" (rating con radios en CSS puro). Todo documentado en
+`DECISIONES.md` ("Página del juego").
 
-- Grilla del tablero (`#board` hoy está vacío, sin CSS).
-- Definir y construir la "galería" (falta ver la captura de Figma para saber
-  qué es exactamente).
+**Para discutir entre los tres antes de mergear:** la página se queda sin
+`<h1>` (decisión de Fran, documentada como excepción puntual). Rompe la
+regla del proyecto "un solo h1 por página" (`CLAUDE.md`, accesibilidad) —
+no es un requisito de la cátedra, es algo que nos autoimpusimos, así que
+vale la pena que lo veamos los tres antes de aceptar la excepción, no
+mergearlo de hecho porque a Fran le resolvía el diseño de esa pantalla.
+
+No se toca todavía: se espera a que Fran la termine antes de revisarla en
+detalle o traerla a `agus`.
 
 ---
 
