@@ -110,6 +110,32 @@ function actualizarBotonesDeCarrito() {
   document.querySelectorAll('[data-carrito-id]').forEach(actualizarBotonCarrito);
 }
 
+// Fábrica compartida por home.js (cards de las filas) y carousel.js (banner
+// Destacados): mismo botón ícono, mismo comportamiento, solo cambia la
+// clase para que cada CSS lo posicione donde corresponda. El ícono va
+// envuelto en un <span class="carrito-icono">: en las filas de la Home ese
+// span no hace nada especial (el botón ya es el círculo), pero en el
+// banner es el círculo visual — el botón ahí cubre toda la card, ver
+// DECISIONES.md ("Carrito de compras, parte 2").
+function crearBotonCarrito(juego, clase) {
+  const boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = clase;
+  boton.dataset.carritoId = juego.id;
+  boton.dataset.carritoNombre = juego.name;
+  boton.innerHTML = '<span class="carrito-icono"><i class="ph ph-shopping-cart-simple" aria-hidden="true"></i></span>';
+  actualizarBotonCarrito(boton);
+
+  boton.addEventListener('click', (evento) => {
+    // En el banner, el slide tiene su propio click (irA); en las filas de
+    // la Home no hay nada que competir, pero frenarlo igual no cambia nada.
+    evento.stopPropagation();
+    alternarCarrito({ id: juego.id, nombre: juego.name, imagen: juego.background_image });
+  });
+
+  return boton;
+}
+
 function alternarCarrito(juego) {
   if (estaEnElCarrito(juego.id)) {
     quitarDelCarrito(juego.id);

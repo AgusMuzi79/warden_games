@@ -40,26 +40,6 @@ function esDeGenero(juego, genero) {
   return juego.genres.some((g) => g.name === genero);
 }
 
-// Solo los juegos "de pago" (simulado, ver carrito.js) muestran este botón.
-// Ícono solo, superpuesto en la esquina inferior derecha de la imagen —
-// aria-pressed refleja si ya está en el carrito, y carrito.js lo mantiene
-// actualizado (ver actualizarBotonesDeCarrito) ante cualquier cambio.
-function crearBotonCarrito(juego) {
-  const boton = document.createElement('button');
-  boton.type = 'button';
-  boton.className = 'game-card__carrito';
-  boton.dataset.carritoId = juego.id;
-  boton.dataset.carritoNombre = juego.name;
-  boton.innerHTML = '<i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>';
-  actualizarBotonCarrito(boton);
-
-  boton.addEventListener('click', () => {
-    alternarCarrito({ id: juego.id, nombre: juego.name, imagen: juego.background_image });
-  });
-
-  return boton;
-}
-
 function crearCard(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
@@ -73,7 +53,7 @@ function crearCard(juego) {
   imagen.alt = '';
   imagen.loading = 'lazy';
   media.append(imagen);
-  if (esDePago(juego.id)) media.append(crearBotonCarrito(juego));
+  if (esDePago(juego.id)) media.append(crearBotonCarrito(juego, 'game-card__carrito'));
 
   const titulo = document.createElement('h3');
   titulo.className = 'game-card__title';

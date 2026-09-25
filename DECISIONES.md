@@ -1350,6 +1350,71 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
   círculo del botón se distinga incluso sobre imágenes claras — ninguno de
   los tokens existentes era una versión translúcida de `--fondo`.
 
+## Carrito de compras (parte 2: banner Destacados)
+
+- **`crearBotonCarrito()` se mudó a `carrito.js`:** hasta acá vivía
+  duplicada la lógica (crear el botón, el ícono, el `aria-pressed`, el
+  click) en `home.js`. Ahora es una función compartida
+  (`crearBotonCarrito(juego, clase)`, la `clase` es lo único que cambia
+  entre `.game-card__carrito` y `.banner__carrito`) — `carousel.js` la
+  reusa igual que `home.js`, en vez de reescribirla.
+- **`evento.stopPropagation()` en el click, ahora sí necesario:** cada
+  `.banner__slide` tiene su propio listener de click (`irA(index)`) — sin
+  frenar la propagación, clickear el ícono de carrito también dispararía
+  ese click del slide (sin romper nada porque la card ya está activa
+  cuando el ícono es clickeable, pero no hace falta que compitan).
+- **Neon Circuit no tiene ícono de carrito:** es nuestro propio juego, no
+  algo que salga del catálogo de la API — ya tiene su propia acción real
+  (el botón "Jugar" que aparece en hover). `crearSlide()` lo excluye por
+  comparación de referencia (`juego !== NEON_CIRCUIT`).
+- **El ícono va arriba a la derecha, no abajo a la derecha como en las
+  filas de la Home:** se probó abajo primero (mismo lugar que
+  `.game-card__carrito`), pero `.banner__nombre` (el título del juego) ya
+  ocupa esa franja de punta a punta — un título largo como "Counter-Strike:
+  Global Offensive" quedaba tapado por el círculo. Arriba a la derecha
+  queda simétrico a la etiqueta "Destacado" (arriba a la izquierda) y no
+  compite con ningún otro texto.
+- **Visible solo si la card está activa, sin necesidad de hover:** mismo
+  criterio de "invisible y no alcanzable por Tab si no está activa" que ya
+  usa el botón "Jugar" (una card rotada al costado no debería ser un
+  tab-stop). A diferencia de "Jugar", no hace falta además pasar el mouse
+  para verlo una vez activa — es un ícono chico en una esquina, no una
+  superposición grande que tape el resto de la card.
+- **Bug real encontrado al probarlo — el click no le pegaba al ícono:**
+  con el botón del tamaño real del ícono (44px, en la esquina), clickear
+  ahí no hacía nada; `boton.click()` desde consola sí agregaba el juego,
+  así que el handler estaba bien enganchado. Se confirmó con
+  `document.elementFromPoint()` en el centro exacto del botón: devolvía
+  `.banner__escena` (un ancestro), no el botón. Es la misma familia del
+  bug de hit-testing que ya está documentado para el propio coverflow
+  ("Carrusel coverflow: perspective + rotateY..." más arriba) — dentro de
+  un ancestro con `perspective()` en su `transform` (acá, el propio
+  `.banner__slide`), las coordenadas de click no siempre coinciden con la
+  posición visual de un hijo chico y absolutamente posicionado.
+  - **Solución, igual que ya se usa para "Jugar":** el `<button>` pasa a
+    cubrir toda la card (`inset: 0`, sin fondo ni borde propios) en vez de
+    ser del tamaño del ícono. El círculo que se ve sigue siendo chico —
+    ahora es un `<span class="carrito-icono">` interno, anclado arriba a
+    la derecha — pero el ÁREA que reacciona al click es toda la card, así
+    que cualquier desvío del hit-testing sigue cayendo adentro.
+  - **Por qué no se notó con "Jugar":** ese botón YA cubría toda la card
+    desde el principio (fue diseñado así, ver "Neon Circuit es clickeable"
+    más arriba) — el bug existe igual ahí, pero como el área objetivo es
+    del tamaño de toda la card, un desvío de unos pocos píxeles no alcanza
+    a sacar el punto de click afuera. Con un blanco de 44px sí alcanza.
+  - **Consecuencia asumida:** clickear en cualquier parte de la card activa
+    de un juego "de pago" (no solo el ícono) agrega/quita del carrito —
+    igual que clickear en cualquier parte de la card activa de Neon Circuit
+    ya llevaba a "Jugar", no solo su ícono. Es la misma mecánica que ya
+    estaba aceptada en el banner, aplicada al nuevo botón por la misma
+    razón técnica.
+- **`DESTACADOS_DE_RESPALDO` (`carousel.js`) suma `id`:** no los tenía
+  (el respaldo de `carousel.js` es una lista aparte de la de `home.js`,
+  con sus propios juegos). Sin `id`, `esDePago()` no tiene con qué decidir.
+  Se usaron ids fuera del rango real de la API (101-105) para que no
+  choquen si algún día conviven datos reales y de respaldo en la misma
+  sesión.
+
 ---
 
 ## Pendientes de decidir
