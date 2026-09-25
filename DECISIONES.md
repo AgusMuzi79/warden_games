@@ -570,6 +570,446 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ---
 
+## Página del juego (Etapa 4)
+
+A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
+(ver `ETAPAS.md`). Esta sección junta las decisiones de cada una.
+
+### Nombre visible: "Neon Circuit"
+- **Qué:** el `h1`, el `<title>` y la ficha del juego dicen "Neon Circuit",
+  no "Peg Solitaire".
+- **Por qué:** así lo llama la captura de Figma. Es el nombre de fantasía
+  que le puso la cátedra al mock; el juego que programamos abajo sigue
+  siendo Peg Solitaire (reglas, tablero de 33), pero de cara a la interfaz
+  usamos el nombre real del diseño para no tener que inventar ni traducir
+  ningún texto de la ficha, la ayuda o las reseñas.
+
+### Breadcrumb en `--font-ui`, no en Orbitron
+- **Qué:** `<nav class="breadcrumb">` con "Inicio > Puzzle > Neon Circuit",
+  en Roboto Flex 14px. El separador "›" es un `::before` generado por CSS.
+- **Por qué:** en el mock estaba con una tipografía grande, angulosa, que
+  parece Orbitron — pero es navegación, no un título (h1-h3), así que le
+  aplica la regla general del proyecto. "Puzzle" queda como texto plano, sin
+  link: las categorías de la Home son filtros (`home.js`), no páginas
+  propias, así que no hay a dónde linkear todavía.
+
+### Paleta propia del tablero, no la del sitio
+- **Qué:** los colores de las fichas (activa, descargada, seleccionada,
+  destino) van a ser tokens nuevos en `variables.css`, con prefijo
+  `--tablero-*`, en vez de reusar `--primario`/`--acento` aunque algún tono
+  se le parezca.
+- **Por qué:** decisión de Fran y Agus — el tablero tiene su propio lenguaje
+  visual (neón sobre fondo oscuro) pensado aparte del design system general
+  del sitio. Van en `variables.css` y no en `juego.css` siguiendo el mismo
+  criterio que ya usamos con `--sombra-elevacion`/`--resplandor-error`:
+  tokens únicos para todo el proyecto, aunque los use un solo componente.
+  (Los hex concretos se definen en la parte 2, junto con la grilla.)
+
+### El placeholder "Botón" de Figma se muestra como rótulo, no como control
+- **Qué:** arriba de la card del tablero, en vez de un `<button>` sin ninguna
+  acción definida, hay un `<p class="tablero__etiqueta">` con el nombre del
+  juego ("Neon Circuit"), superpuesto al borde superior de la card.
+- **Por qué:** en Figma ese elemento está sin definir (dice literalmente
+  "Botón", sin ícono ni texto real). Armar un botón clickeable que no hace
+  nada sería confuso para quien navega con teclado o lector de pantalla.
+  Cuando se sepa qué función cumple, se resuelve en una parte aparte.
+
+### Grid del tablero generado por JS, no hardcodeado en el HTML
+- **Qué:** `js/juego.js` arma las 33 posiciones del tablero clásico (forma
+  de cruz: filas de 3-3-7-7-7-3-3 sobre una grilla de 7x7) recorriendo las
+  49 celdas y decidiendo con `esPosicionValida()` cuáles son parte de la
+  cruz. Las que no lo son quedan como huecos invisibles (`.tablero__hueco--vacio`,
+  `visibility: hidden`) que igual ocupan su lugar en el CSS Grid, para no
+  romper la forma. El centro arranca "descargado" (vacío); el resto,
+  "activo".
+- **Por qué:** es la misma idea que ya usamos en `carousel.js`/`home.js` —
+  contenido que se arma en JS en vez de escribir 33 `<div>` a mano en el
+  HTML, más fácil de ajustar si el tamaño del tablero cambia a futuro.
+
+### El grid de fichas es `aria-hidden` por ahora
+- **Qué:** `#tablero-grid` tiene `aria-hidden="true"`.
+- **Por qué:** todavía no hay clicks ni navegación por teclado sobre las
+  fichas (eso es lógica de juego, una parte aparte). Sin eso, un lector de
+  pantalla solo encontraría 33 `<div>` sin ninguna acción ni información
+  útil — sería ruido, no contenido. Se saca este atributo en cuanto el
+  tablero sea interactivo de verdad.
+- **La leyenda sí queda accesible:** las muestras de color (`<span>` de cada
+  estado) son decorativas y están `aria-hidden`, pero el texto de al lado
+  ("Nodo activo", "Descargado", etc.) no — describe algo real del diseño
+  aunque el tablero en sí todavía no funcione.
+
+### Portada con botón "Jugar" antes de mostrar el tablero
+- **Qué:** `.tablero__cuerpo` tiene dos hijos: `.tablero__portada`
+  (imagen `assets/img/portada-tronpeg-1616x1320.png` + botón
+  `.btn--primario` "Jugar", visible por default) y `.tablero__juego` (el
+  grid + la leyenda de siempre, con `hidden` puesto en el HTML).
+  `js/juego.js` engancha un click en el botón que hace
+  `portada.hidden = true` y `tableroJuego.hidden = false`, mostrando el
+  tablero real.
+- **Por qué:** pedido de Fran — al entrar a la página se ve una portada
+  (como en cualquier plataforma de juegos) en vez del tablero directo, y
+  recién arranca al clickear "Jugar".
+- **`object-fit: cover`, y la imagen final ya viene recortada a la
+  proporción exacta de la card:** `.tablero__portada-img` usa
+  `object-fit: cover` (misma técnica que el banner "Destacados" y las
+  cards de la Home) para que la imagen llene la card sin deformarse,
+  cualquiera sea su proporción — pero con la primera imagen que probamos
+  (cuadrada, 1080×1080) eso recortaba ~99px arriba y abajo, comiéndose
+  parte del título y de "Peg Solitaire". La card mide 808×660px mientras
+  se ve la portada (fija: con `.tablero__cabecera` oculta en ese momento,
+  el alto de `.tablero` queda solo en su `min-height`, sin nada más que
+  lo empuje). Se le pasó esa proporción exacta (808:660 ≈ 1.224:1) a la
+  IA para que exportara la imagen ya recortada así, en vez de dejar que
+  `cover` la recorte en el navegador — con la imagen ya a la proporción
+  correcta, `cover` no tiene nada que recortar.
+- **`.tablero__cuerpo` pasa a `position: relative`, y el `flex`/`space-between`
+  que tenía se mueve a `.tablero__juego`:** la portada es `position:
+  absolute; inset: 0` sobre `.tablero__cuerpo` (así tapa toda la card, de
+  punta a punta, sin el padding en el medio). Un elemento absoluto no
+  participa del `flex` del padre, así que el `justify-content:
+  space-between` que llevaba el grid+leyenda al fondo de la card se pasó
+  a `.tablero__juego` (que ahora sí es el único hijo flex real de
+  `.tablero__cuerpo` cuando la portada está oculta).
+- **Nombre de archivo:** las imágenes que va probando Fran las deja en la
+  carpeta `assets/` de la raíz del repo (no en `tp2/`); cada una se copia
+  a `tp2/assets/img/` con nombre en minúsculas, sin espacios ni el
+  carácter `×`, por la regla de rutas del proyecto (GitHub Pages
+  distingue mayúsculas).
+- **Historial de versiones probadas** (las viejas quedan en
+  `tp2/assets/img/` sin usar, por si hace falta volver atrás — no se
+  borran): `portada-tron.jpg` (arte genérico estilo Tron, decía "Grid
+  Solitaire", no el nombre real) → `portada-neon-circuit.png` (1080×1080,
+  ya con "Neon Circuit"/"Peg Solitaire", pero cuadrada, se recortaba) →
+  `portada-tronpeg-808x660.png` / `portada-tronpeg-1616x1320.png` (ya a
+  la proporción exacta de la card, sin recorte). Se usa la de
+  1616×1320 (el doble de 808×660) para que se vea nítida en pantallas de
+  alta densidad (retina).
+- **Sin derechos propios, como el avatar:** ninguna de las portadas
+  probadas es un asset propio con derechos — mismo criterio ya aceptado
+  para `avatar.jpg` (ver "Imagen de avatar con sesión"), para los fines
+  de este TP.
+- **`alt=""` en la imagen:** es decorativa — trae el nombre del juego
+  dibujado adentro y el botón "Jugar" es lo único accionable de la
+  portada.
+- **La cabecera ("Neon Circuit") también arranca oculta:** `.tablero__cabecera`
+  suma `id="tablero-cabecera"` y `hidden` en el HTML; el mismo click de
+  "Jugar" que oculta la portada la vuelve a mostrar
+  (`cabecera.hidden = false`). Pedido de Fran — con la portada ya
+  mostrando el nombre del juego dibujado adentro, la franja de arriba con
+  el mismo texto quedaba redundante mientras se ve la portada.
+
+### La card del tablero mide exactamente lo mismo que ficha + Ayuda (no todo el panel lateral)
+- **Qué:** `.juego-layout` pasó a tener 4 hijos directos en vez de 2
+  (sacamos los wrappers `.juego-layout__principal` y la parte de
+  `.panel-lateral` que envolvía a Compartir): fila 1 = `.tablero` | `.panel-lateral`
+  (ahora solo ficha-juego + Ayuda), fila 2 = `.juego-layout__secundario`
+  ("Sobre el juego" + Galería) | `.compartir`. Con `align-items: stretch`,
+  CSS Grid iguala por spec la altura de los dos ítems de una misma fila —
+  el tablero y el panel lateral miden siempre lo mismo, sin ningún cálculo
+  manual. La fila 2 usa `align-self: start` para no heredar ese estirado
+  (no hace falta que "Sobre el juego"+Galería midan lo mismo que Compartir).
+- **Por qué:** la versión anterior (`.tablero` con `flex: 1` dentro de un
+  wrapper que agrupaba las 3 secciones de la izquierda) igualaba la altura
+  del **total** de la columna izquierda contra el **total** de la derecha
+  — pero eso no garantiza que el tablero en sí llegue hasta el borde de
+  Ayuda, solo que la suma final coincida. Fran lo notó comparando contra una
+  captura: el tablero quedaba corto porque "Sobre el juego" + Galería son
+  altas y se llevaban gran parte del crecimiento. Separar en 2 filas de
+  grid ata la altura del tablero directamente a la de ficha+Ayuda, que es
+  la comparación que importa visualmente.
+- **Compartir sigue viéndose debajo de Ayuda:** al ser la fila 2, columna
+  derecha, queda en la misma posición visual de siempre (ver "Panel
+  lateral" más abajo) — solo cambió de qué elemento del HTML depende su
+  altura, no dónde se ve en pantalla.
+- **`.tablero` pierde su `margin-top` propio:** ahora que vuelve a ser un
+  hijo directo de `.juego-layout` (como en la parte 1, antes de que
+  existiera el layout de 2 columnas), ese espaciado ya lo pone el
+  `margin-top` del propio `.juego-layout`; dejar los dos sumaba doble
+  espacio.
+- **Leyenda del tablero más compacta:** `.tablero__leyenda` bajó su
+  `padding-top` (16px → 8px) y su `gap` (16px → 12px), a pedido de Fran,
+  para que ocupe menos alto de la card y el grid de fichas tenga más lugar
+  relativo dentro de ella.
+- **El tablero se desengancha del stretch después de probarlo (`align-self: start`
+  + `min-height` fijo):** con `align-items: stretch` puro, el tablero no solo
+  igualaba contra Ayuda en su estado inicial — la seguía en vivo cada vez
+  que se abría otro `<details>` (misma fila del grid, la fila crece con
+  Ayuda y el tablero la sigue). Fran probó el resultado, le gustó el alto
+  que da Ayuda en su estado por default (un solo ítem abierto), pero pidió
+  que el tablero se quede en esa altura "base" en vez de seguir creciendo
+  cada vez que se abre un desplegable más. `.tablero` pasa a
+  `align-self: start` (sale del stretch de la fila) más un `min-height: 660px`
+  que congela ese alto base — valor estimado a partir del contenido de
+  ficha+Ayuda en su estado inicial, pendiente de afinar a ojo contra la
+  pantalla real (ver "Pendientes de decidir").
+
+### Fichas más grandes (44px → 56px), y el ancho se resuelve con el gap, no con la ficha
+- **Qué:** el grid de fichas y cada `.tablero__hueco` pasaron de 44px a
+  56px, con los anillos internos reescalados en proporción (`inset: 8px` y
+  `17px`, antes `6px` y `13px`). Para ocupar más ancho de la card, en vez
+  de agrandar la ficha de nuevo, `.tablero__grid` separó `gap` en
+  `row-gap` (`--espaciado-3`, sin cambios) y `column-gap`
+  (`--espaciado-8`, más grande).
+- **Por qué:** con la card más grande, el tablero quedaba chico dentro de
+  tanto espacio. Subir la ficha a 56px resolvió el alto ("quedaba
+  perfecto", según Fran). Para el ancho, agrandar la ficha de nuevo también
+  la hacía más alta (es un círculo, ancho y alto van juntos) — separar el
+  gap horizontal del vertical resuelve el ancho sin tocar el alto que ya
+  estaba bien.
+
+### Fichas a 68px y de vuelta a 60px: mismo gap horizontal y vertical (`--espaciado-5`, token nuevo)
+- **Qué:** al agrandar la card (ver "La card del tablero mide exactamente
+  lo mismo que ficha + Ayuda"), las fichas subieron otra vez, a 68px
+  (anillos en `inset: 10px`/`21px`), para aprovechar el espacio de sobra.
+  Fran después pidió que el gap horizontal (32px) y vertical (12px) —
+  distintos a propósito desde la decisión anterior— se acercaran a un
+  punto intermedio, probando 20px para los dos. Como no había ningún token
+  de 20px en la escala (`--espaciado-1..8` son `N × 4px`, pero saltea el 5
+  y el 7), se agregó `--espaciado-5: 20px` en vez de escribirlo a mano.
+  Subir el `row-gap` de 12px a 20px agranda el grid en alto (6 espacios ×
+  8px de más = 48px), así que la ficha bajó de 68px a 60px para
+  compensar y no romper el alto de la card — anillos reescalados de nuevo
+  en proporción (`inset: 9px`/`18px`).
+- **Por qué:** Fran lo pidió así explícitamente: un punto intermedio entre
+  las dos distancias, priorizando no romper el tamaño de la card por sobre
+  mantener la ficha lo más grande posible.
+
+### La etiqueta del título va sobre una cabecera propia, no flotando sola
+- **Qué:** `.tablero` se dividió en `.tablero__cabecera` (franja de arriba,
+  fondo `--primario-o1`, más clara) y `.tablero__cuerpo` (donde van la
+  grilla de fondo, el grid de fichas y la leyenda). El placeholder "Botón"
+  vive centrado dentro de la cabecera. Se sacó el truco de
+  `position: absolute` + `transform` que la hacía flotar sobre el borde
+  superior de la card; ahora es un elemento normal, centrado con flexbox
+  dentro de su propia franja. `.tablero` pasó a tener `overflow: hidden`
+  para que esa franja respete las esquinas redondeadas de la card.
+- **Por qué:** en Figma no es una etiqueta flotando sola sobre la grilla —
+  hay una franja de cabecera de otro color detrás, como el header de una
+  card. Fran lo marcó comparando directo contra la captura.
+
+### Fondo negro debajo de los anillos, y hueco central más grande
+- **Qué:** las fichas "activa"/"seleccionada"/"destino" ahora tienen
+  `background: var(--tablero-descargado)` (el mismo negro del estado
+  "descargado"), y se agrandó el espacio entre los 3 anillos (`inset: 6px`
+  y `13px`, antes `9px` y `16px`).
+- **Por qué:** sin fondo propio, se veía la grilla violeta de atrás
+  mezclada con el resplandor de los anillos — un efecto "naranja
+  difuminado" en vez del hueco negro limpio de Figma. El resplandor
+  (`box-shadow`, hacia afuera del borde) sigue intacto, solo que ahora
+  tiene un fondo negro sólido detrás para contrastar en vez de transparencia.
+
+### Anillo de las fichas: son 3 (no 2), y la leyenda usa el mismo dibujo
+- **Qué:** las fichas "activa"/"seleccionada" no son un borde sólido +
+  un punteado; son 3 anillos concéntricos (sólido afuera, punteado bien en
+  el medio de la banda, sólido chico adentro) con el centro hueco de
+  verdad. Se agregó un tercer anillo con `::after` (antes solo estaba el
+  `::before` punteado, que quedaba pegado al hueco central en vez de ir
+  centrado en la banda). Los íconos de la leyenda (`.tablero__muestra`)
+  usan exactamente el mismo dibujo a escala, no una versión simplificada.
+- **Por qué:** Fran comparó contra el zoom real de Figma — ahí se ve que
+  son 3 trazos, no 2, y que la leyenda tiene que ser igual a la ficha
+  grande, no un ícono aparte.
+
+### Ajustes visuales del tablero contra la captura de Figma (ronda 2)
+Fran comparó el resultado con la captura real de Figma y marcó 3 diferencias,
+más una que sumamos nosotros al revisar:
+- **Fondo con grilla:** `.tablero` tenía un fondo violeta liso; Figma tiene
+  una grilla tenue de líneas. Se agregó con dos `linear-gradient` de 1px
+  (uno horizontal, uno vertical) repetidos cada 28px, con un token nuevo
+  `--tablero-grilla` (rgba de `--primario`, bien tenue). El
+  `background-image` respeta el `border-radius` de la card solo, sin
+  necesitar `overflow: hidden` — importante, porque eso hubiera cortado la
+  mitad de arriba de la etiqueta del título.
+- **Fichas con anillo doble:** `.tablero__hueco--activo`/`--seleccionado`
+  tenían un solo `border: 3px dashed`, que se veía como gajos en vez de un
+  aro prolijo. Ahora son dos capas: un borde sólido (con resplandor) en el
+  propio `div`, más un `::before` punteado más adentro (`inset: 6px`) —
+  igual que en Figma. Una variable CSS local (`--color-ficha`) evita repetir
+  el color de cada estado en los 3 lugares que lo usan (borde, resplandor,
+  anillo interno).
+- **Marco del título:** poco padding y sin resplandor. Se le subió el
+  padding, el grosor del borde (1px → 2px) y se sumó un `box-shadow` sutil
+  del mismo color, para que combine con el resto de la estética "neón" del
+  tablero.
+- **Leyenda en mayúsculas:** de nuestra cuenta, comparando las dos capturas
+  — el estilo "técnico" de Figma usa mayúsculas con letras espaciadas.
+  Se resolvió con `text-transform: uppercase` y `letter-spacing`, sin sumar
+  ninguna fuente nueva (sigue en `--font-ui`, achicado a 12px para que no
+  se vea grande al ir en mayúsculas).
+
+### Paleta del tablero: valores elegidos
+- **Qué:** `--tablero-activo: #FF6A1A` (naranja), `--tablero-descargado:
+  #0B0710` (casi negro), `--tablero-seleccionado: #3FE8E4` (celeste-cian),
+  `--tablero-destino: #B79CF0` (violeta claro).
+- **Por qué:** estimados a ojo de la captura de Figma. Quedan como
+  "pendiente de ajustar" (ver esa sección al final del archivo) hasta
+  compararlos en pantalla contra el diseño real.
+
+### Panel lateral: tablero + ficha/Ayuda/Compartir en dos columnas, solo desktop
+- **Qué:** `.juego-layout` es un grid de 2 columnas (320px fijo para la
+  derecha, el resto para la izquierda) y 2 filas: tablero / ficha+Ayuda
+  arriba, "Sobre el juego"+Galería / Compartir abajo. Compartir queda
+  debajo de Ayuda, en la misma columna, aunque ya no comparte wrapper HTML
+  con `.panel-lateral` — ver "La card del tablero mide exactamente lo mismo
+  que ficha + Ayuda" más arriba, que explica por qué se separó en 2 filas.
+  Sin `@media`, porque la página del juego no necesita mobile first (regla
+  del proyecto).
+- **Por qué:** así está en la captura de Figma que confirmó Fran — Compartir
+  va debajo de Ayuda, en la misma columna lateral, no debajo de la Galería.
+  Al principio Compartir había quedado como sección suelta a ancho completo
+  porque se armó antes de tener esa captura puntual del layout completo.
+
+### Acordeón de Ayuda con `<details>`/`<summary>`, no JS a mano
+- **Qué:** cada ítem ("Cómo se juega", "Objetivo", "Puentes", "Puntaje") es
+  un `<details>`; el primero con el atributo `open`. El signo "+"/"−" es un
+  `::after` sobre `summary` que cambia solo con el selector `[open]`.
+- **Por qué:** es exactamente el comportamiento que hace falta (expandir/
+  colapsar, uno a la vez o varios juntos, todo announced correctamente por
+  lectores de pantalla) y el navegador ya lo resuelve solo, sin estado en
+  JS ni manejo de foco a mano — a diferencia del selector de Login (que sí
+  necesitó ARIA de tabs a mano porque el comportamiento ahí es "tabs", no
+  "acordeón").
+- **Contenido de "Puentes" y "Puntaje":** son reglas del juego terminado
+  (todavía no programadas — la lógica de movimientos es de una etapa
+  aparte). El texto de "Puentes" aclara que este tablero clásico de 33 no
+  los usa, en vez de prometer algo que no está.
+
+### Miniatura de la ficha del juego: ahora con imagen real (antes, gradiente con la paleta del tablero)
+- **Qué:** `.ficha-juego__miniatura` pasó de un `linear-gradient` (con
+  `--tablero-activo`, `--tablero-seleccionado` y `--tablero-destino`) a
+  `background: url("../assets/img/miniatura-neon-circuit.png") center / cover`.
+- **Por qué antes era un gradiente:** todavía no había ningún asset real
+  para Neon Circuit. Reusar la paleta del tablero mantenía la miniatura
+  coherente con el resto de la página sin depender de un archivo nuevo.
+- **Por qué ahora es una imagen:** ya existe una portada real para el
+  juego (ver "Portada con botón Jugar"). `miniatura-neon-circuit.png` es
+  la misma imagen `tron-peg-efectos.png` que probamos para la portada
+  grande, copiada sin recortar — es 1080×1080 (1:1), el mismo cuadrado
+  que ya usa `.ficha-juego__miniatura` (56×56px), así que no hace falta
+  ningún ajuste de proporción. A ese tamaño el texto ("Neon Circuit",
+  "Peg Solitaire") no se llega a leer, queda como un ícono abstracto de
+  colores — el mismo efecto visual que ya tenía el gradiente, no una
+  regresión.
+
+### "Sobre el juego": texto propio, no copiado de la captura
+- **Qué:** `.sobre-juego` es un párrafo simple (`max-width: 70ch` para que
+  las líneas no queden demasiado largas de leer), con un texto escrito para
+  este juego puntual, no una copia literal de Figma (la captura estaba muy
+  chica para transcribir bien).
+- **Por qué:** describe la mecánica real que ya está definida (saltos en
+  línea recta, 33 nodos, objetivo de terminar con el mínimo posible),
+  consistente con el resto de la página en vez de un texto genérico.
+
+### Galería con gradientes de la paleta del tablero, `aria-hidden` por ahora
+- **Qué:** `.galeria__grid` tiene 6 `<li>` sin contenido, cada uno con un
+  `linear-gradient` distinto combinando los tokens `--tablero-*` (y algún
+  color del sitio, como `--acento`/`--primario`, para variar más). Toda la
+  lista tiene `aria-hidden="true"`.
+- **Por qué:** decisión de Fran y Agus — todavía no hay capturas reales del
+  juego (se resuelven en otra parte), y unos gradientes lisos sin `alt` no
+  aportan nada a quien usa lector de pantalla; mejor ocultarlos que anunciar
+  6 elementos vacíos. Cuando haya fotos reales con su `alt` correspondiente,
+  se saca el `aria-hidden`.
+
+### Reseñas de Comunidad: 3 distintas, no la misma repetida
+- **Qué:** 3 reseñas con nombre, fecha, puntaje y largo de texto distintos
+  (una larga, una media, una cortita), en vez de copiar la captura de Figma
+  que repite el mismo texto de "Malena F." tres veces.
+- **Por qué:** es justo el tipo de dato repetido/genérico que el enunciado
+  pide evitar. Los avatares son un círculo con iniciales (sin foto real
+  todavía), con un color distinto por reseña.
+- **Estrellas con caracteres Unicode, no íconos:** `★`/`☆` como texto,
+  `aria-hidden` en el visual y un `sr-only` al lado con el puntaje en
+  palabras ("Puntaje: 5 de 5"). Evita depender de un ícono "relleno" que no
+  existe en la hoja de Phosphor que carga el proyecto (ver el bug que le
+  marcamos a Agus en el PR de la Home: la hoja `regular` no trae `-fill`).
+
+### "Dejá tu reseña": el puntaje es CSS puro (radios + labels), sin JS
+- **Qué:** `.estrellas` es un `<fieldset>` con 5 `<input type="radio">` en
+  orden inverso (5,4,3,2,1) + sus `<label>`, dado vuelta visualmente con
+  `flex-direction: row-reverse`. Con `input:checked ~ label` y
+  `label:hover ~ label` (combinador de hermanos siguientes) se pinta la
+  estrella elegida y todas las anteriores en pantalla.
+- **Por qué:** es el truco clásico de "rating con radios": nace accesible
+  (son inputs de verdad, con foco y selección por teclado) y no hace falta
+  ninguna línea de JS. El input queda invisible (`opacity: 0`) pero sigue
+  ocupando su lugar, así que el foco de teclado se redirige a su label con
+  `input:focus-visible + label`.
+- **Sin eco numérico ("4/5") al lado:** en Figma aparece, pero como no hay
+  JS enganchado al puntaje, ese número quedaría desactualizado en cuanto
+  alguien tocara otra estrella. Mejor no mostrarlo que mostrar uno
+  incorrecto.
+
+### Contador de caracteres y botón "Copiar", en archivos propios
+- **Qué:** `js/resena.js` (contador del textarea, actualiza un `<span>` en
+  cada `input`) y `js/compartir.js` (copia el link con
+  `navigator.clipboard.writeText` y cambia el texto del botón a "¡Copiado!"
+  por 2 segundos) son archivos nuevos, no se sumaron a `juego.js`.
+- **Por qué:** `juego.js` es la lógica del tablero (una responsabilidad
+  puntual); estos dos son widgets sueltos de la página, sin relación entre
+  sí ni con el juego. Separarlos sigue el mismo criterio que ya usa el
+  proyecto en la Home (`carousel.js`, `home.js`, `menu.js` aparte).
+
+### Compartir sin backend real
+- **Qué:** los botones de redes sociales y "Mensaje" son placeholders
+  (`href="#"`, sin navegar a ningún lado todavía). El único que hace algo
+  real es "Copiar".
+- **Por qué:** no hay integraciones reales armadas (compartir a redes,
+  mensajería interna) — se deja para cuando exista esa lógica. "Copiar" sí
+  se resolvió porque es una sola función del navegador (`clipboard`), sin
+  ninguna dependencia externa.
+
+### Excepción puntual: la página del juego se queda sin `h1`
+- **Qué:** se sacó el `<h1>Neon Circuit</h1>` de `juego.html`. La página
+  arranca directo con el breadcrumb (que ya termina en "Neon Circuit" como
+  página actual) y sigue con `h2` en adelante.
+- **Por qué:** decisión explícita de Fran, sabiendo que contradice la regla
+  general del proyecto ("un solo `h1` por página") — se dejó pasar puntual
+  para esta página porque el nombre del juego ya queda claro en el
+  breadcrumb, justo arriba, y repetirlo como título grande se sentía
+  redundante. No se aplica al resto del sitio: Home y Login siguen
+  necesitando su `h1`.
+- **Costo asumido:** sin `h1`, alguien que navegue saltando de heading en
+  heading (lectores de pantalla) no tiene un punto de entrada claro al
+  contenido principal, y la página pierde el título de mayor jerarquía para
+  buscadores. Se acepta ese costo puntualmente acá.
+
+### Se sacó el botón "Reiniciar" suelto debajo del `h1`
+- **Qué:** se sacó la `<section id="controls">` con el botón "Reiniciar"
+  que quedaba entre el `h1` y el tablero, de una versión vieja de la página
+  (de antes de tener las capturas de Figma).
+- **Por qué:** decisión de Fran — no está en el diseño y, sin lógica de
+  juego todavía, no hacía nada (no tenía ningún `addEventListener`
+  enganchado). "Reiniciar tablero" ya está como atajo de teclado (`R`) en
+  el panel de Ayuda; si hace falta un botón real más adelante, se agrega
+  ahí como acción del juego, no suelto en la parte de arriba.
+
+### Comunidad y "Dejá tu reseña" reusan el layout de 2 columnas
+- **Qué:** el mismo `.juego-layout` que ya arma tablero + panel lateral se
+  reusa para esta fila: Comunidad (columna ancha) y "Dejá tu reseña"
+  (columna de 320px), uno al lado del otro.
+- **Por qué:** confirmado con la captura de Figma que pasó Fran — es
+  exactamente el mismo layout de 2 columnas, así que reusar la clase evita
+  duplicar el mismo CSS con otro nombre.
+
+### "Enlaces relacionados" se sacó de la página
+- **Qué:** se sacó por completo la sección con los 4 links (WardenDevs,
+  Sitio Oficial, Red Prisma, Ajedrez) que estaba debajo de Compartir, junto
+  con su CSS (`.enlaces-relacionados*`).
+- **Por qué:** decisión de Fran — no la vamos a usar. No hay ninguna de esas
+  páginas/juegos armada todavía y no está en el plan sumarlas.
+
+### Números de la ficha ("Jugando ahora", "Tu récord", rating) simulados
+- **Qué:** 4.7 de rating, 1.284 reseñas, 8.412 jugando ahora, 3 nodos de
+  récord — son valores fijos en el HTML, no vienen de ningún lado.
+- **Por qué:** Neon Circuit es nuestro propio juego (no viene de la API de
+  la cátedra, que trae juegos de terceros para el catálogo de la Home). No
+  hay backend de puntajes ni de sesiones concurrentes todavía (`js/api.js`,
+  ítem "Plus" pendiente), así que son simulados a propósito, mismo criterio
+  que ya se usó para "Partida guardada" y el estado de sesión del header.
+
+---
+
 ## Componentes
 
 ### Cards que se elevan sobre las vecinas en hover
@@ -747,7 +1187,12 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   precio.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
-- La página del juego sin `<h1>` (PR #4, ver `ETAPAS.md` Etapa 4): rompe la
+- Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
+  estimados a ojo de la captura de Figma, falta compararlos en pantalla.
+- La página del juego sin `<h1>` (ver `ETAPAS.md` Etapa 4): rompe la
   regla del proyecto de "un solo h1 por página" (no es un requisito de la
   cátedra, es algo que nos autoimpusimos). Fran lo documentó como excepción
   puntual; falta que lo charlemos los tres antes de aceptarlo.
+- `min-height: 660px` del `.tablero` (altura "base", ver "Página del
+  juego"): valor estimado a partir del contenido de ficha+Ayuda, falta
+  confirmarlo/ajustarlo mirando la pantalla real.

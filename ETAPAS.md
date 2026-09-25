@@ -127,23 +127,48 @@ Detalle en `DECISIONES.md`.
 
 ---
 
-## 🔶 Etapa 4 — Juego / "Neon Circuit" (a cargo de Fran)
+## ✅ Etapa 4 — Juego (Peg Solitaire / "Neon Circuit" en la interfaz)
 
-En progreso, a medio hacer (así lo marcó Fran): [PR #4](https://github.com/AgusMuzi79/warden_games/pull/4),
-rama `fran`. Tablero (solo visual, sin lógica de movimientos todavía),
-panel lateral (ficha, Ayuda, Compartir), Comunidad con reseñas reales y
-"Dejá tu reseña" (rating con radios en CSS puro). Todo documentado en
-`DECISIONES.md` ("Página del juego").
+Archivos: `juego.html`, `juego.css`, `js/juego.js`, `js/compartir.js`,
+`js/resena.js`.
 
-**Para discutir entre los tres antes de mergear:** la página se queda sin
-`<h1>` (decisión de Fran, documentada como excepción puntual). Rompe la
+A partir de las capturas de Figma que pasó Fran, la página del juego trae
+bastante más que la grilla y la galería. Se dividió en partes.
+
+- ✅ 4a. Breadcrumb ("Inicio > Puzzle > Neon Circuit"), `h1` renombrado a
+  "Neon Circuit" y marco de la card del tablero (con el placeholder "Botón"
+  de Figma como rótulo, sin función todavía).
+- ✅ 4b. Paleta de colores propia del tablero (tokens nuevos en
+  `variables.css`) + grilla de 33 posiciones + estados de ficha (activa,
+  descargada, seleccionada, destino) + leyenda de símbolos. Solo visual,
+  sin lógica de movimientos todavía. Fuera de alcance por ahora: tableros
+  de otro tamaño y "puentes" (tablero 21+).
+- ✅ 4c. Panel lateral: ficha del juego (miniatura, categoría, dev, rating,
+  "jugando ahora"/"tu récord") + acordeón de Ayuda (`<details>`/`<summary>`)
+  + atajos de teclado (Z/R/Esc).
+- ✅ 4d. Sección "Sobre el juego" (texto descriptivo, escrito para este
+  juego, no copiado de la captura).
+- ✅ 4e. Galería: 6 tiles con gradientes CSS armados con la paleta del
+  tablero (sin fotos reales todavía, `aria-hidden` hasta que las haya).
+- ✅ 4f. Comunidad (3 reseñas reales y distintas, no repetidas) + Compartir
+  (redes, mail, "Copiar" link funcional) + "Dejá tu reseña" (puntaje con
+  radios en CSS puro, sin JS). Sin enlaces relacionados: se sacaron, no se
+  van a usar.
+- ✅ 4g. Pase final de layout, con 3 correcciones de Fran contra Figma:
+  - Compartir pasó a vivir en el panel lateral, debajo de Ayuda (no debajo
+    de la Galería).
+  - Se sacó la sección "Enlaces relacionados".
+  - Comunidad y "Dejá tu reseña" pasaron a ir uno al lado del otro (reusan
+    el mismo `.juego-layout` de 2 columnas).
+
+Detalle de las decisiones de la 4a en `DECISIONES.md`.
+
+**Para discutir entre los tres:** la página se queda sin `<h1>` (decisión
+de Fran, documentada como excepción puntual en `DECISIONES.md`). Rompe la
 regla del proyecto "un solo h1 por página" (`CLAUDE.md`, accesibilidad) —
 no es un requisito de la cátedra, es algo que nos autoimpusimos, así que
-vale la pena que lo veamos los tres antes de aceptar la excepción, no
-mergearlo de hecho porque a Fran le resolvía el diseño de esa pantalla.
-
-No se toca todavía: se espera a que Fran la termine antes de revisarla en
-detalle o traerla a `agus`.
+vale la pena que lo veamos los tres antes de aceptar la excepción de hecho
+porque a Fran le resolvía el diseño de esa pantalla.
 
 ---
 
