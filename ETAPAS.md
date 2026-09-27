@@ -203,5 +203,6 @@ pasó después una captura de los badges "Gratis"/precio/"Nuevo" (parte 4).
   cuenta ya apunta ahí. Detalle en `DECISIONES.md`.
 - ✅ Parte 4: badges "Gratis"/precio/"Nuevo" en las cards de la Home y junto
   a "Destacado" en el banner (no en Neon Circuit ni en juegos ya comprados).
-  Precio simulado fijo (`$9.99`), no real todavía. Detalle en
-  `DECISIONES.md`, "Sistema de compras (parte 3)".
+  Precio simulado fijo (`$9.99`) para todo lo "de pago" — decisión final,
+  no va a haber precios reales por juego. Detalle en `DECISIONES.md`,
+  "Sistema de compras (parte 3)".

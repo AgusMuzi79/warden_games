@@ -1558,11 +1558,13 @@ van ni de qué depende cada uno — esas decisiones se tomaron acá, con Agus).
   `esDePago()` (1 de cada 5 juegos por id, en vez de `Math.random()` en
   cada render). Si un id cumple los dos, "Nuevo" gana — no hay lugar para
   mostrar dos etiquetas a la vez, y es la más noticiosa de las dos.
-- **Precio fijo simulado (`PRECIO_SIMULADO = '$9.99'`):** no hay precios
-  reales todavía (ver "Pendientes de decidir"), así que cualquier juego "de
-  pago" muestra el mismo monto. Inventar precios distintos por juego sería
-  peor que uno solo repetido: dato fabricado con apariencia de real, en vez
-  de un placeholder que se nota que lo es.
+- **Precio fijo simulado (`PRECIO_SIMULADO = '$9.99'`), decisión final, no
+  un placeholder a reemplazar:** cualquier juego "de pago" muestra el mismo
+  monto. Confirmado con Agus — no va a haber precios reales por juego en
+  este proyecto. Un monto único y fijo es más simple de mantener y explicar
+  en la defensa que inventar precios distintos por juego, que sería un dato
+  fabricado con apariencia de real en vez de un placeholder que se nota
+  que lo es.
 
 ### Roboto Flex en mayúsculas, no Orbitron — la captura de Figma no aplica tal cual
 - **Qué:** el componente `.badge` (`components.css`) usa `--font-ui` en
@@ -1598,10 +1600,6 @@ van ni de qué depende cada uno — esas decisiones se tomaron acá, con Agus).
 
 ## Pendientes de decidir
 
-- Precio real por juego: por ahora todo lo "de pago" muestra el mismo
-  precio simulado (`$9.99`, ver "Sistema de compras (parte 3)"). El sistema
-  de compras real (form de pago, sin pasarela) ya está armado — lo que
-  falta es que los montos sean reales en vez de un placeholder fijo.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
 - Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
