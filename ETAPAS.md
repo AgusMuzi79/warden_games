@@ -179,7 +179,8 @@ porque a Fran le resolvía el diseño de esa pantalla.
   guardan el estado en `localStorage` y la Home ya arranca mostrando el
   avatar y "Recomendados" al volver. Sigue sin ser una cuenta real (no hay
   backend ni `api.js` de por medio todavía en el login).
-- ⬜ Guardado de puntajes.
+- ❌ Guardado de puntajes: no se va a hacer — confirmado con Agus, no
+  aparece en el enunciado.
 
 ## ⬜ Sistema de compras
 

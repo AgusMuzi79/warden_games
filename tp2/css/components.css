@@ -122,8 +122,9 @@
   }
 }
 
-/* Link de texto (ej. "¿No tenés cuenta? Registrate") — mismo subrayado
-   animado que .btn--terciario, pero no es un botón. */
+/* Link de texto celeste, para resaltar una palabra suelta dentro de una
+   oración (ej. "Acepto los términos" del checkbox de login) — mismo
+   subrayado animado que .btn--terciario, pero no es un botón. */
 .link {
   position: relative;
   display: inline-block;
@@ -155,6 +156,31 @@
 
 @media (prefers-reduced-motion: reduce) {
   .link::after { transition: none; }
+}
+
+/* Variante "blanco": el link en sí no destaca hasta el hover/foco (mismo
+   criterio que ya usan los links del footer, footer.css: color heredado
+   que pasa a celeste, con el subrayado nativo del navegador en vez del
+   subrayado animado de arriba). Para un link suelto que no necesita
+   llamar la atención de entrada, a diferencia de .link solo (siempre
+   celeste, pensado para resaltar dentro de una oración). */
+.link--blanco {
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.link--blanco::after {
+  content: none;
+}
+
+.link--blanco:hover,
+.link--blanco:focus-visible {
+  color: var(--acento);
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link--blanco { transition: none; }
 }
 
 /* Cards — el hover se levanta por encima de las vecinas.

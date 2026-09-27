@@ -1096,16 +1096,25 @@ más una que sumamos nosotros al revisar:
   corrección del profesor cambió el criterio: ahora se pide explícitamente que sean 4
   distintas, una por variante.
 
-### Componente `.link`
-- **Qué:** texto con color `--acento` y subrayado animado que crece de izquierda a
-  derecha en hover/foco (`::after` con `scaleX`), reutilizando la misma animación que
-  `.btn--terciario` en vez de sumar una 5ª.
-- **Por qué:** faltaba un componente para links de texto dentro de una oración (ej.
-  "¿No tenés cuenta? Registrate" en el splash de login), distinto del `<a>` genérico de
-  `base.css` (que solo subraya con `text-decoration`, sin animación) y de los links de
-  navegación del header/footer.
-- **Pendiente:** el estilo final depende de la captura de Figma del componente link,
-  que todavía no vimos. Este es un default razonable mientras tanto.
+### Componente `.link`, con dos variantes (cerrado: no hay una tercera captura de Figma para esto)
+- **Qué:** `.link` (color `--acento` siempre, con el subrayado animado que
+  crece de izquierda a derecha en hover/foco, reutilizando la misma
+  animación que `.btn--terciario` en vez de sumar una 5ª) y `.link--blanco`
+  (color heredado — blanco/lila según el texto que lo rodea — que pasa a
+  celeste en hover/foco, con el subrayado nativo del navegador en vez del
+  animado).
+- **Por qué dos variantes, no una:** aclarado por Agus — no hay un
+  componente único de Figma para esto, sino dos usos distintos ya
+  presentes en el sitio: `.link` es para resaltar una palabra suelta
+  dentro de una oración (ej. "Acepto los **términos**" del checkbox de
+  login, celeste de entrada porque tiene que notarse que es clickeable en
+  medio de texto plano) y `.link--blanco` es para un link suelto que no
+  necesita destacar hasta que se interactúa con él — mismo criterio que ya
+  usan los links del footer (`.footer a`, footer.css: heredan el color y
+  pasan a celeste en hover, sin subrayado animado).
+- **`.link--blanco` no inventa un estilo nuevo, reusa el del footer:**
+  mismos valores (`color: inherit` → `var(--acento)` en hover/foco) en vez
+  de un tercer componente de color propio.
 
 ### Botón de newsletter unificado a `.btn`
 - **Qué:** el botón "Suscribirse" del footer tenía su propio estilo hardcodeado en
@@ -1744,8 +1753,6 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
 - Qué pasa al clickear "Jugar" en la ficha de un juego del catálogo que no
   es Neon Circuit (gratis, o de pago ya comprado): hoy no hace nada. Falta
   charlarlo con Fran — ver "Ficha de producto para juegos del catálogo".
-- Estilo final del componente `.link` (hay un default en `components.css`; falta
-  confirmar contra la captura de Figma cuando la tengamos).
 - Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
   estimados a ojo de la captura de Figma, falta compararlos en pantalla.
 - La página del juego sin `<h1>` (ver `ETAPAS.md` Etapa 4): rompe la
