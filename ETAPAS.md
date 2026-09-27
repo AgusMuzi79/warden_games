@@ -195,9 +195,10 @@ en el TPE1): las decisiones de layout de esta parte son nuestras.
   abre un form falso, al confirmar mueve los juegos del carrito a una lista
   de "comprados" y vacía el carrito. Detalle en `DECISIONES.md`,
   "Sistema de compras (parte 1: modal de pago simulado)".
-- ⬜ Parte 3: sección "Mis juegos" en la Home, debajo de "Recomendados"
-  (la página tiene que priorizar vender antes que mostrar lo ya comprado).
-  Lee `obtenerComprados()` de `carrito.js`. El link "Mis juegos" del menú de
-  cuenta (hoy placeholder) pasa a apuntar ahí.
+- ✅ Parte 3: sección "Mis juegos" en la Home, debajo de "Recomendados"
+  (la página prioriza vender antes que mostrar lo ya comprado) — pero
+  independiente de la sesión simulada, aparece igual como invitado. Lee
+  `obtenerComprados()` de `carrito.js`. El link "Mis juegos" del menú de
+  cuenta ya apunta ahí. Detalle en `DECISIONES.md`.
 - ⬜ Cuando exista la parte 3, el banner "Destacados" recupera el badge de
   precio que tiene en el Figma pero que se sacó por ahora.

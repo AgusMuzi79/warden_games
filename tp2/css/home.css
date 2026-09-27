@@ -381,6 +381,13 @@
   font-size: 16px;
 }
 
+/* "Mis juegos" no tiene rating (ver home.js, crearCardComprado): sin
+   .game-card__rating debajo, el título necesita su propio margen inferior
+   para no quedar pegado al borde de la card. */
+.game-card__title--solo {
+  margin-bottom: var(--espaciado-3);
+}
+
 .game-card__rating {
   display: flex;
   align-items: center;

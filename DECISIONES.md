@@ -1476,12 +1476,54 @@ esta sección son nuestras, no una traducción de un mock.
   unas pocas líneas de CSS es más barato de mantener que un nombre que mienta
   de dónde viene el estilo.
 
-### Queda para la parte 2 (aparte, no en esta tanda)
-- La fila "Mis juegos" en la Home, debajo de "Recomendados" (para que la
-  página siga priorizando vender antes que mostrar lo ya comprado) — decisión
-  de Agus. Va a leer `obtenerComprados()` de `carrito.js`.
-- Cuando eso exista, el link "Mis juegos" del menú de cuenta (hoy
-  placeholder, `href="#"`) pasa a apuntar ahí.
+## Sistema de compras (parte 2: fila "Mis juegos" en la Home)
+
+### Debajo de "Recomendados", pero independiente de la sesión simulada
+- **Qué:** `home.js` arma una fila más, "Mis juegos", con lo que haya en
+  `obtenerComprados()` (`carrito.js`). Va inmediatamente debajo de
+  "Recomendados" cuando hay sesión — pero a diferencia de esa fila, "Mis
+  juegos" se arma siempre que haya algo comprado, tenga sesión iniciada o no.
+- **Por qué debajo de Recomendados:** decisión de Agus — la Home tiene que
+  seguir priorizando vender antes que mostrar lo que ya comprás.
+- **Por qué independiente de la sesión (a diferencia de "Recomendados"):**
+  comprar (`compras.js`) no depende en ningún momento de tener sesión
+  iniciada — es una mecánica aparte, atada solo a `localStorage`. Si "Mis
+  juegos" solo apareciera con sesión, alguien podría comprar como invitado y
+  no ver la compra reflejada en ningún lado de la Home, lo cual sería raro
+  dado que ambas cosas (comprar y ver lo comprado) pasan en el mismo
+  navegador sin login real de por medio.
+
+### Card sin rating ni botón de carrito, no la misma `crearCard()`
+- **Qué:** `crearFila()` ahora recibe una fábrica de cards como tercer
+  parámetro (`fabricaCard = crearCard` por default). "Mis juegos" le pasa
+  `crearCardComprado()`, una card más simple: imagen + título, sin estrella
+  de rating ni el botón de agregar al carrito.
+- **Por qué no se puede reusar `crearCard()` tal cual:** los objetos que
+  guarda `carrito.js` (`{id, nombre, imagen}`, en español, sin rating ni
+  género) no tienen la forma de los que devuelve la API
+  (`{id, name, background_image, rating, genres}`, en inglés) — no hay
+  `juego.rating` ni `juego.genres` para mostrar. Mostrar el botón de carrito
+  tampoco tendría sentido: ya es tuyo, no hay nada que agregar.
+- **Token de CSS nuevo:** `.game-card__title--solo` en `home.css`, para el
+  margen inferior que en el resto de las cards pone `.game-card__rating`
+  (que acá no existe).
+
+### La compra recarga la página en vez de solo cerrar el modal
+- **Qué:** en `compras.js`, tras mostrar el mensaje de éxito, en vez de
+  `modalPago.close()` ahora se hace `window.location.reload()`.
+- **Por qué:** sin esto, "Mis juegos" no reflejaría la compra recién hecha
+  hasta la próxima carga de la página — `home.js` arma las filas una sola
+  vez, al cargar. Recargar es la forma más simple de que se vuelva a armar
+  con el estado nuevo, sin duplicar la lógica de renderizado acá (mismo
+  criterio que ya usa "Cerrar sesión" en `menu.js`). Cerrar el modal sin
+  confirmar (X, Escape, fondo) sigue sin recargar nada.
+
+### El link "Mis juegos" del menú de cuenta ya apunta a la fila
+- **Qué:** pasa de `href="#"` a `href="index.html#fila-mis-juegos"` (el id
+  que arma `crearFila()` a partir del título).
+- **Por qué:** ya existe una fila real a la que apuntar. Si no hay nada
+  comprado la fila no se arma y el link no tiene efecto — no hace falta
+  ningún manejo especial para ese caso.
 
 ---
 

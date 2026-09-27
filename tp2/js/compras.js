@@ -40,11 +40,15 @@ formPago.addEventListener('submit', (evento) => {
   formPago.hidden = true;
   exitoPago.hidden = false;
 
-  setTimeout(() => modalPago.close(), 2000);
+  // Recarga en vez de solo cerrar el modal: es la forma más simple de que
+  // la fila "Mis juegos" de home.js se arme de nuevo con la compra recién
+  // hecha, sin duplicar esa lógica de renderizado acá (mismo criterio que
+  // "Cerrar sesión" en menu.js).
+  setTimeout(() => window.location.reload(), 2000);
 });
 
-// Deja el modal listo para la próxima vez que se abra (si no, la próxima
-// compra arrancaría directo en la pantalla de éxito de la anterior).
+// Deja el modal listo por si se cierra sin llegar a confirmar la compra
+// (con la "X", Escape o clickeando el fondo) y se vuelve a abrir después.
 modalPago.addEventListener('close', () => {
   formPago.reset();
   formPago.hidden = false;

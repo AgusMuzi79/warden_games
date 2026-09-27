@@ -67,7 +67,32 @@ function crearCard(juego) {
   return card;
 }
 
-function crearFila(titulo, juegos) {
+// "Mis juegos" no viene de la API: son los objetos {id, nombre, imagen}
+// que guarda carrito.js al comprar, sin rating ni género. Card más simple,
+// sin el botón de agregar al carrito (ya es tuyo) ni la estrella.
+function crearCardComprado(juego) {
+  const card = document.createElement('article');
+  card.className = 'card game-card';
+
+  const media = document.createElement('div');
+  media.className = 'game-card__media';
+
+  const imagen = document.createElement('img');
+  imagen.className = 'game-card__image';
+  imagen.src = juego.imagen;
+  imagen.alt = '';
+  imagen.loading = 'lazy';
+  media.append(imagen);
+
+  const titulo = document.createElement('h3');
+  titulo.className = 'game-card__title game-card__title--solo';
+  titulo.textContent = juego.nombre;
+
+  card.append(media, titulo);
+  return card;
+}
+
+function crearFila(titulo, juegos, fabricaCard = crearCard) {
   if (juegos.length === 0) return null;
 
   const idTitulo = `fila-${titulo.toLowerCase().replace(/\s+/g, '-')}`;
@@ -103,7 +128,7 @@ function crearFila(titulo, juegos) {
 
   const pista = document.createElement('div');
   pista.className = 'carrusel__pista';
-  juegos.slice(0, 10).forEach((juego) => pista.append(crearCard(juego)));
+  juegos.slice(0, 10).forEach((juego) => pista.append(fabricaCard(juego)));
 
   fila.append(cabecera, pista);
   activarCarrusel(pista, flechaIzquierda, flechaDerecha);
@@ -124,6 +149,14 @@ function renderizarRecomendados(juegos) {
   if (fila) contenedor.append(fila);
 }
 
+// Independiente de la sesión simulada (sesion.js): comprar no depende de
+// tener sesión iniciada, así que esta fila se guía solo por si hay algo en
+// "warden-compras" (carrito.js), no por el avatar del header.
+function renderizarMisJuegos() {
+  const fila = crearFila('Mis juegos', obtenerComprados(), crearCardComprado);
+  if (fila) contenedor.append(fila);
+}
+
 function renderizarCategorias(juegos) {
   CATEGORIAS.forEach(({ titulo, genero }) => {
     const deLaCategoria = juegos.filter((j) => esDeGenero(j, genero));
@@ -139,6 +172,7 @@ function renderizarFilas(juegos) {
   if (haySesionIniciada()) {
     renderizarRecomendados(juegos);
   }
+  renderizarMisJuegos();
   renderizarCategorias(juegos);
 }
 
