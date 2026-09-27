@@ -241,11 +241,38 @@
   line-height: 1.4;
 }
 
-/* fila del captcha */
+/* Fila del captcha: simulado, pero con la paleta gris clara del widget
+   real de reCAPTCHA de Google en vez de los tokens violeta del sitio — es
+   un widget de un tercero (se ve igual en cualquier página que lo use,
+   nunca toma el tema de quien lo integra). align-items:center (en vez de
+   heredar el flex-start de .check-block, pensado para labels de varias
+   líneas como "Acepto los términos...") porque acá todo el contenido es
+   de una sola línea y tiene que quedar centrado, no arrancando arriba. */
 .check-block--captcha {
+  align-items: center;
   padding: var(--espaciado-3) var(--espaciado-4);
-  border-radius: var(--radio-md);
-  background: var(--fondo);
+  border: 1px solid #d3d3d3;
+  border-radius: var(--radio-sm);
+  background: #f9f9f9;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.check-block--captcha .check-block__mark {
+  border-color: #c1c1c1;
+  background: #fff;
+}
+
+.check-block--captcha input:checked ~ .check-block__mark {
+  background: #4285f4;
+  border-color: #4285f4;
+}
+
+.check-block--captcha input:checked ~ .check-block__mark::after {
+  border-color: #fff;
+}
+
+.check-block--captcha .check-block__label {
+  color: #1a1a1a;
 }
 
 .recaptcha {
@@ -254,14 +281,14 @@
   align-items: center;
   gap: 2px;
   margin-left: auto;
-  color: var(--primario-c1);
+  color: #6b6b6b;
   font-size: 10px;
 }
 
 .recaptcha__icon {
   width: 26px;
   height: 26px;
-  fill: var(--acento);
+  fill: #4285f4;
 }
 
 /* ---------- Botones ----------

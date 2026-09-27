@@ -620,6 +620,24 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   "pasó la validación del formulario", no una cuenta real verificada. Eso
   lo resuelve `js/api.js` (ítem "Plus" pendiente).
 
+### Captcha simulado: paleta gris de Google, no los tokens del sitio
+- **Qué:** `.check-block--captcha` (el "No soy un robot" del registro)
+  pasa de fondo `--fondo` (violeta oscuro) a la paleta gris/blanca real del
+  widget de reCAPTCHA de Google (`#f9f9f9` de fondo, borde `#d3d3d3`,
+  casillero blanco con borde `#c1c1c1`, tilde y logo en azul `#4285f4`,
+  texto en gris oscuro/negro). También se corrigió que quedaba
+  desalineado verticalmente: `.check-block--captcha` ahora tiene
+  `align-items: center` propio, en vez de heredar el `align-items:
+  flex-start` de `.check-block` (pensado para labels de varias líneas,
+  como "Acepto los términos...", no para esta fila de una sola línea).
+- **Por qué colores hardcodeados acá, rompiendo la regla de "nunca colores
+  escritos a mano":** reCAPTCHA es un widget de un tercero (Google) — en
+  un sitio real ni siquiera es HTML propio, es un iframe que Google renderiza
+  siempre igual, sin importar el tema de quien lo integra. Para que la
+  simulación sea creíble tiene que verse como el widget real, no como si
+  hubiera tomado la paleta violeta del sitio — es la única excepción
+  consciente a esa regla, justo porque conceptualmente no es "nuestro" CSS.
+
 ---
 
 ## Página del juego (Etapa 4)
