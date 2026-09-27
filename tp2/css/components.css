@@ -11,6 +11,9 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  /* Ancla acá el z-index:-1 del relleno de .btn--secundario, para que
+     nunca dependa del fondo de lo que lo rodee (ver DECISIONES.md). */
+  z-index: 0;
   min-height: var(--control-alto);
   padding: 0 var(--espaciado-6);
   border: 2px solid transparent;
@@ -59,9 +62,17 @@
   transition: transform 0.25s ease-out;
 }
 
-.btn--secundario:hover,
-.btn--secundario:focus-visible {
+/* .btn.btn--secundario (no solo .btn--secundario): necesita más especificidad
+   que ".menu-dropdown__seccion a:hover" (que resetea text-decoration a los
+   links normales del menú), porque "Contáctanos" vive ahí adentro y es
+   también un .btn--secundario. */
+.btn.btn--secundario:hover,
+.btn.btn--secundario:focus-visible {
   color: var(--fondo);
+  /* Explícito acá (no alcanza con el "a:hover" genérico de base.css): ese
+     selector busca la etiqueta <a>, así que a los .btn--secundario que son
+     <button> (ej. "Mensaje", "Suscribirse") nunca les llegaba. */
+  text-decoration: underline;
 }
 
 .btn--secundario:hover::before,
@@ -244,6 +255,11 @@
 
 .menu-dropdown__seccion--contacto .btn {
   width: 100%;
+  /* Sin esto, ".menu-dropdown__seccion a" (pensada para los links de
+     navegación del menú) le pisa el tamaño de fuente a 15px — el botón
+     queda más chico y el subrayado del hover, más finito, que en el
+     resto de los .btn--secundario del sitio. */
+  font-size: 16px;
 }
 
 /* ---------- Cabecera del menú de cuenta (avatar + nombre) ---------- */

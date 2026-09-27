@@ -1417,6 +1417,76 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
 
 ---
 
+## Bug: la animación de `.btn--secundario` no se veía en algunos botones
+
+- **Qué:** "Enviar mail", "Mensaje" y "Suscribirse" (página del juego) y
+  "Contáctanos" (menú hamburguesa) tenían la clase correcta
+  (`btn btn--secundario`) pero el relleno animado del hover no se veía —
+  quedaba tapado. Se agregó `z-index: 0` a la regla base `.btn`
+  (`components.css`), junto al `position: relative` que ya tenía.
+- **Por qué pasaba:** el relleno es un `::before` con `z-index: -1` (así
+  queda detrás del texto del botón pero delante de su fondo). Ese `-1`
+  solo se contiene dentro del propio botón si el botón es la raíz de ese
+  apilamiento — y `.btn` tenía `position: relative` sin `z-index` propio,
+  así que no lo era. El navegador comparaba el `-1` contra el fondo del
+  ancestro no posicionado más cercano con fondo opaco (`.compartir`,
+  `.newsletter__form`, la sección de contacto del hamburguesa), y ese
+  fondo se pintaba encima, tapando el relleno. "Seguir comprando" (del
+  carrito, PR #7) se salvaba de pura casualidad: vive dentro de
+  `.menu-dropdown`, que sí tiene `position: absolute` + `z-index: 200`, y
+  por eso terminaba conteniendo el `-1` en vez de un ancestro más lejano.
+- **Por qué el fix es en `.btn` y no en cada contenedor:** agregarle
+  `z-index: 0` a `.btn` hace que cada botón sea su propia raíz de
+  apilamiento, así el relleno nunca depende de qué fondo tenga alrededor
+  — sea cual sea el contenedor donde se use `.btn--secundario` de acá en
+  adelante. Parchear cada `.compartir`/`.newsletter__form` uno por uno
+  hubiera dejado el mismo bug listo para reaparecer con el próximo
+  contenedor nuevo.
+- **Sin efecto en los botones que ya andaban bien:** `z-index: 0` está en
+  el mismo grupo de apilamiento que `z-index: auto` (el valor por
+  defecto) frente a los hermanos del botón — no cambia dónde se ubica el
+  botón en la página, solo qué pasa *adentro* de él.
+- **Segunda parte del mismo bug — faltaba el subrayado del texto:** con el
+  relleno ya arreglado, Fran notó que "Mensaje" y "Suscribirse" (ambos
+  `<button>`) seguían sin subrayar el texto en hover, a diferencia de
+  "Seguir comprando" (un `<a>`). La causa: el subrayado nunca fue parte de
+  `.btn--secundario` — salía de rebote de una regla genérica en
+  `base.css` (`a:hover { text-decoration: underline; }`), pensada para
+  links de texto sueltos. Esa regla busca la etiqueta `<a>` específicamente,
+  así que a los `.btn--secundario` que son `<button>` nunca les podía
+  llegar, sin importar qué tuviera `.btn--secundario` propio. Se agregó
+  `text-decoration: underline;` directo a `.btn--secundario:hover`/
+  `:focus-visible`, así el subrayado es parte explícita de la animación
+  del componente (deslizar + rellenar + subrayar) y le llega a cualquier
+  `.btn--secundario`, sea `<a>` o `<button>`.
+- **Tercera vuelta — "Contáctanos" seguía sin subrayar:** con el punto
+  anterior ya resuelto para "Mensaje"/"Suscribirse", "Contáctanos" (un
+  `<a>`, dentro del menú hamburguesa) seguía sin subrayarse. Causa:
+  `.menu-dropdown__seccion a:hover { text-decoration: none; }` (pensada
+  para que los links normales del menú, tipo "Destacados" o "RPG", no se
+  subrayen — usan un fondo en su lugar) es más específica
+  (`.menu-dropdown__seccion` + `:hover` + `a`) que `.btn--secundario:hover`
+  (`.btn--secundario` + `:hover`, sin elemento), y "Contáctanos" cae bajo
+  las dos reglas a la vez por vivir en ese contenedor. Se subió la
+  especificidad del selector del botón a `.btn.btn--secundario:hover`
+  (repitiendo la clase `.btn`, que todo botón ya tiene) en vez de tocar la
+  regla del menú — así el fix queda contenido en el propio componente,
+  sin arriesgar que otro contenedor futuro con una regla parecida vuelva a
+  tapar el subrayado.
+- **Cuarta vuelta — el subrayado de "Contáctanos" se veía más finito que
+  el del resto:** Fran lo notó comparándolo al lado de "Seguir comprando".
+  Causa: `.menu-dropdown__seccion a` (misma regla del punto anterior)
+  también le pisa el `font-size` a 15px (pensado para los links del menú,
+  con texto más chico) — un `.btn` normal usa 16px. El grosor del
+  subrayado (`text-decoration-thickness: auto`) lo calcula el navegador
+  en proporción al tamaño de la letra, así que con la fuente más chica
+  también sale más fino. Se agregó `font-size: 16px;` a
+  `.menu-dropdown__seccion--contacto .btn` (la regla que ya existía ahí
+  al lado, para el `width: 100%`), restaurando el tamaño normal del botón
+  en vez de tocar `.menu-dropdown__seccion a`.
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
