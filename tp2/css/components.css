@@ -180,6 +180,30 @@
   .card:hover, .card:focus-within { transform: none; }
 }
 
+/* Etiqueta chica ("Gratis", precio, "Nuevo") sobre la imagen de un juego
+   (home.js, carousel.js). En Roboto Flex, no Orbitron: es un tag, no un
+   título — misma razón por la que se sacó Orbitron de .banner__nombre. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espaciado-1) var(--espaciado-3);
+  border-radius: var(--radio-sm);
+  font: 700 12px/1.4 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.badge--precio {
+  background: var(--primario-o1);
+  border: 1px solid var(--primario-c1);
+  color: var(--primario-c3);
+}
+
+.badge--nuevo {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
 /* Menú desplegable — mismo componente para el menú hamburguesa y el de
    cuenta (unificados en la 2ª corrección: antes tenían estilos distintos).
    Quien lo posiciona respecto al botón que lo abre es header.css. */

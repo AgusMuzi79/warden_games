@@ -54,6 +54,12 @@ function crearCard(juego) {
   imagen.loading = 'lazy';
   media.append(imagen);
 
+  const badge = crearBadge(juego);
+  if (badge) {
+    badge.classList.add('game-card__badge');
+    media.append(badge);
+  }
+
   const titulo = document.createElement('h3');
   titulo.className = 'game-card__title';
   titulo.textContent = juego.name;

@@ -143,21 +143,29 @@
   font-size: 28px;
 }
 
-.banner__etiqueta,
+.banner__etiquetas,
 .banner__nombre {
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
-.banner__slide--activo .banner__etiqueta,
+.banner__slide--activo .banner__etiquetas,
 .banner__slide--activo .banner__nombre {
   opacity: 1;
 }
 
-.banner__etiqueta {
+/* Agrupa "Destacado" con el badge de Gratis/precio/Nuevo (si el juego
+   tiene uno, ver carrito.js crearBadge) arriba a la izquierda — el carrito
+   ya ocupa arriba a la derecha y el nombre, abajo de punta a punta. */
+.banner__etiquetas {
   position: absolute;
   left: var(--espaciado-4);
   top: var(--espaciado-4);
+  display: flex;
+  gap: var(--espaciado-2);
+}
+
+.banner__etiqueta {
   padding: var(--espaciado-1) var(--espaciado-3);
   border-radius: 999px;
   background: var(--acento);
@@ -264,7 +272,7 @@
     transition: none;
   }
 
-  .banner__etiqueta,
+  .banner__etiquetas,
   .banner__nombre,
   .banner__dot::before,
   .banner__jugar {
@@ -365,11 +373,21 @@
   flex-direction: column;
 }
 
+.game-card__media {
+  position: relative;
+}
+
 .game-card__image {
   display: block;
   width: 100%;
   aspect-ratio: 16 / 9;
   object-fit: cover;
+}
+
+.game-card__badge {
+  position: absolute;
+  left: var(--espaciado-2);
+  top: var(--espaciado-2);
 }
 
 /* Fila de abajo: nombre + puntaje a la izquierda, botón de carrito a la

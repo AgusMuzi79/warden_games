@@ -108,11 +108,24 @@ function crearSlide(juego, index) {
   etiqueta.className = 'banner__etiqueta';
   etiqueta.textContent = 'Destacado';
 
+  const etiquetas = document.createElement('div');
+  etiquetas.className = 'banner__etiquetas';
+  etiquetas.append(etiqueta);
+
+  // Neon Circuit no viene de la API (ver carousel.js más abajo): no tiene
+  // id real para esDePago()/esNuevo() ni puede estar en "comprados", así
+  // que no lleva badge de Gratis/precio/Nuevo — ya tiene su propia acción
+  // real ("Jugar").
+  if (juego !== NEON_CIRCUIT) {
+    const badge = crearBadge(juego);
+    if (badge) etiquetas.append(badge);
+  }
+
   const nombre = document.createElement('p');
   nombre.className = 'banner__nombre';
   nombre.textContent = juego.name;
 
-  slide.append(etiqueta, nombre);
+  slide.append(etiquetas, nombre);
 
   // Es nuestro propio juego: además de poder saltar a esta card como al
   // resto de los destacados, tiene una acción real (ir a jugar). Solo se

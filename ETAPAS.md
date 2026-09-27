@@ -186,8 +186,9 @@ porque a Fran le resolvía el diseño de esa pantalla.
 Lo pide el enunciado, no es opcional — a diferencia de los ítems de "Plus".
 Va a ser un placeholder, decisión nuestra: agregar juegos al carrito, un flujo
 de "pagar" que simula el ok de la compra (sin pasarela real), y que el juego
-comprado pase a figurar en "Mis juegos". Sin captura de Figma (no se diseñó
-en el TPE1): las decisiones de layout de esta parte son nuestras.
+comprado pase a figurar en "Mis juegos". Sin captura de Figma del layout
+general (no se diseñó en el TPE1): esas decisiones son nuestras. Fran sí
+pasó después una captura de los badges "Gratis"/precio/"Nuevo" (parte 4).
 
 - ✅ Parte 1: agregar/quitar del carrito, ícono en el header con desplegable
   (ver "Carrito de compras" en `DECISIONES.md`, partes 1 y 2).
@@ -200,5 +201,7 @@ en el TPE1): las decisiones de layout de esta parte son nuestras.
   independiente de la sesión simulada, aparece igual como invitado. Lee
   `obtenerComprados()` de `carrito.js`. El link "Mis juegos" del menú de
   cuenta ya apunta ahí. Detalle en `DECISIONES.md`.
-- ⬜ Cuando exista la parte 3, el banner "Destacados" recupera el badge de
-  precio que tiene en el Figma pero que se sacó por ahora.
+- ✅ Parte 4: badges "Gratis"/precio/"Nuevo" en las cards de la Home y junto
+  a "Destacado" en el banner (no en Neon Circuit ni en juegos ya comprados).
+  Precio simulado fijo (`$9.99`), no real todavía. Detalle en
+  `DECISIONES.md`, "Sistema de compras (parte 3)".

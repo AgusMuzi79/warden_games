@@ -1542,11 +1542,66 @@ esta sección son nuestras, no una traducción de un mock.
 
 ---
 
+## Sistema de compras (parte 3: badges "Gratis" / precio / "Nuevo")
+
+Fran pasó una captura de Figma con estos 3 badges (sin contexto de dónde
+van ni de qué depende cada uno — esas decisiones se tomaron acá, con Agus).
+
+### Una sola etiqueta por card, con prioridad "Nuevo" > precio/"Gratis" > nada
+- **Qué:** `crearBadge(juego)` (`carrito.js`, fábrica compartida por
+  `home.js` y `carousel.js`, mismo patrón que `crearBotonCarrito`) devuelve
+  una sola etiqueta: "Nuevo" si `esNuevo(id)`, si no el precio simulado o
+  "Gratis" según `esDePago(id)`, o `null` si el juego ya figura en
+  `obtenerComprados()` — un juego que ya es tuyo no necesita decir que es
+  gratis o cuánto cuesta.
+- **`esNuevo(id)`:** simulado y determinístico, mismo criterio que
+  `esDePago()` (1 de cada 5 juegos por id, en vez de `Math.random()` en
+  cada render). Si un id cumple los dos, "Nuevo" gana — no hay lugar para
+  mostrar dos etiquetas a la vez, y es la más noticiosa de las dos.
+- **Precio fijo simulado (`PRECIO_SIMULADO = '$9.99'`):** no hay precios
+  reales todavía (ver "Pendientes de decidir"), así que cualquier juego "de
+  pago" muestra el mismo monto. Inventar precios distintos por juego sería
+  peor que uno solo repetido: dato fabricado con apariencia de real, en vez
+  de un placeholder que se nota que lo es.
+
+### Roboto Flex en mayúsculas, no Orbitron — la captura de Figma no aplica tal cual
+- **Qué:** el componente `.badge` (`components.css`) usa `--font-ui` en
+  700 y `text-transform: uppercase`, no `--font-display`.
+- **Por qué:** la tipografía de la captura de Figma para estos 3 badges
+  parece Orbitron — pero son tags chicos sobre una imagen, no títulos
+  (h1-h3), así que copiarla tal cual rompería la regla del proyecto. Mismo
+  motivo por el que ya se sacó Orbitron de `.banner__nombre` en su momento
+  (ver "Carrusel coverflow" más arriba). Se avisó la diferencia en vez de
+  copiarla, como pide `CLAUDE.md`.
+- **Dos variantes de color, no una por texto:** `.badge--precio` (violeta,
+  para "Gratis" y el precio — visualmente son la misma etiqueta en la
+  captura, solo cambia el texto) y `.badge--nuevo` (cian, mismo par de
+  colores que ya usa `.banner__etiqueta` para "Destacado").
+
+### Ubicación: arriba a la izquierda de la imagen (Home) y junto a "Destacado" (banner)
+- **Qué:** en las filas de la Home, el badge va arriba a la izquierda de
+  `.game-card__media` — el lugar que dejó libre el ícono de carrito al
+  moverse a `.game-card__cuerpo` (ver "El botón pasa de texto a ícono...").
+  En el banner "Destacados", se agrupa junto a la etiqueta "Destacado" en
+  un wrapper nuevo (`.banner__etiquetas`), arriba a la izquierda — el
+  carrito ya ocupa arriba a la derecha y el nombre ocupa abajo de punta a
+  punta, no quedaba otro lugar libre.
+- **`.game-card__media` recupera `position: relative`:** se había sacado
+  cuando el ícono de carrito dejó de estar ahí (ver decisión anterior);
+  vuelve porque ahora el badge sí necesita anclarse a la imagen.
+- **Neon Circuit no lleva badge en el banner:** no viene de la API (no
+  tiene un id real para `esDePago()`/`esNuevo()`/`obtenerComprados()`) y ya
+  tiene su propia acción real ("Jugar") — mismo criterio que ya lo excluye
+  del ícono de carrito ahí.
+
+---
+
 ## Pendientes de decidir
 
-- Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
-  una etapa aparte; mientras no exista, el banner "Destacados" no muestra
-  precio.
+- Precio real por juego: por ahora todo lo "de pago" muestra el mismo
+  precio simulado (`$9.99`, ver "Sistema de compras (parte 3)"). El sistema
+  de compras real (form de pago, sin pasarela) ya está armado — lo que
+  falta es que los montos sean reales en vez de un placeholder fijo.
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
 - Hex definitivo de la paleta del tablero (`--tablero-*`): son valores

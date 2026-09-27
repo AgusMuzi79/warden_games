@@ -65,6 +65,17 @@ function esDePago(id) {
   return id % 3 === 0;
 }
 
+// Mismo criterio que esDePago(): 1 de cada 5 juegos es "nuevo", simulado y
+// determinístico por id. Si un id cumple los dos, "nuevo" tiene prioridad
+// visual (ver crearBadge) — son etiquetas simuladas, no hace falta que un
+// juego nuevo también muestre precio.
+function esNuevo(id) {
+  return id % 5 === 0;
+}
+
+// Sin precios reales todavía: cualquier juego "de pago" cuesta lo mismo.
+const PRECIO_SIMULADO = '$9.99';
+
 // ---- Ícono del header: numerito + lista del desplegable ----
 
 const contadorCarrito = document.getElementById('carrito-contador');
@@ -158,6 +169,28 @@ function crearBotonCarrito(juego, clase) {
   });
 
   return boton;
+}
+
+// Fábrica compartida por home.js (cards de las filas) y carousel.js (banner
+// Destacados), mismo criterio que crearBotonCarrito(): una sola etiqueta por
+// juego, "Nuevo" > precio/"Gratis" > nada si ya está comprado (obtenerComprados,
+// ver "Mis juegos" en DECISIONES.md — un juego que ya es tuyo no necesita
+// mostrar que es gratis o cuánto cuesta).
+function crearBadge(juego) {
+  const yaComprado = obtenerComprados().some((item) => item.id === juego.id);
+  if (yaComprado) return null;
+
+  const badge = document.createElement('span');
+
+  if (esNuevo(juego.id)) {
+    badge.className = 'badge badge--nuevo';
+    badge.textContent = 'Nuevo';
+  } else {
+    badge.className = 'badge badge--precio';
+    badge.textContent = esDePago(juego.id) ? PRECIO_SIMULADO : 'Gratis';
+  }
+
+  return badge;
 }
 
 function alternarCarrito(juego) {
