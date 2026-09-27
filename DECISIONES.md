@@ -1349,6 +1349,19 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
 - **Token nuevo `--fondo-o1`:** rgba de `--fondo` al 75%, para que el
   círculo del botón se distinga incluso sobre imágenes claras — ninguno de
   los tokens existentes era una versión translúcida de `--fondo`.
+- **Actualizado después (pedido de Agus): el ícono se saca de encima de la
+  imagen.** Pasa a vivir en una fila nueva (`.game-card__cuerpo`) junto con
+  el nombre y el puntaje, no superpuesto a `.game-card__media` — queda a la
+  misma altura que ese texto, a la derecha. `.game-card__media` pierde el
+  `position: relative` (ya no ancla nada) y `.game-card__title`/
+  `.game-card__rating` pierden los márgenes que antes los separaban del
+  borde de la card (ahora ese espacio lo da el `padding` de
+  `.game-card__cuerpo`, compartido con el botón). De paso, esto deja
+  `.game-card__title--solo` (el ajuste puntual para "Mis juegos") sin uso:
+  se saca, porque ahora el espaciado sale del `padding` del contenedor para
+  cualquier card, tenga rating o no. `--fondo-o1` queda igual (sigue
+  funcionando bien sobre el fondo de la card), aunque ya no hace falta que
+  se distinga sobre una imagen.
 
 ## Carrito de compras (parte 2: banner Destacados)
 
@@ -1506,7 +1519,9 @@ esta sección son nuestras, no una traducción de un mock.
   tampoco tendría sentido: ya es tuyo, no hay nada que agregar.
 - **Token de CSS nuevo:** `.game-card__title--solo` en `home.css`, para el
   margen inferior que en el resto de las cards pone `.game-card__rating`
-  (que acá no existe).
+  (que acá no existe). *(Actualizado: esta clase se sacó después, ver "El
+  botón pasa de texto a ícono..." más arriba — el espaciado pasó a salir del
+  `padding` de `.game-card__cuerpo`, común a cualquier card.)*
 
 ### La compra recarga la página en vez de solo cerrar el modal
 - **Qué:** en `compras.js`, tras mostrar el mensaje de éxito, en vez de

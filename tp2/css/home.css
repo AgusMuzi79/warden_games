@@ -365,10 +365,6 @@
   flex-direction: column;
 }
 
-.game-card__media {
-  position: relative;
-}
-
 .game-card__image {
   display: block;
   width: 100%;
@@ -376,23 +372,30 @@
   object-fit: cover;
 }
 
-.game-card__title {
-  margin: var(--espaciado-3) var(--espaciado-3) 0;
-  font-size: 16px;
+/* Fila de abajo: nombre + puntaje a la izquierda, botón de carrito a la
+   derecha (si el juego es "de pago") — ya no superpuesto a la imagen. */
+.game-card__cuerpo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-2);
+  padding: var(--espaciado-3);
 }
 
-/* "Mis juegos" no tiene rating (ver home.js, crearCardComprado): sin
-   .game-card__rating debajo, el título necesita su propio margen inferior
-   para no quedar pegado al borde de la card. */
-.game-card__title--solo {
-  margin-bottom: var(--espaciado-3);
+.game-card__texto {
+  min-width: 0;
+}
+
+.game-card__title {
+  margin: 0;
+  font-size: 16px;
 }
 
 .game-card__rating {
   display: flex;
   align-items: center;
   gap: var(--espaciado-1);
-  margin: var(--espaciado-1) var(--espaciado-3) var(--espaciado-3);
+  margin: var(--espaciado-1) 0 0;
   color: var(--acento);
   font: 400 14px/1 var(--font-ui);
 }
@@ -420,9 +423,7 @@
 }
 
 .game-card__carrito {
-  position: absolute;
-  right: var(--espaciado-2);
-  bottom: var(--espaciado-2);
+  flex-shrink: 0;
   cursor: pointer;
 }
 

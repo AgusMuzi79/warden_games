@@ -53,7 +53,6 @@ function crearCard(juego) {
   imagen.alt = '';
   imagen.loading = 'lazy';
   media.append(imagen);
-  if (esDePago(juego.id)) media.append(crearBotonCarrito(juego, 'game-card__carrito'));
 
   const titulo = document.createElement('h3');
   titulo.className = 'game-card__title';
@@ -63,7 +62,18 @@ function crearCard(juego) {
   rating.className = 'game-card__rating';
   rating.innerHTML = `<i class="ph ph-star" aria-hidden="true"></i> ${juego.rating.toFixed(1)}`;
 
-  card.append(media, titulo, rating);
+  const texto = document.createElement('div');
+  texto.className = 'game-card__texto';
+  texto.append(titulo, rating);
+
+  // El botón de carrito va acá, a la altura del nombre y el puntaje, no
+  // superpuesto a la imagen (ver DECISIONES.md).
+  const cuerpo = document.createElement('div');
+  cuerpo.className = 'game-card__cuerpo';
+  cuerpo.append(texto);
+  if (esDePago(juego.id)) cuerpo.append(crearBotonCarrito(juego, 'game-card__carrito'));
+
+  card.append(media, cuerpo);
   return card;
 }
 
@@ -85,10 +95,18 @@ function crearCardComprado(juego) {
   media.append(imagen);
 
   const titulo = document.createElement('h3');
-  titulo.className = 'game-card__title game-card__title--solo';
+  titulo.className = 'game-card__title';
   titulo.textContent = juego.nombre;
 
-  card.append(media, titulo);
+  const texto = document.createElement('div');
+  texto.className = 'game-card__texto';
+  texto.append(titulo);
+
+  const cuerpo = document.createElement('div');
+  cuerpo.className = 'game-card__cuerpo';
+  cuerpo.append(texto);
+
+  card.append(media, cuerpo);
   return card;
 }
 
