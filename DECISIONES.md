@@ -113,6 +113,27 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** el lector de pantalla anuncia "Carrito, link" en vez de nada o un
   carácter raro de la fuente de íconos.
 
+### Scrollbar con la paleta del sitio, no oculta
+- **Qué:** en `base.css`, `scrollbar-color`/`scrollbar-width` (Firefox) y
+  `::-webkit-scrollbar*` (Chrome/Edge/Safari) sobre el selector universal
+  — track `--fondo`, thumb `--primario-o1` que pasa a `--acento` en hover.
+  Aplica a toda la página y a cualquier contenedor con scroll propio
+  (el desplegable del carrito, un `<textarea>`), no hace falta repetirlo
+  por componente.
+- **Por qué no ocultarla directamente (alternativa pedida, descartada):**
+  sacar la barra de scroll de la página entera es un golpe a la
+  accesibilidad/UX — se pierde la referencia visual de cuánto falta para
+  llegar al final y el "agarradero" para arrastrar con mouse. El proyecto
+  ya prioriza accesibilidad sobre estética (corrección del profesor sobre
+  Orbitron). Estilizarla da la identidad visual que se buscaba sin sacar
+  esa función.
+- **No pisa el scrollbar oculto de las filas de la Home:**
+  `.carrusel__pista` (`home.css`) ya la ocultaba a propósito con
+  `scrollbar-width: none` + `::-webkit-scrollbar { display: none }` — ahí
+  sí se justifica porque hay flechas como control alternativo. Esa regla
+  es más específica que el selector universal de acá y sigue ganando, sin
+  tocarla.
+
 ---
 
 ## Header
@@ -184,15 +205,31 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ## Loading de la Home
 
-### Spinner circular con el % adentro
-- **Qué:** un aro (`::before` con borde, uno de sus lados de otro color) que gira con
-  `@keyframes`, con el número de 0 a 100 centrado adentro.
-- **Por qué:** es la forma más simple de las permitidas por el enunciado (spinner, círculo
-  o cuadrado) y la más asociada a "cargando" para quien lo ve. El número va adentro en vez
-  de debajo para que ocupe menos alto y quede más compacto.
-- **Cómo:** el aro que gira es un `::before` absoluto que ocupa todo el spinner; el texto
-  del % es un elemento aparte con `z-index: 1` para quedar siempre arriba, así no hace
-  falta contra-rotarlo para que no gire con el aro.
+### Reemplazado: logo con pulso + aro de progreso real + frases graciosas
+- **Qué:** el spinner original (un aro que giraba sin parar, `::before` con
+  `border-top-color` distinto) se reemplazó por: el logo de Warden
+  latiendo (`@keyframes latido`, `scale` + `drop-shadow`), un aro de
+  progreso real alrededor (un `<svg>` con dos `<circle>` — uno de fondo,
+  fijo, y uno de relleno cuyo `stroke-dashoffset` avanza junto con el %
+  real en `loading.js`, no es un giro infinito sin relación con el
+  avance), el % debajo, y una frase que va rotando cada 1/3 del progreso
+  ("Poniendo a correr a los hámsters…", "Convenciendo a la IA de que
+  trabaje…", "Ocultando las microtransacciones…"), terminando en "Todo
+  listo, a viciar." al llegar a 100%.
+- **Por qué:** pedido de Agus — quería algo más elaborado que un spinner
+  genérico, atado a la marca del sitio en vez de una forma abstracta. Se
+  probó primero como archivo suelto (`preview-loading-logo.html`, junto a
+  otra opción con un marco cuadrado que no se usó) para verlo funcionando
+  antes de tocar el archivo real — se pudo iterar rápido el copy de las
+  frases sin arriesgar nada del sitio.
+- **El aro de progreso está atado al % real, no es decorativo suelto:**
+  mismo criterio que ya se valora en el proyecto (ej. el contador real de
+  0 a 100 en vez de una animación sin relación con el tiempo transcurrido)
+  — el relleno del aro *es* el avance, no un giro que da vueltas sin decir
+  nada.
+- **Las frases son puramente para quien ve la pantalla, no para lectores
+  de pantalla:** ver "El % es decorativo para lectores de pantalla" más
+  abajo — se actualizó ese criterio para incluirlas.
 
 ### `z-index: 500` en el overlay (bug encontrado después de armar el banner)
 - **Qué:** `.loading-overlay` tenía `z-index: 100`. Al armar el banner
@@ -217,11 +254,14 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** sin esto, alguien podría tabular o hacer click en contenido tapado por el
   overlay. `inert` es nativo de HTML, no hace falta JS para bloquear foco elemento por elemento.
 
-### El % es decorativo para lectores de pantalla
-- **Qué:** el spinner y el número tienen `aria-hidden="true"`; en cambio hay un texto fijo
-  ("Cargando catálogo de juegos…") dentro del `role="status"` que se lee una sola vez.
+### El % (y ahora las frases graciosas) son decorativos para lectores de pantalla
+- **Qué:** todo el bloque visual (`.loading__centro`: logo, aro, %, frase)
+  tiene `aria-hidden="true"`; en cambio hay un texto fijo ("Cargando
+  catálogo de juegos…") dentro del `role="status"` que se lee una sola vez.
 - **Por qué:** anunciar el número cambiando 100 veces en 5 segundos sería spam para quien
-  usa lector de pantalla. Un solo anuncio al aparecer el loading alcanza.
+  usa lector de pantalla — mismo problema si se anunciaran las 4 frases que van rotando
+  (menos veces, pero igual interrumpirían un anuncio con el siguiente antes de terminar
+  de leerse). Un solo anuncio fijo al aparecer el loading alcanza para las dos cosas.
 
 ---
 
@@ -620,6 +660,34 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   "pasó la validación del formulario", no una cuenta real verificada. Eso
   lo resuelve `js/api.js` (ítem "Plus" pendiente).
 
+### Captcha simulado: paleta gris de Google, no los tokens del sitio
+- **Qué:** `.check-block--captcha` (el "No soy un robot" del registro)
+  pasa de fondo `--fondo` (violeta oscuro) a la paleta gris/blanca real del
+  widget de reCAPTCHA de Google (`#f9f9f9` de fondo, borde `#d3d3d3`,
+  casillero blanco con borde `#c1c1c1`, tilde y logo en azul `#4285f4`,
+  texto en gris oscuro/negro). También se corrigió que quedaba
+  desalineado verticalmente: `.check-block--captcha` ahora tiene
+  `align-items: center` propio, en vez de heredar el `align-items:
+  flex-start` de `.check-block` (pensado para labels de varias líneas,
+  como "Acepto los términos...", no para esta fila de una sola línea).
+- **Por qué colores hardcodeados acá, rompiendo la regla de "nunca colores
+  escritos a mano":** reCAPTCHA es un widget de un tercero (Google) — en
+  un sitio real ni siquiera es HTML propio, es un iframe que Google renderiza
+  siempre igual, sin importar el tema de quien lo integra. Para que la
+  simulación sea creíble tiene que verse como el widget real, no como si
+  hubiera tomado la paleta violeta del sitio — es la única excepción
+  consciente a esa regla, justo porque conceptualmente no es "nuestro" CSS.
+- **Logo corregido — es una flecha circular de "refresh", no un candado:**
+  la primera versión usaba un ícono de candado/escudo (`ph-shield`, mal
+  elegido de entrada). Agus lo marcó comparando de memoria contra el real;
+  se confirmó visitando el demo oficial de Google
+  (`google.com/recaptcha/api2/demo`) y se rehizo el SVG con la forma
+  correcta: dos flechas en arco formando un círculo (ícono "autorenew" de
+  Material Design), cada una con su propio `<path>` para poder pintarlas
+  de dos colores distintos — `.recaptcha__icon-a` azul (`#4285f4`),
+  `.recaptcha__icon-b` gris (`#b3b3b3`) — en vez de un ícono de un solo
+  color.
+
 ---
 
 ## Página del juego (Etapa 4)
@@ -792,8 +860,11 @@ A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
   cada vez que se abre un desplegable más. `.tablero` pasa a
   `align-self: start` (sale del stretch de la fila) más un `min-height: 660px`
   que congela ese alto base — valor estimado a partir del contenido de
-  ficha+Ayuda en su estado inicial, pendiente de afinar a ojo contra la
-  pantalla real (ver "Pendientes de decidir").
+  ficha+Ayuda en su estado inicial.
+- **Confirmado, sin ajustar:** medido en pantalla, ficha+Ayuda (estado
+  inicial, un solo `<details>` abierto) suman ~656px de alto natural —
+  contra los 660px del `.tablero`, una diferencia de 4px, imperceptible.
+  El valor estimado ya estaba bien calibrado, no hizo falta tocarlo.
 
 ### Fichas más grandes (44px → 56px), y el ancho se resuelve con el gap, no con la ficha
 - **Qué:** el grid de fichas y cada `.tablero__hueco` pasaron de 44px a
@@ -889,13 +960,14 @@ más una que sumamos nosotros al revisar:
   ninguna fuente nueva (sigue en `--font-ui`, achicado a 12px para que no
   se vea grande al ir en mayúsculas).
 
-### Paleta del tablero: valores elegidos
+### Paleta del tablero: valores elegidos (definitivos, no se tocan)
 - **Qué:** `--tablero-activo: #FF6A1A` (naranja), `--tablero-descargado:
   #0B0710` (casi negro), `--tablero-seleccionado: #3FE8E4` (celeste-cian),
   `--tablero-destino: #B79CF0` (violeta claro).
-- **Por qué:** estimados a ojo de la captura de Figma. Quedan como
-  "pendiente de ajustar" (ver esa sección al final del archivo) hasta
-  compararlos en pantalla contra el diseño real.
+- **Por qué:** confirmado con Agus — estos 4 son los únicos colores del
+  tablero, no hay que compararlos contra ninguna captura nueva de Figma.
+  (Esto no incluye las imágenes de los juegos en sí, que van con su color
+  real, sin restricción de paleta.)
 
 ### Panel lateral: tablero + ficha/Ayuda/Compartir en dos columnas, solo desktop
 - **Qué:** `.juego-layout` es un grid de 2 columnas (320px fijo para la
@@ -1096,16 +1168,25 @@ más una que sumamos nosotros al revisar:
   corrección del profesor cambió el criterio: ahora se pide explícitamente que sean 4
   distintas, una por variante.
 
-### Componente `.link`
-- **Qué:** texto con color `--acento` y subrayado animado que crece de izquierda a
-  derecha en hover/foco (`::after` con `scaleX`), reutilizando la misma animación que
-  `.btn--terciario` en vez de sumar una 5ª.
-- **Por qué:** faltaba un componente para links de texto dentro de una oración (ej.
-  "¿No tenés cuenta? Registrate" en el splash de login), distinto del `<a>` genérico de
-  `base.css` (que solo subraya con `text-decoration`, sin animación) y de los links de
-  navegación del header/footer.
-- **Pendiente:** el estilo final depende de la captura de Figma del componente link,
-  que todavía no vimos. Este es un default razonable mientras tanto.
+### Componente `.link`, con dos variantes (cerrado: no hay una tercera captura de Figma para esto)
+- **Qué:** `.link` (color `--acento` siempre, con el subrayado animado que
+  crece de izquierda a derecha en hover/foco, reutilizando la misma
+  animación que `.btn--terciario` en vez de sumar una 5ª) y `.link--blanco`
+  (color heredado — blanco/lila según el texto que lo rodea — que pasa a
+  celeste en hover/foco, con el subrayado nativo del navegador en vez del
+  animado).
+- **Por qué dos variantes, no una:** aclarado por Agus — no hay un
+  componente único de Figma para esto, sino dos usos distintos ya
+  presentes en el sitio: `.link` es para resaltar una palabra suelta
+  dentro de una oración (ej. "Acepto los **términos**" del checkbox de
+  login, celeste de entrada porque tiene que notarse que es clickeable en
+  medio de texto plano) y `.link--blanco` es para un link suelto que no
+  necesita destacar hasta que se interactúa con él — mismo criterio que ya
+  usan los links del footer (`.footer a`, footer.css: heredan el color y
+  pasan a celeste en hover, sin subrayado animado).
+- **`.link--blanco` no inventa un estilo nuevo, reusa el del footer:**
+  mismos valores (`color: inherit` → `var(--acento)` en hover/foco) en vez
+  de un tercer componente de color propio.
 
 ### Botón de newsletter unificado a `.btn`
 - **Qué:** el botón "Suscribirse" del footer tenía su propio estilo hardcodeado en
@@ -1349,6 +1430,19 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
 - **Token nuevo `--fondo-o1`:** rgba de `--fondo` al 75%, para que el
   círculo del botón se distinga incluso sobre imágenes claras — ninguno de
   los tokens existentes era una versión translúcida de `--fondo`.
+- **Actualizado después (pedido de Agus): el ícono se saca de encima de la
+  imagen.** Pasa a vivir en una fila nueva (`.game-card__cuerpo`) junto con
+  el nombre y el puntaje, no superpuesto a `.game-card__media` — queda a la
+  misma altura que ese texto, a la derecha. `.game-card__media` pierde el
+  `position: relative` (ya no ancla nada) y `.game-card__title`/
+  `.game-card__rating` pierden los márgenes que antes los separaban del
+  borde de la card (ahora ese espacio lo da el `padding` de
+  `.game-card__cuerpo`, compartido con el botón). De paso, esto deja
+  `.game-card__title--solo` (el ajuste puntual para "Mis juegos") sin uso:
+  se saca, porque ahora el espaciado sale del `padding` del contenedor para
+  cualquier card, tenga rating o no. `--fondo-o1` queda igual (sigue
+  funcionando bien sobre el fondo de la card), aunque ya no hace falta que
+  se distinga sobre una imagen.
 
 ## Carrito de compras (parte 2: banner Destacados)
 
@@ -1487,19 +1581,321 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
 
 ---
 
+## Sistema de compras (parte 1: modal de pago simulado)
+
+Primera mitad del ítem "Sistema de compras" de `ETAPAS.md` (el único que el
+enunciado pide sin marcar como opcional). Sin captura de Figma: a diferencia
+del resto del sitio, acá no hubo diseño previo en el TPE1 — las decisiones de
+esta sección son nuestras, no una traducción de un mock.
+
+### Modal con `<dialog>` nativo, no un `<div>` armado a mano
+- **Qué:** clickear "Pagar carrito" (el link ya existía, `href="#"`, ahora es
+  un `<button>`) abre un `<dialog id="modal-pago">` con un form falso (nombre,
+  número de tarjeta, vencimiento, CVV). Ninguno de esos datos se valida contra
+  nada real ni se manda a ningún lado.
+- **Por qué `<dialog>` y no un overlay hecho con `position: fixed` + JS:**
+  mismo criterio que ya se usó para el acordeón de Ayuda (`<details>`) — el
+  navegador resuelve solo el foco atrapado adentro del modal, el cierre con
+  Escape (evento `cancel` nativo) y el fondo oscurecido (`::backdrop`), sin
+  manejar nada de eso a mano.
+- **"Pagar carrito" pasa de `<a>` a `<button>`:** mismo cambio que ya se hizo
+  con el avatar de sesión (ver "Menús desplegables del header") — la acción es
+  abrir un modal, no navegar a otra página, así que semánticamente es un botón.
+  Efecto colateral bueno: `menu.js` solo cierra el desplegable del carrito al
+  clickear un `<a>` de adentro; al ser `<button>` no dispara ese cierre
+  específico, pero el listener global de "click afuera" lo cierra igual
+  (bubbling normal), así que el desplegable se cierra solo al abrir el modal
+  sin código nuevo.
+
+### Compra simulada: mueve el carrito a una lista de "comprados", no queda nada a medio camino
+- **Qué:** al enviar el form (`js/compras.js`), se agregan los juegos del
+  carrito a una lista nueva en `localStorage` (`warden-compras`,
+  `agregarComprados()` en `carrito.js`) y se vacía el carrito
+  (`vaciarCarrito()`, nueva también). El form se reemplaza por un bloque de
+  éxito (`.modal__exito`, mismo criterio que `.auth-success` de
+  login.css: fade + scale con `@keyframes modal-pop`, reutilizado también
+  para la entrada del propio modal en vez de sumar una animación más) y el
+  modal se cierra solo a los 2 segundos.
+- **Por qué una clave de `localStorage` aparte (`warden-compras`) y no un
+  campo "comprado" adentro del mismo item del carrito:** carrito y comprados
+  son conceptos distintos con ciclos de vida distintos — son dos listas
+  independientes, no un estado dentro de la misma.
+- **El modal vuelve a mostrar el form (no la pantalla de éxito) la próxima
+  vez que se abre:** al evento `close` del `<dialog>` se le engancha un reset
+  (`form.reset()`, se muestra el form, se oculta el éxito) — si no, la
+  siguiente compra arrancaría directo en la pantalla de éxito de la anterior.
+- **Sin resumen de precio en el modal:** solo dice "Vas a comprar N juego(s)."
+  No hay precios reales todavía (`esDePago()` en `carrito.js` es un booleano
+  simulado, sin ningún monto asociado — ver "Pendientes de decidir"),
+  así que mostrar un total inventado sería peor que no mostrar nada.
+
+### `.modal__cerrar` con su propio estilo, no reusa `.header__icon-btn`
+- **Qué:** el botón "X" del modal tiene su propio bloque de CSS en
+  `components.css` (mismas medidas y comportamiento que `.header__icon-btn`:
+  44px, ícono solo, mismo hover) en vez de compartir esa clase.
+- **Por qué:** `.header__icon-btn` es un nombre BEM atado al bloque `.header`
+  (vive en `header.css`). El modal no es parte del header — reusar esa clase
+  ahí sería el mismo tipo de mezcla de responsabilidades que el proyecto ya
+  evita en otros lados (ver "Header y footer en archivos propios"). Repetir
+  unas pocas líneas de CSS es más barato de mantener que un nombre que mienta
+  de dónde viene el estilo.
+
+## Sistema de compras (parte 2: fila "Mis juegos" en la Home)
+
+### Debajo de "Recomendados", pero independiente de la sesión simulada
+- **Qué:** `home.js` arma una fila más, "Mis juegos", con lo que haya en
+  `obtenerComprados()` (`carrito.js`). Va inmediatamente debajo de
+  "Recomendados" cuando hay sesión — pero a diferencia de esa fila, "Mis
+  juegos" se arma siempre que haya algo comprado, tenga sesión iniciada o no.
+- **Por qué debajo de Recomendados:** decisión de Agus — la Home tiene que
+  seguir priorizando vender antes que mostrar lo que ya comprás.
+- **Por qué independiente de la sesión (a diferencia de "Recomendados"):**
+  comprar (`compras.js`) no depende en ningún momento de tener sesión
+  iniciada — es una mecánica aparte, atada solo a `localStorage`. Si "Mis
+  juegos" solo apareciera con sesión, alguien podría comprar como invitado y
+  no ver la compra reflejada en ningún lado de la Home, lo cual sería raro
+  dado que ambas cosas (comprar y ver lo comprado) pasan en el mismo
+  navegador sin login real de por medio.
+
+### Card sin rating ni botón de carrito, no la misma `crearCard()`
+- **Qué:** `crearFila()` ahora recibe una fábrica de cards como tercer
+  parámetro (`fabricaCard = crearCard` por default). "Mis juegos" le pasa
+  `crearCardComprado()`, una card más simple: imagen + título, sin estrella
+  de rating ni el botón de agregar al carrito.
+- **Por qué no se puede reusar `crearCard()` tal cual:** los objetos que
+  guarda `carrito.js` (`{id, nombre, imagen}`, en español, sin rating ni
+  género) no tienen la forma de los que devuelve la API
+  (`{id, name, background_image, rating, genres}`, en inglés) — no hay
+  `juego.rating` ni `juego.genres` para mostrar. Mostrar el botón de carrito
+  tampoco tendría sentido: ya es tuyo, no hay nada que agregar.
+- **Token de CSS nuevo:** `.game-card__title--solo` en `home.css`, para el
+  margen inferior que en el resto de las cards pone `.game-card__rating`
+  (que acá no existe). *(Actualizado: esta clase se sacó después, ver "El
+  botón pasa de texto a ícono..." más arriba — el espaciado pasó a salir del
+  `padding` de `.game-card__cuerpo`, común a cualquier card.)*
+
+### La compra recarga la página en vez de solo cerrar el modal
+- **Qué:** en `compras.js`, tras mostrar el mensaje de éxito, en vez de
+  `modalPago.close()` ahora se hace `window.location.reload()`.
+- **Por qué:** sin esto, "Mis juegos" no reflejaría la compra recién hecha
+  hasta la próxima carga de la página — `home.js` arma las filas una sola
+  vez, al cargar. Recargar es la forma más simple de que se vuelva a armar
+  con el estado nuevo, sin duplicar la lógica de renderizado acá (mismo
+  criterio que ya usa "Cerrar sesión" en `menu.js`). Cerrar el modal sin
+  confirmar (X, Escape, fondo) sigue sin recargar nada.
+
+### El link "Mis juegos" del menú de cuenta ya apunta a la fila
+- **Qué:** pasa de `href="#"` a `href="index.html#fila-mis-juegos"` (el id
+  que arma `crearFila()` a partir del título).
+- **Por qué:** ya existe una fila real a la que apuntar. Si no hay nada
+  comprado la fila no se arma y el link no tiene efecto — no hace falta
+  ningún manejo especial para ese caso.
+
+---
+
+## Sistema de compras (parte 3: badges "Gratis" / precio / "Nuevo")
+
+Fran pasó una captura de Figma con estos 3 badges (sin contexto de dónde
+van ni de qué depende cada uno — esas decisiones se tomaron acá, con Agus).
+
+### Una sola etiqueta por card, con prioridad "Nuevo" > precio/"Gratis" > nada
+- **Qué:** `crearBadge(juego)` (`carrito.js`, fábrica compartida por
+  `home.js` y `carousel.js`, mismo patrón que `crearBotonCarrito`) devuelve
+  una sola etiqueta: "Nuevo" si `esNuevo(id)`, si no el precio simulado o
+  "Gratis" según `esDePago(id)`, o `null` si el juego ya figura en
+  `obtenerComprados()` — un juego que ya es tuyo no necesita decir que es
+  gratis o cuánto cuesta.
+- **`esNuevo(id)`:** simulado y determinístico, mismo criterio que
+  `esDePago()` (1 de cada 5 juegos por id, en vez de `Math.random()` en
+  cada render). Si un id cumple los dos, "Nuevo" gana — no hay lugar para
+  mostrar dos etiquetas a la vez, y es la más noticiosa de las dos.
+- **Precio fijo simulado (`PRECIO_SIMULADO = '$9.99'`), decisión final, no
+  un placeholder a reemplazar:** cualquier juego "de pago" muestra el mismo
+  monto. Confirmado con Agus — no va a haber precios reales por juego en
+  este proyecto. Un monto único y fijo es más simple de mantener y explicar
+  en la defensa que inventar precios distintos por juego, que sería un dato
+  fabricado con apariencia de real en vez de un placeholder que se nota
+  que lo es.
+
+### Roboto Flex en mayúsculas, no Orbitron — la captura de Figma no aplica tal cual
+- **Qué:** el componente `.badge` (`components.css`) usa `--font-ui` en
+  700 y `text-transform: uppercase`, no `--font-display`.
+- **Por qué:** la tipografía de la captura de Figma para estos 3 badges
+  parece Orbitron — pero son tags chicos sobre una imagen, no títulos
+  (h1-h3), así que copiarla tal cual rompería la regla del proyecto. Mismo
+  motivo por el que ya se sacó Orbitron de `.banner__nombre` en su momento
+  (ver "Carrusel coverflow" más arriba). Se avisó la diferencia en vez de
+  copiarla, como pide `CLAUDE.md`.
+- **Dos variantes de color, no una por texto:** `.badge--precio` (violeta,
+  para "Gratis" y el precio — visualmente son la misma etiqueta en la
+  captura, solo cambia el texto) y `.badge--nuevo` (cian, mismo par de
+  colores que ya usa `.banner__etiqueta` para "Destacado").
+
+### Ubicación: arriba a la izquierda de la imagen (Home) y junto a "Destacado" (banner)
+- **Qué:** en las filas de la Home, el badge va arriba a la izquierda de
+  `.game-card__media` — el lugar que dejó libre el ícono de carrito al
+  moverse a `.game-card__cuerpo` (ver "El botón pasa de texto a ícono...").
+  En el banner "Destacados", se agrupa junto a la etiqueta "Destacado" en
+  un wrapper nuevo (`.banner__etiquetas`), arriba a la izquierda — el
+  carrito ya ocupa arriba a la derecha y el nombre ocupa abajo de punta a
+  punta, no quedaba otro lugar libre.
+- **`.game-card__media` recupera `position: relative`:** se había sacado
+  cuando el ícono de carrito dejó de estar ahí (ver decisión anterior);
+  vuelve porque ahora el badge sí necesita anclarse a la imagen.
+- **Neon Circuit no lleva badge en el banner:** no viene de la API (no
+  tiene un id real para `esDePago()`/`esNuevo()`/`obtenerComprados()`) y ya
+  tiene su propia acción real ("Jugar") — mismo criterio que ya lo excluye
+  del ícono de carrito ahí.
+
+---
+
+## Ficha de producto para juegos del catálogo (`producto.html`)
+
+Pedido de Agus: al clickear un juego de pago que todavía no compraste, se
+abre una ficha con su portada, datos y reseñas — igual que la de Neon
+Circuit, pero para cualquier juego de la API. Sin captura de Figma (esto
+no se diseñó en el TPE1): las decisiones de layout y contenido son
+nuestras. Primera etapa: la página en sí, sin todavía enlazarla desde las
+cards de la Home ni del banner (parte 2 y 3, aparte).
+
+### Página nueva, no la misma que Neon Circuit
+- **Qué:** `producto.html` (+ `js/producto.js`, `css/producto.css`), no
+  reutiliza `juego.html`. Recibe el juego por query string (`?id=`, ej.
+  `producto.html?id=3498`) y busca el juego llamando a `obtenerJuegos()`
+  otra vez (mismo catálogo que ya trae la Home).
+- **Por qué no reusar `juego.html`:** esa página tiene un tablero real de
+  Peg Solitaire (grilla de 33 posiciones, reglas, atajos de teclado) —
+  específico de Neon Circuit. Ningún otro juego del catálogo tiene un
+  minijuego programado atrás, así que no hay nada que mostrar ahí. Se
+  decidió con Agus: sin tablero, solo la portada (ver más abajo).
+- **Sin backend ni id como ruta real:** es un sitio estático, no hay
+  servidor que resuelva `/juego/123` — el id viaja por query string y
+  `producto.js` arma la página en el cliente, mismo criterio que ya usa
+  todo el proyecto (sesión y compras simuladas en `localStorage`).
+
+### Ficha, Sobre el juego, Galería, Compartir, Comunidad y Dejá tu reseña se movieron a `components.css`
+- **Qué:** ese CSS vivía entero en `juego.css`. Ahora que dos páginas lo
+  usan (`juego.html` y `producto.html`), se movió a `components.css` —
+  mismo criterio que ya se usó para promover `crearBotonCarrito()` y
+  `crearBadge()` a `carrito.js` cuando pasaron a compartirse entre
+  `home.js` y `carousel.js`. `juego.css` se queda solo con lo específico
+  de Neon Circuit: el tablero y la Ayuda.
+- **`.ficha-juego__miniatura` pierde su imagen fija:** antes traía
+  `background-image` de Neon Circuit adentro de la regla compartida. Ahora
+  esa regla solo pone tamaño/forma, y cada página pone la imagen que le
+  corresponde: `juego.css` la deja fija (siempre la misma), `producto.js`
+  la setea por juego (`style.backgroundImage`, la imagen real de la API).
+- **Sin "Tu récord" en la ficha de un juego del catálogo:** ese dato es la
+  cantidad de nodos al terminar una partida de Peg Solitaire — no aplica a
+  un juego que no programamos. Tampoco hay desarrollador (la API no lo
+  trae en el endpoint que usamos, `/api`). Queda solo: miniatura, nombre,
+  categoría (géneros reales), rating (real) y "Jugando ahora" (simulado,
+  mismo número que ya usa Neon Circuit).
+- **`CATEGORIAS`/`esDeGenero()` se mueven de `home.js` a `api.js`:**
+  `producto.js` los necesita para traducir el género real del juego a una
+  de las 8 categorías fijas del sitio, en el breadcrumb. Como ahora los
+  usan dos archivos, `api.js` (ya compartido por ambas páginas) es el
+  lugar que corresponde — mismo patrón que categorías/esDePago/CATEGORIAS.
+- **"Sobre el juego", Galería y las 3 reseñas de Comunidad son genéricas,
+  no por juego:** no tenemos descripciones en español de estos juegos
+  (la API las trae en inglés, ver "Plus" en `DECISIONES.md`) ni reseñas
+  reales. Se reusa el mismo texto/datos de ejemplo para cualquier juego —
+  confirmado con Agus, mismo criterio que ya se acepta en otros lados del
+  sitio para contenido simulado.
+
+### `.ficha-juego__nombre` es `<h1>` acá (en Neon Circuit sigue siendo un `<p>`)
+- **Qué:** en `producto.html`, el nombre del juego en la ficha es un
+  `<h1>`. En `juego.html` sigue siendo un `<p>` (Neon Circuit no tiene
+  `<h1>`, ver "Excepción puntual" en `DECISIONES.md` — pendiente de
+  discutir con los tres). Misma clase CSS en los dos casos: el estilo no
+  depende de la etiqueta.
+- **Por qué no repetir la excepción de Neon Circuit acá:** esa excepción
+  fue una decisión puntual de Fran para esa pantalla específica, todavía
+  sin cerrar entre los tres. `producto.html` es una página nueva — por
+  default sigue la regla general del proyecto ("un solo h1 por página") en
+  vez de heredar una excepción ajena sin haberla charlado.
+
+### Portada con botón en hover, no siempre visible como en Neon Circuit
+- **Qué:** `.producto__portada` muestra la imagen real del juego a pantalla
+  completa; el botón ("Comprar" o "Jugar", según corresponda) aparece con
+  hover o foco, con un scrim oscuro atrás — mismo criterio que ya usa
+  "Jugar" en el banner Destacados, no el botón siempre visible de la
+  portada de Neon Circuit.
+- **Por qué distinto a Neon Circuit:** ahí el botón "arranca" el tablero
+  (una transición real, de portada a juego, dentro de la misma card) — acá
+  no hay tablero al que pasar, la acción es "comprar" o (todavía) nada, así
+  que no hace falta ese peso visual permanente.
+- **"Comprar" agrega al carrito y abre el desplegable del header:**
+  confirmado con Agus. Un solo click hace las dos cosas — reusa
+  `agregarAlCarrito()` (`carrito.js`) y dispara el click del botón de
+  carrito del header (`document.querySelector('.menu-carrito
+  .header__icon-btn').click()`) en vez de reimplementar el "abrir menú".
+  Hace falta `evento.stopPropagation()` en el click de "Comprar": si no,
+  el mismo click sigue de largo hasta `document` y el listener de
+  `menu.js` que cierra cualquier menú al clickear "afuera" lo vuelve a
+  cerrar enseguida (bug real, encontrado al probarlo).
+- **"Jugar" no hace nada todavía:** ni en juegos gratis ni en los de pago
+  ya comprados — no hay ningún minijuego real detrás de estos juegos del
+  catálogo. Queda pendiente definir con Fran qué debería pasar acá (ver
+  "Pendientes de decidir").
+
+### Etapa 2: las cards de las filas de la Home enlazan a la ficha
+- **Qué:** en `home.js`, `.game-card__texto` pasa de `<div>` a
+  `<a href="producto.html?id=...">` — clickear el nombre o el puntaje de
+  cualquier card (en cualquier fila, incluida "Mis juegos") lleva a su
+  ficha. Sigue sin ser toda la card: la imagen no es parte del link (ver
+  más abajo).
+- **Por qué no envolver toda la card en el link:** el botón de agregar al
+  carrito ya vive adentro de `.game-card__cuerpo`, al lado del texto. Un
+  `<a>` no puede contener un `<button>` (contenido interactivo anidado,
+  inválido en HTML) — por eso `.game-card__link` y el botón de carrito
+  siguen siendo hermanos dentro de `.game-card__cuerpo`, cada uno con su
+  propia área de click, en vez de uno adentro del otro.
+- **`.game-card__title` necesita `color` explícito ahora:** al pasar el
+  contenedor de `<div>` a `<a>`, el título heredaba el celeste de link de
+  `base.css` en vez del blanco de siempre (bug real, visto al probarlo) —
+  se le puso `color: var(--primario-c3)` explícito para no depender de la
+  herencia según qué etiqueta envuelva el texto.
+- **Sin regresiones en el arrastre con mouse (`carrusel-fila.js`):** ya
+  frenaba el arrastre si el click empieza en un `<a>` o `<button>`
+  (`evento.target.closest('button, a')`, ver "Bug real: el botón de la
+  card no respondía al click con mouse") — cubre el link nuevo sin
+  cambios.
+
+### Etapa 3: el banner "Destacados" enlaza a la ficha, reemplaza el agregar-al-carrito directo
+- **Qué:** en `carousel.js`, `.banner__carrito` (el botón que agregaba al
+  carrito con un click, cubriendo toda la card activa) se reemplaza por
+  `.banner__ver`, un `<a href="producto.html?id=...">` del mismo tamaño
+  (toda la card). Aplica a cualquier juego que no sea Neon Circuit, tenga o
+  no badge de Gratis/precio/Nuevo — antes solo estaba el botón de carrito
+  en los "de pago". Neon Circuit no cambia: sigue yendo a `juego.html` con
+  "Jugar".
+- **Por qué se pierde el agregar-al-carrito directo desde el banner:**
+  confirmado con Agus — las dos acciones (agregar al carrito, ir a la
+  ficha) competían por el mismo gesto de click en la card activa, y no se
+  puede achicar el área de click de una sin volver al bug de hit-testing
+  que ya se documentó (ver "Carrusel coverflow" y "Bug real: el click no
+  le pegaba al ícono", más arriba) — con las cards rotadas en 3D, un
+  control chico ahí adentro no siempre resuelve al click en las
+  coordenadas correctas. Se prioriza "ir a la ficha", consistente con las
+  filas de la Home (Etapa 2); para agregar al carrito desde el banner
+  ahora hay que entrar a la ficha y usar "Comprar" ahí.
+- **El badge no cambia:** `crearBadge(juego)` se sigue llamando igual,
+  independiente del click de la card — Gratis/precio/Nuevo siguen
+  mostrándose junto a "Destacado".
+- **Limpieza de CSS:** se sacaron `.banner__carrito` y las referencias a
+  `.banner__carrito`/`.banner__carrito .carrito-icono` del bloque
+  compartido con `.game-card__carrito` (ahora ese bloque es solo para las
+  filas de la Home) y de los `prefers-reduced-motion` correspondientes.
+
+---
+
 ## Pendientes de decidir
 
-- Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para
-  una etapa aparte; mientras no exista, el banner "Destacados" no muestra
-  precio.
-- Estilo final del componente `.link` (hay un default en `components.css`; falta
-  confirmar contra la captura de Figma cuando la tengamos).
-- Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
-  estimados a ojo de la captura de Figma, falta compararlos en pantalla.
+- Qué pasa al clickear "Jugar" en la ficha de un juego del catálogo que no
+  es Neon Circuit (gratis, o de pago ya comprado): hoy no hace nada. Falta
+  charlarlo con Fran — ver "Ficha de producto para juegos del catálogo".
 - La página del juego sin `<h1>` (ver `ETAPAS.md` Etapa 4): rompe la
   regla del proyecto de "un solo h1 por página" (no es un requisito de la
   cátedra, es algo que nos autoimpusimos). Fran lo documentó como excepción
   puntual; falta que lo charlemos los tres antes de aceptarlo.
-- `min-height: 660px` del `.tablero` (altura "base", ver "Página del
-  juego"): valor estimado a partir del contenido de ficha+Ayuda, falta
-  confirmarlo/ajustarlo mirando la pantalla real.

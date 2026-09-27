@@ -1,0 +1,59 @@
+/*
+  producto.css — Estilos específicos de la ficha de un juego del catálogo
+  (no Neon Circuit). El resto de esta página (breadcrumb, layout, ficha,
+  Sobre el juego, Galería, Compartir, Comunidad, Dejá tu reseña) viene de
+  components.css — ver DECISIONES.md, "Sistema de compras (ficha genérica)".
+*/
+
+/* Portada: la imagen real del juego, con un botón que aparece en hover o
+   foco (mismo criterio que "Jugar" en el banner Destacados) en vez de
+   estar siempre visible como en la de Neon Circuit — acá no hay un board
+   que "arrancar", es solo la acción de ir a jugar o comprar. */
+.producto__portada {
+  position: relative;
+  align-self: start;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radio-xl);
+  overflow: hidden;
+  background: var(--superficie);
+}
+
+.producto__portada-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.producto__accion {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-2);
+  border: 0;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--primario-c3);
+  font: 600 16px/1 var(--font-ui);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.producto__portada:hover .producto__accion,
+.producto__accion:focus-visible {
+  opacity: 1;
+}
+
+.producto__accion i {
+  font-size: 40px;
+  color: var(--acento);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .producto__accion {
+    transition: none;
+  }
+}

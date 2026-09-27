@@ -17,11 +17,23 @@
 </head>
 <body>
 
-  <!-- Loading simulado: se muestra al cargar la Home y se oculta desde loading.js -->
+  <!-- Loading simulado: se muestra al cargar la Home y se oculta desde
+       loading.js. Todo el bloque visual es aria-hidden: el lector de
+       pantalla ya tiene su propio anuncio fijo (el <p class="sr-only">
+       de abajo) — ni el % ni las frases graciosas se leen en voz alta,
+       cambiarían demasiadas veces en 5 segundos. -->
   <div id="loading" class="loading-overlay" role="status" aria-busy="true">
     <p class="sr-only">Cargando catálogo de juegos…</p>
-    <div class="loading__spinner" aria-hidden="true">
+    <div class="loading__centro" aria-hidden="true">
+      <div class="loading__logo-wrap">
+        <svg class="loading__ring" viewBox="0 0 120 120">
+          <circle class="loading__ring-fondo" cx="60" cy="60" r="54"></circle>
+          <circle class="loading__ring-relleno" id="loading-ring" cx="60" cy="60" r="54"></circle>
+        </svg>
+        <img class="loading__logo" src="assets/img/logo.png" alt="">
+      </div>
       <span class="loading__pct"><span id="loading-num">0</span>%</span>
+      <p class="loading__texto" id="loading-texto">Poniendo a correr a los hámsters…</p>
     </div>
   </div>
 
@@ -98,7 +110,7 @@
 
         <div class="carrito__acciones">
           <a href="#" class="btn btn--secundario">Seguir comprando</a>
-          <a href="#" class="btn btn--primario">Pagar carrito</a>
+          <button type="button" class="btn btn--primario" id="btn-pagar-carrito">Pagar carrito</button>
         </div>
       </div>
     </div>
@@ -123,7 +135,7 @@
         <nav class="menu-dropdown__seccion" aria-label="Cuenta">
           <ul>
             <li><a href="#">Mi perfil</a></li>
-            <li><a href="#">Mis juegos</a></li>
+            <li><a href="index.html#fila-mis-juegos">Mis juegos</a></li>
             <li><a href="#">Favoritos</a></li>
             <li><a href="#">Logros</a></li>
             <li><a href="#">Configuración</a></li>
@@ -149,6 +161,49 @@
   </div>
 </header>
 
+  <!-- Modal de pago simulado: lo abre "Pagar carrito" (arriba). Sin pasarela
+       real (ver DECISIONES.md) — el form no valida contra nada ni manda
+       datos a ningún lado, solo simula que la compra salió bien. -->
+  <dialog id="modal-pago" class="modal" aria-label="Pagar carrito">
+    <button type="button" class="modal__cerrar" id="btn-cerrar-pago" aria-label="Cerrar">
+      <i class="ph ph-x" aria-hidden="true"></i>
+    </button>
+
+    <form id="form-pago" class="modal__form">
+      <h2 class="modal__titulo">Pagar carrito</h2>
+      <p class="modal__resumen" id="pago-resumen"></p>
+
+      <div class="field">
+        <label for="pago-nombre">Nombre en la tarjeta</label>
+        <input type="text" id="pago-nombre" name="nombre" required autocomplete="cc-name">
+      </div>
+
+      <div class="field">
+        <label for="pago-numero">Número de tarjeta</label>
+        <input type="text" id="pago-numero" name="numero" required inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19">
+      </div>
+
+      <div class="modal__fila">
+        <div class="field">
+          <label for="pago-vencimiento">Vencimiento</label>
+          <input type="text" id="pago-vencimiento" name="vencimiento" required autocomplete="cc-exp" placeholder="MM/AA" maxlength="5">
+        </div>
+
+        <div class="field">
+          <label for="pago-cvv">CVV</label>
+          <input type="text" id="pago-cvv" name="cvv" required inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primario">Confirmar compra</button>
+    </form>
+
+    <div class="modal__exito" id="pago-exito" role="status" hidden>
+      <i class="ph ph-check-circle modal__exito-icono" aria-hidden="true"></i>
+      <h2 class="modal__exito-titulo">¡Compra realizada!</h2>
+      <p class="modal__exito-texto">Gracias por tu compra.</p>
+    </div>
+  </dialog>
 
   <main>
     <!-- Banner "Destacados": carrusel coverflow armado por js/carousel.js
@@ -310,6 +365,7 @@
   <script src="./js/api.js" defer></script>
   <script src="./js/sesion.js" defer></script>
   <script src="./js/carrito.js" defer></script>
+  <script src="./js/compras.js" defer></script>
   <script src="./js/loading.js" defer></script>
   <script src="./js/carousel.js" defer></script>
   <script src="./js/carrusel-fila.js" defer></script>

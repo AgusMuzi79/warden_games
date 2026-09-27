@@ -27,6 +27,37 @@
 
 html {
   color-scheme: dark;
+  /* Firefox: no hay pseudo-elementos ahí, es la única forma de tocar el
+     color del scrollbar. Chrome/Edge/Safari ignoran esto y usan los
+     ::-webkit-scrollbar de abajo. */
+  scrollbar-color: var(--primario-o1) var(--fondo);
+  scrollbar-width: thin;
+}
+
+/* Mismos colores para Chrome/Edge/Safari. Con el selector universal en vez
+   de uno puntual: cualquier contenedor con scroll propio (el desplegable
+   del carrito, un <textarea>) hereda el mismo estilo sin tener que
+   repetirlo. Las filas de categorías de la Home siguen ocultando la suya
+   igual que antes (.carrusel__pista, en home.css) — esa regla es más
+   específica que este selector universal y gana; ahí ya hay flechas como
+   control alternativo, acá no. */
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--fondo);
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--primario-o1);
+  border: 2px solid var(--fondo);
+  border-radius: var(--radio-sm);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--acento);
 }
 
 body {

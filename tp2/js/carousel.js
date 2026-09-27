@@ -108,11 +108,24 @@ function crearSlide(juego, index) {
   etiqueta.className = 'banner__etiqueta';
   etiqueta.textContent = 'Destacado';
 
+  const etiquetas = document.createElement('div');
+  etiquetas.className = 'banner__etiquetas';
+  etiquetas.append(etiqueta);
+
+  // Neon Circuit no viene de la API (ver carousel.js más abajo): no tiene
+  // id real para esDePago()/esNuevo() ni puede estar en "comprados", así
+  // que no lleva badge de Gratis/precio/Nuevo — ya tiene su propia acción
+  // real ("Jugar").
+  if (juego !== NEON_CIRCUIT) {
+    const badge = crearBadge(juego);
+    if (badge) etiquetas.append(badge);
+  }
+
   const nombre = document.createElement('p');
   nombre.className = 'banner__nombre';
   nombre.textContent = juego.name;
 
-  slide.append(etiqueta, nombre);
+  slide.append(etiquetas, nombre);
 
   // Es nuestro propio juego: además de poder saltar a esta card como al
   // resto de los destacados, tiene una acción real (ir a jugar). Solo se
@@ -134,12 +147,20 @@ function crearSlide(juego, index) {
     slide.append(jugar);
   }
 
-  // Juegos "de pago" (simulado, ver carrito.js) que no sean Neon Circuit:
-  // mismo ícono de carrito que las filas de la Home, en la esquina inferior
-  // derecha. Neon Circuit no entra acá — es nuestro juego, ya tiene su
-  // propia acción real ("Jugar"), no algo para comprar en este banner.
-  if (juego !== NEON_CIRCUIT && esDePago(juego.id)) {
-    slide.append(crearBotonCarrito(juego, 'banner__carrito'));
+  // Cualquier juego que no sea Neon Circuit: clickear la card activa lleva
+  // a su ficha (producto.html) — reemplaza al agregar-al-carrito directo
+  // que tenía este banner antes (ver DECISIONES.md, "Ficha de producto",
+  // etapa 3). Neon Circuit no entra acá: ya tiene su propia acción real
+  // ("Jugar", arriba).
+  if (juego !== NEON_CIRCUIT) {
+    const ver = document.createElement('a');
+    ver.className = 'banner__ver';
+    ver.href = `producto.html?id=${juego.id}`;
+    ver.setAttribute('aria-label', `Ver ${juego.name}`);
+    // Evita que el click también dispare el irA(index) del slide: no
+    // cambiaría nada (ya está activa), pero no hace falta que compita.
+    ver.addEventListener('click', (evento) => evento.stopPropagation());
+    slide.append(ver);
   }
 
   return slide;

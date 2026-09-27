@@ -4,20 +4,6 @@
 
 const contenedor = document.getElementById('filas-juegos');
 
-// Categorías fijas (las mismas que lista el menú hamburguesa). "genero"
-// tiene que matchear el nombre que usa la API en genres[].name. Elegidas
-// por cuántos juegos reales tienen en el catálogo (de más a menos).
-const CATEGORIAS = [
-  { titulo: 'Acción', genero: 'Action' },
-  { titulo: 'Shooters', genero: 'Shooter' },
-  { titulo: 'RPG', genero: 'RPG' },
-  { titulo: 'Indie', genero: 'Indie' },
-  { titulo: 'Aventura', genero: 'Adventure' },
-  { titulo: 'Plataformas', genero: 'Platformer' },
-  { titulo: 'Puzzle', genero: 'Puzzle' },
-  { titulo: 'Estrategia', genero: 'Strategy' },
-];
-
 // No hay login real ni historial de partidas todavía: simulamos que el
 // usuario ya jugó este título, y buscamos "Recomendados" por ese género
 // (no por genres[0]: el orden de géneros de la API no es confiable, por
@@ -36,10 +22,6 @@ const JUEGOS_DE_RESPALDO = [
   { id: 7, name: 'Company of Heroes 2', background_image: 'https://media.rawg.io/media/games/0bd/0bd5646a3d8ee0ac3314bced91ea306d.jpg', rating: 3.1, genres: [{ name: 'Strategy' }] },
 ];
 
-function esDeGenero(juego, genero) {
-  return juego.genres.some((g) => g.name === genero);
-}
-
 function crearCard(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
@@ -53,7 +35,12 @@ function crearCard(juego) {
   imagen.alt = '';
   imagen.loading = 'lazy';
   media.append(imagen);
-  if (esDePago(juego.id)) media.append(crearBotonCarrito(juego, 'game-card__carrito'));
+
+  const badge = crearBadge(juego);
+  if (badge) {
+    badge.classList.add('game-card__badge');
+    media.append(badge);
+  }
 
   const titulo = document.createElement('h3');
   titulo.className = 'game-card__title';
@@ -63,11 +50,61 @@ function crearCard(juego) {
   rating.className = 'game-card__rating';
   rating.innerHTML = `<i class="ph ph-star" aria-hidden="true"></i> ${juego.rating.toFixed(1)}`;
 
-  card.append(media, titulo, rating);
+  // Un <a> en vez de un <div>: clickear el nombre/puntaje lleva a la ficha
+  // del juego (producto.html). No puede envolver también al botón de
+  // carrito (serían dos controles interactivos anidados) — por eso viven
+  // como hermanos en .game-card__cuerpo, no uno adentro del otro.
+  const texto = document.createElement('a');
+  texto.className = 'game-card__texto';
+  texto.href = `producto.html?id=${juego.id}`;
+  texto.append(titulo, rating);
+
+  // El botón de carrito va acá, a la altura del nombre y el puntaje, no
+  // superpuesto a la imagen (ver DECISIONES.md).
+  const cuerpo = document.createElement('div');
+  cuerpo.className = 'game-card__cuerpo';
+  cuerpo.append(texto);
+  if (esDePago(juego.id)) cuerpo.append(crearBotonCarrito(juego, 'game-card__carrito'));
+
+  card.append(media, cuerpo);
   return card;
 }
 
-function crearFila(titulo, juegos) {
+// "Mis juegos" no viene de la API: son los objetos {id, nombre, imagen}
+// que guarda carrito.js al comprar, sin rating ni género. Card más simple,
+// sin el botón de agregar al carrito (ya es tuyo) ni la estrella.
+function crearCardComprado(juego) {
+  const card = document.createElement('article');
+  card.className = 'card game-card';
+
+  const media = document.createElement('div');
+  media.className = 'game-card__media';
+
+  const imagen = document.createElement('img');
+  imagen.className = 'game-card__image';
+  imagen.src = juego.imagen;
+  imagen.alt = '';
+  imagen.loading = 'lazy';
+  media.append(imagen);
+
+  const titulo = document.createElement('h3');
+  titulo.className = 'game-card__title';
+  titulo.textContent = juego.nombre;
+
+  const texto = document.createElement('a');
+  texto.className = 'game-card__texto';
+  texto.href = `producto.html?id=${juego.id}`;
+  texto.append(titulo);
+
+  const cuerpo = document.createElement('div');
+  cuerpo.className = 'game-card__cuerpo';
+  cuerpo.append(texto);
+
+  card.append(media, cuerpo);
+  return card;
+}
+
+function crearFila(titulo, juegos, fabricaCard = crearCard) {
   if (juegos.length === 0) return null;
 
   const idTitulo = `fila-${titulo.toLowerCase().replace(/\s+/g, '-')}`;
@@ -103,7 +140,7 @@ function crearFila(titulo, juegos) {
 
   const pista = document.createElement('div');
   pista.className = 'carrusel__pista';
-  juegos.slice(0, 10).forEach((juego) => pista.append(crearCard(juego)));
+  juegos.slice(0, 10).forEach((juego) => pista.append(fabricaCard(juego)));
 
   fila.append(cabecera, pista);
   activarCarrusel(pista, flechaIzquierda, flechaDerecha);
@@ -124,6 +161,14 @@ function renderizarRecomendados(juegos) {
   if (fila) contenedor.append(fila);
 }
 
+// Independiente de la sesión simulada (sesion.js): comprar no depende de
+// tener sesión iniciada, así que esta fila se guía solo por si hay algo en
+// "warden-compras" (carrito.js), no por el avatar del header.
+function renderizarMisJuegos() {
+  const fila = crearFila('Mis juegos', obtenerComprados(), crearCardComprado);
+  if (fila) contenedor.append(fila);
+}
+
 function renderizarCategorias(juegos) {
   CATEGORIAS.forEach(({ titulo, genero }) => {
     const deLaCategoria = juegos.filter((j) => esDeGenero(j, genero));
@@ -139,6 +184,7 @@ function renderizarFilas(juegos) {
   if (haySesionIniciada()) {
     renderizarRecomendados(juegos);
   }
+  renderizarMisJuegos();
   renderizarCategorias(juegos);
 }
 

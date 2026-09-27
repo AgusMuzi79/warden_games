@@ -179,14 +179,57 @@ porque a Fran le resolvía el diseño de esa pantalla.
   guardan el estado en `localStorage` y la Home ya arranca mostrando el
   avatar y "Recomendados" al volver. Sigue sin ser una cuenta real (no hay
   backend ni `api.js` de por medio todavía en el login).
-- ⬜ Guardado de puntajes.
+- ❌ Guardado de puntajes: no se va a hacer — confirmado con Agus, no
+  aparece en el enunciado.
 
 ## ⬜ Sistema de compras
 
 Lo pide el enunciado, no es opcional — a diferencia de los ítems de "Plus".
-Va a ser un placeholder, decisión nuestra: agregar juegos al carrito (parte 1,
-ya armada, ver `DECISIONES.md`), un flujo de "pagar" con un form que al
-completarse simula el ok de la compra (sin pasarela real), y que el juego
-comprado pase a figurar en "Mis juegos" (sección que todavía no existe).
-Cuando se arme, el banner "Destacados" recupera el badge de precio que tiene
-en el Figma pero que sacamos por ahora.
+Va a ser un placeholder, decisión nuestra: agregar juegos al carrito, un flujo
+de "pagar" que simula el ok de la compra (sin pasarela real), y que el juego
+comprado pase a figurar en "Mis juegos". Sin captura de Figma del layout
+general (no se diseñó en el TPE1): esas decisiones son nuestras. Fran sí
+pasó después una captura de los badges "Gratis"/precio/"Nuevo" (parte 4).
+
+- ✅ Parte 1: agregar/quitar del carrito, ícono en el header con desplegable
+  (ver "Carrito de compras" en `DECISIONES.md`, partes 1 y 2).
+- ✅ Parte 2: modal de pago simulado (`<dialog>` nativo) — "Pagar carrito"
+  abre un form falso, al confirmar mueve los juegos del carrito a una lista
+  de "comprados" y vacía el carrito. Detalle en `DECISIONES.md`,
+  "Sistema de compras (parte 1: modal de pago simulado)".
+- ✅ Parte 3: sección "Mis juegos" en la Home, debajo de "Recomendados"
+  (la página prioriza vender antes que mostrar lo ya comprado) — pero
+  independiente de la sesión simulada, aparece igual como invitado. Lee
+  `obtenerComprados()` de `carrito.js`. El link "Mis juegos" del menú de
+  cuenta ya apunta ahí. Detalle en `DECISIONES.md`.
+- ✅ Parte 4: badges "Gratis"/precio/"Nuevo" en las cards de la Home y junto
+  a "Destacado" en el banner (no en Neon Circuit ni en juegos ya comprados).
+  Precio simulado fijo (`$9.99`) para todo lo "de pago" — decisión final,
+  no va a haber precios reales por juego. Detalle en `DECISIONES.md`,
+  "Sistema de compras (parte 3)".
+
+## ✅ Ficha de producto para juegos del catálogo
+
+Pedido de Agus: clickear un juego de pago que no compraste tiene que abrir
+una ficha con su portada, datos y reseñas — igual que la de Neon Circuit,
+pero para cualquier juego de la API. Sin captura de Figma: layout y
+contenido son decisiones nuestras.
+
+- ✅ Etapa 1: la página en sí (`producto.html`, `js/producto.js`,
+  `css/producto.css`). Portada con botón en hover ("Comprar" agrega al
+  carrito y abre el desplegable; "Jugar" todavía no hace nada, pendiente
+  con Fran), ficha con datos reales (nombre, categoría, rating) y el mismo
+  contenido genérico de Neon Circuit para Sobre el juego/Galería/Comunidad.
+  Se probó navegando directo con `?id=`, todavía sin ningún link real
+  apuntando ahí. Ficha/Galería/Compartir/Comunidad/Dejá tu reseña se
+  movieron de `juego.css` a `components.css` (ahora las usan dos páginas).
+  Detalle en `DECISIONES.md`, "Ficha de producto para juegos del catálogo".
+- ✅ Etapa 2: las cards de las filas de la Home enlazan a esta página
+  (nombre y puntaje, no toda la card — el botón de carrito ya ocupa ese
+  espacio y un `<a>` no puede contener un `<button>`). Detalle en
+  `DECISIONES.md`.
+- ✅ Etapa 3: el banner "Destacados" enlaza a esta página — reemplaza el
+  agregar-al-carrito directo que tenía (`.banner__carrito` → `.banner__ver`),
+  confirmado con Agus: las dos acciones competían por el mismo click en la
+  card activa. Neon Circuit no cambia, sigue yendo a `juego.html`. Detalle
+  en `DECISIONES.md`.
