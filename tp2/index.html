@@ -17,11 +17,23 @@
 </head>
 <body>
 
-  <!-- Loading simulado: se muestra al cargar la Home y se oculta desde loading.js -->
+  <!-- Loading simulado: se muestra al cargar la Home y se oculta desde
+       loading.js. Todo el bloque visual es aria-hidden: el lector de
+       pantalla ya tiene su propio anuncio fijo (el <p class="sr-only">
+       de abajo) — ni el % ni las frases graciosas se leen en voz alta,
+       cambiarían demasiadas veces en 5 segundos. -->
   <div id="loading" class="loading-overlay" role="status" aria-busy="true">
     <p class="sr-only">Cargando catálogo de juegos…</p>
-    <div class="loading__spinner" aria-hidden="true">
+    <div class="loading__centro" aria-hidden="true">
+      <div class="loading__logo-wrap">
+        <svg class="loading__ring" viewBox="0 0 120 120">
+          <circle class="loading__ring-fondo" cx="60" cy="60" r="54"></circle>
+          <circle class="loading__ring-relleno" id="loading-ring" cx="60" cy="60" r="54"></circle>
+        </svg>
+        <img class="loading__logo" src="assets/img/logo.png" alt="">
+      </div>
       <span class="loading__pct"><span id="loading-num">0</span>%</span>
+      <p class="loading__texto" id="loading-texto">Poniendo a correr a los hámsters…</p>
     </div>
   </div>
 

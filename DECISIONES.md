@@ -184,15 +184,31 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 
 ## Loading de la Home
 
-### Spinner circular con el % adentro
-- **Qué:** un aro (`::before` con borde, uno de sus lados de otro color) que gira con
-  `@keyframes`, con el número de 0 a 100 centrado adentro.
-- **Por qué:** es la forma más simple de las permitidas por el enunciado (spinner, círculo
-  o cuadrado) y la más asociada a "cargando" para quien lo ve. El número va adentro en vez
-  de debajo para que ocupe menos alto y quede más compacto.
-- **Cómo:** el aro que gira es un `::before` absoluto que ocupa todo el spinner; el texto
-  del % es un elemento aparte con `z-index: 1` para quedar siempre arriba, así no hace
-  falta contra-rotarlo para que no gire con el aro.
+### Reemplazado: logo con pulso + aro de progreso real + frases graciosas
+- **Qué:** el spinner original (un aro que giraba sin parar, `::before` con
+  `border-top-color` distinto) se reemplazó por: el logo de Warden
+  latiendo (`@keyframes latido`, `scale` + `drop-shadow`), un aro de
+  progreso real alrededor (un `<svg>` con dos `<circle>` — uno de fondo,
+  fijo, y uno de relleno cuyo `stroke-dashoffset` avanza junto con el %
+  real en `loading.js`, no es un giro infinito sin relación con el
+  avance), el % debajo, y una frase que va rotando cada 1/3 del progreso
+  ("Poniendo a correr a los hámsters…", "Convenciendo a la IA de que
+  trabaje…", "Ocultando las microtransacciones…"), terminando en "Todo
+  listo, a viciar." al llegar a 100%.
+- **Por qué:** pedido de Agus — quería algo más elaborado que un spinner
+  genérico, atado a la marca del sitio en vez de una forma abstracta. Se
+  probó primero como archivo suelto (`preview-loading-logo.html`, junto a
+  otra opción con un marco cuadrado que no se usó) para verlo funcionando
+  antes de tocar el archivo real — se pudo iterar rápido el copy de las
+  frases sin arriesgar nada del sitio.
+- **El aro de progreso está atado al % real, no es decorativo suelto:**
+  mismo criterio que ya se valora en el proyecto (ej. el contador real de
+  0 a 100 en vez de una animación sin relación con el tiempo transcurrido)
+  — el relleno del aro *es* el avance, no un giro que da vueltas sin decir
+  nada.
+- **Las frases son puramente para quien ve la pantalla, no para lectores
+  de pantalla:** ver "El % es decorativo para lectores de pantalla" más
+  abajo — se actualizó ese criterio para incluirlas.
 
 ### `z-index: 500` en el overlay (bug encontrado después de armar el banner)
 - **Qué:** `.loading-overlay` tenía `z-index: 100`. Al armar el banner
@@ -217,11 +233,14 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** sin esto, alguien podría tabular o hacer click en contenido tapado por el
   overlay. `inert` es nativo de HTML, no hace falta JS para bloquear foco elemento por elemento.
 
-### El % es decorativo para lectores de pantalla
-- **Qué:** el spinner y el número tienen `aria-hidden="true"`; en cambio hay un texto fijo
-  ("Cargando catálogo de juegos…") dentro del `role="status"` que se lee una sola vez.
+### El % (y ahora las frases graciosas) son decorativos para lectores de pantalla
+- **Qué:** todo el bloque visual (`.loading__centro`: logo, aro, %, frase)
+  tiene `aria-hidden="true"`; en cambio hay un texto fijo ("Cargando
+  catálogo de juegos…") dentro del `role="status"` que se lee una sola vez.
 - **Por qué:** anunciar el número cambiando 100 veces en 5 segundos sería spam para quien
-  usa lector de pantalla. Un solo anuncio al aparecer el loading alcanza.
+  usa lector de pantalla — mismo problema si se anunciaran las 4 frases que van rotando
+  (menos veces, pero igual interrumpirían un anuncio con el siguiente antes de terminar
+  de leerse). Un solo anuncio fijo al aparecer el loading alcanza para las dos cosas.
 
 ---
 

@@ -14,39 +14,81 @@
   background: var(--fondo);
 }
 
-.loading__spinner {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 96px;
-  height: 96px;
+.loading__centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-6);
 }
 
-.loading__spinner::before {
-  content: "";
+.loading__logo-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+}
+
+/* Aro de progreso real: el relleno avanza junto con el % (loading.js), no
+   es un spinner infinito sin relación con el avance. */
+.loading__ring {
   position: absolute;
   inset: 0;
-  border: 6px solid var(--primario-o1);
-  border-top-color: var(--acento);
-  border-radius: 50%;
-  animation: girar 1s linear infinite;
+  transform: rotate(-90deg);
+}
+
+.loading__ring-fondo {
+  fill: none;
+  stroke: var(--primario-o1);
+  stroke-width: 4;
+}
+
+.loading__ring-relleno {
+  fill: none;
+  stroke: var(--acento);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 339.292;
+  stroke-dashoffset: 339.292;
+  filter: drop-shadow(0 0 4px var(--acento));
+  transition: stroke-dashoffset 0.05s linear;
+}
+
+.loading__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radio-md);
+  animation: latido 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px var(--primario));
 }
 
 .loading__pct {
-  position: relative;
-  z-index: 1;
-  font: 600 20px/1 var(--font-display);
+  font: 600 24px/1 var(--font-display);
   color: var(--primario-c3);
 }
 
-@keyframes girar {
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* Frases graciosas que van rotando (loading.js) — puramente decorativas,
+   ver el aria-hidden en index.html. */
+.loading__texto {
+  margin: 0;
+  max-width: 22rem;
+  text-align: center;
+  color: var(--primario-c1);
+  font: 400 14px var(--font-ui);
+}
+
+@keyframes latido {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .loading__spinner::before {
+  .loading__logo {
     animation: none;
+  }
+
+  .loading__ring-relleno {
+    transition: none;
   }
 }
 
