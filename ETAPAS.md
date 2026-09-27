@@ -206,3 +206,23 @@ pasó después una captura de los badges "Gratis"/precio/"Nuevo" (parte 4).
   Precio simulado fijo (`$9.99`) para todo lo "de pago" — decisión final,
   no va a haber precios reales por juego. Detalle en `DECISIONES.md`,
   "Sistema de compras (parte 3)".
+
+## ⬜ Ficha de producto para juegos del catálogo
+
+Pedido de Agus: clickear un juego de pago que no compraste tiene que abrir
+una ficha con su portada, datos y reseñas — igual que la de Neon Circuit,
+pero para cualquier juego de la API. Sin captura de Figma: layout y
+contenido son decisiones nuestras.
+
+- ✅ Etapa 1: la página en sí (`producto.html`, `js/producto.js`,
+  `css/producto.css`). Portada con botón en hover ("Comprar" agrega al
+  carrito y abre el desplegable; "Jugar" todavía no hace nada, pendiente
+  con Fran), ficha con datos reales (nombre, categoría, rating) y el mismo
+  contenido genérico de Neon Circuit para Sobre el juego/Galería/Comunidad.
+  Se probó navegando directo con `?id=`, todavía sin ningún link real
+  apuntando ahí. Ficha/Galería/Compartir/Comunidad/Dejá tu reseña se
+  movieron de `juego.css` a `components.css` (ahora las usan dos páginas).
+  Detalle en `DECISIONES.md`, "Ficha de producto para juegos del catálogo".
+- ⬜ Etapa 2: las cards de las filas de la Home enlazan a esta página.
+- ⬜ Etapa 3: el banner "Destacados" enlaza a esta página (reemplaza el
+  agregar-al-carrito directo que tiene hoy — confirmado con Agus).

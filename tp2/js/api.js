@@ -14,3 +14,23 @@ async function obtenerJuegos() {
 
   return respuesta.json();
 }
+
+// Categorías fijas (las mismas que arma home.js para las filas de la Home y
+// que lista el menú hamburguesa). "genero" tiene que matchear el nombre que
+// usa la API en genres[].name. Elegidas por cuántos juegos reales tienen en
+// el catálogo (de más a menos, ver DECISIONES.md). Compartidas con
+// producto.js para el breadcrumb de la ficha de un juego.
+const CATEGORIAS = [
+  { titulo: 'Acción', genero: 'Action' },
+  { titulo: 'Shooters', genero: 'Shooter' },
+  { titulo: 'RPG', genero: 'RPG' },
+  { titulo: 'Indie', genero: 'Indie' },
+  { titulo: 'Aventura', genero: 'Adventure' },
+  { titulo: 'Plataformas', genero: 'Platformer' },
+  { titulo: 'Puzzle', genero: 'Puzzle' },
+  { titulo: 'Estrategia', genero: 'Strategy' },
+];
+
+function esDeGenero(juego, genero) {
+  return juego.genres.some((g) => g.name === genero);
+}

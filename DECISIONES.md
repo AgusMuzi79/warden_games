@@ -1598,8 +1598,103 @@ van ni de qué depende cada uno — esas decisiones se tomaron acá, con Agus).
 
 ---
 
+## Ficha de producto para juegos del catálogo (`producto.html`)
+
+Pedido de Agus: al clickear un juego de pago que todavía no compraste, se
+abre una ficha con su portada, datos y reseñas — igual que la de Neon
+Circuit, pero para cualquier juego de la API. Sin captura de Figma (esto
+no se diseñó en el TPE1): las decisiones de layout y contenido son
+nuestras. Primera etapa: la página en sí, sin todavía enlazarla desde las
+cards de la Home ni del banner (parte 2 y 3, aparte).
+
+### Página nueva, no la misma que Neon Circuit
+- **Qué:** `producto.html` (+ `js/producto.js`, `css/producto.css`), no
+  reutiliza `juego.html`. Recibe el juego por query string (`?id=`, ej.
+  `producto.html?id=3498`) y busca el juego llamando a `obtenerJuegos()`
+  otra vez (mismo catálogo que ya trae la Home).
+- **Por qué no reusar `juego.html`:** esa página tiene un tablero real de
+  Peg Solitaire (grilla de 33 posiciones, reglas, atajos de teclado) —
+  específico de Neon Circuit. Ningún otro juego del catálogo tiene un
+  minijuego programado atrás, así que no hay nada que mostrar ahí. Se
+  decidió con Agus: sin tablero, solo la portada (ver más abajo).
+- **Sin backend ni id como ruta real:** es un sitio estático, no hay
+  servidor que resuelva `/juego/123` — el id viaja por query string y
+  `producto.js` arma la página en el cliente, mismo criterio que ya usa
+  todo el proyecto (sesión y compras simuladas en `localStorage`).
+
+### Ficha, Sobre el juego, Galería, Compartir, Comunidad y Dejá tu reseña se movieron a `components.css`
+- **Qué:** ese CSS vivía entero en `juego.css`. Ahora que dos páginas lo
+  usan (`juego.html` y `producto.html`), se movió a `components.css` —
+  mismo criterio que ya se usó para promover `crearBotonCarrito()` y
+  `crearBadge()` a `carrito.js` cuando pasaron a compartirse entre
+  `home.js` y `carousel.js`. `juego.css` se queda solo con lo específico
+  de Neon Circuit: el tablero y la Ayuda.
+- **`.ficha-juego__miniatura` pierde su imagen fija:** antes traía
+  `background-image` de Neon Circuit adentro de la regla compartida. Ahora
+  esa regla solo pone tamaño/forma, y cada página pone la imagen que le
+  corresponde: `juego.css` la deja fija (siempre la misma), `producto.js`
+  la setea por juego (`style.backgroundImage`, la imagen real de la API).
+- **Sin "Tu récord" en la ficha de un juego del catálogo:** ese dato es la
+  cantidad de nodos al terminar una partida de Peg Solitaire — no aplica a
+  un juego que no programamos. Tampoco hay desarrollador (la API no lo
+  trae en el endpoint que usamos, `/api`). Queda solo: miniatura, nombre,
+  categoría (géneros reales), rating (real) y "Jugando ahora" (simulado,
+  mismo número que ya usa Neon Circuit).
+- **`CATEGORIAS`/`esDeGenero()` se mueven de `home.js` a `api.js`:**
+  `producto.js` los necesita para traducir el género real del juego a una
+  de las 8 categorías fijas del sitio, en el breadcrumb. Como ahora los
+  usan dos archivos, `api.js` (ya compartido por ambas páginas) es el
+  lugar que corresponde — mismo patrón que categorías/esDePago/CATEGORIAS.
+- **"Sobre el juego", Galería y las 3 reseñas de Comunidad son genéricas,
+  no por juego:** no tenemos descripciones en español de estos juegos
+  (la API las trae en inglés, ver "Plus" en `DECISIONES.md`) ni reseñas
+  reales. Se reusa el mismo texto/datos de ejemplo para cualquier juego —
+  confirmado con Agus, mismo criterio que ya se acepta en otros lados del
+  sitio para contenido simulado.
+
+### `.ficha-juego__nombre` es `<h1>` acá (en Neon Circuit sigue siendo un `<p>`)
+- **Qué:** en `producto.html`, el nombre del juego en la ficha es un
+  `<h1>`. En `juego.html` sigue siendo un `<p>` (Neon Circuit no tiene
+  `<h1>`, ver "Excepción puntual" en `DECISIONES.md` — pendiente de
+  discutir con los tres). Misma clase CSS en los dos casos: el estilo no
+  depende de la etiqueta.
+- **Por qué no repetir la excepción de Neon Circuit acá:** esa excepción
+  fue una decisión puntual de Fran para esa pantalla específica, todavía
+  sin cerrar entre los tres. `producto.html` es una página nueva — por
+  default sigue la regla general del proyecto ("un solo h1 por página") en
+  vez de heredar una excepción ajena sin haberla charlado.
+
+### Portada con botón en hover, no siempre visible como en Neon Circuit
+- **Qué:** `.producto__portada` muestra la imagen real del juego a pantalla
+  completa; el botón ("Comprar" o "Jugar", según corresponda) aparece con
+  hover o foco, con un scrim oscuro atrás — mismo criterio que ya usa
+  "Jugar" en el banner Destacados, no el botón siempre visible de la
+  portada de Neon Circuit.
+- **Por qué distinto a Neon Circuit:** ahí el botón "arranca" el tablero
+  (una transición real, de portada a juego, dentro de la misma card) — acá
+  no hay tablero al que pasar, la acción es "comprar" o (todavía) nada, así
+  que no hace falta ese peso visual permanente.
+- **"Comprar" agrega al carrito y abre el desplegable del header:**
+  confirmado con Agus. Un solo click hace las dos cosas — reusa
+  `agregarAlCarrito()` (`carrito.js`) y dispara el click del botón de
+  carrito del header (`document.querySelector('.menu-carrito
+  .header__icon-btn').click()`) en vez de reimplementar el "abrir menú".
+  Hace falta `evento.stopPropagation()` en el click de "Comprar": si no,
+  el mismo click sigue de largo hasta `document` y el listener de
+  `menu.js` que cierra cualquier menú al clickear "afuera" lo vuelve a
+  cerrar enseguida (bug real, encontrado al probarlo).
+- **"Jugar" no hace nada todavía:** ni en juegos gratis ni en los de pago
+  ya comprados — no hay ningún minijuego real detrás de estos juegos del
+  catálogo. Queda pendiente definir con Fran qué debería pasar acá (ver
+  "Pendientes de decidir").
+
+---
+
 ## Pendientes de decidir
 
+- Qué pasa al clickear "Jugar" en la ficha de un juego del catálogo que no
+  es Neon Circuit (gratis, o de pago ya comprado): hoy no hace nada. Falta
+  charlarlo con Fran — ver "Ficha de producto para juegos del catálogo".
 - Estilo final del componente `.link` (hay un default en `components.css`; falta
   confirmar contra la captura de Figma cuando la tengamos).
 - Hex definitivo de la paleta del tablero (`--tablero-*`): son valores

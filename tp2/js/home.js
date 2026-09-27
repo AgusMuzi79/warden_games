@@ -4,20 +4,6 @@
 
 const contenedor = document.getElementById('filas-juegos');
 
-// Categorías fijas (las mismas que lista el menú hamburguesa). "genero"
-// tiene que matchear el nombre que usa la API en genres[].name. Elegidas
-// por cuántos juegos reales tienen en el catálogo (de más a menos).
-const CATEGORIAS = [
-  { titulo: 'Acción', genero: 'Action' },
-  { titulo: 'Shooters', genero: 'Shooter' },
-  { titulo: 'RPG', genero: 'RPG' },
-  { titulo: 'Indie', genero: 'Indie' },
-  { titulo: 'Aventura', genero: 'Adventure' },
-  { titulo: 'Plataformas', genero: 'Platformer' },
-  { titulo: 'Puzzle', genero: 'Puzzle' },
-  { titulo: 'Estrategia', genero: 'Strategy' },
-];
-
 // No hay login real ni historial de partidas todavía: simulamos que el
 // usuario ya jugó este título, y buscamos "Recomendados" por ese género
 // (no por genres[0]: el orden de géneros de la API no es confiable, por
@@ -35,10 +21,6 @@ const JUEGOS_DE_RESPALDO = [
   { id: 6, name: 'Limbo', background_image: 'https://media.rawg.io/media/games/942/9424d6bb763dc38d9378b488603c87fa.jpg', rating: 4.14, genres: [{ name: 'Indie' }, { name: 'Platformer' }] },
   { id: 7, name: 'Company of Heroes 2', background_image: 'https://media.rawg.io/media/games/0bd/0bd5646a3d8ee0ac3314bced91ea306d.jpg', rating: 3.1, genres: [{ name: 'Strategy' }] },
 ];
-
-function esDeGenero(juego, genero) {
-  return juego.genres.some((g) => g.name === genero);
-}
 
 function crearCard(juego) {
   const card = document.createElement('article');

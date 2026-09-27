@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Warden Games</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Roboto+Flex:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./css/variables.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/header.css">
+  <link rel="stylesheet" href="./css/footer.css">
+  <link rel="stylesheet" href="./css/producto.css">
+</head>
+<body>
+
+  <header class="header">
+  <div class="header__start">
+    <div class="menu-hamburguesa">
+      <button class="header__icon-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
+        <i class="ph ph-list" aria-hidden="true"></i>
+      </button>
+
+      <div id="menu-principal" class="menu-dropdown menu-dropdown--hamburguesa" hidden>
+        <nav class="menu-dropdown__seccion" aria-labelledby="menu-jugar-titulo">
+          <h2 class="menu-dropdown__titulo" id="menu-jugar-titulo">Jugar</h2>
+          <ul>
+            <li><a href="#"><i class="ph ph-star" aria-hidden="true"></i> Destacados</a></li>
+            <li><a href="#"><i class="ph ph-sparkle" aria-hidden="true"></i> Últimos</a></li>
+            <li><a href="#"><i class="ph ph-clock" aria-hidden="true"></i> Recientes</a></li>
+            <li><a href="#"><i class="ph ph-trophy" aria-hidden="true"></i> Top 100</a></li>
+            <li><a href="#"><i class="ph ph-arrows-clockwise" aria-hidden="true"></i> Actualizados</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <nav class="menu-dropdown__seccion" aria-labelledby="menu-categorias-titulo">
+          <h2 class="menu-dropdown__titulo" id="menu-categorias-titulo">Categorías</h2>
+          <ul>
+            <li><a href="#"><i class="ph ph-lightning" aria-hidden="true"></i> Acción</a></li>
+            <li><a href="#"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> Shooters</a></li>
+            <li><a href="#"><i class="ph ph-sword" aria-hidden="true"></i> RPG</a></li>
+            <li><a href="#"><i class="ph ph-palette" aria-hidden="true"></i> Indie</a></li>
+            <li><a href="#"><i class="ph ph-compass" aria-hidden="true"></i> Aventura</a></li>
+            <li><a href="#"><i class="ph ph-game-controller" aria-hidden="true"></i> Plataformas</a></li>
+            <li><a href="#"><i class="ph ph-puzzle-piece" aria-hidden="true"></i> Puzzle</a></li>
+            <li><a href="#"><i class="ph ph-brain" aria-hidden="true"></i> Estrategia</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <div class="menu-dropdown__seccion menu-dropdown__seccion--contacto">
+          <a class="btn btn--secundario" href="mailto:hola@warden.gg">Contáctanos</a>
+        </div>
+      </div>
+    </div>
+
+    <a class="header__logo" href="index.html" aria-label="Warden, ir al inicio">
+      <img src="assets/img/logo.png" alt="" width="32" height="32">
+      <span>Warden</span>
+    </a>
+  </div>
+
+  <form class="header__search" role="search" action="#">
+    <label class="sr-only" for="buscar">Buscar juegos</label>
+    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+    <input type="search" id="buscar" name="q" placeholder="Buscar juegos" autocomplete="off">
+  </form>
+
+  <div class="header__actions">
+    <div class="menu-carrito">
+      <button class="header__icon-btn" type="button" aria-label="Carrito" aria-expanded="false" aria-controls="menu-carrito-panel">
+        <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
+        <span class="carrito__contador" id="carrito-contador" hidden>0</span>
+      </button>
+
+      <div id="menu-carrito-panel" class="menu-dropdown menu-dropdown--carrito" hidden>
+        <h2 class="menu-dropdown__titulo">Carrito</h2>
+
+        <p class="carrito__vacio" id="carrito-vacio">Todavía no agregaste ningún juego.</p>
+
+        <ul class="carrito__lista" id="carrito-lista">
+          <!-- Ítems generados por carrito.js -->
+        </ul>
+
+        <div class="carrito__acciones">
+          <a href="#" class="btn btn--secundario">Seguir comprando</a>
+          <button type="button" class="btn btn--primario" id="btn-pagar-carrito">Pagar carrito</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Con sesión -->
+    <div class="menu-cuenta">
+      <button class="header__avatar" type="button" aria-label="Mi cuenta" aria-expanded="false" aria-controls="menu-perfil" data-sesion="usuario" hidden>
+        <img src="assets/img/avatar.jpg" alt="" width="36" height="36">
+      </button>
+
+      <div id="menu-perfil" class="menu-dropdown menu-dropdown--perfil" hidden>
+        <div class="menu-dropdown__cabecera">
+          <img src="assets/img/avatar.jpg" alt="" width="48" height="48">
+          <div>
+            <p class="menu-dropdown__nombre">Nombre Apellido</p>
+            <p class="menu-dropdown__usuario">@username</p>
+          </div>
+        </div>
+
+        <hr class="menu-dropdown__divisor">
+
+        <nav class="menu-dropdown__seccion" aria-label="Cuenta">
+          <ul>
+            <li><a href="#">Mi perfil</a></li>
+            <li><a href="index.html#fila-mis-juegos">Mis juegos</a></li>
+            <li><a href="#">Favoritos</a></li>
+            <li><a href="#">Logros</a></li>
+            <li><a href="#">Configuración</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <ul class="menu-dropdown__social" aria-label="Redes sociales">
+          <li><a href="#" aria-label="Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <button type="button" class="menu-dropdown__cerrar-sesion">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <!-- Sin sesión -->
+    <a class="header__avatar header__avatar--invitado" href="login.html" aria-label="Iniciar sesión" data-sesion="invitado">
+      <i class="ph ph-user" aria-hidden="true"></i>
+    </a>
+  </div>
+</header>
+
+  <!-- Modal de pago simulado, igual que en index.html: lo abre "Pagar
+       carrito" o "Comprar" en la portada de acá abajo. -->
+  <dialog id="modal-pago" class="modal" aria-label="Pagar carrito">
+    <button type="button" class="modal__cerrar" id="btn-cerrar-pago" aria-label="Cerrar">
+      <i class="ph ph-x" aria-hidden="true"></i>
+    </button>
+
+    <form id="form-pago" class="modal__form">
+      <h2 class="modal__titulo">Pagar carrito</h2>
+      <p class="modal__resumen" id="pago-resumen"></p>
+
+      <div class="field">
+        <label for="pago-nombre">Nombre en la tarjeta</label>
+        <input type="text" id="pago-nombre" name="nombre" required autocomplete="cc-name">
+      </div>
+
+      <div class="field">
+        <label for="pago-numero">Número de tarjeta</label>
+        <input type="text" id="pago-numero" name="numero" required inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19">
+      </div>
+
+      <div class="modal__fila">
+        <div class="field">
+          <label for="pago-vencimiento">Vencimiento</label>
+          <input type="text" id="pago-vencimiento" name="vencimiento" required autocomplete="cc-exp" placeholder="MM/AA" maxlength="5">
+        </div>
+
+        <div class="field">
+          <label for="pago-cvv">CVV</label>
+          <input type="text" id="pago-cvv" name="cvv" required inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primario">Confirmar compra</button>
+    </form>
+
+    <div class="modal__exito" id="pago-exito" role="status" hidden>
+      <i class="ph ph-check-circle modal__exito-icono" aria-hidden="true"></i>
+      <h2 class="modal__exito-titulo">¡Compra realizada!</h2>
+      <p class="modal__exito-texto">Gracias por tu compra.</p>
+    </div>
+  </dialog>
+
+  <main>
+    <!-- Ruta de navegación: categoría y nombre reales, completados por
+         producto.js apenas llega la respuesta de la API. -->
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <ol class="breadcrumb__lista">
+        <li class="breadcrumb__item"><a href="index.html">Inicio</a></li>
+        <li class="breadcrumb__item" id="producto-categoria">Juegos</li>
+        <li class="breadcrumb__item" aria-current="page" id="producto-nombre-breadcrumb">Cargando…</li>
+      </ol>
+    </nav>
+
+    <div class="juego-layout">
+
+      <!-- Portada: la imagen real del juego. El botón aparece en hover o
+           foco (mismo criterio que "Jugar" en el banner Destacados) y
+           dice "Comprar" o "Jugar" según corresponda (producto.js). -->
+      <section class="producto__portada" aria-label="Portada del juego">
+        <img class="producto__portada-img" id="producto-imagen" src="" alt="">
+        <button type="button" class="producto__accion" id="producto-accion">
+          <i class="ph ph-play" id="producto-accion-icono" aria-hidden="true"></i>
+          <span id="producto-accion-texto">Jugar</span>
+        </button>
+      </section>
+
+      <aside class="panel-lateral" aria-label="Información del juego">
+        <section class="ficha-juego">
+          <div class="ficha-juego__cabecera">
+            <div class="ficha-juego__miniatura" id="producto-miniatura" aria-hidden="true"></div>
+            <div>
+              <h1 class="ficha-juego__nombre" id="producto-nombre">Cargando…</h1>
+              <p class="ficha-juego__categoria" id="producto-categoria-ficha"></p>
+            </div>
+          </div>
+          <p class="ficha-juego__rating">
+            <i class="ph ph-star" aria-hidden="true"></i> <span id="producto-rating">–</span>
+            <span class="ficha-juego__resenas">(1.284 reseñas)</span>
+          </p>
+          <dl class="ficha-juego__stats">
+            <div>
+              <dt>Jugando ahora</dt>
+              <dd>8.412</dd>
+            </div>
+          </dl>
+        </section>
+      </aside>
+
+      <div class="juego-layout__secundario">
+        <!-- Mismo texto genérico para cualquier juego del catálogo: no
+             tenemos descripciones propias de estos juegos (ver
+             DECISIONES.md, "Sistema de compras", ficha genérica). -->
+        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
+          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
+          <p>Este juego forma parte del catálogo de Warden Games. Mirá capturas de la comunidad más abajo, sumate a la conversación en las reseñas y, si querés, dejá la tuya.</p>
+        </section>
+
+        <section class="galeria" aria-labelledby="galeria-titulo">
+          <div class="galeria__cabecera">
+            <h2 id="galeria-titulo">Galería</h2>
+            <p class="galeria__contador">6 capturas</p>
+          </div>
+          <ul class="galeria__grid" aria-hidden="true">
+            <li class="galeria__tile galeria__tile--1"></li>
+            <li class="galeria__tile galeria__tile--2"></li>
+            <li class="galeria__tile galeria__tile--3"></li>
+            <li class="galeria__tile galeria__tile--4"></li>
+            <li class="galeria__tile galeria__tile--5"></li>
+            <li class="galeria__tile galeria__tile--6"></li>
+          </ul>
+        </section>
+      </div>
+
+      <section class="compartir" aria-labelledby="compartir-titulo">
+        <h2 id="compartir-titulo">Compartir</h2>
+
+        <ul class="compartir__redes">
+          <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <div class="compartir__acciones">
+          <a class="btn btn--secundario" href="mailto:?subject=Mir%C3%A1%20este%20juego" id="producto-compartir-mail">Enviar mail</a>
+          <button type="button" class="btn btn--secundario">Mensaje</button>
+        </div>
+
+        <div class="compartir__link">
+          <label class="sr-only" for="link-juego">Enlace para compartir</label>
+          <input type="text" id="link-juego" value="" readonly>
+          <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Comunidad + "Dejá tu reseña": mismo contenido de ejemplo que ya usa
+         Neon Circuit (ver DECISIONES.md) — no tenemos reseñas reales de
+         estos juegos. -->
+    <div class="juego-layout">
+
+      <section class="comunidad" aria-labelledby="comunidad-titulo">
+        <div class="comunidad__cabecera">
+          <h2 id="comunidad-titulo">Comunidad</h2>
+          <p class="comunidad__contador">1.284 reseñas</p>
+        </div>
+
+        <ul class="comunidad__lista">
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--1" aria-hidden="true">MF</span>
+              <div>
+                <p class="resena__nombre">Malena F. <span class="resena__fecha">14 ago 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true">★★★★★</span><span class="sr-only">Puntaje: 5 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Le metí varias horas ya y sigue siendo de lo mejor que jugué este año. Lo recomiendo sin dudar.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (42)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--2" aria-hidden="true">BI</span>
+              <div>
+                <p class="resena__nombre">Bruno Ibarra <span class="resena__fecha">10 ago 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true">★★★★☆</span><span class="sr-only">Puntaje: 4 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Muy buena experiencia en general, aunque tuve algún problemita de rendimiento en mi compu.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (15)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--3" aria-hidden="true">CN</span>
+              <div>
+                <p class="resena__nombre">Carla Núñez <span class="resena__fecha">2 jul 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true">★★★★★</span><span class="sr-only">Puntaje: 5 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Adictivo. Me senté "un ratito" y perdí la tarde.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (6)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="resena-form" aria-labelledby="resena-form-titulo">
+        <h2 id="resena-form-titulo">Dejá tu reseña</h2>
+
+        <form id="form-resena" action="#" method="post" novalidate>
+          <fieldset class="resena-form__puntaje">
+            <legend>Tu puntaje</legend>
+            <div class="estrellas">
+              <input type="radio" id="estrella-5" name="puntaje" value="5">
+              <label for="estrella-5"><span class="sr-only">5 estrellas</span></label>
+              <input type="radio" id="estrella-4" name="puntaje" value="4" checked>
+              <label for="estrella-4"><span class="sr-only">4 estrellas</span></label>
+              <input type="radio" id="estrella-3" name="puntaje" value="3">
+              <label for="estrella-3"><span class="sr-only">3 estrellas</span></label>
+              <input type="radio" id="estrella-2" name="puntaje" value="2">
+              <label for="estrella-2"><span class="sr-only">2 estrellas</span></label>
+              <input type="radio" id="estrella-1" name="puntaje" value="1">
+              <label for="estrella-1"><span class="sr-only">1 estrella</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="resena-texto">Tu reseña</label>
+            <textarea id="resena-texto" name="resena" maxlength="500" placeholder="Contá qué te pareció."></textarea>
+            <p class="resena-form__contador"><span id="resena-contador">0</span>/500</p>
+          </div>
+
+          <button type="submit" class="btn btn--primario">Publicar</button>
+          <p class="resena-form__estado" id="resena-estado" role="status"></p>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+
+      <!-- Sponsors -->
+      <section class="sponsors" aria-labelledby="sponsors-title">
+        <div class="sponsors__row">
+          <h2 class="footer__label" id="sponsors-title">Sponsors</h2>
+          <ul class="sponsors__list">
+            <li><a href="#">Voltio</a></li>
+            <li><a href="#">Kraven</a></li>
+            <li><a href="#">NodoSur</a></li>
+            <li><a href="#">Hexa</a></li>
+            <li><a href="#">Cuenca</a></li>
+            <li><a href="#">Pixelería</a></li>
+            <li><a href="#">Uncas Games</a></li>
+          </ul>
+        </div>
+        <a class="sponsors__mail" href="mailto:sponsors@warden.gg">sponsors@warden.gg</a>
+      </section>
+
+      <hr class="footer__divider">
+
+      <!-- Marca + navegación -->
+      <div class="footer__grid">
+
+        <div class="brand">
+          <a class="brand__logo" href="index.html" aria-label="Warden, ir al inicio">
+            <img src="assets/img/logo.png" alt="" width="44" height="44">
+            <span>Warden</span>
+          </a>
+          <p class="brand__tagline">Miles de juegos, cero instalaciones. Entrás, jugás, seguís con tu día.</p>
+
+          <ul class="social" aria-label="Redes sociales de Warden">
+            <li><a href="#" aria-label="Warden en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Warden en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Warden en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Warden en YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+          </ul>
+        </div>
+
+        <nav class="footer__col" aria-labelledby="col-jugar">
+          <h2 class="footer__label" id="col-jugar">Jugar</h2>
+          <ul>
+            <li><a href="#">Destacados</a></li>
+            <li><a href="#">Últimos</a></li>
+            <li><a href="#">Recientes</a></li>
+            <li><a href="#">Top 100</a></li>
+            <li><a href="#">Actualizados</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer__col" aria-labelledby="col-devs">
+          <h2 class="footer__label" id="col-devs">Devs</h2>
+          <ul>
+            <li><a href="#">Publicá tu juego</a></li>
+            <li><a href="#">Documentación</a></li>
+            <li><a href="#">Ingresos</a></li>
+            <li><a href="#">Estado de la API</a></li>
+            <li><a href="#">Foro</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer__col" aria-labelledby="col-comunidad">
+          <h2 class="footer__label" id="col-comunidad">Comunidad</h2>
+          <ul>
+            <li><a href="#">Torneos</a></li>
+            <li><a href="#">Discord</a></li>
+            <li><a href="#">Embajadores</a></li>
+            <li><a href="#">Convivencia</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer__col" aria-labelledby="col-ayuda">
+          <h2 class="footer__label" id="col-ayuda">Ayuda</h2>
+          <ul>
+            <li><a href="#">Centro de ayuda</a></li>
+            <li><a href="#">Preguntas</a></li>
+            <li><a href="#">Contacto</a></li>
+            <li><a href="#">Estado del servicio</a></li>
+            <li><a href="#">Accesibilidad</a></li>
+          </ul>
+        </nav>
+
+      </div>
+
+      <hr class="footer__divider">
+
+      <!-- Newsletter + empresa -->
+      <div class="footer__bottom">
+
+        <section class="newsletter" aria-labelledby="newsletter-title">
+          <h2 class="newsletter__title" id="newsletter-title">No te pierdas ningún lanzamiento</h2>
+          <p class="newsletter__copy">Un mail por semana con los juegos nuevos y los torneos que se vienen.</p>
+          <form class="newsletter__form" action="#" method="post" novalidate>
+            <label class="sr-only" for="newsletter-email">Tu correo electrónico</label>
+            <input type="email" id="newsletter-email" name="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
+            <button type="submit" class="btn btn--secundario">Suscribirse</button>
+          </form>
+        </section>
+
+        <section class="company" aria-labelledby="company-title">
+          <h2 class="footer__label company__title" id="company-title">Warden Interactive S.R.L.</h2>
+          <address>
+            Av. Reforma Universitaria, Aulas Comunes 1 - Tandil, Argentina.<br>
+            CUIT 30-12345678-6<br>
+            <a href="mailto:hola@warden.gg">hola@warden.gg</a> - <a href="mailto:soporte@warden.gg">soporte@warden.gg</a><br>
+            <a href="tel:+541155550182">+54 11 5555-0182</a> - lun a vie de 9 a 18 hs
+          </address>
+        </section>
+
+      </div>
+
+      <hr class="footer__divider">
+
+      <!-- Barra legal -->
+      <div class="legal">
+        <nav aria-label="Información legal">
+          <ul class="legal__links">
+            <li><a href="#">Términos y condiciones</a></li>
+            <li><a href="#">Privacidad</a></li>
+            <li><a href="#">Cookies</a></li>
+            <li><a href="#">Botón de arrepentimiento</a></li>
+            <li><a href="#">Defensa de las y los consumidores</a></li>
+          </ul>
+        </nav>
+        <div class="legal__meta">
+          <p>© 2026 Warden Interactive S.R.L. Todos los derechos reservados.</p>
+          <p>v4.2.1 · build 20260909</p>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="./js/api.js" defer></script>
+  <script src="./js/sesion.js" defer></script>
+  <script src="./js/carrito.js" defer></script>
+  <script src="./js/compras.js" defer></script>
+  <script src="./js/producto.js" defer></script>
+  <script src="./js/resena.js" defer></script>
+  <script src="./js/compartir.js" defer></script>
+  <script src="./js/menu.js" defer></script>
+</body>
+</html>
