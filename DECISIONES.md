@@ -113,6 +113,27 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** el lector de pantalla anuncia "Carrito, link" en vez de nada o un
   carácter raro de la fuente de íconos.
 
+### Scrollbar con la paleta del sitio, no oculta
+- **Qué:** en `base.css`, `scrollbar-color`/`scrollbar-width` (Firefox) y
+  `::-webkit-scrollbar*` (Chrome/Edge/Safari) sobre el selector universal
+  — track `--fondo`, thumb `--primario-o1` que pasa a `--acento` en hover.
+  Aplica a toda la página y a cualquier contenedor con scroll propio
+  (el desplegable del carrito, un `<textarea>`), no hace falta repetirlo
+  por componente.
+- **Por qué no ocultarla directamente (alternativa pedida, descartada):**
+  sacar la barra de scroll de la página entera es un golpe a la
+  accesibilidad/UX — se pierde la referencia visual de cuánto falta para
+  llegar al final y el "agarradero" para arrastrar con mouse. El proyecto
+  ya prioriza accesibilidad sobre estética (corrección del profesor sobre
+  Orbitron). Estilizarla da la identidad visual que se buscaba sin sacar
+  esa función.
+- **No pisa el scrollbar oculto de las filas de la Home:**
+  `.carrusel__pista` (`home.css`) ya la ocultaba a propósito con
+  `scrollbar-width: none` + `::-webkit-scrollbar { display: none }` — ahí
+  sí se justifica porque hay flechas como control alternativo. Esa regla
+  es más específica que el selector universal de acá y sigue ganando, sin
+  tocarla.
+
 ---
 
 ## Header
