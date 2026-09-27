@@ -285,10 +285,19 @@
   font-size: 10px;
 }
 
+/* Logo real de reCAPTCHA: flecha circular de "refresh" en dos tonos, no
+   un candado — dos <path>, uno por mitad del ícono. */
 .recaptcha__icon {
   width: 26px;
   height: 26px;
+}
+
+.recaptcha__icon-a {
   fill: #4285f4;
+}
+
+.recaptcha__icon-b {
+  fill: #b3b3b3;
 }
 
 /* ---------- Botones ----------

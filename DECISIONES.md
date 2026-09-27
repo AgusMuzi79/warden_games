@@ -637,6 +637,16 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   simulación sea creíble tiene que verse como el widget real, no como si
   hubiera tomado la paleta violeta del sitio — es la única excepción
   consciente a esa regla, justo porque conceptualmente no es "nuestro" CSS.
+- **Logo corregido — es una flecha circular de "refresh", no un candado:**
+  la primera versión usaba un ícono de candado/escudo (`ph-shield`, mal
+  elegido de entrada). Agus lo marcó comparando de memoria contra el real;
+  se confirmó visitando el demo oficial de Google
+  (`google.com/recaptcha/api2/demo`) y se rehizo el SVG con la forma
+  correcta: dos flechas en arco formando un círculo (ícono "autorenew" de
+  Material Design), cada una con su propio `<path>` para poder pintarlas
+  de dos colores distintos — `.recaptcha__icon-a` azul (`#4285f4`),
+  `.recaptcha__icon-b` gris (`#b3b3b3`) — en vez de un ícono de un solo
+  color.
 
 ---
 
