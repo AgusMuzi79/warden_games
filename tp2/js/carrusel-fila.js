@@ -18,6 +18,11 @@ function activarCarrusel(pista, flechaIzquierda, flechaDerecha) {
 
   pista.addEventListener('pointerdown', (evento) => {
     if (evento.pointerType !== 'mouse') return; // el touch ya scrollea nativo
+    // Si el mouse-down arranca sobre un control (ej. "Agregar al carrito"),
+    // no iniciar el arrastre: el preventDefault() de más abajo, necesario
+    // para el arrastre, cancela también el click posterior sobre ese
+    // control (así lo define la spec de Pointer Events), rompiéndolo.
+    if (evento.target.closest('button, a')) return;
     arrastrando = true;
     seMovio = false;
     inicioX = evento.clientX;

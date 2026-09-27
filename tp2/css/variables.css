@@ -6,6 +6,7 @@
 :root {
   /* ---- Color: base ---- */
   --fondo:            #19042A;
+  --fondo-o1:         rgba(25, 4, 42, 0.75);
   --superficie:       var(--primario-o2);
 
   /* ---- Color: primario (violeta) ---- */

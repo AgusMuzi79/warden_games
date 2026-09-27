@@ -39,11 +39,11 @@ const NEON_CIRCUIT = {
 
 // Si la API falla, destacamos estos juegos reales igual.
 const DESTACADOS_DE_RESPALDO = [
-  { name: 'The Witcher 3: Wild Hunt', background_image: 'https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg', rating: 4.64 },
-  { name: 'Portal 2', background_image: 'https://media.rawg.io/media/games/2ba/2bac0e87cf45e5b508f227d281c9252a.jpg', rating: 4.58 },
-  { name: 'Grand Theft Auto V', background_image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg', rating: 4.47 },
-  { name: 'Counter-Strike: Global Offensive', background_image: 'https://media.rawg.io/media/games/736/73619bd336c894d6941d926bfd563946.jpg', rating: 3.57 },
-  { name: 'Tomb Raider (2013)', background_image: 'https://media.rawg.io/media/games/021/021c4e21a1824d2526f925eff6324653.jpg', rating: 4.06 },
+  { id: 101, name: 'The Witcher 3: Wild Hunt', background_image: 'https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg', rating: 4.64 },
+  { id: 102, name: 'Portal 2', background_image: 'https://media.rawg.io/media/games/2ba/2bac0e87cf45e5b508f227d281c9252a.jpg', rating: 4.58 },
+  { id: 103, name: 'Grand Theft Auto V', background_image: 'https://media.rawg.io/media/games/20a/20aa03a10cda45239fe22d035c0ebe64.jpg', rating: 4.47 },
+  { id: 104, name: 'Counter-Strike: Global Offensive', background_image: 'https://media.rawg.io/media/games/736/73619bd336c894d6941d926bfd563946.jpg', rating: 3.57 },
+  { id: 105, name: 'Tomb Raider (2013)', background_image: 'https://media.rawg.io/media/games/021/021c4e21a1824d2526f925eff6324653.jpg', rating: 4.06 },
 ];
 
 let slides = [];
@@ -132,6 +132,14 @@ function crearSlide(juego, index) {
 
     jugar.append(icono);
     slide.append(jugar);
+  }
+
+  // Juegos "de pago" (simulado, ver carrito.js) que no sean Neon Circuit:
+  // mismo ícono de carrito que las filas de la Home, en la esquina inferior
+  // derecha. Neon Circuit no entra acá — es nuestro juego, ya tiene su
+  // propia acción real ("Jugar"), no algo para comprar en este banner.
+  if (juego !== NEON_CIRCUIT && esDePago(juego.id)) {
+    slide.append(crearBotonCarrito(juego, 'banner__carrito'));
   }
 
   return slide;

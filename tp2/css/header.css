@@ -101,6 +101,7 @@
 
 /* Botones de solo ícono: área táctil de 44px aunque el ícono sea de 24 */
 .header__icon-btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -120,6 +121,34 @@
   background: var(--primario-o2);
   color: var(--acento);
   text-decoration: none;
+}
+
+/* Ancla el desplegable del carrito a su botón, igual que .menu-cuenta. */
+.menu-carrito {
+  position: relative;
+}
+
+.menu-dropdown--carrito {
+  top: calc(100% + var(--espaciado-2));
+  right: 0;
+}
+
+/* Numerito de cantidad de ítems, sobre el ícono del carrito. Oculto por
+   JS (carrito.js) con [hidden] cuando el carrito está vacío. */
+.carrito__contador {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--acento);
+  color: var(--fondo);
+  font: 700 11px/1 var(--font-ui);
 }
 
 /* Ancla el menú de cuenta al avatar. Alineado a la derecha para no
