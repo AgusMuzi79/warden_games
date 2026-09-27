@@ -1417,6 +1417,74 @@ bloquear esa parte de la interfaz hasta que exista un backend de pagos.
 
 ---
 
+## Sistema de compras (parte 1: modal de pago simulado)
+
+Primera mitad del ítem "Sistema de compras" de `ETAPAS.md` (el único que el
+enunciado pide sin marcar como opcional). Sin captura de Figma: a diferencia
+del resto del sitio, acá no hubo diseño previo en el TPE1 — las decisiones de
+esta sección son nuestras, no una traducción de un mock.
+
+### Modal con `<dialog>` nativo, no un `<div>` armado a mano
+- **Qué:** clickear "Pagar carrito" (el link ya existía, `href="#"`, ahora es
+  un `<button>`) abre un `<dialog id="modal-pago">` con un form falso (nombre,
+  número de tarjeta, vencimiento, CVV). Ninguno de esos datos se valida contra
+  nada real ni se manda a ningún lado.
+- **Por qué `<dialog>` y no un overlay hecho con `position: fixed` + JS:**
+  mismo criterio que ya se usó para el acordeón de Ayuda (`<details>`) — el
+  navegador resuelve solo el foco atrapado adentro del modal, el cierre con
+  Escape (evento `cancel` nativo) y el fondo oscurecido (`::backdrop`), sin
+  manejar nada de eso a mano.
+- **"Pagar carrito" pasa de `<a>` a `<button>`:** mismo cambio que ya se hizo
+  con el avatar de sesión (ver "Menús desplegables del header") — la acción es
+  abrir un modal, no navegar a otra página, así que semánticamente es un botón.
+  Efecto colateral bueno: `menu.js` solo cierra el desplegable del carrito al
+  clickear un `<a>` de adentro; al ser `<button>` no dispara ese cierre
+  específico, pero el listener global de "click afuera" lo cierra igual
+  (bubbling normal), así que el desplegable se cierra solo al abrir el modal
+  sin código nuevo.
+
+### Compra simulada: mueve el carrito a una lista de "comprados", no queda nada a medio camino
+- **Qué:** al enviar el form (`js/compras.js`), se agregan los juegos del
+  carrito a una lista nueva en `localStorage` (`warden-compras`,
+  `agregarComprados()` en `carrito.js`) y se vacía el carrito
+  (`vaciarCarrito()`, nueva también). El form se reemplaza por un bloque de
+  éxito (`.modal__exito`, mismo criterio que `.auth-success` de
+  login.css: fade + scale con `@keyframes modal-pop`, reutilizado también
+  para la entrada del propio modal en vez de sumar una animación más) y el
+  modal se cierra solo a los 2 segundos.
+- **Por qué una clave de `localStorage` aparte (`warden-compras`) y no un
+  campo "comprado" adentro del mismo item del carrito:** carrito y comprados
+  son conceptos distintos con ciclos de vida distintos — son dos listas
+  independientes, no un estado dentro de la misma.
+- **El modal vuelve a mostrar el form (no la pantalla de éxito) la próxima
+  vez que se abre:** al evento `close` del `<dialog>` se le engancha un reset
+  (`form.reset()`, se muestra el form, se oculta el éxito) — si no, la
+  siguiente compra arrancaría directo en la pantalla de éxito de la anterior.
+- **Sin resumen de precio en el modal:** solo dice "Vas a comprar N juego(s)."
+  No hay precios reales todavía (`esDePago()` en `carrito.js` es un booleano
+  simulado, sin ningún monto asociado — ver "Pendientes de decidir"),
+  así que mostrar un total inventado sería peor que no mostrar nada.
+
+### `.modal__cerrar` con su propio estilo, no reusa `.header__icon-btn`
+- **Qué:** el botón "X" del modal tiene su propio bloque de CSS en
+  `components.css` (mismas medidas y comportamiento que `.header__icon-btn`:
+  44px, ícono solo, mismo hover) en vez de compartir esa clase.
+- **Por qué:** `.header__icon-btn` es un nombre BEM atado al bloque `.header`
+  (vive en `header.css`). El modal no es parte del header — reusar esa clase
+  ahí sería el mismo tipo de mezcla de responsabilidades que el proyecto ya
+  evita en otros lados (ver "Header y footer en archivos propios"). Repetir
+  unas pocas líneas de CSS es más barato de mantener que un nombre que mienta
+  de dónde viene el estilo.
+
+### Queda para la parte 2 (aparte, no en esta tanda)
+- La fila "Mis juegos" en la Home, debajo de "Recomendados" (para que la
+  página siga priorizando vender antes que mostrar lo ya comprado) — decisión
+  de Agus. Va a leer `obtenerComprados()` de `carrito.js`.
+- Cuando eso exista, el link "Mis juegos" del menú de cuenta (hoy
+  placeholder, `href="#"`) pasa a apuntar ahí.
+
+---
+
 ## Pendientes de decidir
 
 - Sistema de compras real: lo pide el enunciado, no es opcional. Se deja para

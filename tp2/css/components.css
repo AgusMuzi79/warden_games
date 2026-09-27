@@ -387,6 +387,115 @@
   background: var(--primario-o2);
 }
 
+/* ---------- Modal (ej. "Pagar carrito") ---------- */
+.modal {
+  position: fixed;
+  margin: auto;
+  width: min(26rem, 90vw);
+  max-height: calc(100vh - var(--espaciado-8));
+  overflow-y: auto;
+  border: none;
+  border-radius: var(--radio-xl);
+  padding: var(--espaciado-8);
+  background: var(--superficie);
+  color: var(--primario-c3);
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+}
+
+.modal::backdrop {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.modal[open] {
+  animation: modal-pop 0.25s ease-out;
+}
+
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.modal__cerrar {
+  position: absolute;
+  top: var(--espaciado-3);
+  right: var(--espaciado-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--primario-c3);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.modal__cerrar:hover {
+  background: var(--primario-o2);
+  color: var(--acento);
+}
+
+.modal__titulo {
+  margin: 0 0 var(--espaciado-4);
+}
+
+.modal__resumen {
+  color: var(--primario-c1);
+  font-size: 14px;
+}
+
+.modal__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-4);
+}
+
+.modal__fila .field {
+  flex: 1;
+  min-width: 7rem;
+}
+
+.modal__form .btn {
+  width: 100%;
+  margin-top: var(--espaciado-2);
+}
+
+/* Reemplaza al form tras confirmar, mismo criterio que .auth-success
+   (login.css): fade + scale en vez de aparecer de golpe. */
+.modal__exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-3);
+  padding: var(--espaciado-6) 0;
+  text-align: center;
+  animation: modal-pop 0.4s ease-out;
+}
+
+.modal__exito-icono {
+  font-size: 48px;
+  color: var(--exito);
+}
+
+.modal__exito-titulo {
+  margin: 0;
+}
+
+.modal__exito-texto {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open],
+  .modal__exito {
+    animation: none;
+  }
+}
+
 /* Inputs */
 .field {
   display: flex;

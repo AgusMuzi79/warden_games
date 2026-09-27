@@ -184,9 +184,20 @@ porque a Fran le resolvía el diseño de esa pantalla.
 ## ⬜ Sistema de compras
 
 Lo pide el enunciado, no es opcional — a diferencia de los ítems de "Plus".
-Va a ser un placeholder, decisión nuestra: agregar juegos al carrito (parte 1,
-ya armada, ver `DECISIONES.md`), un flujo de "pagar" con un form que al
-completarse simula el ok de la compra (sin pasarela real), y que el juego
-comprado pase a figurar en "Mis juegos" (sección que todavía no existe).
-Cuando se arme, el banner "Destacados" recupera el badge de precio que tiene
-en el Figma pero que sacamos por ahora.
+Va a ser un placeholder, decisión nuestra: agregar juegos al carrito, un flujo
+de "pagar" que simula el ok de la compra (sin pasarela real), y que el juego
+comprado pase a figurar en "Mis juegos". Sin captura de Figma (no se diseñó
+en el TPE1): las decisiones de layout de esta parte son nuestras.
+
+- ✅ Parte 1: agregar/quitar del carrito, ícono en el header con desplegable
+  (ver "Carrito de compras" en `DECISIONES.md`, partes 1 y 2).
+- ✅ Parte 2: modal de pago simulado (`<dialog>` nativo) — "Pagar carrito"
+  abre un form falso, al confirmar mueve los juegos del carrito a una lista
+  de "comprados" y vacía el carrito. Detalle en `DECISIONES.md`,
+  "Sistema de compras (parte 1: modal de pago simulado)".
+- ⬜ Parte 3: sección "Mis juegos" en la Home, debajo de "Recomendados"
+  (la página tiene que priorizar vender antes que mostrar lo ya comprado).
+  Lee `obtenerComprados()` de `carrito.js`. El link "Mis juegos" del menú de
+  cuenta (hoy placeholder) pasa a apuntar ahí.
+- ⬜ Cuando exista la parte 3, el banner "Destacados" recupera el badge de
+  precio que tiene en el Figma pero que se sacó por ahora.
