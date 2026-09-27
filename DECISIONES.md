@@ -1688,6 +1688,29 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
   catálogo. Queda pendiente definir con Fran qué debería pasar acá (ver
   "Pendientes de decidir").
 
+### Etapa 2: las cards de las filas de la Home enlazan a la ficha
+- **Qué:** en `home.js`, `.game-card__texto` pasa de `<div>` a
+  `<a href="producto.html?id=...">` — clickear el nombre o el puntaje de
+  cualquier card (en cualquier fila, incluida "Mis juegos") lleva a su
+  ficha. Sigue sin ser toda la card: la imagen no es parte del link (ver
+  más abajo).
+- **Por qué no envolver toda la card en el link:** el botón de agregar al
+  carrito ya vive adentro de `.game-card__cuerpo`, al lado del texto. Un
+  `<a>` no puede contener un `<button>` (contenido interactivo anidado,
+  inválido en HTML) — por eso `.game-card__link` y el botón de carrito
+  siguen siendo hermanos dentro de `.game-card__cuerpo`, cada uno con su
+  propia área de click, en vez de uno adentro del otro.
+- **`.game-card__title` necesita `color` explícito ahora:** al pasar el
+  contenedor de `<div>` a `<a>`, el título heredaba el celeste de link de
+  `base.css` en vez del blanco de siempre (bug real, visto al probarlo) —
+  se le puso `color: var(--primario-c3)` explícito para no depender de la
+  herencia según qué etiqueta envuelva el texto.
+- **Sin regresiones en el arrastre con mouse (`carrusel-fila.js`):** ya
+  frenaba el arrastre si el click empieza en un `<a>` o `<button>`
+  (`evento.target.closest('button, a')`, ver "Bug real: el botón de la
+  card no respondía al click con mouse") — cubre el link nuevo sin
+  cambios.
+
 ---
 
 ## Pendientes de decidir

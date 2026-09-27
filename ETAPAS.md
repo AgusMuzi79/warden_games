@@ -223,6 +223,9 @@ contenido son decisiones nuestras.
   apuntando ahí. Ficha/Galería/Compartir/Comunidad/Dejá tu reseña se
   movieron de `juego.css` a `components.css` (ahora las usan dos páginas).
   Detalle en `DECISIONES.md`, "Ficha de producto para juegos del catálogo".
-- ⬜ Etapa 2: las cards de las filas de la Home enlazan a esta página.
+- ✅ Etapa 2: las cards de las filas de la Home enlazan a esta página
+  (nombre y puntaje, no toda la card — el botón de carrito ya ocupa ese
+  espacio y un `<a>` no puede contener un `<button>`). Detalle en
+  `DECISIONES.md`.
 - ⬜ Etapa 3: el banner "Destacados" enlaza a esta página (reemplaza el
   agregar-al-carrito directo que tiene hoy — confirmado con Agus).

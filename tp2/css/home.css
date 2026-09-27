@@ -400,12 +400,24 @@
   padding: var(--espaciado-3);
 }
 
+/* <a>, no <div>: clickear el nombre/puntaje lleva a la ficha del juego
+   (ver home.js). text-decoration:none porque, si no, el subrayado que
+   pone base.css en hover se ve por debajo del título y el puntaje. */
 .game-card__texto {
+  display: block;
   min-width: 0;
+  text-decoration: none;
+}
+
+.game-card__texto:hover {
+  text-decoration: none;
 }
 
 .game-card__title {
   margin: 0;
+  /* Ahora que .game-card__texto es un <a>, sin esto heredaría el celeste
+     de base.css en vez del blanco de siempre. */
+  color: var(--primario-c3);
   font-size: 16px;
 }
 

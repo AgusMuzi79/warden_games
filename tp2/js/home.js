@@ -50,8 +50,13 @@ function crearCard(juego) {
   rating.className = 'game-card__rating';
   rating.innerHTML = `<i class="ph ph-star" aria-hidden="true"></i> ${juego.rating.toFixed(1)}`;
 
-  const texto = document.createElement('div');
+  // Un <a> en vez de un <div>: clickear el nombre/puntaje lleva a la ficha
+  // del juego (producto.html). No puede envolver también al botón de
+  // carrito (serían dos controles interactivos anidados) — por eso viven
+  // como hermanos en .game-card__cuerpo, no uno adentro del otro.
+  const texto = document.createElement('a');
   texto.className = 'game-card__texto';
+  texto.href = `producto.html?id=${juego.id}`;
   texto.append(titulo, rating);
 
   // El botón de carrito va acá, a la altura del nombre y el puntaje, no
@@ -86,8 +91,9 @@ function crearCardComprado(juego) {
   titulo.className = 'game-card__title';
   titulo.textContent = juego.nombre;
 
-  const texto = document.createElement('div');
+  const texto = document.createElement('a');
   texto.className = 'game-card__texto';
+  texto.href = `producto.html?id=${juego.id}`;
   texto.append(titulo);
 
   const cuerpo = document.createElement('div');
