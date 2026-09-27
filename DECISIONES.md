@@ -792,8 +792,11 @@ A partir de las capturas de Figma que pasó Fran, se dividió en partes chicas
   cada vez que se abre un desplegable más. `.tablero` pasa a
   `align-self: start` (sale del stretch de la fila) más un `min-height: 660px`
   que congela ese alto base — valor estimado a partir del contenido de
-  ficha+Ayuda en su estado inicial, pendiente de afinar a ojo contra la
-  pantalla real (ver "Pendientes de decidir").
+  ficha+Ayuda en su estado inicial.
+- **Confirmado, sin ajustar:** medido en pantalla, ficha+Ayuda (estado
+  inicial, un solo `<details>` abierto) suman ~656px de alto natural —
+  contra los 660px del `.tablero`, una diferencia de 4px, imperceptible.
+  El valor estimado ya estaba bien calibrado, no hizo falta tocarlo.
 
 ### Fichas más grandes (44px → 56px), y el ancho se resuelve con el gap, no con la ficha
 - **Qué:** el grid de fichas y cada `.tablero__hueco` pasaron de 44px a
@@ -889,13 +892,14 @@ más una que sumamos nosotros al revisar:
   ninguna fuente nueva (sigue en `--font-ui`, achicado a 12px para que no
   se vea grande al ir en mayúsculas).
 
-### Paleta del tablero: valores elegidos
+### Paleta del tablero: valores elegidos (definitivos, no se tocan)
 - **Qué:** `--tablero-activo: #FF6A1A` (naranja), `--tablero-descargado:
   #0B0710` (casi negro), `--tablero-seleccionado: #3FE8E4` (celeste-cian),
   `--tablero-destino: #B79CF0` (violeta claro).
-- **Por qué:** estimados a ojo de la captura de Figma. Quedan como
-  "pendiente de ajustar" (ver esa sección al final del archivo) hasta
-  compararlos en pantalla contra el diseño real.
+- **Por qué:** confirmado con Agus — estos 4 son los únicos colores del
+  tablero, no hay que compararlos contra ninguna captura nueva de Figma.
+  (Esto no incluye las imágenes de los juegos en sí, que van con su color
+  real, sin restricción de paleta.)
 
 ### Panel lateral: tablero + ficha/Ayuda/Compartir en dos columnas, solo desktop
 - **Qué:** `.juego-layout` es un grid de 2 columnas (320px fijo para la
@@ -1753,12 +1757,7 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
 - Qué pasa al clickear "Jugar" en la ficha de un juego del catálogo que no
   es Neon Circuit (gratis, o de pago ya comprado): hoy no hace nada. Falta
   charlarlo con Fran — ver "Ficha de producto para juegos del catálogo".
-- Hex definitivo de la paleta del tablero (`--tablero-*`): son valores
-  estimados a ojo de la captura de Figma, falta compararlos en pantalla.
 - La página del juego sin `<h1>` (ver `ETAPAS.md` Etapa 4): rompe la
   regla del proyecto de "un solo h1 por página" (no es un requisito de la
   cátedra, es algo que nos autoimpusimos). Fran lo documentó como excepción
   puntual; falta que lo charlemos los tres antes de aceptarlo.
-- `min-height: 660px` del `.tablero` (altura "base", ver "Página del
-  juego"): valor estimado a partir del contenido de ficha+Ayuda, falta
-  confirmarlo/ajustarlo mirando la pantalla real.
