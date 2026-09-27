@@ -1711,6 +1711,32 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
   card no respondía al click con mouse") — cubre el link nuevo sin
   cambios.
 
+### Etapa 3: el banner "Destacados" enlaza a la ficha, reemplaza el agregar-al-carrito directo
+- **Qué:** en `carousel.js`, `.banner__carrito` (el botón que agregaba al
+  carrito con un click, cubriendo toda la card activa) se reemplaza por
+  `.banner__ver`, un `<a href="producto.html?id=...">` del mismo tamaño
+  (toda la card). Aplica a cualquier juego que no sea Neon Circuit, tenga o
+  no badge de Gratis/precio/Nuevo — antes solo estaba el botón de carrito
+  en los "de pago". Neon Circuit no cambia: sigue yendo a `juego.html` con
+  "Jugar".
+- **Por qué se pierde el agregar-al-carrito directo desde el banner:**
+  confirmado con Agus — las dos acciones (agregar al carrito, ir a la
+  ficha) competían por el mismo gesto de click en la card activa, y no se
+  puede achicar el área de click de una sin volver al bug de hit-testing
+  que ya se documentó (ver "Carrusel coverflow" y "Bug real: el click no
+  le pegaba al ícono", más arriba) — con las cards rotadas en 3D, un
+  control chico ahí adentro no siempre resuelve al click en las
+  coordenadas correctas. Se prioriza "ir a la ficha", consistente con las
+  filas de la Home (Etapa 2); para agregar al carrito desde el banner
+  ahora hay que entrar a la ficha y usar "Comprar" ahí.
+- **El badge no cambia:** `crearBadge(juego)` se sigue llamando igual,
+  independiente del click de la card — Gratis/precio/Nuevo siguen
+  mostrándose junto a "Destacado".
+- **Limpieza de CSS:** se sacaron `.banner__carrito` y las referencias a
+  `.banner__carrito`/`.banner__carrito .carrito-icono` del bloque
+  compartido con `.game-card__carrito` (ahora ese bloque es solo para las
+  filas de la Home) y de los `prefers-reduced-motion` correspondientes.
+
 ---
 
 ## Pendientes de decidir

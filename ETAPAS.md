@@ -207,7 +207,7 @@ pasó después una captura de los badges "Gratis"/precio/"Nuevo" (parte 4).
   no va a haber precios reales por juego. Detalle en `DECISIONES.md`,
   "Sistema de compras (parte 3)".
 
-## ⬜ Ficha de producto para juegos del catálogo
+## ✅ Ficha de producto para juegos del catálogo
 
 Pedido de Agus: clickear un juego de pago que no compraste tiene que abrir
 una ficha con su portada, datos y reseñas — igual que la de Neon Circuit,
@@ -227,5 +227,8 @@ contenido son decisiones nuestras.
   (nombre y puntaje, no toda la card — el botón de carrito ya ocupa ese
   espacio y un `<a>` no puede contener un `<button>`). Detalle en
   `DECISIONES.md`.
-- ⬜ Etapa 3: el banner "Destacados" enlaza a esta página (reemplaza el
-  agregar-al-carrito directo que tiene hoy — confirmado con Agus).
+- ✅ Etapa 3: el banner "Destacados" enlaza a esta página — reemplaza el
+  agregar-al-carrito directo que tenía (`.banner__carrito` → `.banner__ver`),
+  confirmado con Agus: las dos acciones competían por el mismo click en la
+  card activa. Neon Circuit no cambia, sigue yendo a `juego.html`. Detalle
+  en `DECISIONES.md`.
