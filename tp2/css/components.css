@@ -789,6 +789,7 @@
 .galeria__tile {
   aspect-ratio: 16 / 9;
   border-radius: var(--radio-md);
+  overflow: hidden;
 }
 
 .galeria__tile--1 { background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-destino)); }
@@ -797,6 +798,14 @@
 .galeria__tile--4 { background: linear-gradient(135deg, var(--acento), var(--tablero-destino)); }
 .galeria__tile--5 { background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-seleccionado)); }
 .galeria__tile--6 { background: linear-gradient(135deg, var(--primario), var(--tablero-seleccionado) 60%, var(--tablero-activo)); }
+
+/* Capturas reales (Neon Circuit, juego.html): llenan el tile sin deformarse. */
+.galeria__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 /* ---------- Compartir ---------- */
 .compartir {
