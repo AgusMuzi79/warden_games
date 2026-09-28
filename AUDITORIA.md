@@ -312,6 +312,11 @@ propuesta) está en el informe original.
 - **Justificación:** `DECISIONES.md`, "Contador real de 0 a 100% en 5 segundos"
   (actualización T14). **Commit:** `git log --grep T14`.
 
+## Pendientes que aparecieron durante las tareas (no eran del informe)
+
+- **Cerrados:** el banner a tablet (`git log --grep "banner a tablet"`), los bordes
+  de los campos (T08b) y los `rgba()` escritos a mano (`git log --grep rgba`).
+
 ## Tareas que tocan decisiones ya tomadas
 
 Estas cuatro no se aplican a ciegas. Cada una cambia o matiza una decisión que

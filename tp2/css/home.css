@@ -183,7 +183,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--sombra-elevacion);
 }
 
 /* Dispositivos sin hover (touch): el botón "Jugar" no puede depender del

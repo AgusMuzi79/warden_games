@@ -153,6 +153,27 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Descartado:** cambiar el valor del token `--primario-o1`: lo usan los fondos de
   los badges y de los botones primarios (T02), que sí necesitan ese tono.
 
+### Colores `rgba()` sueltos reemplazados por tokens; token nuevo `--velo-modal`
+- **Qué:** el velo de "Jugar" del banner (`home.css`, `.banner__jugar::before`) pasa
+  de `rgba(0, 0, 0, 0.35)` a `var(--sombra-elevacion)`; el fondo del modal de pago
+  (`components.css`, `.modal::backdrop`) pasa de `rgba(0, 0, 0, 0.6)` a
+  `var(--velo-modal)`, un token nuevo en `variables.css` con ese mismo valor.
+- **Por qué:** la regla del proyecto es no escribir colores a mano en el CSS. Eran
+  tres casos, anteriores a la auditoría, que aparecieron al hacer T04.
+- **Sin cambio visual:** el velo de "Jugar" ya valía exactamente lo mismo que
+  `--sombra-elevacion` (0,35), así que se reusa el token que existe. El del modal
+  (0,6) no tenía equivalente, por eso se propuso un token nuevo con el mismo
+  valor. Se comprobó en el navegador: los valores computados son idénticos a los
+  de antes.
+- **La sombra del captcha simulado se queda como está** (`login.css`,
+  `rgba(0, 0, 0, 0.2)`): es parte del widget de Google, con su paleta gris y sus
+  hex fijos, que ya es una excepción documentada ("Captcha simulado"). Se dejó
+  un comentario en el CSS que lo aclara. Es el único `rgba()` que queda fuera de
+  `variables.css`.
+- **Descartado:** un token para cada valor suelto de opacidad (`--velo-claro`,
+  `--velo-oscuro`...). Con dos valores que ya existen, dos casos no justifican
+  una escala.
+
 ### Scrollbar con la paleta del sitio, no oculta
 - **Qué:** en `base.css`, `scrollbar-color`/`scrollbar-width` (Firefox) y
   `::-webkit-scrollbar*` (Chrome/Edge/Safari) sobre el selector universal

@@ -30,6 +30,7 @@
   /* ---- Color: utilidad ---- */
   --foco:             #EEF434;
   --sombra-elevacion: rgba(0, 0, 0, 0.35);
+  --velo-modal:       rgba(0, 0, 0, 0.6);   /* fondo oscurecido detrás de un <dialog> */
   --resplandor-error: rgba(248, 113, 113, 0.55);
 
   /* ---- Color: tablero (página del juego) ----

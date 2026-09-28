@@ -256,6 +256,8 @@
   border: 1px solid #d3d3d3;
   border-radius: var(--radio-sm);
   background: #f9f9f9;
+  /* Sombra del widget de Google: forma parte de la misma excepción que los
+     colores fijos de arriba (ver DECISIONES.md, "Captcha simulado"). */
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
