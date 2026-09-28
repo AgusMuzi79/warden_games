@@ -174,9 +174,31 @@
   background: var(--tablero-descargado);
 }
 
+/* Destino usa el mismo dibujo de 3 anillos que activo/seleccionado, pero con
+   la banda del medio rellena de blanco (no negra): el ::after de acá no es
+   solo una línea, también tapa el centro de negro para recortar el "agujero"
+   sobre el blanco. Ver DECISIONES.md, "Disco de destino". */
 .tablero__hueco--destino {
-  background: var(--tablero-descargado);
+  background: #FFFFFF;
   border: 2px solid var(--tablero-destino);
+  box-shadow: 0 0 8px var(--tablero-destino);
+}
+
+.tablero__hueco--destino::before {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  border: 2px dashed var(--tablero-destino);
+  border-radius: 50%;
+}
+
+.tablero__hueco--destino::after {
+  content: "";
+  position: absolute;
+  inset: 18px;
+  border: 2px solid var(--tablero-destino);
+  border-radius: 50%;
+  background: var(--tablero-descargado);
 }
 
 /* ---------- Leyenda ---------- */
@@ -243,8 +265,25 @@
 }
 
 .tablero__muestra--destino {
-  background: var(--tablero-descargado);
+  background: #FFFFFF;
   border: 1.5px solid var(--tablero-destino);
+}
+
+.tablero__muestra--destino::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px dashed var(--tablero-destino);
+  border-radius: 50%;
+}
+
+.tablero__muestra--destino::after {
+  content: "";
+  position: absolute;
+  inset: 4.5px;
+  border: 1px solid var(--tablero-destino);
+  border-radius: 50%;
+  background: var(--tablero-descargado);
 }
 
 .tablero__leyenda-salto i {

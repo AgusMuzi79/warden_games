@@ -28,8 +28,15 @@ function crearCard(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
 
-  const media = document.createElement('div');
+  // <a>, no <div>: clickear la imagen también lleva a la ficha del juego,
+  // igual que el nombre/puntaje de más abajo (dos links a la misma
+  // página, uno por zona de la card). No hay ningún botón adentro de
+  // .game-card__media (el de carrito vive aparte, en .game-card__cuerpo),
+  // así que este <a> no anida ningún control interactivo.
+  const media = document.createElement('a');
   media.className = 'game-card__media';
+  media.href = `producto.html?id=${juego.id}`;
+  media.setAttribute('aria-label', `Ver ${juego.name}`);
 
   const imagen = document.createElement('img');
   imagen.className = 'game-card__image';
@@ -75,8 +82,10 @@ function crearCardComprado(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
 
-  const media = document.createElement('div');
+  const media = document.createElement('a');
   media.className = 'game-card__media';
+  media.href = `producto.html?id=${juego.id}`;
+  media.setAttribute('aria-label', `Ver ${juego.nombre}`);
 
   const imagen = document.createElement('img');
   imagen.className = 'game-card__image';

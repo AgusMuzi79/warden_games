@@ -56,3 +56,17 @@ btnJugar.addEventListener('click', () => {
   // tablero real, por eso recibe el foco (tabindex="-1" en el HTML).
   cabecera.focus();
 });
+
+// Galería animada (Etapa 4 parte 5, animada en la 2ª corrección del TPE2):
+// las 6 capturas reales de Neon Circuit. El motor del flip (genérico, lo
+// comparte producto.html) vive en js/galeria.js, cargado antes que este
+// archivo en juego.html.
+const FOTOS_GALERIA_JUEGO = [
+  { src: 'assets/img/inicio-juego.png', alt: 'Tablero de Neon Circuit al arrancar la partida, con los 33 nodos activos y el hueco central.' },
+  { src: 'assets/img/ficha-seleccionada.png', alt: 'Un nodo seleccionado en el tablero, listo para saltar.' },
+  { src: 'assets/img/ficha-salto.png', alt: 'El momento del salto de un nodo sobre otro hacia un casillero descargado.' },
+  { src: 'assets/img/juego-avanzado.png', alt: 'Partida avanzada, con buena parte de los nodos ya descargados del tablero.' },
+  { src: 'assets/img/victoria.png', alt: 'Pantalla de victoria, con un único nodo restante en el centro del tablero.' },
+  { src: 'assets/img/glitch-gameover.png', alt: 'Pantalla de fin de partida, con un efecto glitch sobre el tablero.' },
+];
+iniciarGaleria(FOTOS_GALERIA_JUEGO);

@@ -182,22 +182,34 @@
           <p>Neon Circuit lleva el clásico solitario de tablero a una estética de circuito de neón. Cada nodo cargado puede saltar sobre un vecino directo hacia un casillero descargado, en línea recta, y el nodo del medio se apaga con cada salto. Empezás con 33 nodos activos y un único hueco en el centro: el objetivo es terminar la partida con la menor cantidad de nodos posible, hasta llegar, si podés, a uno solo justo en el medio.</p>
         </section>
 
-        <!-- Galería (Etapa 4, parte 5). Gradientes con la paleta del tablero,
-             sin fotos reales todavía (se resuelven más adelante). aria-hidden
-             por lo mismo: no son capturas reales, no aportan información. -->
+        <!-- Galería (Etapa 4, parte 5; animada en la 2ª corrección del TPE2).
+             Ya no es una grilla estática: es un carrusel de "una foto a la
+             vez" con transición de flip 3D. El motor genérico del flip vive
+             en js/galeria.js (compartido con producto.html); la lista de
+             las 6 fotos reales de Neon Circuit está en js/juego.js, que la
+             pasa con iniciarGaleria(). Los src/alt de acá abajo son solo el
+             arranque (foto 1 y 2); el resto entra por JS al navegar. -->
         <section class="galeria" aria-labelledby="galeria-titulo">
           <div class="galeria__cabecera">
             <h2 id="galeria-titulo">Galería</h2>
-            <p class="galeria__contador">6 capturas</p>
+            <p class="galeria__contador" id="galeria-contador" aria-live="polite">Foto 1 de 6</p>
           </div>
-          <ul class="galeria__grid" aria-hidden="true">
-            <li class="galeria__tile galeria__tile--1"></li>
-            <li class="galeria__tile galeria__tile--2"></li>
-            <li class="galeria__tile galeria__tile--3"></li>
-            <li class="galeria__tile galeria__tile--4"></li>
-            <li class="galeria__tile galeria__tile--5"></li>
-            <li class="galeria__tile galeria__tile--6"></li>
-          </ul>
+          <div class="galeria__visor">
+            <div class="galeria__carta" id="galeria-carta">
+              <div class="galeria__cara galeria__cara--a">
+                <img class="galeria__img" id="galeria-img-a" src="assets/img/inicio-juego.png" alt="Tablero de Neon Circuit al arrancar la partida, con los 33 nodos activos y el hueco central.">
+              </div>
+              <div class="galeria__cara galeria__cara--b">
+                <img class="galeria__img" id="galeria-img-b" src="assets/img/ficha-seleccionada.png" alt="Un nodo seleccionado en el tablero, listo para saltar.">
+              </div>
+            </div>
+            <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">
+              <i class="ph ph-caret-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="galeria__flecha galeria__flecha--next" id="galeria-next" aria-label="Foto siguiente de la galería">
+              <i class="ph ph-caret-right" aria-hidden="true"></i>
+            </button>
+          </div>
         </section>
 
       </div>
@@ -459,6 +471,7 @@
   </footer>
 
   <script src="./js/api.js" defer></script>
+  <script src="./js/galeria.js" defer></script>
   <script src="./js/juego.js" defer></script>
   <script src="./js/compartir.js" defer></script>
   <script src="./js/resena.js" defer></script>

@@ -422,6 +422,9 @@
    .game-card__texto), pero la imagen igual tiene que respetar las esquinas
    redondeadas de arriba. */
 .game-card__media {
+  /* Ahora es un <a> (antes <div>): sin esto, al ser inline por defecto,
+     el layout de la card se rompía (la imagen no ocupaba todo el ancho). */
+  display: block;
   position: relative;
   overflow: hidden;
   border-radius: var(--radio-md) var(--radio-md) 0 0;

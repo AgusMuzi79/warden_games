@@ -201,13 +201,13 @@
 
     <div class="juego-layout">
 
-      <!-- Portada: la imagen real del juego. El botón aparece en hover o
-           foco (mismo criterio que "Jugar" en el banner Destacados) y
-           dice "Comprar" o "Jugar" según corresponda (producto.js). -->
+      <!-- Portada: la imagen real del juego, con el mismo botón violeta
+           fijo que usa Neon Circuit en su portada (.btn--primario, ver
+           tablero__jugar en juego.html) — siempre visible, no solo en
+           hover. Dice "Comprar" o "Jugar" según corresponda (producto.js). -->
       <section class="producto__portada" aria-label="Portada del juego">
         <img class="producto__portada-img" id="producto-imagen" src="" alt="">
-        <button type="button" class="producto__accion" id="producto-accion">
-          <i class="ph ph-play" id="producto-accion-icono" aria-hidden="true"></i>
+        <button type="button" class="btn btn--primario producto__accion" id="producto-accion">
           <span id="producto-accion-texto">Jugar</span>
         </button>
       </section>
@@ -243,19 +243,34 @@
           <p>Este juego forma parte del catálogo de Warden Games. Mirá capturas de la comunidad más abajo, sumate a la conversación en las reseñas y, si querés, dejá la tuya.</p>
         </section>
 
+        <!-- Galería animada (2ª corrección del TPE2): mismo carrusel de
+             flip 3D que juego.html (motor compartido en js/galeria.js).
+             La API de la cátedra solo trae 1 imagen real por juego (la
+             portada, en background_image) — no hay 6 capturas distintas
+             acá como en Neon Circuit. producto.js llama a iniciarGaleria()
+             con esa única foto apenas la tiene; hasta entonces las 2 caras
+             quedan sin src, igual que la portada grande de más arriba. -->
         <section class="galeria" aria-labelledby="galeria-titulo">
           <div class="galeria__cabecera">
             <h2 id="galeria-titulo">Galería</h2>
-            <p class="galeria__contador">6 capturas</p>
+            <p class="galeria__contador" id="galeria-contador" aria-live="polite">Foto 1 de 1</p>
           </div>
-          <ul class="galeria__grid" aria-hidden="true">
-            <li class="galeria__tile galeria__tile--1"></li>
-            <li class="galeria__tile galeria__tile--2"></li>
-            <li class="galeria__tile galeria__tile--3"></li>
-            <li class="galeria__tile galeria__tile--4"></li>
-            <li class="galeria__tile galeria__tile--5"></li>
-            <li class="galeria__tile galeria__tile--6"></li>
-          </ul>
+          <div class="galeria__visor">
+            <div class="galeria__carta" id="galeria-carta">
+              <div class="galeria__cara galeria__cara--a">
+                <img class="galeria__img" id="galeria-img-a" src="" alt="">
+              </div>
+              <div class="galeria__cara galeria__cara--b">
+                <img class="galeria__img" id="galeria-img-b" src="" alt="">
+              </div>
+            </div>
+            <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">
+              <i class="ph ph-caret-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="galeria__flecha galeria__flecha--next" id="galeria-next" aria-label="Foto siguiente de la galería">
+              <i class="ph ph-caret-right" aria-hidden="true"></i>
+            </button>
+          </div>
         </section>
       </div>
 
@@ -515,6 +530,7 @@
   <script src="./js/sesion.js" defer></script>
   <script src="./js/carrito.js" defer></script>
   <script src="./js/compras.js" defer></script>
+  <script src="./js/galeria.js" defer></script>
   <script src="./js/producto.js" defer></script>
   <script src="./js/resena.js" defer></script>
   <script src="./js/compartir.js" defer></script>
