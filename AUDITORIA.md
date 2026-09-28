@@ -39,7 +39,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T02 | S3 | Texto de botones primarios con contraste 3,62:1 | **Hecha** | `git log --grep T02` |
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
-| T05 | S3 | Newsletter: el POST termina en una página de error | Pendiente | — |
+| T05 | S3 | Newsletter: el POST termina en una página de error | **Hecha** | `git log --grep T05` |
 | T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
@@ -186,6 +186,28 @@ propuesta) está en el informe original.
   'Seguir comprando' pasa a terciario (T01)". **Commit:** `git log --grep T01`.
 - **Sigue abierto:** no conocemos el criterio exacto de la cátedra (slide 14) sobre
   qué cuenta como "animación" de hover; si aceptan cambios de color, ya cumplíamos.
+
+### T05 — Newsletter: el POST termina en una página de error (S3) · hecha
+
+- **Antes (`pre-auditoria`):** el form del footer (`action="#" method="post"
+  novalidate`) no tenía ningún JS. "Suscribirse" navegaba con un POST: en el
+  servidor local de prueba respondía 501 y en GitHub Pages (hosting estático)
+  respondería 405. Quien se suscribía salía del sitio a una página de error, sin
+  confirmación, y un mail mal escrito también se enviaba (por el `novalidate`).
+- **Criterios que rompía:** Nielsen #9 (recuperarse de errores), #1 (visibilidad
+  del estado) y #5 (prevención de errores).
+- **Después:** `js/footer.js` intercepta el envío, valida el mail y confirma en
+  el lugar ("Listo, te vamos a escribir a ..."). Sin navegación. Vale para las
+  tres páginas con footer.
+- **Diferencia con el informe:** el `<p role="status">` está en el HTML desde el
+  principio, vacío, en vez de crearse con JS. Es más confiable para lectores de
+  pantalla. Y el foco pasa al mensaje al confirmar.
+- **Verificado en el navegador** en `index.html`, `producto.html` y `juego.html`:
+  mail vacío y "hola" quedan bloqueados por la validación; con
+  `test@ejemplo.com` el form se oculta, aparece el mensaje, la URL no cambia y no
+  hay recarga. Sin errores de consola. No se probó en el sitio publicado.
+- **Justificación:** `DECISIONES.md`, "Newsletter simulado: valida el mail y
+  confirma en el lugar (T05)". **Commit:** `git log --grep T05`.
 
 ## Tareas que tocan decisiones ya tomadas
 

@@ -324,6 +324,38 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   desde desktop, marca + 4 columnas como en Figma.
 - **Por qué:** el footer está en la Home, que es mobile first.
 
+### Newsletter simulado: valida el mail y confirma en el lugar (T05)
+- **Qué:** `js/footer.js` (nuevo, cargado en `index.html`, `producto.html` y
+  `juego.html`) engancha el `submit` del form del newsletter: `preventDefault()`,
+  validación nativa del mail (`checkValidity()` + `reportValidity()`), y si es
+  válido oculta el form y escribe "Listo, te vamos a escribir a `<mail>`." en un
+  `<p class="newsletter__ok" role="status">`. El foco pasa a ese mensaje. Se sacó
+  `method="post"` del form.
+- **Por qué:** ningún JS interceptaba el form, así que "Suscribirse" hacía un POST
+  a `#`. GitHub Pages es hosting estático y responde 405 a un POST (en el
+  servidor local de prueba respondía 501): quien se suscribía terminaba en una
+  página de error, fuera del sitio, sin saber si había funcionado. Y con
+  `novalidate` un mail mal escrito también se enviaba sin aviso. Detectado en la
+  auditoría (T05).
+- **Simulado a propósito:** no hay backend para guardar el mail. El mensaje
+  confirma la acción en pantalla, igual que el resto de lo simulado en el sitio
+  (sesión, compras, reseñas).
+- **El `<p role="status">` vive en el HTML, vacío desde el principio** (el informe
+  proponía crearlo con JS al enviar). Un lector de pantalla anuncia un cambio de
+  texto en una región en vivo que ya existe, pero no siempre lo hace con una que
+  se agrega recién con el texto puesto. Tiene `tabindex="-1"` para poder darle
+  el foco por código: el botón "Suscribirse" desaparece con el form, y sin esto
+  el foco quedaría en el `<body>`.
+- **Vacío no ocupa lugar:** `.footer p` ya tiene `margin: 0` y sin texto el
+  párrafo mide 0px, así que no hizo falta CSS nuevo.
+- **`form.hidden`, no `replaceWith`:** `[hidden]` ya es global en `base.css`.
+  Ocultar en vez de reemplazar deja el form en el DOM, con el mail cargado.
+- **`novalidate` se mantiene:** evita que salte la burbuja nativa sola en otro
+  contexto; la validación se pide a mano, en el `submit`.
+- **Descartado:** un servicio externo (Formspree o similar) para guardar los mails
+  de verdad. Suma una dependencia y un tercero que recibe datos personales, y
+  el enunciado no lo pide.
+
 ### Franja de abajo del footer con `minmax(0, 1fr)` (T06)
 - **Qué:** `.footer__bottom` (newsletter + datos de la empresa) pasa de una columna
   automática a `grid-template-columns: minmax(0, 1fr)`, y en tablet de

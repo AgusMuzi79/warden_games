@@ -329,11 +329,14 @@
       <section class="newsletter" aria-labelledby="newsletter-title">
         <h2 class="newsletter__title" id="newsletter-title">No te pierdas ningún lanzamiento</h2>
         <p class="newsletter__copy">Un mail por semana con los juegos nuevos y los torneos que se vienen.</p>
-        <form class="newsletter__form" action="#" method="post" novalidate>
+        <form class="newsletter__form" action="#" novalidate>
           <label class="sr-only" for="newsletter-email">Tu correo electrónico</label>
           <input type="email" id="newsletter-email" name="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
           <button type="submit" class="btn btn--secundario">Suscribirse</button>
         </form>
+        <!-- Confirmación de la suscripción (footer.js). role="status" y vacío desde el
+             principio: el lector de pantalla anuncia el texto cuando aparece. -->
+        <p class="newsletter__ok" role="status" tabindex="-1"></p>
       </section>
 
       <section class="company" aria-labelledby="company-title">
@@ -383,5 +386,6 @@
   <script src="./js/home.js" defer></script>
   <script src="./js/menu.js" defer></script>
   <script src="./js/logo-inicio.js" defer></script>
+  <script src="./js/footer.js" defer></script>
 </body>
 </html>
