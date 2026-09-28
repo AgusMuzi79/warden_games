@@ -172,6 +172,22 @@
   background: rgba(0, 0, 0, 0.35);
 }
 
+/* Dispositivos sin hover (touch): el botón "Jugar" no puede depender del
+   hover porque ahí no existe, y era el único acceso a juego.html desde la
+   Home. Se muestra fijo en la card activa. Sin el velo oscuro de ::before,
+   que taparía la portada todo el tiempo: alcanza con el círculo de play. Con
+   mouse sigue igual: aparece solo con hover o foco (ver DECISIONES.md,
+   "Neon Circuit es clickeable"). */
+@media (hover: none) {
+  .banner__slide--activo .banner__jugar {
+    opacity: 1;
+  }
+
+  .banner__jugar::before {
+    display: none;
+  }
+}
+
 .banner__jugar .ph-play {
   position: relative;
   display: flex;

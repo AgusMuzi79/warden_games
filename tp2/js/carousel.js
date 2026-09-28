@@ -222,6 +222,29 @@ function iniciarAutoplay() {
   banner.addEventListener('focusout', programarSiguiente);
 }
 
+// El autoplay arranca recién cuando termina el loading simulado de la Home.
+// Si arrancara apenas responde la API (que tarda menos de 5 segundos), el
+// primer destacado (Neon Circuit, nuestro juego) pasaría detrás del overlay y
+// el usuario lo vería menos de un segundo. No se toca loading.js: acá solo se
+// observa el atributo hidden del overlay, igual que este archivo ya depende
+// de #banner (ver DECISIONES.md, "Autoplay que se pausa con hover o foco").
+function iniciarAutoplayDespuesDeLaCarga() {
+  const overlayCarga = document.getElementById('loading');
+
+  if (!overlayCarga || overlayCarga.hidden) {
+    iniciarAutoplay();
+    return;
+  }
+
+  const observador = new MutationObserver(() => {
+    if (overlayCarga.hidden) {
+      observador.disconnect();
+      iniciarAutoplay();
+    }
+  });
+  observador.observe(overlayCarga, { attributes: true, attributeFilter: ['hidden'] });
+}
+
 function renderizarBanner(juegos) {
   const destacados = elegirDestacados(juegos);
 
@@ -236,7 +259,7 @@ function renderizarBanner(juegos) {
   dots.forEach((dot) => dotsContenedor.append(dot));
 
   actualizarPosiciones();
-  iniciarAutoplay();
+  iniciarAutoplayDespuesDeLaCarga();
 }
 
 obtenerJuegos()

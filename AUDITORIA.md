@@ -38,7 +38,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T01 | Enunciado | Solo 2 de las 4 animaciones hover de botón se usan en páginas reales | **Hecha** | `git log --grep T01` |
 | T02 | S3 | Texto de botones primarios con contraste 3,62:1 | **Hecha** | `git log --grep T02` |
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
-| T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
+| T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | **Hecha** | `git log --grep T04` |
 | T05 | S3 | Newsletter: el POST termina en una página de error | **Hecha** | `git log --grep T05` |
 | T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
@@ -208,6 +208,28 @@ propuesta) está en el informe original.
   hay recarga. Sin errores de consola. No se probó en el sitio publicado.
 - **Justificación:** `DECISIONES.md`, "Newsletter simulado: valida el mail y
   confirma en el lugar (T05)". **Commit:** `git log --grep T05`.
+
+### T04 — El acceso al juego se ve menos de 1 s y en touch nunca (S3) · hecha
+
+- **Antes (`pre-auditoria`):** el autoplay del banner arrancaba apenas respondía
+  la API, detrás del overlay de 5 s. El informe midió (1440 px) el overlay
+  oculto a los 5644 ms y el banner pasando al segundo destacado a los 6387 ms:
+  Neon Circuit, que es el único acceso a `juego.html` desde la Home, quedaba de
+  frente 743 ms y volvía unos 30 s después. Además `.banner__jugar` tenía
+  `opacity: 0` salvo con hover, y en touch (`hover: none`) no se ve nunca.
+- **Criterios que rompía:** Nielsen #6 (reconocimiento antes que recuerdo), #1, y
+  el punto 1a del enunciado.
+- **Después:** el autoplay arranca cuando desaparece el overlay
+  (`MutationObserver` sobre `#loading`), y en dispositivos sin hover el botón
+  "Jugar" queda fijo en la card activa, sin el velo oscuro. Con mouse no cambia.
+- **Verificado:** el primer destacado no se movió en más de 11 s con el overlay
+  visible, y avanzó ~6 s después de ocultarlo. En desktop sin hover el botón
+  sigue oculto. **Pendiente de probar:** el `@media (hover: none)` real, en un
+  celular o con la emulación táctil de DevTools.
+- **Decisión que toca:** "Neon Circuit es clickeable: botón Jugar en hover" y
+  "Autoplay que se pausa con hover o foco" (se agregó una actualización a cada
+  una). **Justificación:** `DECISIONES.md`, "Neon Circuit accesible en touch y
+  visible después del loading (T04)". **Commit:** `git log --grep T04`.
 
 ## Tareas que tocan decisiones ya tomadas
 

@@ -796,6 +796,8 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   cero en cada cambio es más simple de razonar y de explicar.
 - **Movimiento reducido:** con `prefers-reduced-motion`, no arranca el
   autoplay y las cards cambian de posición directo, sin el giro animado.
+- **Actualización (T04): el autoplay arranca cuando termina el loading**, no
+  antes. Ver "Neon Circuit accesible en touch y visible después del loading (T04)".
 
 ### `margin-inline: auto` en el viewport, porque `aspect-ratio` + `max-height` le achica el ancho
 - **Qué:** `.banner__viewport` quedaba pegado a la izquierda en vez de
@@ -837,6 +839,11 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   su propio listener de click (`irA(index)`), que no hace nada si la card ya
   está activa (que es el único momento en que el botón es clickeable) — pero
   se corta la propagación igual para que no dependa de esa coincidencia.
+- **Actualización (T04): en dispositivos sin hover se ve siempre.** Con
+  `@media (hover: none)` el botón queda fijo en la card activa y se saca el velo
+  oscuro (`::before`), que taparía la portada todo el tiempo. En desktop con mouse
+  no cambia nada: sigue apareciendo solo con hover o foco. Detalle en "Neon
+  Circuit accesible en touch y visible después del loading (T04)", más abajo.
 
 ### Etiqueta "Destacado": mismo radio que `.badge`, texto centrado con `inline-flex`
 - **Qué:** `.banner__etiqueta` pasó de `border-radius: 999px` + `line-height: 1`
@@ -875,6 +882,45 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Descartado:** acortar los nombres largos con puntos suspensivos. En el banner
   hay espacio de sobra para 2 líneas, y cortar el nombre de un juego destacado
   es perder justo lo que se quiere mostrar.
+
+### Neon Circuit accesible en touch y visible después del loading (T04)
+- **Qué:** dos cambios.
+  1. `carousel.js`: `iniciarAutoplayDespuesDeLaCarga()`. Si `#loading` ya está
+     oculto, el autoplay arranca; si no, un `MutationObserver` mira su atributo
+     `hidden` y lo arranca cuando desaparece. Reemplaza la llamada directa a
+     `iniciarAutoplay()` en `renderizarBanner()`.
+  2. `home.css`: `@media (hover: none)` deja `.banner__jugar` visible en la card
+     activa y saca su velo oscuro. Con mouse (hover) no cambia nada.
+- **Por qué:**
+  1. El autoplay arrancaba apenas respondía la API, detrás del overlay de 5
+     segundos. Cuando el usuario empezaba a ver la Home, el banner ya estaba por
+     pasar del primer destacado, que es Neon Circuit: nuestro juego y el único
+     acceso a `juego.html` desde la Home. El informe midió unos 0,7 segundos de
+     Neon Circuit a la vista, y no volvía hasta unos 30 segundos después.
+  2. El botón "Jugar" solo aparecía con `:hover`. En touch no hay hover, así que
+     el único camino a la página del juego era invisible (tocar la card sí
+     funcionaba, pero nada lo comunicaba). Nielsen #6: reconocimiento antes que
+     recuerdo. Es el flujo del punto 1a del enunciado.
+- **Respeta la decisión "Jugar solo en hover":** el motivo original era que un botón
+  fijo taparía la portada y mezclaría la acción con el salto de card. Sin hover
+  ese motivo no puede cumplirse (no hay cómo mostrarlo bajo demanda), así que
+  se muestra fijo solo ahí. La versión anterior del informe proponía un "Jugar"
+  siempre visible; se descartó por contradecir esa decisión.
+- **Sin el velo oscuro en touch:** `rgba(0, 0, 0, 0.35)` sobre toda la portada, fija,
+  la oscurecería sin necesidad; alcanza con el círculo de play. (El velo sigue
+  siendo un color escrito a mano en `.banner__jugar::before`, anterior a la
+  auditoría; queda para revisar.)
+- **Tensión con "El fetch de datos no depende del loading simulado":** `loading.js`
+  no se toca y no sabe nada del banner. Solo `carousel.js` lee el atributo
+  `hidden` del overlay, como ya lee `#banner`. Alternativa descartada: que
+  `loading.js` dispare un evento propio; acoplaba en la dirección contraria y
+  tocaba un archivo que no tenía por qué enterarse del banner.
+- **Verificado:** con el overlay visible más de 11 segundos el primer destacado
+  no se movió; al ocultarlo avanzó unos 6 segundos después (7 medidos, en una
+  pestaña en segundo plano). En desktop sin hover el botón sigue en
+  `opacity: 0`. El aspecto en touch se comprobó inyectando la regla sin el
+  `@media` (círculo de play sin velo). **No se probó en un celular real ni con
+  la emulación táctil de DevTools.**
 
 ### Dots como barritas finitas (estilo Steam), no círculos
 - **Qué:** `.banner__dot` es un botón de 28×24px sin nada visible propio; la
