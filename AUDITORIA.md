@@ -43,7 +43,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | **Hecha** | `git log --grep T07` |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
-| T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | Pendiente | — |
+| T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | **Hecha** | `git log --grep T09` |
 | T10 | S2 | Links del hamburguesa que no hacen nada | Pendiente | — |
 | T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
 | T12 | S2 | Galería de producto gira hacia la misma foto | A charlar con Fran | — |
@@ -252,6 +252,23 @@ propuesta) está en el informe original.
   parte del botón "Jugar" fijo sin hover sigue siendo necesaria.
 - **Justificación:** `DECISIONES.md`, "Autoplay que se pausa con hover o foco,
   sin botón de pausa" (actualización T07). **Commit:** `git log --grep T07`.
+
+### T09 — "Pagar carrito" vacío no hace nada ni avisa (S2) · hecha
+
+- **Antes (`pre-auditoria`):** con el carrito vacío el botón "Pagar carrito"
+  parecía activo (`disabled` en `false`), pero `abrirModalPago()` cortaba en
+  silencio: el clic no hacía nada. El texto "Todavía no agregaste ningún juego."
+  estaba arriba y el botón lo contradecía.
+- **Criterio que rompía:** Nielsen #1 (visibilidad del estado del sistema).
+- **Después:** el botón queda deshabilitado con el carrito vacío y se habilita al
+  agregar un juego (sin recargar); se vuelve a deshabilitar al quitarlo. Verificado
+  en `index.html` (vacío, con un juego, y de nuevo vacío) y en `producto.html`.
+  Un clic en el botón deshabilitado no cierra el desplegable.
+- **Bug encontrado al probarlo (no estaba en el informe):** el botón
+  deshabilitado seguía elevándose 3px con sombra en hover. Se agregó
+  `.btn:disabled:hover` para anularlo; aplica a cualquier botón deshabilitado.
+- **Justificación:** `DECISIONES.md`, "'Pagar carrito' se deshabilita con el
+  carrito vacío (T09)". **Commit:** `git log --grep T09`.
 
 ## Tareas que tocan decisiones ya tomadas
 

@@ -124,6 +124,14 @@ function renderizarCarritoHeader() {
   vacioCarrito.hidden = items.length > 0;
   listaCarrito.innerHTML = '';
   items.forEach((item) => listaCarrito.append(crearItemCarrito(item)));
+
+  // Sin juegos no hay nada que pagar: el botón queda deshabilitado (con el
+  // estilo .btn:disabled de components.css) en vez de parecer activo y no
+  // hacer nada al clickearlo (compras.js corta en silencio si el carrito
+  // está vacío). Se busca acá por id y no se usa la constante de compras.js:
+  // ese archivo se carga después de este.
+  const botonPagarCarrito = document.getElementById('btn-pagar-carrito');
+  if (botonPagarCarrito) botonPagarCarrito.disabled = items.length === 0;
 }
 
 // ---- Botones "Agregar al carrito" de las cards (home.js, carousel.js) ----

@@ -126,6 +126,15 @@
   cursor: not-allowed;
 }
 
+/* Un botón deshabilitado no reacciona: sin esto, .btn--primario:hover lo
+   seguía elevando 3px con sombra (el background y el color sí los pisa
+   .btn:disabled, que va después), como si estuviera activo. */
+.btn:disabled:hover,
+.btn:disabled:active {
+  transform: none;
+  box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .btn--secundario::before,

@@ -1668,6 +1668,33 @@ más una que sumamos nosotros al revisar:
   para mostrar las 4. Sumaría una acción que hay que confirmar o poder deshacer,
   solo por el hover.
 
+### "Pagar carrito" se deshabilita con el carrito vacío (T09)
+- **Qué:** `renderizarCarritoHeader()` (`carrito.js`) pone
+  `#btn-pagar-carrito.disabled = true` cuando no hay juegos, y lo saca apenas se
+  agrega uno (sin recargar). `components.css` suma
+  `.btn:disabled:hover, .btn:disabled:active { transform: none; box-shadow: none }`.
+- **Por qué:** con el carrito vacío el botón primario del panel parecía activo, pero
+  `abrirModalPago()` (`compras.js`) hacía `return` en silencio: el clic no
+  hacía nada ni avisaba. Justo arriba dice "Todavía no agregaste ningún juego.", y
+  el botón lo contradecía (Nielsen #1, visibilidad del estado). Ahora el propio
+  botón dice que todavía no se puede. El guard de `compras.js` se deja como
+  defensa por si se llega al modal por otro camino.
+- **El estilo `.btn:disabled` ya existía** (`--primario-c1` sobre `--primario-o2`,
+  7,92:1, cursor `not-allowed`) y no se tocó.
+- **Bug encontrado al probarlo (no estaba en el informe):** `.btn--primario:hover`
+  seguía elevando el botón deshabilitado 3px con sombra. `.btn:disabled` pisaba
+  el color y el fondo (va después en el archivo) pero no `transform` ni
+  `box-shadow`, así que el botón "se levantaba" como si fuera clickeable. Se
+  resolvió con la regla `.btn:disabled:hover`. Vale para cualquier botón
+  deshabilitado del sitio, no solo este.
+- **Un clic en el botón deshabilitado no cierra el desplegable:** el navegador no
+  dispara `click` en un `<button disabled>`, así que el listener de "click
+  afuera" de `menu.js` no lo ve. Comprobado.
+- **Descartado:** dejar el botón habilitado y mostrar un mensaje al clickearlo.
+  Es más código para avisar de algo que se puede evitar, y un botón que
+  responde con un error a un clic que nunca iba a funcionar es peor que uno
+  que no invita al clic.
+
 ### Botón primario y pestaña activa de login en `--primario-o1` (T02)
 - **Qué:** `.btn--primario` pasa de fondo `--primario` (#9B4BDD) a `--primario-o1`
   (#731EB8), con el mismo texto `--primario-c3`. `:active` sigue con el fondo de
