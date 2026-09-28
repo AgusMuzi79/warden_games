@@ -7,8 +7,10 @@ const contenedor = document.getElementById('filas-juegos');
 // No hay login real ni historial de partidas todavía: simulamos que el
 // usuario ya jugó este título, y buscamos "Recomendados" por ese género
 // (no por genres[0]: el orden de géneros de la API no es confiable, por
-// ejemplo "The Witcher 3" trae "Action" antes que "RPG").
-const JUEGO_JUGADO = { nombre: 'The Witcher 3: Wild Hunt', genero: 'RPG' };
+// ejemplo "Middle-earth: Shadow of Mordor" trae "Action" y "RPG", y de las
+// dos elegimos RPG a mano). El nombre también se muestra debajo del título
+// de la fila, para explicar por qué se recomienda lo que se ve.
+const JUEGO_JUGADO = { nombre: 'Middle-earth: Shadow of Mordor', genero: 'RPG' };
 
 // Si la API falla, mostramos estos juegos reales igual, con género
 // suficiente para cubrir las 8 categorías y el simulado de "Recomendados".
@@ -100,7 +102,9 @@ function crearCardComprado(juego) {
   return card;
 }
 
-function crearFila(titulo, juegos, fabricaCard = crearCard) {
+// `basadoEn` (opcional) es el nombre del juego que explica por qué se ve esta
+// fila: agrega debajo del título "Basado en que jugaste <nombre>".
+function crearFila(titulo, juegos, fabricaCard = crearCard, basadoEn = null) {
   if (juegos.length === 0) return null;
 
   const idTitulo = `fila-${titulo.toLowerCase().replace(/\s+/g, '-')}`;
@@ -113,6 +117,26 @@ function crearFila(titulo, juegos, fabricaCard = crearCard) {
   h2.className = 'carrusel__titulo';
   h2.id = idTitulo;
   h2.textContent = titulo;
+
+  // El título (y el subtítulo, si hay) van juntos en un contenedor para que
+  // las flechas sigan a la derecha, centradas contra los dos.
+  const encabezado = document.createElement('div');
+  encabezado.className = 'carrusel__encabezado';
+  encabezado.append(h2);
+
+  if (basadoEn) {
+    const idSubtitulo = `${idTitulo}-motivo`;
+    const nombreJuego = document.createElement('strong');
+    nombreJuego.textContent = basadoEn;
+
+    const subtitulo = document.createElement('p');
+    subtitulo.className = 'carrusel__subtitulo';
+    subtitulo.id = idSubtitulo;
+    subtitulo.append('Basado en que jugaste ', nombreJuego);
+
+    fila.setAttribute('aria-describedby', idSubtitulo);
+    encabezado.append(subtitulo);
+  }
 
   const flechaIzquierda = document.createElement('button');
   flechaIzquierda.type = 'button';
@@ -132,7 +156,7 @@ function crearFila(titulo, juegos, fabricaCard = crearCard) {
 
   const cabecera = document.createElement('div');
   cabecera.className = 'carrusel__cabecera';
-  cabecera.append(h2, flechas);
+  cabecera.append(encabezado, flechas);
 
   const pista = document.createElement('div');
   pista.className = 'carrusel__pista';
@@ -153,7 +177,7 @@ function renderizarRecomendados(juegos) {
     (j) => esDeGenero(j, JUEGO_JUGADO.genero) && j.name !== JUEGO_JUGADO.nombre
   );
 
-  const fila = crearFila('Recomendados', recomendados);
+  const fila = crearFila('Recomendados', recomendados, crearCard, JUEGO_JUGADO.nombre);
   if (fila) contenedor.append(fila);
 }
 

@@ -362,6 +362,29 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   el "hay sesión" como el "juego ya jugado" son simulados a propósito para
   esta entrega.
 
+### "Recomendados" explica por qué: "Basado en que jugaste Middle-earth: Shadow of Mordor"
+- **Qué:** debajo del título de la fila "Recomendados" aparece una línea chica,
+  "Basado en que jugaste **Middle-earth: Shadow of Mordor**" (`.carrusel__subtitulo`,
+  con el nombre en `<strong>`). `JUEGO_JUGADO` pasó de "The Witcher 3" a ese juego,
+  con género `RPG`. `crearFila()` recibe un 4º parámetro opcional (`basadoEn`);
+  solo "Recomendados" lo usa, el resto de las filas no cambia.
+- **Por qué:** pedido de Agus — que se entienda por qué se recomienda lo que se ve,
+  en vez de una fila que aparece sin explicación. Como no hay historial real de
+  partidas, el juego "jugado" sigue siendo simulado (ver arriba), pero ahora se
+  muestra.
+- **`RPG` y no `Action`, aunque Shadow of Mordor trae los dos géneros:** la API
+  lo lista como `Action` y `RPG`. Con `Action` (69 juegos) la fila sería casi la
+  misma que la categoría "Acción" de abajo; con `RPG` (19) es una selección más
+  propia (Witcher, Skyrim, Fallout, Cyberpunk...), mismo criterio del género
+  elegido a mano en vez de `genres[0]`.
+- **Título y subtítulo en un contenedor (`.carrusel__encabezado`):** así las flechas
+  siguen a la derecha y quedan centradas contra los dos renglones, sin tocar el
+  `flex` de `.carrusel__cabecera`.
+- **`aria-describedby` en la fila, no en el `<h2>`:** la fila ya se nombra con
+  `aria-labelledby` (el título); el motivo va como descripción, así un lector de
+  pantalla dice "Recomendados, Basado en que jugaste..." sin mezclar las dos cosas
+  en el nombre.
+
 ### Cada fila es un carrusel de scroll nativo, no el banner animado
 - **Qué:** `.carrusel__pista` es un `flex` con `overflow-x: auto` y
   `scroll-snap`; se desplaza con scroll (trackpad, arrastrando con mouse,

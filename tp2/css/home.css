@@ -333,6 +333,19 @@
   margin-bottom: 0;
 }
 
+/* "Basado en que jugaste ..." debajo del título de "Recomendados". El
+   nombre del juego va en <strong> para que se distinga del resto. */
+.carrusel__subtitulo {
+  margin: var(--espaciado-1) 0 0;
+  color: var(--primario-c1);
+  font: 400 14px/1.4 var(--font-ui);
+}
+
+.carrusel__subtitulo strong {
+  color: var(--primario-c3);
+  font-weight: 600;
+}
+
 .carrusel__flechas {
   display: flex;
   gap: var(--espaciado-1);
