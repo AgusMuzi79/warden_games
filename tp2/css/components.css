@@ -807,6 +807,108 @@
   object-fit: cover;
 }
 
+/* ---------- Galería animada: carrusel de flip (solo juego.html) ----------
+   producto.html sigue con la grilla de gradientes de arriba (sin fotos
+   reales). Acá, en cambio, se ve una sola foto grande a la vez; al pasar a
+   la siguiente, la tarjeta gira en 3D como una ficha que se da vuelta —
+   una animación de rotación real, no un simple desplazamiento. La lógica
+   que dispara el giro (qué foto va en cada cara y cuándo) vive en
+   js/galeria.js; acá solo el CSS que hace que ese giro se vea y se anime. */
+
+/* "perspective" en el contenedor es lo que le da profundidad al giro de la
+   tarjeta: sin esto, rotateY se ve aplastado en 2D, como si la tarjeta se
+   angostara en vez de girar. Cuanto más alto el valor, menos exagerada se
+   ve la perspectiva (1400px = un giro suave, no un efecto "ojo de pez"). */
+.galeria__visor {
+  position: relative;
+  perspective: 1400px;
+}
+
+/* La tarjeta que gira. transform-style: preserve-3d es lo que permite que
+   sus dos caras (los hijos .galeria__cara) mantengan su propia posición en
+   el espacio 3D en vez de aplanarse contra la pantalla — sin esto, el giro
+   de las caras de adentro no se notaría.
+   El ángulo en sí (--angulo) lo escribe js/galeria.js en cada click, sumando
+   o restando 180° según la dirección (nunca "vuelve" a 0: sigue girando
+   siempre para el mismo lado, así el giro nunca da un salto raro hacia
+   atrás). "transition" es lo único que hace falta para que ese cambio de
+   variable se vea como una animación en vez de un salto instantáneo. */
+.galeria__carta {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radio-md);
+  transform-style: preserve-3d;
+  transform: rotateY(var(--angulo, 0deg));
+  transition: transform 0.7s ease-in-out;
+}
+
+/* Las 2 caras de la tarjeta, superpuestas exactamente en el mismo lugar
+   (position: absolute + inset: 0, una arriba de la otra). Giran junto con
+   la tarjeta porque son sus hijas dentro del mismo espacio 3D.
+   "backface-visibility: hidden" es la clave de todo el truco: apenas una
+   cara queda "mirando para atrás" (a más de 90° de giro), esta propiedad la
+   hace invisible — así nunca se ve una imagen espejada ni las dos fotos
+   mezcladas al mismo tiempo durante el giro. */
+.galeria__cara {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+/* La cara B arranca pre-girada 180° respecto de la tarjeta (al revés de la
+   cara A, que se queda en 0°). Es lo que hace que, cuando la tarjeta
+   completa su primer giro de 180°, la cara B termine mirando derecho hacia
+   el frente (sus 180° propios + los 180° que giró la tarjeta = 360°, que
+   es lo mismo que 0°) en vez de aparecer espejada. */
+.galeria__cara--b {
+  transform: rotateY(180deg);
+}
+
+/* Flechas para pasar de foto, superpuestas sobre la imagen (no debajo,
+   como en las filas de la Home) porque acá hay una sola foto grande, no
+   una fila para desplazar. */
+.galeria__flecha {
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  /* Centra el botón verticalmente sin tener que saber su alto de antemano:
+     lo corre la mitad de su propia altura hacia arriba. */
+  transform: translateY(-50%);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 0;
+  border-radius: 50%;
+  background: var(--fondo-o1);
+  color: var(--primario-c3);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.galeria__flecha:hover,
+.galeria__flecha:focus-visible {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+.galeria__flecha--prev { left: var(--espaciado-3); }
+.galeria__flecha--next { right: var(--espaciado-3); }
+
+/* Sin movimiento: la tarjeta sigue cambiando de foto (sigue siendo
+   funcional), pero de golpe, sin el giro — se saca la única propiedad que
+   anima el cambio (transition), nada más. */
+@media (prefers-reduced-motion: reduce) {
+  .galeria__carta {
+    transition: none;
+  }
+}
+
 /* ---------- Compartir ---------- */
 .compartir {
   padding: var(--espaciado-4);

@@ -1038,27 +1038,91 @@ más una que sumamos nosotros al revisar:
   (`producto.html`), que muestra cualquier juego de la API.
 
 ### Galería de Neon Circuit: capturas reales, ya sin `aria-hidden`
-- **Qué:** en `juego.html`, cada `<li class="galeria__tile">` pasa a tener
-  un `<img class="galeria__img">` adentro (en vez de un gradiente vacío),
-  con `object-fit: cover` para llenar el tile 16:9 sin deformarse, y
-  `overflow: hidden` en `.galeria__tile` para que la imagen respete el
-  borde redondeado. Se saca el `aria-hidden` del `<ul>`, porque ahora cada
-  imagen tiene su propio `alt` describiendo la captura. Las 6, en orden:
-  `inicio-juego.png`, `ficha-seleccionada.png`, `ficha-salto.png`,
-  `juego-avanzado.png`, `victoria.png`, `glitch-gameover.png`.
+- **Qué:** en `juego.html`, la galería pasa a mostrar imágenes reales del
+  juego (antes eran gradientes vacíos). Cada imagen tiene su propio `alt`
+  describiendo la captura, así que se saca el `aria-hidden` que tenía antes.
+  Las 6, en orden: `inicio-juego.png`, `ficha-seleccionada.png`,
+  `ficha-salto.png`, `juego-avanzado.png`, `victoria.png`,
+  `glitch-gameover.png`.
 - **Por qué:** Fran consiguió las 6 capturas reales del propio juego (Neon
   Circuit es nuestro, a diferencia de los juegos de la API en
   `producto.html`) — deja de tener sentido ocultarlas o mostrarlas como
   gradiente genérico.
 - **Sin recorte:** las 6 imágenes vienen a 1920×1080, exactamente 16:9 —
-  coincide con el `aspect-ratio` que ya tenía `.galeria__tile`, así que
-  `object-fit: cover` no tiene nada que recortar.
+  coincide con el `aspect-ratio` que ya usaban los tiles de la grilla, así
+  que `object-fit: cover` no tiene nada que recortar.
 - **`.galeria__tile--1..6` (las clases de gradiente) se dejan intactas en
   `components.css`:** siguen en uso por `producto.html`, que sí necesita el
   placeholder para juegos de terceros sin capturas.
 - **Ruta de los archivos:** igual que las portadas — Fran las deja en
   `assets/` (raíz del repo) y se copian a `tp2/assets/img/` con nombre en
   minúsculas y sin espacios (ya venían así).
+- **La grilla estática de esta decisión quedó reemplazada por un carrusel
+  animado** — ver la siguiente entrada, "Galería animada: carrusel de flip
+  3D".
+
+### Galería animada: carrusel de flip 3D (2ª corrección del TPE2)
+- **Qué:** la consigna nueva pide al menos una galería/carrusel con
+  transición **animada** entre imágenes (no alcanza con que se desplace).
+  La galería de `juego.html` (la única con fotos reales, ver la entrada de
+  arriba) pasó de ser una grilla de 6 fotos fijas a un carrusel de "una
+  foto grande a la vez": `.galeria__visor` (contenedor) → `.galeria__carta`
+  (la tarjeta que gira) → dos `.galeria__cara` (`--a`/`--b`, cada una con su
+  `<img>`) + flechas prev/next superpuestas. Al cambiar de foto, la tarjeta
+  gira en 3D (`rotateY` + `perspective`) como si fuera una ficha que se da
+  vuelta, revelando la siguiente foto del otro lado — una animación de
+  rotación real, no un simple desplazamiento. Lógica en `js/galeria.js`
+  (nuevo, un archivo por responsabilidad como el resto del proyecto);
+  ambos archivos (`components.css`/`galeria.js`) quedaron comentados línea
+  por línea explicando el porqué de cada propiedad, a pedido de Fran (hay
+  que poder explicar cada línea en la defensa).
+- **Por qué el flip y no otra animación:** la cátedra pasó un link con
+  ideas de carruseles (`webartdevelopers.com`, un catálogo de **plugins de
+  jQuery**). Como el proyecto es JS/CSS vanilla, no instalamos ninguno de
+  esos plugins — nos quedamos solo con la idea visual de uno de ellos
+  ("Flipping Card Slider") y la reconstruimos desde cero con CSS puro. Se
+  descartó imitar un efecto 3D tipo "3D Carousel" porque el banner
+  "Destacados" ya usa perspectiva 3D (`rotateY` + `translateZ`) — un flip
+  de tarjeta es una técnica distinta (aunque también 3D), así que no se
+  siente repetido.
+- **Solo `juego.html`, no `producto.html`:** la galería de `producto.html`
+  son gradientes placeholder (juegos de la API, sin capturas propias) — no
+  hay contenido real para hacer girar ahí. El requisito de "al menos una
+  galería animada" ya queda cubierto con la de Neon Circuit; no hacía falta
+  tocar `producto.html` para esto.
+- **Cómo funciona el giro (2 caras, ángulo que se acumula):** la tarjeta
+  tiene solo 2 `<img>` en el DOM (no 6) — antes de cada giro, `galeria.js`
+  carga la foto que corresponde en la cara que en ese momento está
+  escondida (invisible por `backface-visibility: hidden`, así el cambio de
+  `src` no se nota) y recién ahí gira la tarjeta 180° para revelarla. El
+  ángulo acumulado nunca vuelve a 0° (sigue sumando o restando 180° por
+  click): resetearlo a 0 en cada vuelta completa haría que el giro "saltara"
+  para el lado contrario en vez de seguir siempre para el mismo lado.
+- **Por qué recalcular la foto en cada click (no precargarla de antemano):**
+  la primera versión precargaba la cara escondida asumiendo que el próximo
+  click iba a ser "siguiente" — pero si el primer click real era
+  "anterior", mostraba la foto equivocada (la que se había precargado para
+  "siguiente", no la anterior real). Se corrigió calculando qué foto
+  corresponde mostrar en el momento del click, según la dirección de ESE
+  click y la foto visible actual, no una suposición hecha en el click de
+  antes.
+- **Sin JS para `prefers-reduced-motion`:** a diferencia del autoplay del
+  banner (que si tiene que frenarse por completo con JS), acá alcanza con
+  la regla CSS `@media (prefers-reduced-motion: reduce) { .galeria__carta
+  { transition: none; } }` — el carrusel se seguía usando igual (el click
+  sigue cambiando de foto), solo que sin el giro animado. No hizo falta
+  ninguna condición en `galeria.js`.
+- **Flechas superpuestas sobre la foto, no arriba como en las filas de la
+  Home:** acá hay una sola foto grande (no una fila para desplazar), así
+  que las flechas van encima de la imagen, a los costados — mismo criterio
+  de accesibilidad de siempre (44px de área táctil, `--control-alto`,
+  `aria-label` descriptivo, ícono `aria-hidden`).
+- **`aria-live="polite"` en el contador ("Foto 1 de 6"):** anuncia el
+  cambio de foto a quien usa lector de pantalla sin interrumpirlo, mismo
+  patrón que "Partida guardada" en el header.
+- **Pendiente de que Fran lo pruebe:** se probó de lectura de código, no en
+  el navegador todavía — puede necesitar ajustes de timing/tamaño una vez
+  que se vea andando.
 
 ### Reseñas de Comunidad: 3 distintas, no la misma repetida
 - **Qué:** 3 reseñas con nombre, fecha, puntaje y largo de texto distintos
