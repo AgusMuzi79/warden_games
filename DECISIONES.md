@@ -354,6 +354,31 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   cuya fila quedó oculta por el filtro, no hay dónde scrollear. Borrar la
   búsqueda vuelve a mostrar todo.
 
+### Buscador de 18rem en tablet y 24rem en desktop (header a 768px)
+- **Qué:** en `header.css`, el ancho del buscador sale de una variable local
+  `--ancho-buscador`: `18rem` desde `48rem` y `24rem` desde `64rem`. La grilla pasa
+  a `1fr minmax(0, var(--ancho-buscador)) 1fr`. El header del juego
+  (`.header--juego`) tiene sus propias columnas y no cambia.
+- **Por qué:** a 768px (un iPad en vertical) las dos columnas laterales medían
+  144px, y el bloque de la izquierda (menú + logo con texto) necesita unos 176px:
+  el texto "Warden" se metía 8px debajo del buscador. Con 24rem el problema aparece
+  entre 768 y unos 790px; con 18rem las columnas laterales dan 187px. Se detectó
+  mirando una captura del banner a tablet, no estaba en el informe.
+- **Sigue centrado:** se probó una alternativa (`minmax(max-content, 1fr)` en las
+  laterales) que también evitaba el solape, pero descentraba el buscador hasta
+  37px a 768px. Achicar el buscador mantiene la simetría, que es la razón de la
+  grilla de 3 columnas iguales (ver "Grilla de 3 columnas iguales para centrar el
+  buscador").
+- **Se usan los dos breakpoints del proyecto** (`48rem` y `64rem`), sin sumar uno
+  nuevo. Costo: entre 768 y 1023px el buscador mide 288px en vez de 384px.
+- **Medido** a 768, 800, 1000, 1024 y 1440px en `index.html` y a 768px en
+  `producto.html`: sin solape con el logo ni con las acciones, `desvioCentro` de 0
+  y sin scroll horizontal.
+- **Por qué una variable y no otra media query con la grilla completa:** una
+  segunda regla `.header { grid-template-columns: ... }` a 64rem le habría ganado
+  a la de `.header--juego` (misma especificidad, aparece después) y roto el
+  header del juego. Cambiando solo el valor de la variable no compiten.
+
 ### Header del juego sin menú ni buscador ("modo foco")
 - **Qué:** solo logo, estado de guardado, "Volver al menú" y avatar.
 - **Por qué:** mientras se juega, reducir distracciones. Se deja una salida clara

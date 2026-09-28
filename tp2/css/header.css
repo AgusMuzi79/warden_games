@@ -269,7 +269,12 @@
    ========================================================= */
 @media (min-width: 48rem) {
   .header {
-    grid-template-columns: 1fr minmax(0, 24rem) 1fr;
+    /* Buscador de 18rem en tablet y 24rem desde desktop (ver más abajo): con
+       24rem, a 768px las columnas laterales quedaban en 144px y el texto
+       "Warden" (176px con el menú) se metía 8px debajo del buscador. A 18rem
+       las laterales dan 187px y el buscador sigue centrado. */
+    --ancho-buscador: 18rem;
+    grid-template-columns: 1fr minmax(0, var(--ancho-buscador)) 1fr;
     grid-template-areas: "start search actions";
     gap: var(--espaciado-6);
     padding-inline: var(--espaciado-6);
@@ -298,5 +303,11 @@
   .header--juego {
     grid-template-columns: 1fr auto 1fr;
     grid-template-areas: "start status actions";
+  }
+}
+
+@media (min-width: 64rem) {
+  .header {
+    --ancho-buscador: 24rem;
   }
 }

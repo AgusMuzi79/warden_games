@@ -315,7 +315,8 @@ propuesta) está en el informe original.
 ## Pendientes que aparecieron durante las tareas (no eran del informe)
 
 - **Cerrados:** el banner a tablet (`git log --grep "banner a tablet"`), los bordes
-  de los campos (T08b) y los `rgba()` escritos a mano (`git log --grep rgba`).
+  de los campos (T08b), los `rgba()` escritos a mano (`git log --grep rgba`) y el
+  solape del logo con el buscador a 768 px (`git log --grep "header de tablet"`).
 
 ## Tareas que tocan decisiones ya tomadas
 
