@@ -1541,6 +1541,42 @@ más una que sumamos nosotros al revisar:
   corrección del profesor cambió el criterio: ahora se pide explícitamente que sean 4
   distintas, una por variante.
 
+### Dónde se ve cada animación de hover: "Seguir comprando" pasa a terciario (T01)
+- **Qué:** el link "Seguir comprando" del panel del carrito (`index.html` y
+  `producto.html`) pasa de `.btn--secundario` a `.btn--terciario`. Además,
+  `.btn:hover` suma `text-decoration: none` en `components.css`.
+- **Por qué:** las 4 variantes existían en el CSS, pero en las páginas solo se
+  usaban 2: `.btn--terciario` y `.btn--destructivo` tenían 0 usos en los HTML y en
+  los JS. El enunciado pide al menos 3 animaciones de hover distintas en
+  botones. Si la cátedra no cuenta un cambio de color como animación (no
+  conocemos el criterio exacto), quien corrige veía solo la elevación del
+  primario y el relleno deslizante del secundario. "Seguir comprando" es la
+  acción de menor prioridad del carrito, así que la variante más discreta le
+  corresponde, y no suma ningún botón nuevo (la corrección del TPE1 pedía
+  menos botones distintos, no más).
+- **Dónde se ve cada animación ahora:**
+  - **Primario (se eleva):** Pagar carrito, Confirmar compra, Registrarse,
+    Ingresar, Jugar, Publicar y la acción de la portada de producto.
+  - **Secundario (relleno deslizante):** Contáctanos, Suscribirse, Volver al
+    menú, los botones de compartir y "Continuar con..." de login.
+  - **Terciario (subrayado que crece):** Seguir comprando, en el desplegable del
+    carrito (hay que abrirlo con el ícono del carrito para verlo).
+  - **Destructivo (pulso rojo):** no se usa en ninguna pantalla, porque el sitio
+    no tiene todavía ninguna acción destructiva. No se inventó una solo para
+    mostrar el hover: una acción así necesitaría confirmación o deshacer.
+- **El subrayado nativo se duplicaba:** `base.css` tiene `a:hover { text-decoration:
+  underline }` (especificidad 0,1,1), que le gana a `.btn { text-decoration: none }`
+  (0,1,0). En un `<a class="btn">` aparecía el subrayado del navegador, instantáneo,
+  además del animado, y el efecto de "crece de izquierda a derecha" no se notaba.
+  Se resolvió con `.btn:hover { text-decoration: none }`. También afecta a los
+  otros `<a class="btn">` (Contáctanos, Volver al menú, Enviar mail): dejan de
+  subrayarse en hover y solo muestran su propia animación.
+- **Verificado en el navegador:** con hover, el `::after` del terciario pasa de
+  `scaleX(0)` a `scaleX(1)` y el `text-decoration` computado es `none`.
+- **Descartado:** agregar un botón "Vaciar carrito" con la variante destructiva
+  para mostrar las 4. Sumaría una acción que hay que confirmar o poder deshacer,
+  solo por el hover.
+
 ### Botón primario y pestaña activa de login en `--primario-o1` (T02)
 - **Qué:** `.btn--primario` pasa de fondo `--primario` (#9B4BDD) a `--primario-o1`
   (#731EB8), con el mismo texto `--primario-c3`. `:active` sigue con el fondo de

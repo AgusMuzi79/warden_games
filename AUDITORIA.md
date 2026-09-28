@@ -35,7 +35,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 
 | ID | Sev. | Hallazgo | Estado | Commit |
 |---|---|---|---|---|
-| T01 | Enunciado | Solo 2 de las 4 animaciones hover de botón se usan en páginas reales | Pendiente | — |
+| T01 | Enunciado | Solo 2 de las 4 animaciones hover de botón se usan en páginas reales | **Hecha** | `git log --grep T01` |
 | T02 | S3 | Texto de botones primarios con contraste 3,62:1 | **Hecha** | `git log --grep T02` |
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
@@ -163,6 +163,29 @@ propuesta) está en el informe original.
   fondo). Medido en el navegador con `getComputedStyle`.
 - **Justificación:** `DECISIONES.md`, "Borde visible en el buscador y dots
   inactivos más claros (T08)". **Commit:** `git log --grep T08`.
+
+### T01 — Solo 2 de las 4 animaciones hover se usaban en las páginas (Enunciado) · hecha
+
+- **Antes (`pre-auditoria`):** `.btn--terciario` y `.btn--destructivo` estaban
+  definidos en `components.css` pero tenían 0 usos en `index.html`, `login.html`,
+  `juego.html`, `producto.html` y en `js/`. Quien corrige veía dos animaciones de
+  hover distintas (primario se eleva, secundario rellena), y el enunciado pide al
+  menos 3. `DECISIONES.md` afirmaba que había 4.
+- **Después:** "Seguir comprando" del carrito (`index.html` y `producto.html`) usa
+  `.btn--terciario`: el subrayado crece de izquierda a derecha. Ahora se ven 3
+  animaciones distintas. La destructiva sigue sin usarse: no hay acciones
+  destructivas en el sitio y no se inventó una.
+- **Bug encontrado al probarlo (no estaba en el informe):** el subrayado nativo
+  del navegador aparecía junto con el animado en cualquier `<a class="btn">`
+  (`a:hover` le ganaba a `.btn` por especificidad). Se corrigió con
+  `.btn:hover { text-decoration: none }`.
+- **Para la defensa:** el terciario está dentro del desplegable del carrito, hay
+  que abrirlo con el ícono del carrito para verlo. Conviene tenerlo presente al
+  mostrar las tres animaciones.
+- **Justificación:** `DECISIONES.md`, "Dónde se ve cada animación de hover:
+  'Seguir comprando' pasa a terciario (T01)". **Commit:** `git log --grep T01`.
+- **Sigue abierto:** no conocemos el criterio exacto de la cátedra (slide 14) sobre
+  qué cuenta como "animación" de hover; si aceptan cambios de color, ya cumplíamos.
 
 ## Tareas que tocan decisiones ya tomadas
 
