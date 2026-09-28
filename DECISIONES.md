@@ -798,6 +798,19 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   autoplay y las cards cambian de posición directo, sin el giro animado.
 - **Actualización (T04): el autoplay arranca cuando termina el loading**, no
   antes. Ver "Neon Circuit accesible en touch y visible después del loading (T04)".
+- **Actualización (T07): sin hover (touch), el autoplay no arranca.**
+  `carousel.js` suma `puedePausarConHover` (`matchMedia('(hover: hover)')`) y
+  `programarSiguiente()` no arma el timer si es `false`, igual que ya hace con
+  `prefers-reduced-motion`. **Por qué:** la pausa por hover/foco no existe en
+  touch (`pointerleave` llega enseguida después del toque y volvía a armar el
+  timer), y un contenido que cambia solo cada 6 segundos sin ningún mecanismo
+  para pausarlo incumple WCAG 2.2 SC 2.2.2 (nivel A). En touch se navega igual
+  con los dots y tocando las cards de los costados. **No se agregó botón de
+  pausa** (que era la propuesta original de la auditoría): contradice esta
+  misma decisión y suma un control a un banner que en touch ya no se mueve solo.
+  **Costo asumido:** un celular ve el banner quieto; el autoplay es un extra, no
+  algo que pida el enunciado. En una notebook con pantalla táctil y mouse
+  (`hover: hover`) el autoplay sigue funcionando y se pausa con el mouse.
 
 ### `margin-inline: auto` en el viewport, porque `aspect-ratio` + `max-height` le achica el ancho
 - **Qué:** `.banner__viewport` quedaba pegado a la izquierda en vez de

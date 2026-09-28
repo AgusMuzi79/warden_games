@@ -41,7 +41,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | **Hecha** | `git log --grep T04` |
 | T05 | S3 | Newsletter: el POST termina en una página de error | **Hecha** | `git log --grep T05` |
 | T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
-| T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
+| T07 | S3 | En touch el banner avanza solo y no se puede pausar | **Hecha** | `git log --grep T07` |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | Pendiente | — |
 | T10 | S2 | Links del hamburguesa que no hacen nada | Pendiente | — |
@@ -230,6 +230,28 @@ propuesta) está en el informe original.
   "Autoplay que se pausa con hover o foco" (se agregó una actualización a cada
   una). **Justificación:** `DECISIONES.md`, "Neon Circuit accesible en touch y
   visible después del loading (T04)". **Commit:** `git log --grep T04`.
+
+### T07 — En touch el banner avanza solo y no se puede pausar (S3) · hecha
+
+- **Antes (`pre-auditoria`):** el banner avanzaba cada 6 s y solo se pausaba con
+  `pointerenter`/`focusin`. En touch (360 px, emulado) se tocó el título del
+  banner y 6,8 s después el destacado activo era el 2: `pointerleave` llega enseguida
+  después del toque y volvía a armar el timer. Ningún mecanismo de pausa en touch.
+- **Criterio que rompía:** WCAG 2.2 SC 2.2.2 Pausar, detener, ocultar (nivel A):
+  contenido que se actualiza solo por más de 5 s tiene que poder pausarse.
+- **Después:** en dispositivos sin hover el autoplay no arranca
+  (`puedePausarConHover`). No se agregó botón de pausa (contradecía la decisión
+  vigente). Los dots y el toque en las cards de los costados siguen navegando.
+- **Verificado en el navegador**, simulando un celular con `matchMedia('(hover:
+  hover)')` en `false` dentro de un iframe: el banner no avanzó solo en 9,5 s;
+  al tocar un dot cambió a ese destacado y no volvió a moverse en 8 s. El control
+  con hover normal avanzó a los ~7 s (6 s del timer más el redondeo de una pestaña en
+  segundo plano). **Pendiente de probar** en un celular real.
+- **Relación con T04:** en touch el autoplay ya no corre, así que la parte de
+  timing de T04 (esperar al loading) solo aplica en dispositivos con hover; la
+  parte del botón "Jugar" fijo sin hover sigue siendo necesaria.
+- **Justificación:** `DECISIONES.md`, "Autoplay que se pausa con hover o foco,
+  sin botón de pausa" (actualización T07). **Commit:** `git log --grep T07`.
 
 ## Tareas que tocan decisiones ya tomadas
 

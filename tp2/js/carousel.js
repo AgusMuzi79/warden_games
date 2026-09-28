@@ -29,6 +29,15 @@ const MAX_VISIBLES = 1;
 
 const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Solo con un puntero que puede hacer hover (mouse, trackpad): ahí existe la
+// pausa por hover. En touch no hay hover, así que el autoplay no arranca —
+// mismo criterio que ya se usa con prefers-reduced-motion. Sin esto, el
+// banner cambiaría solo cada 6 segundos sin ningún mecanismo para pausarlo
+// (WCAG 2.2 SC 2.2.2). El usuario igual navega con los dots o tocando las
+// cards de los costados (ver DECISIONES.md, "Autoplay que se pausa con hover
+// o foco, sin botón de pausa").
+const puedePausarConHover = window.matchMedia('(hover: hover)').matches;
+
 // Nuestro propio juego: no viene de la API (esa trae juegos de terceros
 // para el catálogo), así que va hardcodeado y siempre primero, sin pelear
 // por rating contra el resto.
@@ -201,7 +210,7 @@ function siguiente() {
 // punto del ciclo anterior había quedado).
 function programarSiguiente() {
   clearTimeout(timerAutoplay);
-  if (prefiereMovimientoReducido || slides.length < 2) return;
+  if (!puedePausarConHover || prefiereMovimientoReducido || slides.length < 2) return;
 
   timerAutoplay = setTimeout(siguiente, DURACION_AUTOPLAY_MS);
 }
