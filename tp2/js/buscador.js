@@ -1,16 +1,78 @@
-// buscador.js — Lupa del header en mobile: abre y cierra el buscador
-// Solo hace algo en mobile: desde tablet el buscador ya se ve siempre y el
-// botón de la lupa está oculto por CSS (header.css).
+// buscador.js — Buscador del header: la lupa de mobile (abre y cierra el
+// buscador) y la búsqueda de juegos por nombre.
+//
+// La lupa solo hace algo en mobile: desde tablet el buscador ya se ve
+// siempre y el botón de la lupa está oculto por CSS (header.css).
 // A propósito no usa aria-controls: menu.js engancha cualquier botón que
 // tenga aria-controls + aria-expanded, y cierra sus paneles al clickear en
 // cualquier lado — eso cerraría el buscador al tocar el input para escribir.
+//
+// Buscar: en la Home filtra las filas ya armadas, sin recargar (una recarga
+// volvería a mostrar el loading de 5 segundos).
+
+// Global a propósito (los scripts no usan type="module"): home.js la va a
+// llamar al terminar de armar las filas si la búsqueda vino de otra página.
+function filtrarJuegos(consulta) {
+  const texto = consulta.trim();
+  const q = texto.toLowerCase();
+  // Un mismo juego puede estar en varias filas (ej. Acción y RPG): se
+  // cuentan nombres distintos, no cards, para que el número tenga sentido.
+  const encontrados = new Set();
+
+  document.querySelectorAll('#filas-juegos .carrusel').forEach((fila) => {
+    let visiblesEnLaFila = 0;
+
+    fila.querySelectorAll('.game-card').forEach((card) => {
+      const nombre = card.querySelector('.game-card__title').textContent;
+      const coincide = q === '' || nombre.toLowerCase().includes(q);
+      card.hidden = !coincide;
+      if (coincide) {
+        visiblesEnLaFila += 1;
+        encontrados.add(nombre);
+      }
+    });
+
+    // Una fila sin ninguna card visible se oculta entera (con su título).
+    fila.hidden = visiblesEnLaFila === 0;
+
+    // La fila cambió de ancho: vuelve al principio y avisa a
+    // carrusel-fila.js (que escucha "scroll") para que actualice qué
+    // flechas quedan habilitadas.
+    const pista = fila.querySelector('.carrusel__pista');
+    if (pista) {
+      pista.scrollLeft = 0;
+      pista.dispatchEvent(new Event('scroll'));
+    }
+  });
+
+  const estado = document.getElementById('busqueda-estado');
+  if (!estado) return;
+
+  if (q === '') {
+    estado.textContent = '';
+    return;
+  }
+
+  if (encontrados.size > 0) {
+    const palabra = encontrados.size === 1 ? 'juego' : 'juegos';
+    estado.textContent = `${encontrados.size} ${palabra} para “${texto}”`;
+  } else {
+    estado.textContent = `No encontramos juegos para “${texto}”. Probá con otro nombre.`;
+  }
+
+  // El banner ocupa casi toda la primera pantalla: sin esto, al apretar
+  // Enter no se vería que pasó algo. Con el header fijo, el scroll-padding-top
+  // de home.css deja el mensaje justo debajo. Sin animación si el usuario
+  // pidió movimiento reducido.
+  const sinAnimacion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  estado.scrollIntoView({ behavior: sinAnimacion ? 'auto' : 'smooth', block: 'start' });
+}
 
 const botonLupa = document.querySelector('.header__search-toggle');
 const buscador = document.querySelector('.header__search');
+const inputBuscador = buscador ? buscador.querySelector('input') : null;
 
 if (botonLupa && buscador) {
-  const inputBuscador = buscador.querySelector('input');
-
   function abrirBuscador() {
     buscador.classList.add('header__search--abierto');
     botonLupa.setAttribute('aria-expanded', 'true');
@@ -36,5 +98,25 @@ if (botonLupa && buscador) {
     if (evento.key !== 'Escape') return;
     cerrarBuscador();
     botonLupa.focus();
+  });
+}
+
+if (buscador) {
+  const estamosEnLaHome = () => document.getElementById('filas-juegos') !== null;
+
+  buscador.addEventListener('submit', (evento) => {
+    // Sin esto, el form (action="#") recarga la página: en la Home vuelve el
+    // loading de 5 s.
+    evento.preventDefault();
+
+    if (!estamosEnLaHome()) return;
+
+    filtrarJuegos(inputBuscador.value);
+  });
+
+  // Borrar el texto (la "x" nativa del input type="search", o dejarlo vacío)
+  // vuelve a mostrar todas las filas.
+  inputBuscador.addEventListener('search', () => {
+    if (inputBuscador.value === '' && estamosEnLaHome()) filtrarJuegos('');
   });
 }

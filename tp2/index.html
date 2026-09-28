@@ -228,6 +228,10 @@
 
     <!-- Filas generadas por home.js: categorías por género para invitado,
          o "Recomendados" si el avatar del header tiene data-sesion="usuario" -->
+    <!-- Resultado de la búsqueda del header (buscador.js). role="status": el
+         lector de pantalla lo anuncia sin mover el foco. Vacío = oculto. -->
+    <p id="busqueda-estado" class="busqueda-estado" role="status"></p>
+
     <div id="filas-juegos"></div>
   </main>
 
@@ -373,9 +377,11 @@
   <script src="./js/loading.js" defer></script>
   <script src="./js/carousel.js" defer></script>
   <script src="./js/carrusel-fila.js" defer></script>
+  <!-- buscador.js antes que home.js: home.js llama a filtrarJuegos() cuando
+       termina de armar las filas, y tiene que estar definida para entonces. -->
+  <script src="./js/buscador.js" defer></script>
   <script src="./js/home.js" defer></script>
   <script src="./js/menu.js" defer></script>
-  <script src="./js/buscador.js" defer></script>
   <script src="./js/logo-inicio.js" defer></script>
 </body>
 </html>

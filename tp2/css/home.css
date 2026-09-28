@@ -582,3 +582,14 @@
     scroll-padding-top: calc(var(--control-alto) + 2 * var(--espaciado-2) + var(--espaciado-4));
   }
 }
+
+/* Resultado de la búsqueda del header (buscador.js). Vacío no ocupa lugar.
+   No hace falta una regla para [hidden]: base.css ya la tiene global. */
+.busqueda-estado {
+  margin: var(--espaciado-8) 0 0;
+  color: var(--primario-c3);
+}
+
+.busqueda-estado:empty {
+  display: none;
+}
