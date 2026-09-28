@@ -376,8 +376,10 @@
      la spec de CSS): sin este padding, el scale(1.06) del hover de .card
      quedaba cortado contra el borde de la fila. El margin negativo
      compensa para que el layout no se corra. */
-  padding: 12px;
-  margin: -12px;
+  padding: 12px 12px 32px;
+  margin: -12px -12px -32px;
+  /* (El padding de abajo es más grande: al hacer hover, el título completo
+     de una card puede salirse por debajo de ella — ver .game-card__texto.) */
   /* La scrollbar nativa se saca: se navega con las flechas o arrastrando
      con el mouse (carrusel-fila.js) — en mobile el scroll táctil ya anda. */
   scrollbar-width: none;
@@ -398,13 +400,18 @@
   width: 260px;
   scroll-snap-align: start;
   padding: 0;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+/* El overflow: hidden se mudó de .game-card a la imagen: la card tiene que
+   dejar que el título expandido en hover se salga por abajo (ver
+   .game-card__texto), pero la imagen igual tiene que respetar las esquinas
+   redondeadas de arriba. */
 .game-card__media {
   position: relative;
+  overflow: hidden;
+  border-radius: var(--radio-md) var(--radio-md) 0 0;
 }
 
 .game-card__image {
@@ -421,30 +428,63 @@
 }
 
 /* Fila de abajo: nombre a la izquierda, botón de carrito a la derecha (si
-   el juego es "de pago") — ya no superpuesto a la imagen. El min-height
-   iguala el alto con o sin botón, así el título queda a la misma altura
-   en todas las cards de la fila. */
+   el juego es "de pago") — ya no superpuesto a la imagen. El alto es fijo
+   (no min-height): así ninguna card de la fila cambia de alto según el
+   largo del título, y el título expandido en hover no empuja nada. */
 .game-card__cuerpo {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--espaciado-2);
-  min-height: var(--control-alto);
+  height: var(--control-alto);
   padding: var(--espaciado-3);
   box-sizing: content-box;
 }
 
 /* <a>, no <div>: clickear el nombre lleva a la ficha del juego (ver
    home.js). text-decoration:none porque, si no, el subrayado que pone
-   base.css en hover se ve por debajo del título. */
+   base.css en hover se ve por debajo del título.
+   position: absolute a propósito, tapando todo el cuerpo: en reposo mide
+   justo lo mismo (min-height: 100%) y centra el título en vertical con
+   flex; en hover el título se muestra completo y la caja crece hacia abajo
+   por encima de lo que haya, sin cambiar el alto de la card ni de la fila
+   (que un elemento absoluto no cuenta para el layout). */
 .game-card__texto {
-  display: block;
-  min-width: 0;
+  position: absolute;
+  top: 0;
+  /* -1px a los costados y +1px de alto: la caja cubre justo el borde de 1px
+     de la card (.card), así en hover su propio borde (ver más abajo) tapa
+     el de la card y, si el título se sale por abajo, el trazo sigue sin
+     cortarse. Sin borde arriba: ahí está la unión con la imagen. */
+  left: -1px;
+  right: -1px;
+  min-height: calc(100% + 1px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: var(--espaciado-3);
+  border: 1px solid transparent;
+  border-top: 0;
+  border-radius: 0 0 var(--radio-md) var(--radio-md);
   text-decoration: none;
+}
+
+/* Deja libre el lugar del botón de carrito (que va encima, a la derecha). */
+.game-card__cuerpo:has(.game-card__carrito) .game-card__texto {
+  padding-right: calc(var(--espaciado-3) + var(--control-alto) + var(--espaciado-2));
 }
 
 .game-card__texto:hover {
   text-decoration: none;
+}
+
+/* Con hover o foco en la card, la caja del título se pinta del mismo color
+   que la card: así la parte que se sale por debajo (si el título es largo)
+   se ve como una continuación de la card, no como texto suelto. */
+.game-card:hover .game-card__texto,
+.game-card:focus-within .game-card__texto {
+  background: var(--superficie);
+  border-color: var(--primario-o1);
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
 }
 
 .game-card__title {
@@ -453,6 +493,20 @@
      de base.css en vez del blanco de siempre. */
   color: var(--primario-c3);
   font-size: 16px;
+  /* Máximo 2 líneas en reposo (con "…"): 2 × 19px entra en el alto fijo de
+     la fila, así todas las cards miden lo mismo. En hover se muestra completo. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.game-card:hover .game-card__title,
+.game-card:focus-within .game-card__title {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
 }
 
 /* Cuadrado con esquinas redondeadas del botón "Agregar al carrito" (solo en cards "de pago",
@@ -472,6 +526,12 @@
   color: var(--acento);
   font-size: 18px;
   flex-shrink: 0;
+  /* margin-left:auto lo manda a la derecha (ya no hay otro item en el flex
+     que lo empuje), y position+z-index lo dejan por encima de
+     .game-card__texto, que es absoluto y tapa todo el cuerpo. */
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }

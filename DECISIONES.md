@@ -379,9 +379,9 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Qué:** las cards de las filas ya no muestran la estrella con el rating,
   solo el título (igual que las de "Mis juegos"). El botón de carrito pasó
   de círculo (`border-radius: 50%`) a cuadrado con esquinas redondeadas
-  (`--radio-md`), siempre de 44×44px. `.game-card__cuerpo` suma
-  `min-height: var(--control-alto)` (con `box-sizing: content-box`, para que
-  el padding se sume por fuera) y se borró `.game-card__rating`.
+  (`--radio-md`), siempre de 44×44px. Se borró `.game-card__rating`.
+  `.game-card__cuerpo` pasa a tener alto fijo (`height: var(--control-alto)`
+  con `box-sizing: content-box`, para que el padding se sume por fuera).
 - **Por qué:** pedido de Agus — "Mis juegos" se veía mejor. Las cards eran
   del mismo ancho y con la misma imagen 16:9; la diferencia era que sin el
   rating el texto de abajo ocupa una sola línea, y la imagen pasa a ser una
@@ -393,6 +393,41 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Descartado:** agrandar la imagen (ancho de la card o aspect-ratio) —
   no hacía falta para lograr lo que se buscaba.
 
+#### Título a 2 líneas en reposo, completo en hover
+- **Qué:** `.game-card__title` se corta a 2 líneas con "…"
+  (`-webkit-line-clamp: 2`). Con hover o foco en la card se saca el corte y
+  se ve el título completo.
+- **Por qué:** con Orbitron (ancha) y el botón al costado, un título como
+  "Counter-Strike: Global Offensive" ocupa 3 líneas, y como las cards de una
+  fila se estiran a la altura de la más alta (flex, `align-items: stretch`),
+  un título largo agrandaba todas las de esa fila. Con el corte a 2 líneas
+  (~38px) todas entran en los 44px fijos y miden lo mismo.
+- **`.game-card__texto` es `position: absolute`, tapando todo el cuerpo:** en
+  reposo mide lo mismo que el cuerpo (`min-height: 100%`) y centra el título
+  con flex; en hover crece hacia abajo. Al ser absoluto no cuenta para el
+  layout, así que la card y la fila no cambian de alto (si no, todo lo que
+  está debajo saltaría cada vez que se pasa el mouse). Se pinta del mismo
+  color que la card (`--superficie`) con sombra para que lo que se sale por
+  debajo se lea como continuación de la card.
+- **Cambios que hicieron falta para que se pueda salir:** `overflow: hidden`
+  se mudó de `.game-card` a `.game-card__media` (con radio solo arriba,
+  para que la imagen siga respetando las esquinas), y `.carrusel__pista`
+  suma más padding abajo (32px, con margin negativo igual, para no correr
+  el layout), porque `overflow-x: auto` recorta también en vertical.
+- **El borde de la card se cortaba (bug encontrado por Agus):** el borde de
+  1px es de `.card`, y el texto absoluto, al salirse por abajo, lo pisaba
+  sin tener uno propio — el trazo se interrumpía justo donde la caja
+  seguía. Se arregló dándole al texto un borde propio (`1px solid`,
+  transparente en reposo y `--primario-o1` en hover, sin borde arriba para
+  no marcar la unión con la imagen), con `left/right: -1px` y
+  `min-height: calc(100% + 1px)` para que cubra exactamente el borde de la
+  card: con un título corto queda encima del de la card (no se ve doble) y
+  con uno largo lo continúa hacia abajo.
+- **Botón de carrito:** ahora `position: relative; z-index: 1;
+  margin-left: auto`, para quedar arriba del texto absoluto y a la derecha.
+  El texto deja el lugar libre con `:has(.game-card__carrito)`.
+- **Descartado:** dejar que la card crezca en su lugar — empujaba todas las
+  cards de la fila y todo lo de abajo cada vez que se pasaba el mouse.
 
 ### Datos de respaldo si la API falla
 - **Qué:** `home.js` tiene `JUEGOS_DE_RESPALDO`, 5 juegos reales con género
