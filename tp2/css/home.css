@@ -98,6 +98,20 @@
    fondo. carousel.js calcula el transform de cada una según su distancia a
    la activa. El h1 de la página va acá arriba, visible, en vez del hero de
    texto que había antes. */
+/* En tablet (~600-800px) las cards de los costados del coverflow giran en 3D
+   y se pasan del ancho de la pantalla (hasta 28px), y la Home se podía
+   arrastrar de costado. overflow-x: clip recorta ese sobrante sin crear un
+   contenedor de scroll y deja visible el eje vertical (con hidden, el otro eje
+   también se recortaría). El margin negativo + padding hacen que el recorte
+   sea en el borde de main y no en el del banner: si no, las cards se
+   cortarían 24px adentro del ancho de la página. Ver AUDITORIA.md (T06,
+   "Sigue abierto"). */
+#banner {
+  margin-inline: calc(-1 * var(--espaciado-6));
+  padding-inline: var(--espaciado-6);
+  overflow-x: clip;
+}
+
 .banner__titulo {
   margin-bottom: var(--espaciado-4);
 }

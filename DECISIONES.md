@@ -801,6 +801,22 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   hidden` del viewport: ahora que se ve la imagen completa de cada card (no
   un pedazo recortado), ya se distingue bien cuál es cuál solo con el
   tamaño, el giro y la posición — no hace falta además oscurecerlas.
+- **Actualización: el banner recorta en horizontal, en el borde de la página.**
+  `#banner` suma `overflow-x: clip`, con `margin-inline` negativo y `padding-inline`
+  del mismo valor (`--espaciado-6`, el padding de `main`). **Por qué:** entre unos
+  600 y 800px de ancho las cards de los costados giran en 3D y se pasan del ancho
+  de la pantalla (medido: 8px a 600, 17px a 700, 25px a 768 y 28px a 800), y la
+  Home se podía arrastrar de costado en tablet; a 320/360 y desde 900px no pasaba.
+  **`clip` y no `hidden`:** `hidden` convierte el otro eje también en recortado y
+  crea un contenedor de scroll; `clip` solo recorta en X y deja visible el eje Y.
+  **El margen negativo con padding:** sin él el recorte quedaría en el borde del
+  banner, 24px adentro de la pantalla (el padding de `main`), y las cards se
+  verían cortadas antes de tiempo; así se cortan en el borde de la pantalla,
+  donde de todas formas se salían. **Respeta la decisión "sin `overflow: hidden`"
+  en `.banner__viewport`:** ahí sigue sin recorte, para que se vean completas
+  mientras haya lugar; solo se corta lo que ya quedaba fuera de la página.
+  Verificado a 320, 360, 600, 700, 768, 800, 900, 1024 y 1440px: sin desborde en
+  ninguno, y a 768px el título y el banner no se movieron.
 
 ### Se eligen los 5 juegos mejor puntuados como "Destacados" — y Neon Circuit siempre primero
 - **Qué:** `carousel.js` ordena el catálogo de la API por `rating` y toma

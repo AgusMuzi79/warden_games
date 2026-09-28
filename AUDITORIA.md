@@ -40,7 +40,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | **Hecha** | `git log --grep T04` |
 | T05 | S3 | Newsletter: el POST termina en una página de error | **Hecha** | `git log --grep T05` |
-| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
+| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). El banner a 768 px, resuelto después (ver el detalle) | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | **Hecha** | `git log --grep T07` |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | **Hecha** | `git log --grep T09` |
@@ -112,12 +112,14 @@ propuesta) está en el informe original.
   angostas que Orbitron.
 - **Resultado:** en `index.html`, `scrollWidth` = `clientWidth` a 320, 359, 360 y
   390 px.
-- **Lo que sigue sin resolver y no es del footer:**
-  - A 768 px el banner se pasa 25 px: las cards de los costados del coverflow
-    giran fuera del ancho de la pantalla. No está en el informe; se trata aparte.
-  - `producto.html` y `juego.html` a 360 px se pasan 18 px por el panel lateral
-    fijo de 320 px. Son páginas solo desktop según el enunciado, así que no se
-    tocan.
+- **El banner a 768 px (cerrado después):** entre unos 600 y 800 px las cards de
+  los costados del coverflow se pasaban del ancho (8 a 28 px) y la Home se podía
+  arrastrar de costado en tablet. No estaba en el informe. Se resolvió con
+  `overflow-x: clip` en `#banner` (ver `DECISIONES.md`, actualización en "Carrusel
+  coverflow"). Commit: `git log --grep "banner a tablet"`.
+- **Lo que sigue sin resolver y no es del footer:** `producto.html` y `juego.html`
+  a 360 px se pasan 18 px por el panel lateral fijo de 320 px. Son páginas solo
+  desktop según el enunciado, así que no se tocan.
 
 ### T13 — Etiquetas del banner cortadas en mobile (S3) · hecha
 
