@@ -14,7 +14,6 @@ const elementos = {
   categoriaFicha: document.getElementById('producto-categoria-ficha'),
   rating: document.getElementById('producto-rating'),
   accion: document.getElementById('producto-accion'),
-  accionIcono: document.getElementById('producto-accion-icono'),
   accionTexto: document.getElementById('producto-accion-texto'),
   linkCompartir: document.getElementById('link-juego'),
   mailCompartir: document.getElementById('producto-compartir-mail'),
@@ -37,9 +36,6 @@ function configurarAccion(juego) {
   const esComprable = esDePago(juego.id) && !comprado;
 
   elementos.accionTexto.textContent = esComprable ? 'Comprar' : 'Jugar';
-  elementos.accionIcono.className = esComprable
-    ? 'ph ph-shopping-cart-simple'
-    : 'ph ph-play';
   elementos.accion.setAttribute(
     'aria-label',
     esComprable ? `Comprar ${juego.name}` : `Jugar a ${juego.name}`
@@ -76,6 +72,12 @@ function mostrarJuego(juego) {
   elementos.mailCompartir.href = `mailto:?subject=${encodeURIComponent(`Mirá ${juego.name}`)}&body=${encodeURIComponent(`Mirá este juego: https://wardengames.com/producto.html?id=${juego.id}`)}`;
 
   configurarAccion(juego);
+
+  // Galería animada (mismo carrusel de flip que juego.html, motor en
+  // js/galeria.js): la API solo trae 1 foto real por juego, así que la
+  // lista tiene un único elemento — ver la nota en producto.html sobre
+  // qué pasa con el flip cuando hay una sola foto.
+  iniciarGaleria([{ src: juego.background_image, alt: `Portada de ${juego.name}` }]);
 }
 
 // Sin backend ni catálogo de respaldo acá (a diferencia de home.js): esta

@@ -184,9 +184,11 @@
 
         <!-- Galería (Etapa 4, parte 5; animada en la 2ª corrección del TPE2).
              Ya no es una grilla estática: es un carrusel de "una foto a la
-             vez" con transición de flip 3D (js/galeria.js). Las primeras 2
-             fotos van hardcodeadas acá (son las 2 caras de la tarjeta); el
-             resto de la lista (FOTOS en galeria.js) define las que siguen. -->
+             vez" con transición de flip 3D. El motor genérico del flip vive
+             en js/galeria.js (compartido con producto.html); la lista de
+             las 6 fotos reales de Neon Circuit está en js/juego.js, que la
+             pasa con iniciarGaleria(). Los src/alt de acá abajo son solo el
+             arranque (foto 1 y 2); el resto entra por JS al navegar. -->
         <section class="galeria" aria-labelledby="galeria-titulo">
           <div class="galeria__cabecera">
             <h2 id="galeria-titulo">Galería</h2>
@@ -469,9 +471,9 @@
   </footer>
 
   <script src="./js/api.js" defer></script>
+  <script src="./js/galeria.js" defer></script>
   <script src="./js/juego.js" defer></script>
   <script src="./js/compartir.js" defer></script>
   <script src="./js/resena.js" defer></script>
-  <script src="./js/galeria.js" defer></script>
 </body>
 </html>

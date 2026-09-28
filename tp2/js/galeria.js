@@ -1,6 +1,9 @@
-// Galería animada de la página del juego (Etapa 4, parte 5 — animada en la
-// 2ª corrección del TPE2). Es un carrusel de "una foto a la vez": al pasar
-// de una a otra, la tarjeta gira en 3D como una ficha que se da vuelta.
+// Motor de la galería animada (carrusel de flip 3D). No trae datos
+// propios: es genérico, lo comparten juego.html (Neon Circuit, 6 fotos
+// reales, ver js/juego.js) y producto.html (un juego del catálogo de la
+// API, que solo tiene 1 foto real — la portada, ver js/producto.js). Cada
+// página le pasa su propia lista de fotos llamando a iniciarGaleria(fotos)
+// una vez que las tiene listas.
 //
 // El giro en sí (la animación) lo resuelve el CSS (.galeria__carta,
 // components.css) con la variable --angulo y una transition sobre
@@ -8,38 +11,40 @@
 // a la cara que está escondida, y cuánto hay que sumarle al ángulo para
 // que esa cara pase al frente.
 
-// Las 6 capturas, en el mismo orden que documenta DECISIONES.md. La 0 y la
-// 1 ya están puestas directo en el HTML (son las 2 caras con las que
-// arranca la tarjeta); esta lista es la fuente de verdad para las que van
-// entrando después.
-const FOTOS_GALERIA = [
-  { src: 'assets/img/inicio-juego.png', alt: 'Tablero de Neon Circuit al arrancar la partida, con los 33 nodos activos y el hueco central.' },
-  { src: 'assets/img/ficha-seleccionada.png', alt: 'Un nodo seleccionado en el tablero, listo para saltar.' },
-  { src: 'assets/img/ficha-salto.png', alt: 'El momento del salto de un nodo sobre otro hacia un casillero descargado.' },
-  { src: 'assets/img/juego-avanzado.png', alt: 'Partida avanzada, con buena parte de los nodos ya descargados del tablero.' },
-  { src: 'assets/img/victoria.png', alt: 'Pantalla de victoria, con un único nodo restante en el centro del tablero.' },
-  { src: 'assets/img/glitch-gameover.png', alt: 'Pantalla de fin de partida, con un efecto glitch sobre el tablero.' },
-];
+// fotos: array de { src, alt }, con al menos 1 elemento. Si solo hay 1
+// foto real (como en producto.html), las 2 caras terminan mostrando la
+// misma — no hay una 2da foto real para poner ahí, pero el carrusel se
+// sigue viendo y las flechas siguen animando el giro igual.
+function iniciarGaleria(fotos) {
+  const carta = document.getElementById('galeria-carta');
 
-const carta = document.getElementById('galeria-carta');
+  // No todas las páginas tienen esta galería (aunque hoy la tengan las 2
+  // que la llaman) — sin este chequeo, cualquier página sin el HTML
+  // correspondiente tiraría error acá.
+  if (!carta || !fotos || fotos.length === 0) return;
 
-// La página del juego es la única que tiene esta galería animada
-// (producto.html sigue con la grilla de gradientes) — sin este chequeo,
-// el script tiraría error en cualquier otra página que lo cargara.
-if (carta) {
   const imgA = document.getElementById('galeria-img-a');
   const imgB = document.getElementById('galeria-img-b');
   const contador = document.getElementById('galeria-contador');
   const botonPrev = document.getElementById('galeria-prev');
   const botonNext = document.getElementById('galeria-next');
 
-  // Índice de la foto que se ve ahora mismo (arranca en 0: la que ya
-  // puso el HTML en la cara A).
+  // Deja las 2 caras con las primeras 2 fotos de la lista recibida (si
+  // solo hay 1, Math.min hace que las 2 caras arranquen con esa misma).
+  imgA.src = fotos[0].src;
+  imgA.alt = fotos[0].alt;
+  const indiceB = Math.min(1, fotos.length - 1);
+  imgB.src = fotos[indiceB].src;
+  imgB.alt = fotos[indiceB].alt;
+
+  // Índice de la foto que se ve ahora mismo (arranca en 0: la que se
+  // acaba de poner en la cara A).
   let indiceVisible = 0;
 
   // Cuál de las 2 caras NO se ve en este momento. Arranca en 'b' porque
-  // así la dejó el HTML: cara A al frente (0°) con la foto 0, cara B
-  // escondida (pre-girada 180° en el CSS) con la foto 1.
+  // así la dejamos recién: cara A al frente (0°, su rotación por
+  // defecto) con la foto 0, cara B escondida (pre-girada 180° en el CSS)
+  // con la foto 1 (o la 0 repetida, si no hay una 2da foto real).
   let caraOculta = 'b';
 
   // Ángulo acumulado de la tarjeta. Nunca "vuelve" a 0 al llegar a 360:
@@ -49,12 +54,13 @@ if (carta) {
   let angulo = 0;
 
   function actualizarContador() {
-    contador.textContent = `Foto ${indiceVisible + 1} de ${FOTOS_GALERIA.length}`;
+    contador.textContent = `Foto ${indiceVisible + 1} de ${fotos.length}`;
   }
+  actualizarContador();
 
   // direccion: 1 para "foto siguiente", -1 para "foto anterior".
   function girar(direccion) {
-    const total = FOTOS_GALERIA.length;
+    const total = fotos.length;
 
     // Calculamos qué foto va a mostrarse ahora, en base a la que se ve
     // hoy (no a lo que se venía preparando de antes): así el carrusel
@@ -67,8 +73,8 @@ if (carta) {
     // La cargamos en la cara que en este momento está escondida: como no
     // se ve, este cambio de imagen es invisible hasta que la tarjeta gire.
     const imgDestino = caraOculta === 'a' ? imgA : imgB;
-    imgDestino.src = FOTOS_GALERIA[nuevoIndice].src;
-    imgDestino.alt = FOTOS_GALERIA[nuevoIndice].alt;
+    imgDestino.src = fotos[nuevoIndice].src;
+    imgDestino.alt = fotos[nuevoIndice].alt;
 
     // Giramos la tarjeta 180° hacia el lado que corresponda a la
     // dirección: esto es lo único que dispara la animación (el resto lo
