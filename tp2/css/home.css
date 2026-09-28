@@ -398,6 +398,9 @@
 }
 
 .game-card__media {
+  /* Ahora es un <a> (antes <div>): sin esto, al ser inline por defecto,
+     el layout de la card se rompía (la imagen no ocupaba todo el ancho). */
+  display: block;
   position: relative;
 }
 
