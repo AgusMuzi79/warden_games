@@ -802,6 +802,30 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   pero deja las dos etiquetas con alturas distintas (el badge de precio tiene
   borde de 1px).
 
+### Etiquetas y nombre del banner en mobile: wrap y 16px (T13)
+- **Qué:** `.banner__etiquetas` suma `right: var(--espaciado-4)` y `flex-wrap: wrap`
+  (si "Destacado" + "Gratis"/precio/"Nuevo" no entran en una fila, la segunda
+  baja a otra). `.banner__nombre` pasa a 16px de base y 22px desde `48rem`
+  (mobile first, como el resto de la Home). En desktop no cambia nada.
+- **Por qué:** a 320px la card activa mide unos 162px de ancho y tiene
+  `overflow: hidden`. Medido en las 5 cards: "Gratis" o "Nuevo" quedaban
+  cortadas contra el borde derecho en las 4 que tienen etiqueta, y el nombre a
+  22px ocupaba hasta 3 líneas y el 58 % del alto de la card ("Red Dead
+  Redemption 2"). Perder el precio o "Gratis" es perder información de compra
+  (WCAG 2.2 SC 1.4.10, Reflow). Después del cambio: 0 etiquetas cortadas a 320
+  y 360px, y el nombre ocupa como mucho 2 líneas.
+- **`text-shadow` con el token, en dos capas:** el valor viejo era un
+  `rgba(0, 0, 0, 0.6)` escrito a mano, que rompe la regla de no escribir
+  colores sueltos. El informe proponía cambiarlo por `--sombra-elevacion`
+  (0.35), pero una sola capa queda más suave y el nombre se lee peor sobre las
+  imágenes claras. Se usan dos sombras con el mismo token (`0 2px 8px` y
+  `0 1px 3px`) para compensar sin inventar un color nuevo.
+- **Tamaños en px:** el proyecto no tiene tokens de tamaño de letra y
+  `.banner__nombre` ya estaba en px; se sigue esa convención.
+- **Descartado:** acortar los nombres largos con puntos suspensivos. En el banner
+  hay espacio de sobra para 2 líneas, y cortar el nombre de un juego destacado
+  es perder justo lo que se quiere mostrar.
+
 ### Dots como barritas finitas (estilo Steam), no círculos
 - **Qué:** `.banner__dot` es un botón de 28×24px sin nada visible propio; la
   barrita (4px de alto, bien angosta) es un `::before` adentro.

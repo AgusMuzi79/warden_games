@@ -47,7 +47,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T10 | S2 | Links del hamburguesa que no hacen nada | Pendiente | — |
 | T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
 | T12 | S2 | Galería de producto gira hacia la misma foto | A charlar con Fran | — |
-| T13 | S3 | Etiquetas del banner cortadas en mobile | Pendiente | — |
+| T13 | S3 | Etiquetas del banner cortadas en mobile | **Hecha** | `git log --grep T13` |
 | T14 | S1 | El loading dura más de 5 s con la pestaña en segundo plano | Pendiente | — |
 
 ## Detalle por tarea
@@ -118,6 +118,24 @@ propuesta) está en el informe original.
   - `producto.html` y `juego.html` a 360 px se pasan 18 px por el panel lateral
     fijo de 320 px. Son páginas solo desktop según el enunciado, así que no se
     tocan.
+
+### T13 — Etiquetas del banner cortadas en mobile (S3) · hecha
+
+- **Antes (`pre-auditoria`):** `.banner__etiquetas` no tenía límite a la derecha
+  ni `flex-wrap`, y `.banner__nombre` medía 22 px en todos los anchos. La card
+  activa tiene `overflow: hidden`. Medido a 320 px (card de ~162 px): "Gratis" o
+  "Nuevo" quedaban cortadas en las 4 cards que tienen etiqueta, y el nombre
+  ocupaba hasta 3 líneas (58 % del alto de la card con "Red Dead Redemption 2").
+- **Criterio que rompía:** WCAG 2.2 SC 1.4.10 Reflow (pérdida de contenido a
+  320 px) y Nielsen #1 (el precio es información de estado de compra).
+- **Después:** las etiquetas hacen `wrap` dentro de la card; el nombre es de 16 px
+  en mobile y 22 px desde tablet. Verificado a 320 y 360 px en los 5 destacados:
+  0 etiquetas cortadas, nombres de 2 líneas como máximo. A 1440 px queda igual
+  (22 px, etiquetas en una fila).
+- **Diferencia con el informe:** la sombra del nombre usa `--sombra-elevacion`
+  en dos capas, no una sola, para no perder legibilidad (ver `DECISIONES.md`).
+- **Justificación:** `DECISIONES.md`, "Etiquetas y nombre del banner en mobile:
+  wrap y 16px (T13)". **Commit:** `git log --grep T13`.
 
 ## Tareas que tocan decisiones ya tomadas
 

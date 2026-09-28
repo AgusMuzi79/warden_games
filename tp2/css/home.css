@@ -198,12 +198,18 @@
 
 /* Agrupa "Destacado" con el badge de Gratis/precio/Nuevo (si el juego
    tiene uno, ver carrito.js crearBadge) arriba a la izquierda — el carrito
-   ya ocupa arriba a la derecha y el nombre, abajo de punta a punta. */
+   ya ocupa arriba a la derecha y el nombre, abajo de punta a punta.
+   right + flex-wrap: en mobile la card activa mide 107-162px y "Destacado" +
+   "Gratis"/precio no entran en una fila; sin esto la segunda etiqueta se
+   recortaba contra el borde (overflow: hidden de la card). Ver AUDITORIA.md,
+   T13. */
 .banner__etiquetas {
   position: absolute;
   left: var(--espaciado-4);
+  right: var(--espaciado-4);
   top: var(--espaciado-4);
   display: flex;
+  flex-wrap: wrap;
   gap: var(--espaciado-2);
 }
 
@@ -223,6 +229,10 @@
   letter-spacing: 0.05em;
 }
 
+/* Mobile first: 16px de base (a 22px el nombre ocupaba 3 líneas y casi
+   el 60 % de la card a 320px); 22px desde tablet, como antes.
+   La sombra usa --sombra-elevacion (un solo token, sin rgba escrito a mano)
+   en dos capas para no perder legibilidad sobre las imágenes claras. */
 .banner__nombre {
   position: absolute;
   left: var(--espaciado-4);
@@ -230,8 +240,14 @@
   bottom: var(--espaciado-4);
   margin: 0;
   color: var(--primario-c3);
-  font: 600 22px/1.3 var(--font-ui);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  font: 600 16px/1.3 var(--font-ui);
+  text-shadow: 0 2px 8px var(--sombra-elevacion), 0 1px 3px var(--sombra-elevacion);
+}
+
+@media (min-width: 48rem) {
+  .banner__nombre {
+    font-size: 22px;
+  }
 }
 
 /* Link invisible que cubre TODA la card (inset: 0, como .banner__jugar):
