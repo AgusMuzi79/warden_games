@@ -224,6 +224,17 @@ function renderizarFilas(juegos) {
     document.getElementById('buscar').value = consultaInicial;
     filtrarJuegos(consultaInicial);
   }
+
+  // Anclas a filas (menú hamburguesa "index.html#fila-acción", menú de
+  // cuenta "index.html#fila-mis-juegos"): las filas recién existen acá,
+  // después del fetch, así que el navegador no las encontró al cargar la
+  // página y no hizo el scroll. Si ya estaban (estando en la Home), el
+  // navegador scrollea solo y esto no cambia nada. El hash viene codificado
+  // ("acci%C3%B3n"), por eso el decodeURIComponent.
+  if (window.location.hash) {
+    const destino = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (destino) destino.scrollIntoView();
+  }
 }
 
 obtenerJuegos()

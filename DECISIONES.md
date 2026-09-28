@@ -282,6 +282,35 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   los botones tienen que seguir en 44px (`--control-alto`), y el logo cambiaría
   de tamaño según el ancho. Ocultar el texto es más simple de explicar.
 
+### Los links del hamburguesa llevan a las filas de la Home (T10)
+- **Qué:** en `#menu-principal` (`index.html` y `producto.html`), "Destacados" apunta
+  a `index.html#banner` y las 8 categorías a `index.html#fila-<categoría>`
+  (`fila-acción`, `fila-shooters`, `fila-rpg`...). `home.js` suma, al final de
+  `renderizarFilas()`, un `scrollIntoView()` del elemento que indique el hash de
+  la URL.
+- **Por qué:** 13 links del menú eran `href="#"` y no hacían nada, aunque las 8
+  categorías ya tenían una fila con ese id en la Home (los ids los arma
+  `crearFila()` como `fila-` + título en minúscula). Nielsen #4: un link tiene
+  que llevar a algún lado. El mismo problema tenía el link "Mis juegos" del menú
+  de cuenta (`index.html#fila-mis-juegos`) al venir de otra página: el navegador
+  busca el ancla al cargar, pero las filas se crean después del `fetch`, así que
+  no la encontraba y no scrolleaba. El bloque nuevo arregla los dos.
+- **Estando en la Home** el navegador scrollea solo (las filas ya existen) y el
+  código nuevo no cambia nada. Desde otra página, la Home se abre ya scrolleada a
+  la fila mientras corre el loading, y el usuario aterriza ahí al terminar.
+- **El título queda bajo el header fijo:** medido, a 76px del borde con el header
+  de 60px, gracias al `scroll-padding-top` de `home.css` (desde tablet; en mobile
+  el header no es fijo).
+- **`decodeURIComponent(hash)`:** los ids con tilde (`fila-acción`) llegan
+  codificados en `location.hash` (`#fila-acci%C3%B3n`). Se dejó el id con tilde
+  en vez de normalizarlo a ASCII: funciona igual y no toca `crearFila()`.
+- **Siguen en `#`:** Últimos, Recientes, Top 100 y Actualizados. No hay datos para
+  esas vistas (la API no trae fechas de actualización ni un ranking), y
+  fingirlos sería peor que dejarlos sin destino. Los del footer tampoco se tocaron.
+- **Límite conocido:** si hay una búsqueda activa (T03) y se elige una categoría
+  cuya fila quedó oculta por el filtro, no hay dónde scrollear. Borrar la
+  búsqueda vuelve a mostrar todo.
+
 ### Header del juego sin menú ni buscador ("modo foco")
 - **Qué:** solo logo, estado de guardado, "Volver al menú" y avatar.
 - **Por qué:** mientras se juega, reducir distracciones. Se deja una salida clara

@@ -44,7 +44,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | **Hecha** | `git log --grep T07` |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | **Hecha** | `git log --grep T09` |
-| T10 | S2 | Links del hamburguesa que no hacen nada | Pendiente | — |
+| T10 | S2 | Links del hamburguesa que no hacen nada | **Hecha** | `git log --grep T10` |
 | T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
 | T12 | S2 | Galería de producto gira hacia la misma foto | A charlar con Fran | — |
 | T13 | S3 | Etiquetas del banner cortadas en mobile | **Hecha** | `git log --grep T13` |
@@ -269,6 +269,24 @@ propuesta) está en el informe original.
   `.btn:disabled:hover` para anularlo; aplica a cualquier botón deshabilitado.
 - **Justificación:** `DECISIONES.md`, "'Pagar carrito' se deshabilita con el
   carrito vacío (T09)". **Commit:** `git log --grep T09`.
+
+### T10 — Links del hamburguesa que no hacen nada (S2) · hecha
+
+- **Antes (`pre-auditoria`):** 13 links del menú hamburguesa eran `href="#"`:
+  5 de "Jugar" y las 8 categorías. Las 8 categorías coinciden 1 a 1 con los ids de
+  las filas que arma `home.js`, y no las usaban. El link "Mis juegos" del menú de
+  cuenta tampoco scrolleaba viniendo de otra página: la fila se crea después del
+  `fetch`, cuando el navegador ya buscó el ancla.
+- **Criterio que rompía:** Nielsen #4 (consistencia) y enunciado, punto 1.
+- **Después:** "Destacados" y las 8 categorías apuntan a `index.html#banner` y
+  `index.html#fila-...`; `home.js` scrollea al hash cuando termina de armar las
+  filas. Verificado (1440 px): desde la Home, "RPG" y "Acción" dejan el título de
+  la fila a 76 px del borde, debajo del header fijo, y cierran el menú; desde
+  `producto.html`, "Puzzle" abre la Home ya scrolleada a esa fila.
+- **Quedan en `#`:** Últimos, Recientes, Top 100 y Actualizados (sin datos
+  reales para esas vistas), como propone el informe.
+- **Justificación:** `DECISIONES.md`, "Los links del hamburguesa llevan a las
+  filas de la Home (T10)". **Commit:** `git log --grep T10`.
 
 ## Tareas que tocan decisiones ya tomadas
 
