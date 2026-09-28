@@ -153,11 +153,31 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Descartado:** flex con `justify-content: space-between` (lo centra entre los
   vecinos, no en la página).
 
-### En mobile el buscador baja a una segunda fila
-- **Qué:** con `grid-template-areas`, el buscador ocupa el ancho completo debajo.
-- **Por qué:** en una pantalla angosta no entra en la misma fila sin quedar diminuto.
-  Se mantiene visible (no se esconde tras un ícono) porque buscar es una tarea
-  principal en una plataforma de juegos.
+### En mobile el buscador se esconde tras una lupa y se abre en una segunda fila
+- **Qué:** en mobile el header es una sola fila: menú + logo a la izquierda, una
+  lupa (`.header__search-toggle`, en el medio) y carrito + avatar a la derecha. Al
+  tocar la lupa se abre el buscador en una segunda fila, debajo, de ancho completo,
+  y el foco pasa al input. La lupa lo vuelve a cerrar, y Escape también (devolviendo
+  el foco a la lupa). Desde tablet (`48rem`) la lupa se oculta y el buscador está
+  siempre a la vista, centrado, como antes.
+- **Por qué:** pedido de Agus — el header con 2 renglones fijos ocupaba mucha
+  pantalla en mobile. La lupa en el medio libera ese renglón sin sacar el buscador.
+- **Reemplaza una decisión anterior:** antes el buscador estaba siempre visible en
+  una segunda fila, "porque buscar es una tarea principal". Sigue a un toque de
+  distancia, pero ya no ocupa lugar permanente.
+- **Columnas `auto 1fr auto`, no `1fr auto 1fr`:** con dos `1fr` iguales las
+  columnas de los costados no entraban en 360px y desbordaban. Con `auto 1fr auto`
+  la lupa queda centrada en el espacio libre entre el logo y las acciones (no
+  necesariamente en el centro exacto de la pantalla, pero sin desbordar).
+- **Se abre con una clase (`.header__search--abierto`), no con `[hidden]`:** en
+  desktop el buscador tiene que verse siempre, y `[hidden] { display: none
+  !important }` no se puede pisar desde un `@media`.
+- **`js/buscador.js` aparte de `menu.js`, y sin `aria-controls`:** `menu.js`
+  engancha cualquier botón que tenga `aria-controls` + `aria-expanded`, y cierra
+  sus paneles al clickear en cualquier lado — incluido el propio input. Eso
+  cerraría el buscador al tocarlo para escribir. La lupa lleva solo `aria-expanded`.
+- **Se aplica también a `producto.html`:** comparte el mismo header y el mismo CSS,
+  así que tiene la lupa y el `<script>` igual que la Home.
 
 ### Header fijo solo en la Home, y solo desde tablet
 - **Qué:** `.header--fijo` (`position: sticky; top: 0; z-index: 200`, dentro del

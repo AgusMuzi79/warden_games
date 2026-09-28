@@ -6,12 +6,17 @@
 
 .header {
   display: grid;
-  grid-template-columns: 1fr auto;
+  /* Mobile: una sola fila con menú + logo, lupa en el medio y acciones.
+     El buscador ("search") es una segunda fila que solo aparece si se toca
+     la lupa (ver .header__search--abierto y js/buscador.js). Sin gap
+     vertical: si no, quedaría un hueco de 8px vacío con el buscador cerrado
+     (el margen lo pone el propio buscador al abrirse). */
+  grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    "start  actions"
-    "search search";
+    "start  lupa   actions"
+    "search search search";
   align-items: center;
-  gap: var(--espaciado-2) var(--espaciado-3);
+  gap: 0 var(--espaciado-3);
   padding: var(--espaciado-2) var(--espaciado-4);
   background: var(--superficie);
 }
@@ -54,9 +59,26 @@
 
 /* ---------- Buscador ---------- */
 
+/* Lupa que abre el buscador en mobile. Reusa .header__icon-btn (44px de
+   área táctil); en tablet/desktop se oculta porque el buscador ya está
+   siempre a la vista. */
+.header__search-toggle {
+  grid-area: lupa;
+  justify-self: center;
+}
+
+/* Mobile: cerrado por default; con la clase --abierto se muestra debajo. Es
+   una clase y no el atributo [hidden] porque en desktop tiene que verse
+   siempre, y [hidden] { display: none !important } no se puede pisar. */
 .header__search {
   grid-area: search;
   position: relative;
+  display: none;
+}
+
+.header__search--abierto {
+  display: block;
+  margin-top: var(--espaciado-2);
 }
 
 .header__search i {
@@ -230,6 +252,16 @@
     grid-template-areas: "start search actions";
     gap: var(--espaciado-6);
     padding-inline: var(--espaciado-6);
+  }
+
+  .header__search,
+  .header__search--abierto {
+    display: block;
+    margin-top: 0;
+  }
+
+  .header__search-toggle {
+    display: none;
   }
 
   /* Solo la Home (index.html): el header queda fijo arriba al scrollear.
