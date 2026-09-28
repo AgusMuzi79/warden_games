@@ -40,7 +40,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
 | T05 | S3 | Newsletter: el POST termina en una página de error | Pendiente | — |
-| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer). Queda el header a 320 px y las etiquetas del banner (T13) | `611d5a3` |
+| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer). Queda el header a 320 px y las etiquetas del banner (T13) | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | Pendiente | — |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | Pendiente | — |
@@ -99,7 +99,7 @@ propuesta) está en el informe original.
 - **Después:** `.footer__bottom` usa `minmax(0, 1fr)` (una columna en mobile,
   `repeat(2, minmax(0, 1fr))` desde tablet). A 320 px newsletter y empresa quedan
   en x=290; a 768 px son dos columnas iguales (343 px cada una).
-- **Commit:** `611d5a3`. **Justificación:** `DECISIONES.md`, "Franja de abajo del
+- **Commit:** `a055720`. **Justificación:** `DECISIONES.md`, "Franja de abajo del
   footer con `minmax(0, 1fr)` (T06)".
 - **Qué sigue desbordando a 320 px (medido después del arreglo):**
   - `.header__actions` / avatar: llega a x=324 con 310 disponibles. El header de
