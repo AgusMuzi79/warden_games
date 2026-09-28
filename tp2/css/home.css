@@ -207,12 +207,18 @@
   gap: var(--espaciado-2);
 }
 
+/* Mismo radio y line-height que .badge (components.css) para que las dos
+   etiquetas se vean como un par. Con inline-flex + align-items el texto
+   queda centrado en vertical aunque el flex padre (.banner__etiquetas) la
+   estire a la altura del badge de al lado. */
 .banner__etiqueta {
+  display: inline-flex;
+  align-items: center;
   padding: var(--espaciado-1) var(--espaciado-3);
-  border-radius: 999px;
+  border-radius: var(--radio-sm);
   background: var(--acento);
   color: var(--fondo);
-  font: 600 12px/1 var(--font-ui);
+  font: 700 12px/1.4 var(--font-ui);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }

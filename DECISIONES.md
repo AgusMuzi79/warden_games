@@ -589,6 +589,20 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   está activa (que es el único momento en que el botón es clickeable) — pero
   se corta la propagación igual para que no dependa de esa coincidencia.
 
+### Etiqueta "Destacado": mismo radio que `.badge`, texto centrado con `inline-flex`
+- **Qué:** `.banner__etiqueta` pasó de `border-radius: 999px` + `line-height: 1`
+  a `--radio-sm` + `line-height: 1.4` (los mismos valores que `.badge`), y
+  suma `display: inline-flex; align-items: center`.
+- **Por qué:** `.banner__etiquetas` es un flex con `align-items: stretch` (el
+  default), así que cuando el juego tiene un badge al lado ("Gratis", precio,
+  "Nuevo"), que es más alto, "Destacado" se estiraba a esa altura. Con
+  `line-height: 1` el texto quedaba pegado arriba (no centrado) y el 999px
+  sobre una caja más alta se veía como un radio exagerado. Igualar radio y
+  line-height con `.badge` hace que las dos etiquetas se vean como un par.
+- **Descartado:** `align-items: center` en el contenedor — evita el estiramiento,
+  pero deja las dos etiquetas con alturas distintas (el badge de precio tiene
+  borde de 1px).
+
 ### Dots como barritas finitas (estilo Steam), no círculos
 - **Qué:** `.banner__dot` es un botón de 28×24px sin nada visible propio; la
   barrita (4px de alto, bien angosta) es un `::before` adentro.
