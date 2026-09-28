@@ -36,7 +36,13 @@ function crearCard(juego) {
   const media = document.createElement('a');
   media.className = 'game-card__media';
   media.href = `producto.html?id=${juego.id}`;
-  media.setAttribute('aria-label', `Ver ${juego.name}`);
+  // El link de la imagen es un atajo para mouse y touch: el del nombre
+  // (.game-card__texto, más abajo) ya lleva al mismo lugar. Fuera del orden
+  // de Tab y oculto para lectores de pantalla, así teclado y lector pasan
+  // una sola vez por cada juego (ver DECISIONES.md, "Etapa 2: las cards de
+  // las filas de la Home enlazan a la ficha", costo asumido revisado).
+  media.tabIndex = -1;
+  media.setAttribute('aria-hidden', 'true');
 
   const imagen = document.createElement('img');
   imagen.className = 'game-card__image';
@@ -85,7 +91,10 @@ function crearCardComprado(juego) {
   const media = document.createElement('a');
   media.className = 'game-card__media';
   media.href = `producto.html?id=${juego.id}`;
-  media.setAttribute('aria-label', `Ver ${juego.nombre}`);
+  // Mismo criterio que crearCard(): el link de la imagen es un atajo, el
+  // del nombre ya lleva al mismo lugar.
+  media.tabIndex = -1;
+  media.setAttribute('aria-hidden', 'true');
 
   const imagen = document.createElement('img');
   imagen.className = 'game-card__image';

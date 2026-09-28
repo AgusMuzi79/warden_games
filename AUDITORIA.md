@@ -45,7 +45,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | **Hecha** | `git log --grep T09` |
 | T10 | S2 | Links del hamburguesa que no hacen nada | **Hecha** | `git log --grep T10` |
-| T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
+| T11 | S2 | Dos paradas de Tab por card | **Hecha**. Avisar a Fran | `git log --grep T11` |
 | T12 | S2 | Galería de producto gira hacia la misma foto | **Hecha** (variante: mensaje en la 2ª cara, no se sacan las flechas). Avisar a Fran | `git log --grep T12` |
 | T13 | S3 | Etiquetas del banner cortadas en mobile | **Hecha** | `git log --grep T13` |
 | T14 | S1 | El loading dura más de 5 s con la pestaña en segundo plano | **Hecha** | `git log --grep T14` |
@@ -341,6 +341,24 @@ propuesta) está en el informe original.
 - **Pendiente:** avisarle a Fran del cambio (toca su decisión, aunque no la revierte).
 - **Justificación:** `DECISIONES.md`, actualización (T12) dentro de "Galería
   animada en `producto.html`". **Commit:** `git log --grep T12`.
+
+### T11 — Cada card tiene dos paradas de Tab al mismo destino (S2) · hecha
+
+- **Antes (`pre-auditoria`):** `crearCard()` y `crearCardComprado()` (`home.js`)
+  ponían `aria-label` en el link de la imagen, así que quedaba en el orden de Tab
+  igual que el del nombre. Con los datos de respaldo (10 cards): 2 paradas por
+  card; con la API real, hasta 80 en total.
+- **Criterio que rompía:** Nielsen #7 (flexibilidad y eficiencia de uso).
+- **Qué decía `DECISIONES.md`:** aceptaba las 2 paradas como "costo asumido", por
+  mantener el HTML simple.
+- **Después:** el link de la imagen pasa a `tabIndex = -1` y `aria-hidden="true"`.
+  El del nombre no cambia. El HTML sigue simple, así que no contradice el motivo
+  de la decisión original — se revisa, no se revierte.
+- **Verificado:** 71 cards en la Home (API real), 0 links de imagen alcanzables
+  con Tab, y un clic en la imagen sigue llevando a la ficha del juego.
+- **Pendiente:** avisarle a Fran (toca la nota "costo asumido" que él escribió).
+- **Justificación:** `DECISIONES.md`, actualización (T11) dentro de "Etapa 2: las
+  cards de las filas de la Home enlazan a la ficha". **Commit:** `git log --grep T11`.
 
 ## Tareas que tocan decisiones ya tomadas
 

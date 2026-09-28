@@ -2582,6 +2582,19 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
   (`evento.target.closest('button, a')`, ver "Bug real: el botón de la
   card no respondía al click con mouse") — cubre el link nuevo sin
   cambios.
+- **Actualización (T11): se revisa el "costo asumido".** En `crearCard()` y
+  `crearCardComprado()` (`home.js`), el link de la imagen ya no lleva
+  `aria-label`: pasa a `tabIndex = -1` y `aria-hidden="true"`. El del nombre
+  (`.game-card__texto`) sigue igual y lleva al mismo lugar.
+  **Por qué:** la auditoría (T11) midió, con los datos de respaldo, 2 paradas de
+  Tab por card (imagen y nombre) y el lector de pantalla anunciando cada juego
+  dos veces; con la API real (~80 juegos, hasta 8 filas) son hasta 80 paradas
+  redundantes para llegar del banner al footer (Nielsen #7). El HTML sigue
+  simple (dos atributos, nada de `position: absolute` ni `z-index`), así que no
+  contradice el motivo original de aceptar el costo.
+  **Verificado:** con 71 cards en la Home, 0 links de imagen quedan alcanzables
+  con Tab, todos con `aria-hidden`, y un clic en la imagen sigue navegando a la
+  ficha (mouse/touch no cambian).
 
 ### Etapa 3: el banner "Destacados" enlaza a la ficha, reemplaza el agregar-al-carrito directo
 - **Qué:** en `carousel.js`, `.banner__carrito` (el botón que agregaba al
