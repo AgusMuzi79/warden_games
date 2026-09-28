@@ -8,7 +8,8 @@
 // cualquier lado — eso cerraría el buscador al tocar el input para escribir.
 //
 // Buscar: en la Home filtra las filas ya armadas, sin recargar (una recarga
-// volvería a mostrar el loading de 5 segundos).
+// volvería a mostrar el loading de 5 segundos). En cualquier otra página
+// (producto.html) lleva a la Home con ?q=...
 
 // Global a propósito (los scripts no usan type="module"): home.js la va a
 // llamar al terminar de armar las filas si la búsqueda vino de otra página.
@@ -106,10 +107,16 @@ if (buscador) {
 
   buscador.addEventListener('submit', (evento) => {
     // Sin esto, el form (action="#") recarga la página: en la Home vuelve el
-    // loading de 5 s.
+    // loading de 5 s, y en producto.html se pierde el ?id= del juego.
     evento.preventDefault();
 
-    if (!estamosEnLaHome()) return;
+    // Fuera de la Home (producto.html) no hay filas que filtrar: se va a la
+    // Home con ?q=..., y home.js aplica el filtro cuando termina de armar
+    // las filas (recién existen después del fetch).
+    if (!estamosEnLaHome()) {
+      window.location.href = `index.html?q=${encodeURIComponent(inputBuscador.value.trim())}`;
+      return;
+    }
 
     filtrarJuegos(inputBuscador.value);
   });

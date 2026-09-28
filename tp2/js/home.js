@@ -215,6 +215,15 @@ function renderizarFilas(juegos) {
   }
   renderizarMisJuegos();
   renderizarCategorias(juegos);
+
+  // Búsqueda hecha desde otra página: buscador.js lleva a index.html?q=...
+  // Las filas recién existen acá (después del fetch), por eso el filtro se
+  // aplica al final y no al cargar la página.
+  const consultaInicial = new URLSearchParams(window.location.search).get('q');
+  if (consultaInicial) {
+    document.getElementById('buscar').value = consultaInicial;
+    filtrarJuegos(consultaInicial);
+  }
 }
 
 obtenerJuegos()

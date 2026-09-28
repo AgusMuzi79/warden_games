@@ -211,6 +211,38 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **En las otras páginas no cambia nada:** el script solo se carga en la Home; en
   el resto el logo sigue llevando a `index.html`.
 
+### El buscador filtra en el lugar (Home) o lleva a la Home con `?q=` (T03)
+- **Qué:** Enter en el buscador del header ya no recarga la página. En la Home,
+  `filtrarJuegos()` (`js/buscador.js`) oculta las cards que no coinciden con el
+  nombre, oculta las filas que quedan sin ninguna card, y escribe un resultado en
+  `#busqueda-estado` ("2 juegos para “portal”", o "No encontramos juegos para
+  “zzz”. Probá con otro nombre."). Borrar el texto (la "x" del input) vuelve a
+  mostrar todo. Desde `producto.html` no hay filas para filtrar: lleva a
+  `index.html?q=...`, y `home.js` aplica el filtro al final de `renderizarFilas()`
+  y escribe la consulta en el input.
+- **Por qué:** venía del `action="#"` del form: Enter recargaba la página, en la
+  Home volvía el loading de 5 segundos sin ningún resultado, y en `producto.html`
+  se perdía el `?id=` y aparecía "No encontramos este juego". Detectado en la
+  auditoría UX (T03). Buscar era el control más visible del header y no hacía nada.
+- **Se cuentan juegos distintos, no cards:** un juego puede estar en varias filas
+  (Acción y RPG). El número usa los nombres únicos para que "3 juegos" sea cierto.
+- **Después de buscar, la vista baja hasta el mensaje** (`scrollIntoView`, sin
+  animación con `prefers-reduced-motion`): el banner ocupa casi toda la primera
+  pantalla, y sin esto no se vería que pasó algo. El `scroll-padding-top` de
+  `home.css` lo deja debajo del header fijo. Ajuste nuestro, no estaba en la
+  auditoría.
+- **`buscador.js` se carga antes que `home.js`:** `home.js` llama a
+  `filtrarJuegos()` cuando termina el `fetch`. Si la API respondía muy rápido
+  (desde caché) antes de que se ejecutara `buscador.js`, el filtro se salteaba
+  sin avisar. `filtrarJuegos` es global a propósito (los scripts no usan
+  `type="module"`).
+- **En mobile, con `?q=`, el input queda cerrado** (la lupa lo abre): el mensaje de
+  resultados igual muestra qué se buscó.
+- **Descartado:** una página de resultados aparte. Hay 80 juegos y ya están todos
+  en la Home; una página nueva sumaba otro `<h1>`, otro header y otro loading sin
+  aportar nada. También se descartó normalizar tildes ("accion" = "Acción"): los
+  nombres de la API son casi todos en inglés.
+
 ### Header del juego sin menú ni buscador ("modo foco")
 - **Qué:** solo logo, estado de guardado, "Volver al menú" y avatar.
 - **Por qué:** mientras se juega, reducir distracciones. Se deja una salida clara
