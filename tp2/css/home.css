@@ -555,3 +555,14 @@
     transition: none;
   }
 }
+
+/* Con el header fijo (desde tablet, ver .header--fijo en header.css), un
+   link a un ancla como "Mis juegos" (index.html#fila-mis-juegos) dejaba el
+   título de la fila tapado por el header. scroll-padding-top le dice al
+   navegador cuánto espacio dejar arriba al scrollear a un ancla: alto del
+   header (control + padding de arriba y de abajo) más un poco de aire. */
+@media (min-width: 48rem) {
+  html {
+    scroll-padding-top: calc(var(--control-alto) + 2 * var(--espaciado-2) + var(--espaciado-4));
+  }
+}

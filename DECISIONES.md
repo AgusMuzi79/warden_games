@@ -159,6 +159,25 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   Se mantiene visible (no se esconde tras un ícono) porque buscar es una tarea
   principal en una plataforma de juegos.
 
+### Header fijo solo en la Home, y solo desde tablet
+- **Qué:** `.header--fijo` (`position: sticky; top: 0; z-index: 200`, dentro del
+  `@media (min-width: 48rem)` de `header.css`), puesto solo en `index.html`.
+  `juego.html` (`.header--juego`) y `producto.html` no lo llevan. En mobile no
+  queda fijo.
+- **Por qué:** pedido de Agus. En la Home hay mucho scroll (banner + varias filas
+  + footer) y tener el menú, el carrito y la cuenta siempre a mano ayuda. En la
+  página del juego el "modo foco" busca lo contrario, y la ficha de producto se
+  dejó igual a la del juego. En mobile, un header fijo se come pantalla.
+- **Como variante y no en `home.css`:** es un modificador del componente
+  (`.header--fijo`), igual que `.header--juego`, así que va con el resto del
+  header y cualquier página lo puede activar sumando una clase.
+- **`z-index: 200`:** el mismo que los menús desplegables, por encima del banner
+  coverflow (llega a 100). El loading (500) sigue tapándolo mientras carga.
+- **`scroll-padding-top` en `html` (`home.css`, desde tablet):** con el header fijo,
+  el link "Mis juegos" del menú (`index.html#fila-mis-juegos`) dejaba el título
+  de la fila tapado. El valor sale de tokens: alto del control + padding de arriba
+  y de abajo + un poco de aire.
+
 ### Header del juego sin menú ni buscador ("modo foco")
 - **Qué:** solo logo, estado de guardado, "Volver al menú" y avatar.
 - **Por qué:** mientras se juega, reducir distracciones. Se deja una salida clara

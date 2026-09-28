@@ -232,6 +232,16 @@
     padding-inline: var(--espaciado-6);
   }
 
+  /* Solo la Home (index.html): el header queda fijo arriba al scrollear.
+     Solo desde tablet — en mobile ocuparía demasiado de la pantalla. z-index
+     200, el mismo que los menús (ver .menu-dropdown en components.css):
+     tiene que quedar por encima del banner coverflow (llega a 100). */
+  .header--fijo {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+
   .header--juego {
     grid-template-columns: 1fr auto 1fr;
     grid-template-areas: "start status actions";
