@@ -1024,16 +1024,41 @@ más una que sumamos nosotros al revisar:
   línea recta, 33 nodos, objetivo de terminar con el mínimo posible),
   consistente con el resto de la página en vez de un texto genérico.
 
-### Galería con gradientes de la paleta del tablero, `aria-hidden` por ahora
+### Galería con gradientes de la paleta del tablero, `aria-hidden` por ahora (solo en `producto.html`)
 - **Qué:** `.galeria__grid` tiene 6 `<li>` sin contenido, cada uno con un
   `linear-gradient` distinto combinando los tokens `--tablero-*` (y algún
   color del sitio, como `--acento`/`--primario`, para variar más). Toda la
   lista tiene `aria-hidden="true"`.
-- **Por qué:** decisión de Fran y Agus — todavía no hay capturas reales del
-  juego (se resuelven en otra parte), y unos gradientes lisos sin `alt` no
-  aportan nada a quien usa lector de pantalla; mejor ocultarlos que anunciar
-  6 elementos vacíos. Cuando haya fotos reales con su `alt` correspondiente,
-  se saca el `aria-hidden`.
+- **Por qué:** decisión de Fran y Agus — todavía no hay capturas reales de
+  los juegos del catálogo (son de terceros, no hay como conseguirlas), y unos
+  gradientes lisos sin `alt` no aportan nada a quien usa lector de pantalla;
+  mejor ocultarlos que anunciar 6 elementos vacíos.
+- **Ya no aplica a `juego.html`** (ver "Galería de Neon Circuit: capturas
+  reales" más abajo) — sigue así solo en la ficha de producto genérica
+  (`producto.html`), que muestra cualquier juego de la API.
+
+### Galería de Neon Circuit: capturas reales, ya sin `aria-hidden`
+- **Qué:** en `juego.html`, cada `<li class="galeria__tile">` pasa a tener
+  un `<img class="galeria__img">` adentro (en vez de un gradiente vacío),
+  con `object-fit: cover` para llenar el tile 16:9 sin deformarse, y
+  `overflow: hidden` en `.galeria__tile` para que la imagen respete el
+  borde redondeado. Se saca el `aria-hidden` del `<ul>`, porque ahora cada
+  imagen tiene su propio `alt` describiendo la captura. Las 6, en orden:
+  `inicio-juego.png`, `ficha-seleccionada.png`, `ficha-salto.png`,
+  `juego-avanzado.png`, `victoria.png`, `glitch-gameover.png`.
+- **Por qué:** Fran consiguió las 6 capturas reales del propio juego (Neon
+  Circuit es nuestro, a diferencia de los juegos de la API en
+  `producto.html`) — deja de tener sentido ocultarlas o mostrarlas como
+  gradiente genérico.
+- **Sin recorte:** las 6 imágenes vienen a 1920×1080, exactamente 16:9 —
+  coincide con el `aspect-ratio` que ya tenía `.galeria__tile`, así que
+  `object-fit: cover` no tiene nada que recortar.
+- **`.galeria__tile--1..6` (las clases de gradiente) se dejan intactas en
+  `components.css`:** siguen en uso por `producto.html`, que sí necesita el
+  placeholder para juegos de terceros sin capturas.
+- **Ruta de los archivos:** igual que las portadas — Fran las deja en
+  `assets/` (raíz del repo) y se copian a `tp2/assets/img/` con nombre en
+  minúsculas y sin espacios (ya venían así).
 
 ### Reseñas de Comunidad: 3 distintas, no la misma repetida
 - **Qué:** 3 reseñas con nombre, fecha, puntaje y largo de texto distintos
