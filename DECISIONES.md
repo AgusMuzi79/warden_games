@@ -285,6 +285,23 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   desde desktop, marca + 4 columnas como en Figma.
 - **Por qué:** el footer está en la Home, que es mobile first.
 
+### Franja de abajo del footer con `minmax(0, 1fr)` (T06)
+- **Qué:** `.footer__bottom` (newsletter + datos de la empresa) pasa de una columna
+  automática a `grid-template-columns: minmax(0, 1fr)`, y en tablet de
+  `1fr 1fr` a `repeat(2, minmax(0, 1fr))`.
+- **Por qué:** el mínimo automático de un ítem de grilla es el ancho de su
+  contenido. El form del newsletter (input + botón "Suscribirse") no se achica
+  por debajo de ~310px, así que empujaba la columna más allá del ancho de la
+  pantalla y la Home se podía arrastrar hacia los costados en mobile. Medido en
+  un viewport de 320px: el newsletter y la empresa llegaban hasta x=330 con
+  310px disponibles; con el cambio quedan en x=290. `minmax(0, 1fr)` deja que la
+  columna se achique a lo que haya. Incumplía WCAG 2.2 SC 1.4.10 (Reflow).
+- **`1fr 1fr` también se cambió:** en tablet `1fr` es en realidad
+  `minmax(auto, 1fr)`, el mismo problema apenas el contenido no entre. Con
+  `minmax(0, 1fr)` las dos columnas quedan siempre iguales.
+- **Descartado:** achicar el form del newsletter con `min-width: 0` a mano en
+  cada hijo. Arreglar la grilla resuelve la causa, no cada síntoma.
+
 ---
 
 ## Loading de la Home

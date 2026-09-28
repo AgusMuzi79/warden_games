@@ -125,8 +125,13 @@
 
 /* ---------- Newsletter + empresa ---------- */
 
+/* minmax(0, 1fr) en vez de la columna automática: el mínimo automático de un
+   ítem de grilla es el ancho de su contenido, y el form del newsletter
+   (input + botón) empujaba la columna más allá del ancho de la pantalla,
+   con scroll horizontal en mobile chico (ver AUDITORIA.md, T06). */
 .footer__bottom {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 2rem;
 }
 
@@ -207,7 +212,7 @@
   }
 
   .footer__bottom {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .legal__meta {

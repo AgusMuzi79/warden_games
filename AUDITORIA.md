@@ -40,7 +40,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
 | T05 | S3 | Newsletter: el POST termina en una página de error | Pendiente | — |
-| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | Pendiente | — |
+| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer). Queda el header a 320 px y las etiquetas del banner (T13) | `611d5a3` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | Pendiente | — |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | Pendiente | — |
@@ -86,6 +86,31 @@ propuesta) está en el informe original.
 - **Qué se descartó:** una página de resultados aparte (otro `<h1>`, otro header
   y otro loading sin aportar nada) y normalizar tildes (los nombres de la API son
   casi todos en inglés).
+
+### T06 — Scroll horizontal en mobile (S3) · hecha (footer)
+
+- **Antes (`pre-auditoria`):** el informe midió `scrollWidth` 368 con viewports de
+  320 y 360 px. Causa: `.footer__bottom` era una grilla de columna automática
+  y el form del newsletter (input + botón) empujaba la columna más allá de la
+  pantalla. Con las fuentes reales (Roboto Flex / Orbitron) y la scrollbar de 10 px
+  del sitio, lo medimos a 320 px: newsletter y empresa llegaban a x=330 con 310 px
+  disponibles. A 360 px, con fuentes reales, el footer ya entraba.
+- **Criterio que rompía:** WCAG 2.2 SC 1.4.10 Reflow (AA) y enunciado, punto 6.
+- **Después:** `.footer__bottom` usa `minmax(0, 1fr)` (una columna en mobile,
+  `repeat(2, minmax(0, 1fr))` desde tablet). A 320 px newsletter y empresa quedan
+  en x=290; a 768 px son dos columnas iguales (343 px cada una).
+- **Commit:** `611d5a3`. **Justificación:** `DECISIONES.md`, "Franja de abajo del
+  footer con `minmax(0, 1fr)` (T06)".
+- **Qué sigue desbordando a 320 px (medido después del arreglo):**
+  - `.header__actions` / avatar: llega a x=324 con 310 disponibles. El header de
+    una fila con la lupa (nuestro) no entra en 320 px con Orbitron. Se resuelve
+    aparte (T06b).
+  - `.banner__etiquetas`: es T13.
+  - A 768 px el banner se pasa 25 px: las cards de los costados del coverflow
+    giran fuera del ancho de la pantalla. No está en el informe; se trata aparte.
+  - `producto.html` y `juego.html` a 360 px se pasan 18 px por el panel lateral
+    fijo de 320 px. Son páginas solo desktop según el enunciado, así que no se
+    tocan.
 
 ## Tareas que tocan decisiones ya tomadas
 
