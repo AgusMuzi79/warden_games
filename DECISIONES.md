@@ -448,6 +448,19 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   oculta el overlay con el atributo `hidden`.
 - **Por qué:** el enunciado pide "loading simulado de 5 segundos con % de avance visible";
   un contador reproducible es más simple de explicar que una animación por `requestAnimationFrame`.
+- **Actualización (T14): el % sale del tiempo transcurrido, no de sumar 1 por tick.**
+  En `loading.js`, `porcentaje` pasa de `porcentaje += 1` a
+  `Math.min(100, Math.floor((performance.now() - inicioCarga) / DURACION_MS * 100))`.
+  El intervalo de 50ms, el aro, las frases y el `inert` no cambian.
+  **Por qué:** los navegadores frenan los timers de una pestaña en segundo plano
+  (ticks de 1 segundo o más), y sumando de a 1 el loading podía tardar más de
+  un minuto si la Home se abría en una pestaña que no estaba al frente (por
+  ejemplo, con clic central). Medido en una pestaña en segundo plano: el código
+  viejo llegó al 21 % después de 20 segundos; el nuevo terminó en 5,7 segundos.
+  Con la pestaña al frente se comporta igual que antes. Si el navegador salta de
+  20 % a 40 % en un tick, las frases siguen en orden (se calculan por tramo).
+  **Descartado:** reemplazar `loading.js` entero, como proponía el informe: el
+  cambio real son tres líneas, y el resto del archivo ya estaba bien.
 
 ### El resto de la página queda `inert` mientras carga
 - **Qué:** mientras el loading está visible, el header, el `main` y el footer tienen el

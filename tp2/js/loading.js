@@ -35,8 +35,16 @@ function actualizarFrase() {
 
 actualizarFrase();
 
+// El % se calcula con el tiempo real transcurrido, no sumando 1 por cada
+// tick: si la pestaña está en segundo plano el navegador frena los timers
+// (ticks de 1 segundo o más), y sumando de a 1 el loading podía tardar más de
+// un minuto. Así siempre termina a los 5 segundos, se vea o no la pestaña
+// (ver AUDITORIA.md, T14).
+const inicioCarga = performance.now();
+
 const timer = setInterval(() => {
-  porcentaje += 1;
+  const transcurrido = performance.now() - inicioCarga;
+  porcentaje = Math.min(PASOS, Math.floor((transcurrido / DURACION_MS) * PASOS));
   numero.textContent = porcentaje;
   anillo.style.strokeDashoffset = CIRCUNFERENCIA * (1 - porcentaje / PASOS);
   actualizarFrase();

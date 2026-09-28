@@ -48,7 +48,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
 | T12 | S2 | Galería de producto gira hacia la misma foto | A charlar con Fran | — |
 | T13 | S3 | Etiquetas del banner cortadas en mobile | **Hecha** | `git log --grep T13` |
-| T14 | S1 | El loading dura más de 5 s con la pestaña en segundo plano | Pendiente | — |
+| T14 | S1 | El loading dura más de 5 s con la pestaña en segundo plano | **Hecha** | `git log --grep T14` |
 
 ## Detalle por tarea
 
@@ -287,6 +287,22 @@ propuesta) está en el informe original.
   reales para esas vistas), como propone el informe.
 - **Justificación:** `DECISIONES.md`, "Los links del hamburguesa llevan a las
   filas de la Home (T10)". **Commit:** `git log --grep T10`.
+
+### T14 — El loading dura más de 5 s con la pestaña en segundo plano (S1) · hecha
+
+- **Antes (`pre-auditoria`):** `loading.js` sumaba 1 % por tick de `setInterval`
+  (cada 50 ms). Con la pestaña en segundo plano el navegador frena los timers y
+  el loading podía tardar mucho más que los 5 s que pide el enunciado.
+  **Medido** en una pestaña en segundo plano, con el código viejo: **21 % después
+  de 20 s**.
+- **Criterio que rompía:** enunciado, punto 3 (loading simulado de 5 segundos),
+  en un caso borde de robustez.
+- **Después:** el % se calcula con `performance.now()` desde que arranca el
+  script. **Medido** en las mismas condiciones: terminó en **5,7 s**. Con la
+  pestaña al frente se comporta como antes. Solo se cambiaron tres líneas de
+  `loading.js`, no el archivo entero.
+- **Justificación:** `DECISIONES.md`, "Contador real de 0 a 100% en 5 segundos"
+  (actualización T14). **Commit:** `git log --grep T14`.
 
 ## Tareas que tocan decisiones ya tomadas
 
