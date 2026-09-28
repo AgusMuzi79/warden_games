@@ -420,19 +420,23 @@
   top: var(--espaciado-2);
 }
 
-/* Fila de abajo: nombre + puntaje a la izquierda, botón de carrito a la
-   derecha (si el juego es "de pago") — ya no superpuesto a la imagen. */
+/* Fila de abajo: nombre a la izquierda, botón de carrito a la derecha (si
+   el juego es "de pago") — ya no superpuesto a la imagen. El min-height
+   iguala el alto con o sin botón, así el título queda a la misma altura
+   en todas las cards de la fila. */
 .game-card__cuerpo {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--espaciado-2);
+  min-height: var(--control-alto);
   padding: var(--espaciado-3);
+  box-sizing: content-box;
 }
 
-/* <a>, no <div>: clickear el nombre/puntaje lleva a la ficha del juego
-   (ver home.js). text-decoration:none porque, si no, el subrayado que
-   pone base.css en hover se ve por debajo del título y el puntaje. */
+/* <a>, no <div>: clickear el nombre lleva a la ficha del juego (ver
+   home.js). text-decoration:none porque, si no, el subrayado que pone
+   base.css en hover se ve por debajo del título. */
 .game-card__texto {
   display: block;
   min-width: 0;
@@ -451,16 +455,7 @@
   font-size: 16px;
 }
 
-.game-card__rating {
-  display: flex;
-  align-items: center;
-  gap: var(--espaciado-1);
-  margin: var(--espaciado-1) 0 0;
-  color: var(--acento);
-  font: 400 14px/1 var(--font-ui);
-}
-
-/* Círculo visual del botón "Agregar al carrito" (solo en cards "de pago",
+/* Cuadrado con esquinas redondeadas del botón "Agregar al carrito" (solo en cards "de pago",
    simulado, ver carrito.js) de las filas de la Home: 44px de área táctil
    (--control-alto) aunque se vea chico, mismo criterio que el resto de
    los controles de ícono del proyecto. El banner "Destacados" ya no tiene
@@ -472,7 +467,7 @@
   width: var(--control-alto);
   height: var(--control-alto);
   border: 2px solid var(--acento);
-  border-radius: 50%;
+  border-radius: var(--radio-md);
   background: var(--fondo-o1);
   color: var(--acento);
   font-size: 18px;

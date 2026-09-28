@@ -375,6 +375,25 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** correción sobre la primera versión de la 3a, que las tenía en
   3:4 (verticales). Las cards de estas filas tienen que ser horizontales.
 
+### Cards sin rating, botón de carrito cuadrado, y alto parejo
+- **Qué:** las cards de las filas ya no muestran la estrella con el rating,
+  solo el título (igual que las de "Mis juegos"). El botón de carrito pasó
+  de círculo (`border-radius: 50%`) a cuadrado con esquinas redondeadas
+  (`--radio-md`), siempre de 44×44px. `.game-card__cuerpo` suma
+  `min-height: var(--control-alto)` (con `box-sizing: content-box`, para que
+  el padding se sume por fuera) y se borró `.game-card__rating`.
+- **Por qué:** pedido de Agus — "Mis juegos" se veía mejor. Las cards eran
+  del mismo ancho y con la misma imagen 16:9; la diferencia era que sin el
+  rating el texto de abajo ocupa una sola línea, y la imagen pasa a ser una
+  parte más grande de la card. El `min-height` iguala el alto con o sin
+  botón (juegos gratis, "Mis juegos"), así el título queda a la misma altura
+  en todas las cards de una fila, centrado en vertical con el botón.
+- **El rating no se pierde:** sigue en la ficha de cada juego
+  (`producto.html`) y sigue usándose para elegir los "Destacados" del banner.
+- **Descartado:** agrandar la imagen (ancho de la card o aspect-ratio) —
+  no hacía falta para lograr lo que se buscaba.
+
+
 ### Datos de respaldo si la API falla
 - **Qué:** `home.js` tiene `JUEGOS_DE_RESPALDO`, 5 juegos reales con género
   incluido, elegidos para cubrir las 4 categorías fijas y el simulado de
