@@ -16,7 +16,10 @@
     "start  lupa   actions"
     "search search search";
   align-items: center;
-  gap: 0 var(--espaciado-3);
+  /* Gap horizontal chico: los botones de ícono ya tienen 44px de área táctil
+     con aire propio, y a 320px la fila (menú + logo, lupa, carrito + avatar)
+     no entraba con 12px entre columnas (ver AUDITORIA.md, T06b). */
+  gap: 0 var(--espaciado-1);
   padding: var(--espaciado-2) var(--espaciado-4);
   background: var(--superficie);
 }
@@ -55,6 +58,20 @@
 .header__logo img {
   width: 32px;
   height: 32px;
+}
+
+/* Bajo 22.5rem (360px) solo queda el ícono del logo: menú + logo con texto +
+   lupa + carrito + avatar necesitan unos 324px y a 320px hay 288, así que el
+   texto "Warden" se montaba debajo de la lupa. El link sigue nombrado por su
+   aria-label ("Warden, ir al inicio"), no depende de este texto. */
+.header__logo span {
+  display: none;
+}
+
+@media (min-width: 22.5rem) {
+  .header__logo span {
+    display: inline;
+  }
 }
 
 /* ---------- Buscador ---------- */

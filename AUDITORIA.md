@@ -40,7 +40,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
 | T05 | S3 | Newsletter: el POST termina en una página de error | Pendiente | — |
-| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer). Queda el header a 320 px y las etiquetas del banner (T13) | `a055720` |
+| T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
 | T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | Pendiente | — |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | Pendiente | — |
@@ -101,11 +101,18 @@ propuesta) está en el informe original.
   en x=290; a 768 px son dos columnas iguales (343 px cada una).
 - **Commit:** `a055720`. **Justificación:** `DECISIONES.md`, "Franja de abajo del
   footer con `minmax(0, 1fr)` (T06)".
-- **Qué sigue desbordando a 320 px (medido después del arreglo):**
-  - `.header__actions` / avatar: llega a x=324 con 310 disponibles. El header de
-    una fila con la lupa (nuestro) no entra en 320 px con Orbitron. Se resuelve
-    aparte (T06b).
-  - `.banner__etiquetas`: es T13.
+- **T06b — el header a 320 px (se encontró al medir con fuentes reales):**
+  después de arreglar el footer, `.header__actions` seguía llegando a x=324 con
+  310 disponibles. El header de una fila con la lupa (cambio nuestro, anterior a
+  la auditoría) necesita unos 324 px de contenido y a 320 px hay 288. Se achicó
+  el gap horizontal y se oculta el texto "Warden" bajo 360 px (queda el ícono).
+  Commit: `git log --grep T06b`. Justificación: `DECISIONES.md`, "Header de
+  mobile a 320px: gap chico y sin el texto del logo bajo 360px (T06b)".
+  El informe original no lo vio porque midió con fuentes de respaldo más
+  angostas que Orbitron.
+- **Resultado:** en `index.html`, `scrollWidth` = `clientWidth` a 320, 359, 360 y
+  390 px.
+- **Lo que sigue sin resolver y no es del footer:**
   - A 768 px el banner se pasa 25 px: las cards de los costados del coverflow
     giran fuera del ancho de la pantalla. No está en el informe; se trata aparte.
   - `producto.html` y `juego.html` a 360 px se pasan 18 px por el panel lateral

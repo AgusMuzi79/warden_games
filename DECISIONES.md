@@ -243,6 +243,27 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   aportar nada. También se descartó normalizar tildes ("accion" = "Acción"): los
   nombres de la API son casi todos en inglés.
 
+### Header de mobile a 320px: gap chico y sin el texto del logo bajo 360px (T06b)
+- **Qué:** en `header.css`, el gap horizontal de la grilla mobile pasa de
+  `--espaciado-3` (12px) a `--espaciado-1` (4px), y el texto "Warden" del logo
+  (`.header__logo span`) se oculta bajo `22.5rem` (360px): queda solo el ícono.
+  Desde 360px vuelve a verse.
+- **Por qué:** el header de una sola fila con la lupa (menú + logo con texto,
+  lupa, carrito y avatar) necesita unos 324px de contenido, y a 320px hay 288.
+  Medido: el avatar llegaba a x=324 con 310 disponibles (scroll horizontal), y
+  reducir solo el gap dejaba la página sin desborde pero con el ícono de la lupa
+  montado sobre la "n" de "Warden". Apareció al medir T06 con las fuentes reales:
+  el informe de la auditoría usó fuentes de respaldo más angostas y no lo vio.
+- **A 360px entra justo** (unos 4px de aire), por eso el corte está ahí y no en
+  un valor más grande: los celulares de 360px son de los más comunes y no
+  queremos sacarles el texto sin necesidad.
+- **El link sigue accesible sin el texto:** `aria-label="Warden, ir al inicio"`
+  está en el `<a>`, no depende del `<span>`. `display: none` lo saca también del
+  lector de pantalla, que ya lee el aria-label.
+- **Descartado:** achicar el tamaño de letra del logo o los botones de ícono —
+  los botones tienen que seguir en 44px (`--control-alto`), y el logo cambiaría
+  de tamaño según el ancho. Ocultar el texto es más simple de explicar.
+
 ### Header del juego sin menú ni buscador ("modo foco")
 - **Qué:** solo logo, estado de guardado, "Volver al menú" y avatar.
 - **Por qué:** mientras se juega, reducir distracciones. Se deja una salida clara
