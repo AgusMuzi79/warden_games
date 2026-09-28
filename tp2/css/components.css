@@ -29,10 +29,14 @@
   transform: scale(0.98);
 }
 
-/* Primario: se eleva y tira sombra al pasar el mouse (animación 1) */
-.btn--primario            { background: var(--primario); color: var(--primario-c3); }
+/* Primario: se eleva y tira sombra al pasar el mouse (animación 1).
+   Fondo --primario-o1 en reposo: con --primario-c3 da 6,17:1. El --primario
+   anterior daba 3,62:1 y no llegaba al 4,5:1 que pide WCAG 1.4.3 para texto
+   de 16px (ver AUDITORIA.md, T02). En :active el fondo sigue siendo el de
+   reposo, así que se oscurece con filter para que igual se note el clic. */
+.btn--primario            { background: var(--primario-o1); color: var(--primario-c3); }
 .btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); transform: translateY(-3px); box-shadow: 0 6px 14px var(--sombra-elevacion); }
-.btn--primario:active     { background: var(--primario-o1); transform: translateY(0) scale(0.98); box-shadow: none; }
+.btn--primario:active     { background: var(--primario-o1); filter: brightness(0.85); transform: translateY(0) scale(0.98); box-shadow: none; }
 
 /* Destructivo: pulso/resplandor rojo que crece y se desvanece (animación 4) */
 .btn--destructivo         { border-color: var(--error); color: var(--error); }

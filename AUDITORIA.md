@@ -36,7 +36,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | ID | Sev. | Hallazgo | Estado | Commit |
 |---|---|---|---|---|
 | T01 | Enunciado | Solo 2 de las 4 animaciones hover de botón se usan en páginas reales | Pendiente | — |
-| T02 | S3 | Texto de botones primarios con contraste 3,62:1 | Pendiente | — |
+| T02 | S3 | Texto de botones primarios con contraste 3,62:1 | **Hecha** | `git log --grep T02` |
 | T03 | S3 | Buscar con Enter recarga la página | **Hecha** | `769186e`, `cee6a59` |
 | T04 | S3 | El acceso a `juego.html` se ve menos de 1 s y en touch nunca | Pendiente | — |
 | T05 | S3 | Newsletter: el POST termina en una página de error | Pendiente | — |
@@ -136,6 +136,21 @@ propuesta) está en el informe original.
   en dos capas, no una sola, para no perder legibilidad (ver `DECISIONES.md`).
 - **Justificación:** `DECISIONES.md`, "Etiquetas y nombre del banner en mobile:
   wrap y 16px (T13)". **Commit:** `git log --grep T13`.
+
+### T02 — Contraste del texto de los botones primarios (S3) · hecha
+
+- **Antes (`pre-auditoria`):** `.btn--primario` usaba `--primario-c3` sobre
+  `--primario`: **3,62:1** con texto de 16 px, cuando WCAG 2.2 SC 1.4.3 (AA) pide
+  4,5:1. Afectaba a todos los botones primarios: Pagar carrito, Confirmar compra,
+  Registrarse, Ingresar, Jugar, Publicar y la acción de la portada de producto.
+- **Después:** fondo `--primario-o1`, **6,17:1**. El hover (elevación y fondo
+  lila claro) no cambia; `:active` se oscurece con `filter`. Medido en el
+  navegador en login: Registrarse, Ingresar y la pestaña activa dan 6,17:1.
+- **Diferencia con el informe:** se corrigió también la pestaña activa de login
+  (`.auth-switch__btn.active`), que tenía el mismo par de colores y el informe
+  no incluyó.
+- **Justificación:** `DECISIONES.md`, "Botón primario y pestaña activa de login
+  en `--primario-o1` (T02)". **Commit:** `git log --grep T02`.
 
 ## Tareas que tocan decisiones ya tomadas
 

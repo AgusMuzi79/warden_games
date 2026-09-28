@@ -1523,6 +1523,27 @@ más una que sumamos nosotros al revisar:
   corrección del profesor cambió el criterio: ahora se pide explícitamente que sean 4
   distintas, una por variante.
 
+### Botón primario y pestaña activa de login en `--primario-o1` (T02)
+- **Qué:** `.btn--primario` pasa de fondo `--primario` (#9B4BDD) a `--primario-o1`
+  (#731EB8), con el mismo texto `--primario-c3`. `:active` sigue con el fondo de
+  reposo, pero suma `filter: brightness(0.85)` para que el clic se note.
+  `.auth-switch__btn.active` (la pestaña activa de Crear Cuenta / Ingresar, en
+  `login.css`) recibe el mismo cambio. El hover no cambia (`--fondo` sobre
+  `--primario-c1`, 8,98:1) ni la animación de elevación.
+- **Por qué:** el texto de 16px sobre `--primario` daba **3,62:1**, por debajo del
+  4,5:1 que pide WCAG 2.2 SC 1.4.3 (AA). Afectaba a todos los botones primarios
+  del sitio (Pagar carrito, Confirmar compra, Registrarse, Ingresar, Jugar,
+  Publicar...). Con `--primario-o1` da **6,17:1**. Medido en el navegador después
+  del cambio: 6,17:1 en los tres botones primarios de login y en la pestaña activa.
+- **La pestaña activa de login no estaba en el informe:** tiene el mismo par de
+  colores (`--primario` + `--primario-c3`, 3,62:1), es un botón de 15px y
+  cae en la misma regla. Se corrigió con el mismo criterio para que los dos
+  violetas del sitio sean el mismo.
+- **Descartado:** invertir los colores (texto `--fondo` sobre `--primario`): da
+  4,07:1 y tampoco llega a 4,5:1. También se descartó tocar el valor de
+  `--primario` en `variables.css`: lo usan los dots, el borde del buscador y otros
+  elementos que sí alcanzan con ese color; cambiar el token movía todo lo demás.
+
 ### Componente `.link`, con dos variantes (cerrado: no hay una tercera captura de Figma para esto)
 - **Qué:** `.link` (color `--acento` siempre, con el subrayado animado que
   crece de izquierda a derecha en hover/foco, reutilizando la misma

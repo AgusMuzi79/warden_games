@@ -102,9 +102,11 @@
   color: var(--primario-c3);
 }
 
+/* --primario-o1, igual que .btn--primario: con --primario-c3 el --primario
+   daba 3,62:1 y no pasaba el 4,5:1 de WCAG 1.4.3 (ver AUDITORIA.md, T02). */
 .auth-switch__btn.active,
 .auth-switch__btn.active:hover {
-  background: var(--primario);
+  background: var(--primario-o1);
   color: var(--primario-c3);
 }
 
