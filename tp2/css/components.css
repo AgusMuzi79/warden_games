@@ -598,7 +598,7 @@
 
 .field input {
   background: var(--fondo);
-  border: 1px solid var(--primario-o1);
+  border: 1px solid var(--primario);
   border-radius: var(--radio-sm);
   padding: var(--espaciado-2) var(--espaciado-4);
   color: var(--primario-c3);
@@ -981,7 +981,7 @@
   flex: 1;
   min-height: var(--control-alto);
   padding: 0 var(--espaciado-3);
-  border: 1px solid var(--primario-o1);
+  border: 1px solid var(--primario);
   border-radius: var(--radio-sm);
   background: var(--fondo);
   color: var(--primario-c1);
@@ -1185,7 +1185,7 @@
 .resena-form textarea {
   min-height: 96px;
   padding: var(--espaciado-3);
-  border: 1px solid var(--primario-o1);
+  border: 1px solid var(--primario);
   border-radius: var(--radio-sm);
   background: var(--fondo);
   color: var(--primario-c3);

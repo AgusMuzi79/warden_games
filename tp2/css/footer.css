@@ -157,7 +157,7 @@
   min-height: var(--control-alto);
   padding: 0 var(--espaciado-3);
   background: var(--fondo);
-  border: 1px solid var(--primario-o1);
+  border: 1px solid var(--primario);
   border-radius: var(--radio-sm);
   color: var(--primario-c3);
   font: inherit;

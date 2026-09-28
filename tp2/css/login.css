@@ -208,7 +208,7 @@
   flex: 0 0 22px;
   width: 22px;
   height: 22px;
-  border: 2px solid var(--primario-o1);
+  border: 2px solid var(--primario);
   border-radius: var(--radio-sm);
   background: var(--fondo);
   transition: background-color 0.15s ease, border-color 0.15s ease;

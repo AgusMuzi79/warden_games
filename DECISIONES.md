@@ -131,6 +131,28 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   fondo más claro pierde el contraste con el texto de adentro, y el borde es la
   forma habitual de marcar un campo.
 
+### Bordes de todos los campos en `--primario`, no solo el del buscador (T08b)
+- **Qué:** el borde pasa de `--primario-o1` a `--primario` en los 5 controles que lo
+  usaban como único límite visible: `.field input` (login), `.check-block__mark`
+  (los checkboxes de términos y de "Mantener la sesión"), `.newsletter__form input`
+  (footer), `.compartir__link input` y `.resena-form textarea`. Medido: 3,59:1
+  contra la card (`--superficie`); antes 2,11:1.
+- **Por qué:** es el mismo problema de T08 (WCAG 2.2 SC 1.4.11 pide 3:1 para el
+  límite de un componente de interfaz), pero el informe solo había medido el
+  buscador. Al terminar las tareas se revisaron todas las reglas con
+  `border: ... var(--primario-o1)` (16) y estas 5 son las que son campos.
+- **Las otras 11 no se tocan a propósito:** son cards (`.card`, `.ficha-juego`,
+  `.compartir`, `.resena-form`, `.ayuda`), el menú desplegable, una muestra de la
+  leyenda del tablero, las teclas de la ayuda (`kbd`) y el borde del link de
+  cada red social. No son controles cuyo límite haya que distinguir para usarlos:
+  el texto, el ícono o el propio botón ya son identificables.
+- **El captcha simulado no cambia:** `.check-block--captcha` mantiene la paleta
+  gris del widget real de Google (excepción documentada en "Captcha simulado").
+- **El foco no cambia:** `:focus-visible` de los campos sigue en `--acento`, y el
+  anillo global (`--foco`) tampoco se toca.
+- **Descartado:** cambiar el valor del token `--primario-o1`: lo usan los fondos de
+  los badges y de los botones primarios (T02), que sí necesitan ese tono.
+
 ### Scrollbar con la paleta del sitio, no oculta
 - **Qué:** en `base.css`, `scrollbar-color`/`scrollbar-width` (Firefox) y
   `::-webkit-scrollbar*` (Chrome/Edge/Safari) sobre el selector universal

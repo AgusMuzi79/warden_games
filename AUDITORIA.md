@@ -165,6 +165,12 @@ propuesta) está en el informe original.
   fondo). Medido en el navegador con `getComputedStyle`.
 - **Justificación:** `DECISIONES.md`, "Borde visible en el buscador y dots
   inactivos más claros (T08)". **Commit:** `git log --grep T08`.
+- **T08b — el mismo problema en los otros campos (no estaba en el informe):**
+  al terminar, se revisaron todas las reglas con borde `--primario-o1`. Cinco son
+  controles con ese borde como único límite (login, checkboxes, newsletter, link de
+  compartir y textarea de reseña) y daban **2,11:1**. Ahora usan `--primario`:
+  **3,59:1** medido. Commit: `git log --grep T08b`. Justificación: `DECISIONES.md`,
+  "Bordes de todos los campos en `--primario`, no solo el del buscador (T08b)".
 
 ### T01 — Solo 2 de las 4 animaciones hover se usaban en las páginas (Enunciado) · hecha
 
