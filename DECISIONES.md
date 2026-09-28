@@ -198,6 +198,19 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   de la fila tapado. El valor sale de tokens: alto del control + padding de arriba
   y de abajo + un poco de aire.
 
+### El logo de la Home sube al inicio en vez de recargar
+- **Qué:** `js/logo-inicio.js`, cargado solo en `index.html`. Al clickear el logo
+  del header o el del footer (`.header__logo`, `.brand__logo`) hace
+  `preventDefault()` y `window.scrollTo({ top: 0, behavior: 'smooth' })`. Con
+  `prefers-reduced-motion`, `behavior: 'auto'` (sube de golpe).
+- **Por qué:** los dos logos son links a `index.html`; estando en la Home, el
+  navegador recarga la página (y vuelve a mostrar el loading de 5 segundos). Subir
+  con scroll es lo que se espera de un logo en la página de inicio.
+- **También el logo del footer:** es el que uno tiene a mano estando abajo del
+  todo, y apunta a `index.html` igual que el del header.
+- **En las otras páginas no cambia nada:** el script solo se carga en la Home; en
+  el resto el logo sigue llevando a `index.html`.
+
 ### Header del juego sin menú ni buscador ("modo foco")
 - **Qué:** solo logo, estado de guardado, "Volver al menú" y avatar.
 - **Por qué:** mientras se juega, reducir distracciones. Se deja una salida clara
