@@ -301,7 +301,9 @@
   width: 100%;
   height: 4px;
   border-radius: 999px;
-  background: var(--primario-o1);
+  /* --primario sobre --fondo: 4,07:1 (antes --primario-o1, 2,39:1, y WCAG
+     1.4.11 pide 3:1 para componentes de interfaz; ver AUDITORIA.md, T08). */
+  background: var(--primario);
   transition: background-color 0.2s ease;
 }
 

@@ -113,6 +113,24 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Por qué:** el lector de pantalla anuncia "Carrito, link" en vez de nada o un
   carácter raro de la fuente de íconos.
 
+### Borde visible en el buscador y dots inactivos más claros (T08)
+- **Qué:** el borde del input del buscador (`header.css`) pasa de `transparent` a
+  `--primario` en reposo y a `--primario-c1` en hover (antes `--primario-o1`). La
+  barrita de un dot inactivo del banner (`.banner__dot::before`, `home.css`) pasa
+  de `--primario-o1` a `--primario`. El dot activo (`--acento`) y el hover del
+  dot (`--primario-c1`) no cambian.
+- **Por qué:** WCAG 2.2 SC 1.4.11 (AA) pide 3:1 para el límite de un campo y para
+  los componentes de interfaz. El input (`--fondo`) sobre el header
+  (`--superficie`) daba **1,13:1**, así que el campo casi no se veía en reposo;
+  los dots inactivos daban **2,39:1** contra el fondo, y son botones para
+  cambiar de destacado. Medido en el navegador después del cambio: borde del
+  buscador **3,59:1** contra el header, dots inactivos **4,07:1** contra el fondo.
+- **Los dots siguen siendo barritas finitas (estilo Steam):** solo cambia el
+  color, no la forma ni el área táctil de 28×24px.
+- **Descartado:** dejar el input sin borde y aclarar el fondo del campo. Un
+  fondo más claro pierde el contraste con el texto de adentro, y el borde es la
+  forma habitual de marcar un campo.
+
 ### Scrollbar con la paleta del sitio, no oculta
 - **Qué:** en `base.css`, `scrollbar-color`/`scrollbar-width` (Firefox) y
   `::-webkit-scrollbar*` (Chrome/Edge/Safari) sobre el selector universal

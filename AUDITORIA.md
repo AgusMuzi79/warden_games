@@ -42,7 +42,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T05 | S3 | Newsletter: el POST termina en una página de error | Pendiente | — |
 | T06 | S3 | Scroll horizontal en mobile (368 px en viewports de 320 y 360) | **Hecha** (footer en `a055720`; header a 320 px en T06b, ver abajo). Queda el banner a 768 px | `a055720` |
 | T07 | S3 | En touch el banner avanza solo y no se puede pausar | Pendiente | — |
-| T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | Pendiente | — |
+| T08 | S3 | Buscador y dots inactivos sin contraste 3:1 | **Hecha** | `git log --grep T08` |
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | Pendiente | — |
 | T10 | S2 | Links del hamburguesa que no hacen nada | Pendiente | — |
 | T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
@@ -151,6 +151,18 @@ propuesta) está en el informe original.
   no incluyó.
 - **Justificación:** `DECISIONES.md`, "Botón primario y pestaña activa de login
   en `--primario-o1` (T02)". **Commit:** `git log --grep T02`.
+
+### T08 — Contraste del buscador y de los dots inactivos (S3) · hecha
+
+- **Antes (`pre-auditoria`):** el input del buscador tenía borde transparente:
+  `--fondo` sobre el header `--superficie` daba **1,13:1**. La barrita de un dot
+  inactivo del banner era `--primario-o1` sobre `--fondo`: **2,39:1**. WCAG 2.2
+  SC 1.4.11 (AA) pide 3:1 para componentes de interfaz.
+- **Después:** borde del buscador `--primario` (**3,59:1** contra el header;
+  `--primario-c1` en hover) y dots inactivos `--primario` (**4,07:1** contra el
+  fondo). Medido en el navegador con `getComputedStyle`.
+- **Justificación:** `DECISIONES.md`, "Borde visible en el buscador y dots
+  inactivos más claros (T08)". **Commit:** `git log --grep T08`.
 
 ## Tareas que tocan decisiones ya tomadas
 
