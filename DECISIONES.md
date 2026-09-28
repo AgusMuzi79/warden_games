@@ -1085,11 +1085,11 @@ más una que sumamos nosotros al revisar:
   "Destacados" ya usa perspectiva 3D (`rotateY` + `translateZ`) — un flip
   de tarjeta es una técnica distinta (aunque también 3D), así que no se
   siente repetido.
-- **Solo `juego.html`, no `producto.html`:** la galería de `producto.html`
-  son gradientes placeholder (juegos de la API, sin capturas propias) — no
-  hay contenido real para hacer girar ahí. El requisito de "al menos una
-  galería animada" ya queda cubierto con la de Neon Circuit; no hacía falta
-  tocar `producto.html` para esto.
+- **`js/galeria.js` es un motor genérico, sin datos propios** (revisado
+  después de que Fran pidiera la misma animación en `producto.html`, ver la
+  entrada siguiente): expone `iniciarGaleria(fotos)`, y cada página le pasa
+  su propia lista. `js/juego.js` la llama con las 6 fotos de Neon Circuit;
+  `js/producto.js`, con la de abajo.
 - **Cómo funciona el giro (2 caras, ángulo que se acumula):** la tarjeta
   tiene solo 2 `<img>` en el DOM (no 6) — antes de cada giro, `galeria.js`
   carga la foto que corresponde en la cara que en ese momento está
@@ -1120,9 +1120,38 @@ más una que sumamos nosotros al revisar:
 - **`aria-live="polite"` en el contador ("Foto 1 de 6"):** anuncia el
   cambio de foto a quien usa lector de pantalla sin interrumpirlo, mismo
   patrón que "Partida guardada" en el header.
-- **Pendiente de que Fran lo pruebe:** se probó de lectura de código, no en
-  el navegador todavía — puede necesitar ajustes de timing/tamaño una vez
-  que se vea andando.
+- **Probado por Fran, aprobado.**
+
+### Galería animada en `producto.html`: mismo carrusel, con la portada repetida
+- **Qué:** Fran pidió que `producto.html` (la ficha de cualquier juego del
+  catálogo de la API, hecha por Agus) tenga la misma animación de galería
+  que Neon Circuit, y que muestre la portada del juego en vez de los
+  gradientes placeholder. `js/galeria.js` se separó del todo de Neon
+  Circuit: pasa a ser un motor genérico (`iniciarGaleria(fotos)`, sin
+  ninguna foto hardcodeada adentro), y cada página le pasa su propia lista.
+  `js/producto.js` la llama con un array de **1 solo elemento**
+  (`juego.background_image`, la portada) apenas la API responde.
+- **Por qué 1 sola foto:** se revisó qué trae la API de la cátedra para
+  cada juego (`curl` directo al endpoint) — el objeto de cada juego solo
+  tiene `background_image`, no hay ningún array de capturas adicionales.
+  No es que faltara buscar mejor: la API en sí no ofrece más que esa imagen
+  por juego.
+- **Decisión con Fran sobre qué hacer con 1 sola foto:** se le plantearon 2
+  opciones — (a) mostrar el carrusel igual, con las 2 caras repitiendo la
+  misma portada (mismo componente, mismas flechas, aunque no revelen nada
+  nuevo al navegar), o (b) mostrar la portada fija, sin carrusel ni
+  animación ahí (total, el requisito de "galería animada" ya está cubierto
+  con la de Neon Circuit). Eligió la (a): quiere el mismo carrusel visible
+  en las dos páginas, aunque funcionalmente en `producto.html` las flechas
+  solo repitan la misma imagen.
+- **`iniciarGaleria()` no necesitó ningún caso especial para 1 foto:** con
+  un array de un solo elemento, `nuevoIndice` siempre da 0 (`(0+1) % 1 = 0`,
+  `(0-1+1) % 1 = 0`), así que el conteo de fotos no rompe — simplemente no
+  cambia de foto, pero el giro se sigue animando en cada click.
+- **Orden de scripts:** en las dos páginas, `galeria.js` se carga antes que
+  el script que lo usa (`juego.js` en `juego.html`, `producto.js` en
+  `producto.html`) — mismo criterio de siempre (los `defer` corren en el
+  orden del HTML, y la función tiene que existir antes de llamarla).
 
 ### Reseñas de Comunidad: 3 distintas, no la misma repetida
 - **Qué:** 3 reseñas con nombre, fecha, puntaje y largo de texto distintos
@@ -1904,16 +1933,28 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
   default sigue la regla general del proyecto ("un solo h1 por página") en
   vez de heredar una excepción ajena sin haberla charlado.
 
-### Portada con botón en hover, no siempre visible como en Neon Circuit
-- **Qué:** `.producto__portada` muestra la imagen real del juego a pantalla
-  completa; el botón ("Comprar" o "Jugar", según corresponda) aparece con
-  hover o foco, con un scrim oscuro atrás — mismo criterio que ya usa
-  "Jugar" en el banner Destacados, no el botón siempre visible de la
-  portada de Neon Circuit.
-- **Por qué distinto a Neon Circuit:** ahí el botón "arranca" el tablero
-  (una transición real, de portada a juego, dentro de la misma card) — acá
-  no hay tablero al que pasar, la acción es "comprar" o (todavía) nada, así
-  que no hace falta ese peso visual permanente.
+### Botón de la portada: se unificó con el de Neon Circuit (ya no es solo-ícono en hover)
+- **Qué (versión de Agus, ahora reemplazada):** `.producto__portada`
+  mostraba el botón ("Comprar" o "Jugar") solo con hover o foco, sin el
+  componente `.btn` — un ícono suelto (sin círculo ni fondo) con texto
+  abajo, sobre un scrim oscuro. La decisión documentaba que seguía "el
+  mismo criterio que 'Jugar' en el banner Destacados", pero el CSS no
+  coincidía: al banner le falta el círculo relleno de `--acento` que sí
+  tiene `.banner__jugar` — quedaba un botón bastante más "flaco" que
+  cualquier otro botón del sitio. Fran lo notó comparando las 2 páginas
+  (Neon Circuit vs. un juego del catálogo) una al lado de la otra.
+- **Qué (versión actual):** `.producto__accion` pasa a ser un
+  `.btn.btn--primario` de verdad — mismo componente que usa `juego.html`
+  en su portada (`.tablero__jugar`), **siempre visible** (no solo en
+  hover), centrado sobre la imagen. Se saca el ícono (Neon Circuit tampoco
+  lo tiene, solo texto: "Jugar"). `producto.js` deja de tocar un ícono que
+  ya no existe (`elementos.accionIcono` se saca del todo).
+- **Por qué el cambio:** Fran lo pidió explícito — quiere que la portada
+  de cualquier ficha de juego (catálogo o Neon Circuit) se sienta con el
+  mismo lenguaje visual: un botón violeta fijo, no un hover-reveal más
+  sutil. Ya no hace falta la distinción "acá no hay tablero al que pasar"
+  que justificaba el hover-only: el criterio pasa a ser simplemente
+  consistencia entre páginas.
 - **"Comprar" agrega al carrito y abre el desplegable del header:**
   confirmado con Agus. Un solo click hace las dos cosas — reusa
   `agregarAlCarrito()` (`carrito.js`) y dispara el click del botón de
@@ -1932,14 +1973,28 @@ cards de la Home ni del banner (parte 2 y 3, aparte).
 - **Qué:** en `home.js`, `.game-card__texto` pasa de `<div>` a
   `<a href="producto.html?id=...">` — clickear el nombre o el puntaje de
   cualquier card (en cualquier fila, incluida "Mis juegos") lleva a su
-  ficha. Sigue sin ser toda la card: la imagen no es parte del link (ver
-  más abajo).
-- **Por qué no envolver toda la card en el link:** el botón de agregar al
-  carrito ya vive adentro de `.game-card__cuerpo`, al lado del texto. Un
+  ficha.
+- **Por qué no envolver toda la card en un solo link:** el botón de agregar
+  al carrito vive adentro de `.game-card__cuerpo`, al lado del texto. Un
   `<a>` no puede contener un `<button>` (contenido interactivo anidado,
-  inválido en HTML) — por eso `.game-card__link` y el botón de carrito
+  inválido en HTML) — por eso `.game-card__texto` y el botón de carrito
   siguen siendo hermanos dentro de `.game-card__cuerpo`, cada uno con su
   propia área de click, en vez de uno adentro del otro.
+- **La imagen también pasó a ser parte del link (revisado después de que
+  Fran preguntara por qué no era clickeable):** `.game-card__media` pasa
+  de `<div>` a `<a href="producto.html?id=...">` con el mismo destino que
+  `.game-card__texto`, y `aria-label="Ver <nombre>"` (la imagen en sí sigue
+  con `alt=""`, decorativa). No hizo falta la técnica del link-que-cubre-
+  toda-la-card-con-`stopPropagation()` que usa el banner Destacados
+  (`.banner__ver`): ahí el botón de carrito llegó a estar superpuesto
+  sobre la imagen (por eso Agus necesitó ese truco), pero acá el carrito
+  vive aparte, en `.game-card__cuerpo` — la imagen no tiene ningún control
+  adentro, así que convertirla directo en un segundo `<a>` (sin superponer
+  nada) alcanza y es más simple.
+- **Costo asumido:** cada card queda con 2 links seguidos al mismo destino
+  (imagen y texto) en vez de 1 solo — dos paradas de Tab en vez de una para
+  llegar al mismo lugar. Se acepta por mantener el HTML simple (nada de
+  `position: absolute` ni `z-index` para esto).
 - **`.game-card__title` necesita `color` explícito ahora:** al pasar el
   contenedor de `<div>` a `<a>`, el título heredaba el celeste de link de
   `base.css` en vez del blanco de siempre (bug real, visto al probarlo) —
