@@ -12,9 +12,11 @@
 // que esa cara pase al frente.
 
 // fotos: array de { src, alt }, con al menos 1 elemento. Si solo hay 1
-// foto real (como en producto.html), las 2 caras terminan mostrando la
-// misma — no hay una 2da foto real para poner ahí, pero el carrusel se
-// sigue viendo y las flechas siguen animando el giro igual.
+// foto real (como en producto.html) y la página tiene la cara "sin más
+// capturas" (#galeria-vacio), esa cara hace de 2da diapositiva: las flechas
+// siguen girando la tarjeta, pero en vez de repetir la misma foto se ve un
+// mensaje que dice que no hay más. Sin esa cara, con 1 sola foto las 2
+// caras muestran la misma.
 function iniciarGaleria(fotos) {
   const carta = document.getElementById('galeria-carta');
 
@@ -28,14 +30,34 @@ function iniciarGaleria(fotos) {
   const contador = document.getElementById('galeria-contador');
   const botonPrev = document.getElementById('galeria-prev');
   const botonNext = document.getElementById('galeria-next');
+  const vacio = document.getElementById('galeria-vacio');
 
-  // Deja las 2 caras con las primeras 2 fotos de la lista recibida (si
-  // solo hay 1, Math.min hace que las 2 caras arranquen con esa misma).
-  imgA.src = fotos[0].src;
-  imgA.alt = fotos[0].alt;
-  const indiceB = Math.min(1, fotos.length - 1);
-  imgB.src = fotos[indiceB].src;
-  imgB.alt = fotos[indiceB].alt;
+  // Las "diapositivas" son las fotos reales, más un marcador { vacio: true }
+  // como 2da cuando hay una sola foto y la página tiene la cara de "sin más
+  // capturas". El vacío vive siempre en la cara B: con 2 diapositivas y 2
+  // caras que se alternan, la diapositiva 1 siempre cae en la B.
+  const hayUnaSolaFoto = fotos.length === 1 && vacio !== null;
+  const diapositivas = hayUnaSolaFoto ? [fotos[0], { vacio: true }] : fotos;
+
+  // Pone una diapositiva en una cara (img = imgA o imgB). Si es el vacío, en
+  // vez de una foto se muestra el mensaje; si es una foto, se asegura de
+  // que la cara B vuelva a mostrar su <img> y no el mensaje.
+  function ponerEnCara(img, diapositiva) {
+    if (diapositiva.vacio) {
+      img.hidden = true;
+      vacio.hidden = false;
+      return;
+    }
+    img.hidden = false;
+    if (img === imgB && vacio) vacio.hidden = true;
+    img.src = diapositiva.src;
+    img.alt = diapositiva.alt;
+  }
+
+  // Deja las 2 caras con las primeras 2 diapositivas (si solo hay 1 foto y
+  // no hay cara de vacío, Math.min hace que las 2 arranquen con esa misma).
+  ponerEnCara(imgA, diapositivas[0]);
+  ponerEnCara(imgB, diapositivas[Math.min(1, diapositivas.length - 1)]);
 
   // Índice de la foto que se ve ahora mismo (arranca en 0: la que se
   // acaba de poner en la cara A).
@@ -53,17 +75,25 @@ function iniciarGaleria(fotos) {
   // saltos raros hacia atrás.
   let angulo = 0;
 
+  // El contador cuenta solo fotos reales (fotos.length): con el mensaje de
+  // "sin más capturas" a la vista dice eso mismo, en vez de "Foto 2 de 1".
+  // El mensaje también queda oculto para lectores de pantalla mientras está
+  // en la cara de atrás: se lee solo cuando de verdad se ve.
   function actualizarContador() {
-    contador.textContent = `Foto ${indiceVisible + 1} de ${fotos.length}`;
+    const seVeElVacio = diapositivas[indiceVisible].vacio === true;
+    contador.textContent = seVeElVacio
+      ? 'Sin más capturas'
+      : `Foto ${indiceVisible + 1} de ${fotos.length}`;
+    if (vacio) vacio.setAttribute('aria-hidden', String(!seVeElVacio));
   }
   actualizarContador();
 
   // direccion: 1 para "foto siguiente", -1 para "foto anterior".
   function girar(direccion) {
-    const total = fotos.length;
+    const total = diapositivas.length;
 
-    // Calculamos qué foto va a mostrarse ahora, en base a la que se ve
-    // hoy (no a lo que se venía preparando de antes): así el carrusel
+    // Calculamos qué diapositiva va a mostrarse ahora, en base a la que se
+    // ve hoy (no a lo que se venía preparando de antes): así el carrusel
     // responde bien aunque el click cambie de dirección respecto del
     // anterior (ej: "siguiente" y después "anterior" seguidos).
     const nuevoIndice = direccion > 0
@@ -71,10 +101,9 @@ function iniciarGaleria(fotos) {
       : (indiceVisible - 1 + total) % total;
 
     // La cargamos en la cara que en este momento está escondida: como no
-    // se ve, este cambio de imagen es invisible hasta que la tarjeta gire.
+    // se ve, este cambio es invisible hasta que la tarjeta gire.
     const imgDestino = caraOculta === 'a' ? imgA : imgB;
-    imgDestino.src = fotos[nuevoIndice].src;
-    imgDestino.alt = fotos[nuevoIndice].alt;
+    ponerEnCara(imgDestino, diapositivas[nuevoIndice]);
 
     // Giramos la tarjeta 180° hacia el lado que corresponda a la
     // dirección: esto es lo único que dispara la animación (el resto lo

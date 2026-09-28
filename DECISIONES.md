@@ -1624,6 +1624,27 @@ más una que sumamos nosotros al revisar:
   el script que lo usa (`juego.js` en `juego.html`, `producto.js` en
   `producto.html`) — mismo criterio de siempre (los `defer` corren en el
   orden del HTML, y la función tiene que existir antes de llamarla).
+- **Actualización (T12): la 2ª cara ya no repite la portada, dice que no hay más
+  capturas.** Se mantiene el carrusel animado de `producto.html` (opción (a)
+  elegida acá) y se cambia lo que hay en la cara B cuando el juego tiene una sola
+  foto: en vez de la misma portada, un mensaje con un ícono de imagen ("Este juego
+  no tiene más capturas por ahora."). Las flechas siguen girando la tarjeta; el
+  contador dice "Foto 1 de 1" con la portada y "Sin más capturas" con el mensaje.
+  **Por qué:** la auditoría (T12) marcó que las flechas prometían otra imagen y la
+  animación terminaba mostrando la misma ("Foto 1 de 1" antes y después del giro):
+  una affordance falsa (Nielsen #1 y #8). El informe proponía sacar las flechas
+  (opción (b)), pero eso hubiera quitado la animación de esta página. El
+  mensaje resuelve el engaño sin tocar la decisión de fondo.
+  **Cómo:** `producto.html` suma `#galeria-vacio` dentro de la cara B (oculto, con
+  `aria-hidden`); `galeria.js` arma una lista de "diapositivas" (las fotos, más un
+  marcador de vacío si hay una sola foto y existe esa cara) y usa `ponerEnCara()`
+  para mostrar foto o mensaje; `components.css` estila `.galeria__vacio` con
+  tokens. Con 2 o más fotos (`juego.html`, 6 fotos) el código se comporta igual
+  que antes: verificado, "Foto 1 de 6" a "Foto 6 de 6" y de vuelta.
+  **Accesibilidad:** el mensaje está `aria-hidden` mientras está en la cara de
+  atrás y solo se expone cuando se ve, y el contador (`aria-live="polite"`) lo
+  anuncia. **Descartado:** sacar las flechas y el contador (propuesta del informe)
+  y dejar las flechas deshabilitadas con un texto fijo (pierde la animación).
 
 ### Reseñas de Comunidad: 3 distintas, no la misma repetida
 - **Qué:** 3 reseñas con nombre, fecha, puntaje y largo de texto distintos

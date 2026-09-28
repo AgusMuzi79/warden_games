@@ -828,6 +828,34 @@
   object-fit: cover;
 }
 
+/* Cara "sin más capturas" (solo producto.html, cuando el juego tiene una única
+   foto — ver js/galeria.js y DECISIONES.md, T12). Llena la cara igual que
+   .galeria__img. [hidden] la saca de la vista (base.css). */
+.galeria__vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-3);
+  width: 100%;
+  height: 100%;
+  padding: var(--espaciado-6);
+  background: var(--superficie);
+  color: var(--primario-c3);
+  text-align: center;
+}
+
+.galeria__vacio i {
+  color: var(--acento);
+  font-size: 48px;
+}
+
+.galeria__vacio p {
+  margin: 0;
+  max-width: 28ch;
+  font: 400 16px/1.4 var(--font-ui);
+}
+
 /* ---------- Galería animada: carrusel de flip (solo juego.html) ----------
    producto.html sigue con la grilla de gradientes de arriba (sin fotos
    reales). Acá, en cambio, se ve una sola foto grande a la vez; al pasar a

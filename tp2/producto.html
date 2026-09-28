@@ -251,7 +251,9 @@
              portada, en background_image) — no hay 6 capturas distintas
              acá como en Neon Circuit. producto.js llama a iniciarGaleria()
              con esa única foto apenas la tiene; hasta entonces las 2 caras
-             quedan sin src, igual que la portada grande de más arriba. -->
+             quedan sin src, igual que la portada grande de más arriba.
+             Con una sola foto, la cara B muestra #galeria-vacio ("no hay más
+             capturas") en vez de repetir la portada (ver DECISIONES.md, T12). -->
         <section class="galeria" aria-labelledby="galeria-titulo">
           <div class="galeria__cabecera">
             <h2 id="galeria-titulo">Galería</h2>
@@ -264,6 +266,10 @@
               </div>
               <div class="galeria__cara galeria__cara--b">
                 <img class="galeria__img" id="galeria-img-b" src="" alt="">
+                <div class="galeria__vacio" id="galeria-vacio" aria-hidden="true" hidden>
+                  <i class="ph ph-image" aria-hidden="true"></i>
+                  <p>Este juego no tiene más capturas por ahora.</p>
+                </div>
               </div>
             </div>
             <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">

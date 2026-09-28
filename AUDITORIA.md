@@ -46,7 +46,7 @@ confunde o viola WCAG 2.2 AA), **S2** (menor), **S1** (cosmético / robustez).
 | T09 | S2 | "Pagar carrito" vacío no hace nada ni avisa | **Hecha** | `git log --grep T09` |
 | T10 | S2 | Links del hamburguesa que no hacen nada | **Hecha** | `git log --grep T10` |
 | T11 | S2 | Dos paradas de Tab por card | A charlar con Fran | — |
-| T12 | S2 | Galería de producto gira hacia la misma foto | A charlar con Fran | — |
+| T12 | S2 | Galería de producto gira hacia la misma foto | **Hecha** (variante: mensaje en la 2ª cara, no se sacan las flechas). Avisar a Fran | `git log --grep T12` |
 | T13 | S3 | Etiquetas del banner cortadas en mobile | **Hecha** | `git log --grep T13` |
 | T14 | S1 | El loading dura más de 5 s con la pestaña en segundo plano | **Hecha** | `git log --grep T14` |
 
@@ -317,6 +317,30 @@ propuesta) está en el informe original.
 - **Cerrados:** el banner a tablet (`git log --grep "banner a tablet"`), los bordes
   de los campos (T08b), los `rgba()` escritos a mano (`git log --grep rgba`) y el
   solape del logo con el buscador a 768 px (`git log --grep "header de tablet"`).
+
+### T12 — La galería de producto gira hacia la misma foto (S2) · hecha (variante)
+
+- **Antes (`pre-auditoria`):** en `producto.html` la galería tenía una sola foto (la
+  portada) repetida en las dos caras. Al tocar una flecha, la tarjeta giraba
+  (`--angulo` a `180deg`) y mostraba la misma imagen, con el contador en "Foto 1
+  de 1" antes y después. Las flechas prometían más contenido y no lo había.
+- **Criterios que rompía:** Nielsen #1 (visibilidad del estado) y #8 (un control
+  que no aporta nada).
+- **Qué proponía el informe:** ocultar flechas y contador con menos de 2 fotos
+  (opción b), y recomendaba no hacerlo sin hablar con Fran, porque él había elegido
+  a sabiendas el carrusel con la portada repetida (opción a).
+- **Qué se hizo, distinto al informe:** se mantiene el carrusel animado y las
+  flechas, y la segunda cara pasa a decir "Este juego no tiene más capturas por
+  ahora." (ícono + texto) en vez de repetir la portada. El contador alterna entre
+  "Foto 1 de 1" y "Sin más capturas". Idea de Agus. Conserva la decisión de Fran
+  en lo importante (la animación sigue en `producto.html`) y corrige lo que
+  marcaba la auditoría (el giro ya no miente).
+- **Verificado:** en `producto.html` el giro va 0° a 180° a 360° y vuelve, con el
+  contador y el `aria-hidden` del mensaje cambiando en cada paso; en `juego.html`
+  sigue "Foto 1 de 6" a "Foto 6 de 6" y de vuelta. Sin errores de consola.
+- **Pendiente:** avisarle a Fran del cambio (toca su decisión, aunque no la revierte).
+- **Justificación:** `DECISIONES.md`, actualización (T12) dentro de "Galería
+  animada en `producto.html`". **Commit:** `git log --grep T12`.
 
 ## Tareas que tocan decisiones ya tomadas
 
