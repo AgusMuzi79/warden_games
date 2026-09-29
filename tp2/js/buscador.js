@@ -1,5 +1,10 @@
-// buscador.js — Buscador del header: la lupa de mobile (abre y cierra el
-// buscador) y la búsqueda de juegos por nombre.
+// buscador.js: buscador del header. Maneja la lupa de mobile (abre y cierra
+// el buscador) y la búsqueda de juegos por nombre.
+//
+// Depende de: .header__search-toggle (la lupa), .header__search (el form) y
+// su input, y en la Home de #filas-juegos (lo arma home.js) y
+// #busqueda-estado (el mensaje de resultados).
+// Expone filtrarJuegos(consulta), global porque la usa home.js.
 //
 // La lupa solo hace algo en mobile: desde tablet el buscador ya se ve
 // siempre y el botón de la lupa está oculto por CSS (header.css).
@@ -11,8 +16,11 @@
 // volvería a mostrar el loading de 5 segundos). En cualquier otra página
 // (producto.html) lleva a la Home con ?q=...
 
-// Global a propósito (los scripts no usan type="module"): home.js la va a
-// llamar al terminar de armar las filas si la búsqueda vino de otra página.
+// Filtra por nombre las cards ya armadas: oculta las que no coinciden y las
+// filas que quedan vacías, y escribe el resultado en #busqueda-estado.
+// Una consulta vacía vuelve a mostrar todo.
+// Global a propósito (los scripts no usan type="module"): home.js la llama
+// al terminar de armar las filas si la búsqueda vino de otra página.
 function filtrarJuegos(consulta) {
   const texto = consulta.trim();
   const q = texto.toLowerCase();
@@ -69,11 +77,14 @@ function filtrarJuegos(consulta) {
   estado.scrollIntoView({ behavior: sinAnimacion ? 'auto' : 'smooth', block: 'start' });
 }
 
+// Lupa de mobile. En páginas sin estos elementos, los bloques de abajo no
+// hacen nada.
 const botonLupa = document.querySelector('.header__search-toggle');
 const buscador = document.querySelector('.header__search');
 const inputBuscador = buscador ? buscador.querySelector('input') : null;
 
 if (botonLupa && buscador) {
+  // Al abrir, el foco pasa al input para escribir de una.
   function abrirBuscador() {
     buscador.classList.add('header__search--abierto');
     botonLupa.setAttribute('aria-expanded', 'true');
@@ -102,7 +113,9 @@ if (botonLupa && buscador) {
   });
 }
 
+// Enviar la búsqueda y borrarla. Esto corre en todas las páginas con header.
 if (buscador) {
+  // Solo la Home tiene filas de juegos para filtrar.
   const estamosEnLaHome = () => document.getElementById('filas-juegos') !== null;
 
   buscador.addEventListener('submit', (evento) => {

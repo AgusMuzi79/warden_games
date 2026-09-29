@@ -1,6 +1,17 @@
-// home.js — Filas de juegos de la Home
-// Depende de api.js (obtenerJuegos), del contenedor #filas-juegos y del
-// avatar del header con data-sesion="usuario" para saber si hay sesión.
+// home.js: arma las filas de juegos de la Home (Recomendados, Mis juegos y
+// una por categoría) con los datos de la API.
+//
+// Depende de:
+//   - api.js: obtenerJuegos(), CATEGORIAS y esDeGenero().
+//   - carrito.js: esDePago(), crearBadge(), crearBotonCarrito() y
+//     obtenerComprados().
+//   - carrusel-fila.js: activarCarrusel(), que le da flechas y arrastre a
+//     cada fila.
+//   - buscador.js: filtrarJuegos(), para aplicar un ?q= que vino de otra página.
+//   - En el HTML: el contenedor #filas-juegos, el input #buscar y el avatar del
+//     header con data-sesion="usuario" (así sabe si hay sesión).
+// Todos los scripts comparten scope global, por eso el orden de los <script>
+// en index.html importa. No expone nada: se ejecuta al cargar y termina.
 
 const contenedor = document.getElementById('filas-juegos');
 
@@ -24,13 +35,14 @@ const JUEGOS_DE_RESPALDO = [
   { id: 7, name: 'Company of Heroes 2', background_image: 'https://media.rawg.io/media/games/0bd/0bd5646a3d8ee0ac3314bced91ea306d.jpg', rating: 3.1, genres: [{ name: 'Strategy' }] },
 ];
 
+// Card de un juego de la API. Dos links al mismo destino (imagen y nombre) y,
+// si el juego es "de pago", el botón de carrito al lado del nombre.
 function crearCard(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
 
   // <a>, no <div>: clickear la imagen también lleva a la ficha del juego,
-  // igual que el nombre/puntaje de más abajo (dos links a la misma
-  // página, uno por zona de la card). No hay ningún botón adentro de
+  // igual que el nombre de más abajo. No hay ningún botón adentro de
   // .game-card__media (el de carrito vive aparte, en .game-card__cuerpo),
   // así que este <a> no anida ningún control interactivo.
   const media = document.createElement('a');
@@ -63,8 +75,8 @@ function crearCard(juego) {
 
   // Un <a> en vez de un <div>: clickear el nombre lleva a la ficha del
   // juego (producto.html). No puede envolver también al botón de carrito
-  // (serían dos controles interactivos anidados) — por eso viven como
-  // hermanos en .game-card__cuerpo, no uno adentro del otro.
+  // (serían dos controles interactivos anidados), por eso son hermanos en
+  // .game-card__cuerpo.
   const texto = document.createElement('a');
   texto.className = 'game-card__texto';
   texto.href = `producto.html?id=${juego.id}`;
@@ -82,8 +94,9 @@ function crearCard(juego) {
 }
 
 // "Mis juegos" no viene de la API: son los objetos {id, nombre, imagen}
-// que guarda carrito.js al comprar, sin rating ni género. Card más simple,
-// sin el botón de agregar al carrito (ya es tuyo) ni la estrella.
+// que guarda carrito.js al comprar, sin rating ni género. Por eso no se puede
+// reusar crearCard() (lee juego.name y juego.background_image). Es una card
+// más simple, sin el botón de carrito porque el juego ya es tuyo.
 function crearCardComprado(juego) {
   const card = document.createElement('article');
   card.className = 'card game-card';
@@ -120,11 +133,16 @@ function crearCardComprado(juego) {
   return card;
 }
 
+// Arma una fila completa: cabecera (título + flechas) y pista con hasta 10
+// cards. Devuelve null si no hay juegos, para no mostrar un título vacío.
+// `fabricaCard` crea cada card (la de la API o la de "Mis juegos").
 // `basadoEn` (opcional) es el nombre del juego que explica por qué se ve esta
 // fila: agrega debajo del título "Basado en que jugaste <nombre>".
 function crearFila(titulo, juegos, fabricaCard = crearCard, basadoEn = null) {
   if (juegos.length === 0) return null;
 
+  // Este id es el que usan los links del menú ("index.html#fila-rpg") y el
+  // aria-labelledby de la fila.
   const idTitulo = `fila-${titulo.toLowerCase().replace(/\s+/g, '-')}`;
 
   const fila = document.createElement('section');
@@ -178,6 +196,7 @@ function crearFila(titulo, juegos, fabricaCard = crearCard, basadoEn = null) {
 
   const pista = document.createElement('div');
   pista.className = 'carrusel__pista';
+  // Tope de 10 cards por fila.
   juegos.slice(0, 10).forEach((juego) => pista.append(fabricaCard(juego)));
 
   fila.append(cabecera, pista);
@@ -185,11 +204,14 @@ function crearFila(titulo, juegos, fabricaCard = crearCard, basadoEn = null) {
   return fila;
 }
 
+// sesion.js ya mostró u ocultó los avatares del header antes de que corra
+// este archivo, así que alcanza con mirar cuál quedó visible.
 function haySesionIniciada() {
   const avatarUsuario = document.querySelector('.header__avatar[data-sesion="usuario"]');
   return !!avatarUsuario && !avatarUsuario.hidden;
 }
 
+// Juegos del mismo género que JUEGO_JUGADO, sin incluir el propio juego.
 function renderizarRecomendados(juegos) {
   const recomendados = juegos.filter(
     (j) => esDeGenero(j, JUEGO_JUGADO.genero) && j.name !== JUEGO_JUGADO.nombre
@@ -207,6 +229,7 @@ function renderizarMisJuegos() {
   if (fila) contenedor.append(fila);
 }
 
+// Una fila por cada categoría fija de CATEGORIAS (api.js).
 function renderizarCategorias(juegos) {
   CATEGORIAS.forEach(({ titulo, genero }) => {
     const deLaCategoria = juegos.filter((j) => esDeGenero(j, genero));
@@ -215,6 +238,7 @@ function renderizarCategorias(juegos) {
   });
 }
 
+// Punto de entrada: borra lo que hubiera y arma todas las filas en orden.
 function renderizarFilas(juegos) {
   contenedor.innerHTML = '';
   // Con sesión: "Recomendados" arriba, y las categorías igual que a un
@@ -246,6 +270,8 @@ function renderizarFilas(juegos) {
   }
 }
 
+// El fetch corre en paralelo con el loading simulado (loading.js) y no
+// depende de él. Si la API falla, se usan los juegos de respaldo.
 obtenerJuegos()
   .then(renderizarFilas)
   .catch(() => renderizarFilas(JUEGOS_DE_RESPALDO));

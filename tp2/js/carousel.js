@@ -1,5 +1,12 @@
-// carousel.js — Banner "Destacados" de la Home: carrusel coverflow.
-// Depende de api.js (obtenerJuegos) y de #banner (.banner__escena, .banner__dots).
+// carousel.js: banner "Destacados" de la Home, un carrusel tipo coverflow.
+//
+// Depende de:
+//   - api.js: obtenerJuegos().
+//   - carrito.js: crearBadge() (etiqueta Gratis, precio o Nuevo).
+//   - En el HTML: #banner, .banner__escena, .banner__dots y el overlay
+//     #loading (se observa para arrancar el autoplay).
+// No expone funciones globales. Ojo con los nombres de las constantes de nivel
+// superior: al no haber módulos, no pueden repetirse en otro script.
 //
 // Todas las cards viven superpuestas en el centro de .banner__escena. Cada
 // una se posiciona con un transform 3D calculado según su "distancia" a la
@@ -20,22 +27,20 @@ const PASO_X_PORCENTAJE = 60; // desplazamiento horizontal por posición
 const PASO_Z_PX = 160;        // cuánto se manda para atrás en Z por posición
 const ROTACION_GRADOS = 35;   // cuánto gira en Y cada card corrida
 const ACHIQUE_POR_POSICION = 0.14; // cuánto se achica por cada posición de distancia
-// Con 5 destacados, la distancia máxima posible es 2 — justo ahí es donde
-// el lado "más corto" puede cambiar de dirección en un solo paso (ver
-// DECISIONES.md). Si esa distancia se ve, el cambio de lado se nota como
-// un salto brusco. Achicando a 1, esa distancia queda siempre oculta y el
-// salto pasa "invisible".
+// Con 5 destacados, la distancia máxima posible es 2. Ahí es donde el lado
+// "más corto" puede cambiar de dirección en un solo paso (ver DECISIONES.md).
+// Si esa distancia se ve, el cambio de lado se nota como un salto brusco.
+// Con MAX_VISIBLES en 1 esa distancia queda siempre oculta y el salto no se ve.
 const MAX_VISIBLES = 1;
 
 const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-// Solo con un puntero que puede hacer hover (mouse, trackpad): ahí existe la
-// pausa por hover. En touch no hay hover, así que el autoplay no arranca —
-// mismo criterio que ya se usa con prefers-reduced-motion. Sin esto, el
-// banner cambiaría solo cada 6 segundos sin ningún mecanismo para pausarlo
-// (WCAG 2.2 SC 2.2.2). El usuario igual navega con los dots o tocando las
-// cards de los costados (ver DECISIONES.md, "Autoplay que se pausa con hover
-// o foco, sin botón de pausa").
+// Solo con un puntero que puede hacer hover (mouse, trackpad) existe la pausa
+// por hover. En touch no hay hover, así que el autoplay no arranca, igual que
+// con prefers-reduced-motion. Sin esto, el banner cambiaría solo cada 6
+// segundos sin forma de pausarlo (WCAG 2.2 SC 2.2.2). En touch se navega con
+// los dots o tocando las cards de los costados (ver DECISIONES.md, "Autoplay
+// que se pausa con hover o foco, sin botón de pausa").
 const puedePausarConHover = window.matchMedia('(hover: hover)').matches;
 
 // Nuestro propio juego: no viene de la API (esa trae juegos de terceros
@@ -55,11 +60,15 @@ const DESTACADOS_DE_RESPALDO = [
   { id: 105, name: 'Tomb Raider (2013)', background_image: 'https://media.rawg.io/media/games/021/021c4e21a1824d2526f925eff6324653.jpg', rating: 4.06 },
 ];
 
+// Estado del carrusel. slides y dots van en paralelo: el índice i de uno
+// corresponde al i del otro.
 let slides = [];
 let dots = [];
 let indiceActivo = 0;
 let timerAutoplay = null;
 
+// Neon Circuit siempre primero (así arranca como card activa) y después los
+// mejor puntuados de la API.
 function elegirDestacados(juegos) {
   const otros = [...juegos]
     .sort((a, b) => b.rating - a.rating)
@@ -77,6 +86,8 @@ function offsetCircular(index) {
   return offset;
 }
 
+// Recalcula el transform de todas las cards según el índice activo. Las que
+// quedan a más de MAX_VISIBLES de distancia se ocultan y no reciben clicks.
 function actualizarPosiciones() {
   slides.forEach((slide, index) => {
     const offset = offsetCircular(index);
@@ -107,6 +118,8 @@ function actualizarPosiciones() {
   });
 }
 
+// Arma una card del banner: imagen de fondo, etiquetas arriba a la izquierda,
+// nombre abajo y un link a pantalla completa (a juego.html o a la ficha).
 function crearSlide(juego, index) {
   const slide = document.createElement('div');
   slide.className = 'banner__slide';
@@ -121,10 +134,9 @@ function crearSlide(juego, index) {
   etiquetas.className = 'banner__etiquetas';
   etiquetas.append(etiqueta);
 
-  // Neon Circuit no viene de la API (ver carousel.js más abajo): no tiene
-  // id real para esDePago()/esNuevo() ni puede estar en "comprados", así
-  // que no lleva badge de Gratis/precio/Nuevo — ya tiene su propia acción
-  // real ("Jugar").
+  // Neon Circuit no viene de la API: no tiene id real para esDePago() y
+  // esNuevo() ni puede estar en "comprados", así que no lleva badge de
+  // Gratis, precio o Nuevo. Ya tiene su propia acción ("Jugar").
   if (juego !== NEON_CIRCUIT) {
     const badge = crearBadge(juego);
     if (badge) etiquetas.append(badge);
@@ -137,8 +149,8 @@ function crearSlide(juego, index) {
   slide.append(etiquetas, nombre);
 
   // Es nuestro propio juego: además de poder saltar a esta card como al
-  // resto de los destacados, tiene una acción real (ir a jugar). Solo se
-  // ve/alcanza con foco cuando la card ya está activa (ver home.css).
+  // resto de los destacados, tiene una acción real (ir a jugar). Solo se ve y
+  // recibe foco cuando la card está activa (ver home.css).
   if (juego === NEON_CIRCUIT) {
     const jugar = document.createElement('a');
     jugar.className = 'banner__jugar';
@@ -156,11 +168,10 @@ function crearSlide(juego, index) {
     slide.append(jugar);
   }
 
-  // Cualquier juego que no sea Neon Circuit: clickear la card activa lleva
-  // a su ficha (producto.html) — reemplaza al agregar-al-carrito directo
-  // que tenía este banner antes (ver DECISIONES.md, "Ficha de producto",
-  // etapa 3). Neon Circuit no entra acá: ya tiene su propia acción real
-  // ("Jugar", arriba).
+  // Cualquier juego que no sea Neon Circuit: clickear la card activa lleva a
+  // su ficha (producto.html). Reemplaza al agregar-al-carrito directo que
+  // tenía este banner antes (ver DECISIONES.md, "Ficha de producto", etapa 3).
+  // Neon Circuit tiene su propio link ("Jugar", arriba).
   if (juego !== NEON_CIRCUIT) {
     const ver = document.createElement('a');
     ver.className = 'banner__ver';
@@ -175,6 +186,8 @@ function crearSlide(juego, index) {
   return slide;
 }
 
+// Un dot por card. aria-current marca cuál es la activa para el lector de
+// pantalla.
 function crearDot(index, esActivo) {
   const dot = document.createElement('button');
   dot.type = 'button';
@@ -185,6 +198,8 @@ function crearDot(index, esActivo) {
   return dot;
 }
 
+// Cambia la card activa: mueve las clases y aria-current de los dots y
+// reposiciona las cards. Si ya es la activa no hace nada.
 function irA(index) {
   if (index === indiceActivo) return;
 
@@ -219,6 +234,8 @@ function pausarAutoplay() {
   clearTimeout(timerAutoplay);
 }
 
+// Arma el primer timer y engancha la pausa. Los listeners se agregan una sola
+// vez (esta función se llama una vez por carga de página).
 function iniciarAutoplay() {
   programarSiguiente();
 
@@ -235,8 +252,8 @@ function iniciarAutoplay() {
 // Si arrancara apenas responde la API (que tarda menos de 5 segundos), el
 // primer destacado (Neon Circuit, nuestro juego) pasaría detrás del overlay y
 // el usuario lo vería menos de un segundo. No se toca loading.js: acá solo se
-// observa el atributo hidden del overlay, igual que este archivo ya depende
-// de #banner (ver DECISIONES.md, "Autoplay que se pausa con hover o foco").
+// observa el atributo hidden del overlay (ver DECISIONES.md, "Neon Circuit
+// accesible en touch y visible después del loading (T04)").
 function iniciarAutoplayDespuesDeLaCarga() {
   const overlayCarga = document.getElementById('loading');
 
@@ -254,6 +271,7 @@ function iniciarAutoplayDespuesDeLaCarga() {
   observador.observe(overlayCarga, { attributes: true, attributeFilter: ['hidden'] });
 }
 
+// Punto de entrada: crea cards y dots, las posiciona y arranca el autoplay.
 function renderizarBanner(juegos) {
   const destacados = elegirDestacados(juegos);
 
@@ -271,6 +289,7 @@ function renderizarBanner(juegos) {
   iniciarAutoplayDespuesDeLaCarga();
 }
 
+// Si la API falla, se usan los destacados de respaldo.
 obtenerJuegos()
   .then(renderizarBanner)
   .catch(() => renderizarBanner(DESTACADOS_DE_RESPALDO));

@@ -1,5 +1,9 @@
-// footer.js — Comportamiento del footer (compartido por index.html,
+// footer.js: comportamiento del footer (compartido por index.html,
 // producto.html y juego.html).
+//
+// Depende de .newsletter__form y .newsletter__ok (el <p role="status">
+// vacío que ya está en el HTML). Si alguno falta, no hace nada. No expone
+// funciones globales.
 //
 // Newsletter simulado: no hay backend, y GitHub Pages no acepta POST (un
 // submit real terminaría en una página de error). Se valida el mail con la
