@@ -1,8 +1,20 @@
 /*
-  home.css — Estilos específicos de la Home (loading, banner, filas de juegos)
+  home.css: estilos de la Home (index.html)
+  Se carga al final, después de header.css y footer.css. Usa tokens de
+  variables.css y las piezas de components.css (.card, .badge, .btn).
+  Secciones, en orden:
+    1. Loading simulado de 5 segundos (overlay con aro de progreso)
+    2. Banner "Destacados" (carrusel coverflow 3D)
+    3. Filas de juegos por categoría (carrusel de scroll nativo + cards)
+    4. Detalles de la página (scroll-padding, resultado de búsqueda)
+  Mobile first: los estilos base son de mobile y los @media (min-width)
+  agrandan. Cada animación tiene su bloque prefers-reduced-motion.
 */
 
-/* Loading simulado */
+/* =========================================================
+   1. Loading simulado
+   El JS (loading.js) mueve el % y el aro; acá solo está el aspecto.
+   ========================================================= */
 .loading-overlay {
   position: fixed;
   inset: 0;
@@ -14,6 +26,7 @@
   background: var(--fondo);
 }
 
+/* Columna centrada: logo con aro, porcentaje y frase. */
 .loading__centro {
   display: flex;
   flex-direction: column;
@@ -43,6 +56,8 @@
   stroke-width: 4;
 }
 
+/* stroke-dasharray es el largo de la circunferencia (2 * pi * r con r = 54).
+   loading.js baja el dashoffset de ese valor a 0 a medida que sube el %. */
 .loading__ring-relleno {
   fill: none;
   stroke: var(--acento);
@@ -54,6 +69,7 @@
   transition: stroke-dashoffset 0.05s linear;
 }
 
+/* El logo late con @keyframes latido (scale + resplandor). */
 .loading__logo {
   width: 56px;
   height: 56px;
@@ -62,6 +78,7 @@
   filter: drop-shadow(0 0 10px var(--primario));
 }
 
+/* El % va en Orbitron: es un número grande, casi un título. */
 .loading__pct {
   font: 600 24px/1 var(--font-display);
   color: var(--primario-c3);
@@ -92,7 +109,10 @@
   }
 }
 
-/* Banner "Destacados" — carrusel coverflow: la card activa queda de frente
+/* =========================================================
+   2. Banner "Destacados"
+   ========================================================= */
+/* Carrusel coverflow: la card activa queda de frente
    al centro; las de los costados se corren, se achican y giran en el eje Y
    (perspective + rotateY + translateZ), como si se alejaran hacia el
    fondo. carousel.js calcula el transform de cada una según su distancia a
@@ -112,6 +132,7 @@
   overflow-x: clip;
 }
 
+/* El h1 de la página. */
 .banner__titulo {
   margin-bottom: var(--espaciado-4);
 }
@@ -129,12 +150,18 @@
   background: var(--fondo);
 }
 
+/* Sin perspective ni preserve-3d acá: cada slide lleva su propio
+   perspective() dentro del transform (ver DECISIONES.md, "Carrusel
+   coverflow"), porque con la perspectiva en un ancestro los clicks no caían
+   donde se veía la card. */
 .banner__escena {
   position: relative;
   width: 100%;
   height: 100%;
 }
 
+/* El transform lo escribe carousel.js según la distancia a la activa. Acá
+   solo están la posición base (centrada) y la transición. */
 .banner__slide {
   position: absolute;
   top: 0;
@@ -215,6 +242,8 @@
   font-size: 28px;
 }
 
+/* Etiquetas y nombre solo se ven en la card activa, para no mezclar el
+   texto con el de las cards giradas al costado. */
 .banner__etiquetas,
 .banner__nombre {
   opacity: 0;
@@ -227,8 +256,9 @@
 }
 
 /* Agrupa "Destacado" con el badge de Gratis/precio/Nuevo (si el juego
-   tiene uno, ver carrito.js crearBadge) arriba a la izquierda — el carrito
-   ya ocupa arriba a la derecha y el nombre, abajo de punta a punta.
+   tiene uno, ver carrito.js crearBadge) arriba a la izquierda. Arriba a la
+   derecha no hay nada (el botón de carrito del banner ya no existe) y el
+   nombre ocupa abajo de punta a punta.
    right + flex-wrap: en mobile la card activa mide 107-162px y "Destacado" +
    "Gratis"/precio no entran en una fila; sin esto la segunda etiqueta se
    recortaba contra el borde (overflow: hidden de la card). Ver AUDITORIA.md,
@@ -303,6 +333,8 @@
   visibility: visible;
 }
 
+/* Dots de navegación: son el control por teclado del carrusel (las cards
+   de los costados solo se clickean con mouse, a propósito). */
 .banner__dots {
   display: flex;
   justify-content: center;
@@ -358,10 +390,13 @@
   }
 }
 
-/* Filas de juegos (categorías para invitado, "Recomendados" con sesión).
+/* =========================================================
+   3. Filas de juegos
+   ========================================================= */
+/* Categorías (siempre), "Recomendados" y "Mis juegos" (home.js las arma).
    Se navegan con scroll nativo, arrastrando con mouse o con las flechas
-   (carrusel-fila.js) — sin transición animada, eso queda reservado para
-   el banner "Destacados" (etapa 3b). */
+   (carrusel-fila.js), sin transición animada: eso queda reservado para
+   el banner "Destacados". */
 #filas-juegos {
   margin-top: var(--espaciado-8);
   display: flex;
@@ -369,6 +404,7 @@
   gap: var(--espaciado-8);
 }
 
+/* Título a la izquierda y flechas a la derecha. */
 .carrusel__cabecera {
   display: flex;
   align-items: center;
@@ -394,6 +430,7 @@
   font-weight: 600;
 }
 
+/* Botones de ícono de 44px; carrusel-fila.js los deshabilita en las puntas. */
 .carrusel__flechas {
   display: flex;
   gap: var(--espaciado-1);
@@ -451,11 +488,14 @@
   display: none;
 }
 
+/* La agrega carrusel-fila.js mientras se arrastra con el mouse. */
 .carrusel__pista--arrastrando {
   cursor: grabbing;
   user-select: none;
 }
 
+/* Card de juego. Se apoya en .card de components.css (fondo, borde y
+   hover con scale). flex: 0 0 auto la mantiene en 260px dentro de la pista. */
 .game-card {
   flex: 0 0 auto;
   width: 260px;
@@ -478,6 +518,7 @@
   border-radius: var(--radio-md) var(--radio-md) 0 0;
 }
 
+/* 16:9 horizontal (las cards verticales se descartaron). */
 .game-card__image {
   display: block;
   width: 100%;
@@ -485,6 +526,7 @@
   object-fit: cover;
 }
 
+/* Badge Gratis / precio / Nuevo sobre la esquina de la imagen. */
 .game-card__badge {
   position: absolute;
   left: var(--espaciado-2);
@@ -620,6 +662,9 @@
   }
 }
 
+/* =========================================================
+   4. Detalles de la página
+   ========================================================= */
 /* Con el header fijo (desde tablet, ver .header--fijo en header.css), un
    link a un ancla como "Mis juegos" (index.html#fila-mis-juegos) dejaba el
    título de la fila tapado por el header. scroll-padding-top le dice al

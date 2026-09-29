@@ -1,14 +1,18 @@
 /*
-  juego.css — Estilos específicos de la página del juego (Peg Solitaire /
-  "Neon Circuit" en la interfaz). El breadcrumb, el layout de 2 columnas,
-  la ficha, "Sobre el juego", la Galería, Compartir, Comunidad y "Dejá tu
-  reseña" viven en components.css: los usa también producto.html.
-  ============================================================ */
+  juego.css: página del juego (juego.html, Peg Solitaire / "Neon Circuit"
+  en la interfaz)
+  Se carga al final. Usa tokens de variables.css, sobre todo los
+  --tablero-* (paleta propia del tablero, separada de la del sitio).
+  Acá vive solo lo de este juego: el tablero (portada, grilla de 33 fichas,
+  leyenda) y la Ayuda. El breadcrumb, el layout de 2 columnas, la ficha,
+  "Sobre el juego", la Galería, Compartir, Comunidad y "Dejá tu reseña"
+  viven en components.css porque producto.html también los usa.
+  Solo desktop (regla del proyecto), por eso no hay @media.
+*/
 
 /* ============================================================
-   Tablero — Etapa 4, parte 1: solo el marco de la card.
-   El grid de 33 fichas (parte 2) se arma dentro de este mismo #board,
-   en js/juego.js.
+   Tablero: marco de la card
+   Las fichas las arma js/juego.js dentro de #tablero-grid.
    ============================================================ */
 /* Alto "base" de la fila de arriba (tablero + panel lateral). Una sola
    variable para las dos cosas que tienen que medir lo mismo: el tablero
@@ -34,6 +38,7 @@
   min-height: var(--alto-tablero);
 }
 
+/* Cabecera y cuerpo: el cuerpo lleva la portada (estado inicial) o el juego. */
 /* Franja de cabecera, de un violeta más claro que el cuerpo — así se ve en
    Figma, no es la etiqueta flotando sola sobre la grilla. */
 .tablero__cabecera {
@@ -84,6 +89,7 @@
   object-fit: cover;
 }
 
+/* Botón "Jugar": el estilo lo trae .btn--primario, igual que en producto. */
 .tablero__jugar {
   /* Por encima de la imagen (que también es position:absolute). */
   position: relative;
@@ -113,7 +119,7 @@
   box-shadow: 0 0 8px var(--acento);
 }
 
-/* ---------- Grid de posiciones (parte 2) ----------
+/* ---------- Grid de posiciones ----------
    7x7 con forma de cruz clásica (33 posiciones válidas + huecos invisibles
    en las esquinas). js/juego.js arma un <div class="tablero__hueco ..."> por
    celda; acá solo el tamaño/color de cada estado. */
@@ -131,6 +137,8 @@
   margin: var(--espaciado-2) 0 var(--espaciado-6);
 }
 
+/* Cada celda del grid. El tamaño (60px) tiene que coincidir con las
+   columnas y filas de .tablero__grid. Los estados van en modificadores. */
 .tablero__hueco {
   position: relative;
   width: 60px;
@@ -184,7 +192,8 @@
 /* Destino usa el mismo dibujo de 3 anillos que activo/seleccionado, pero con
    la banda del medio rellena de blanco (no negra): el ::after de acá no es
    solo una línea, también tapa el centro de negro para recortar el "agujero"
-   sobre el blanco. Ver DECISIONES.md, "Disco de destino". */
+   sobre el blanco. El blanco (#FFFFFF) es un valor escrito a mano porque
+   no hay token para él (tampoco en .tablero__muestra--destino). */
 .tablero__hueco--destino {
   background: #FFFFFF;
   border: 2px solid var(--tablero-destino);
@@ -208,7 +217,8 @@
   background: var(--tablero-descargado);
 }
 
-/* ---------- Leyenda ---------- */
+/* ---------- Leyenda ----------
+   Las muestras (.tablero__muestra) repiten a escala las fichas del grid. */
 .tablero__leyenda {
   display: flex;
   flex-wrap: wrap;
@@ -293,12 +303,13 @@
   background: var(--tablero-descargado);
 }
 
+/* Ícono de flecha del ítem "salto" de la leyenda. */
 .tablero__leyenda-salto i {
   font-size: 14px;
 }
 
 /* ============================================================
-   Ayuda — Etapa 4, parte 3
+   Ayuda
    El layout de 2 columnas (.juego-layout), el panel lateral y la ficha del
    juego viven en components.css: producto.html también los usa, y no
    arma un board propio. Ayuda sigue acá porque son las reglas de Peg
@@ -326,6 +337,7 @@
   background: var(--superficie);
 }
 
+/* Título con la tecla de atajo ("F1") a la derecha. */
 .ayuda h2 {
   display: flex;
   align-items: center;
@@ -345,6 +357,8 @@
   border-top: 1px solid var(--primario-o1);
 }
 
+/* Acordeón nativo con <details>/<summary>: el navegador resuelve el abrir
+   y cerrar. El "+" y el "−" son un ::after que cambia con [open]. */
 .ayuda__item summary {
   display: flex;
   align-items: center;
@@ -377,6 +391,7 @@
   font-size: 14px;
 }
 
+/* Lista de atajos de teclado (Z, R, Esc) con <kbd>. */
 .ayuda__atajos {
   display: flex;
   flex-direction: column;

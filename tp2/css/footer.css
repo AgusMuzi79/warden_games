@@ -1,6 +1,13 @@
 /* =========================================================
-   Footer — mobile first
-   Usa los tokens de variables.css (--superficie = --primario-o2).
+   footer.css: fat footer, mobile first
+   Se carga en las 4 páginas, pero solo index, producto y juego tienen
+   <footer> (login no). Usa los
+   tokens de variables.css y .btn de components.css (el botón del
+   newsletter). El HTML es semántico: cada columna es un <nav>, sponsors y
+   newsletter son <section>, los datos de la empresa un <address>.
+   Los <div> son solo de layout. Breakpoints: 48rem (tablet) y 64rem
+   (desktop). Las medidas en rem de este archivo vienen de la primera
+   versión, antes de tener los tokens de espaciado.
    ========================================================= */
 
 .footer {
@@ -15,6 +22,8 @@
 
 /* ---------- Elementos comunes ---------- */
 
+/* Los links del footer heredan el color y pasan a celeste en hover, sin
+   subrayado animado. Es el mismo criterio de .link--blanco (components.css). */
 .footer p {
   margin: 0;
   color: inherit; /* base.css pinta los <p> de lila */
@@ -75,7 +84,9 @@
   color: var(--primario-c1);
 }
 
-/* ---------- Marca + columnas ---------- */
+/* ---------- Marca + columnas ----------
+   Mobile: la marca arriba a todo el ancho y las columnas de a dos.
+   Tablet: 4 columnas. Desktop: marca (2.2fr) + 4 columnas, como en Figma. */
 
 .footer__grid {
   display: grid;
@@ -104,6 +115,7 @@
   margin: 0.75rem 0 1rem;
 }
 
+/* Redes: el ícono mide 26px pero el link 40px (área táctil). */
 .social {
   display: flex;
   gap: 0.5rem;
@@ -135,6 +147,7 @@
   gap: 2rem;
 }
 
+/* Es un <h2> (por eso Orbitron), con tamaño de label chico. */
 .newsletter__title {
   margin: 0 0 var(--espaciado-3);
   font: 500 18px/1.4 var(--font-display);
@@ -171,6 +184,8 @@
   flex-shrink: 0;
 }
 
+/* Es un <h2 class="footer__label company__title">: toma el estilo de
+   .footer__label y este bloque le saca las mayúsculas y el espaciado. */
 .company__title {
   margin-bottom: var(--espaciado-3);
   text-transform: none;
@@ -181,7 +196,8 @@
   font-style: normal;
 }
 
-/* ---------- Legal ---------- */
+/* ---------- Legal ----------
+   Franja de abajo de todo: links legales y copyright. */
 
 .legal__links {
   display: flex;

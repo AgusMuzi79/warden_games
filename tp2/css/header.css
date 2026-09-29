@@ -1,8 +1,16 @@
 /* =========================================================
-   Header — mobile first
-   Depende de variables.css, base.css (.sr-only) y components.css
-   (.btn, .menu-dropdown).
+   header.css: header del sitio, mobile first
+   Se carga en las 4 páginas, después de components.css. Usa tokens de
+   variables.css, .sr-only de base.css y de components.css los botones
+   (.btn) y el desplegable (.menu-dropdown, que acá solo se posiciona).
+   Tiene una estructura y tres variantes: Home con sesión, Home invitado
+   (las dos con el mismo CSS, cambia el avatar) y .header--juego, el
+   "modo foco" sin menú ni buscador (lo usan juego.html y producto.html). La grilla cambia en dos puntos:
+   mobile (una fila + buscador plegable) y desde 48rem (una sola fila).
    ========================================================= */
+
+/* Contenedor: grilla con áreas con nombre, así cada hijo se ubica con
+   grid-area sin depender del orden del HTML. */
 
 .header {
   display: grid;
@@ -38,11 +46,15 @@
   position: relative;
 }
 
+/* Solo la posición: el aspecto del desplegable es .menu-dropdown
+   (components.css). */
 .menu-dropdown--hamburguesa {
   top: calc(100% + var(--espaciado-2));
   left: 0;
 }
 
+/* El logo es la única otra pieza con Orbitron fuera de h1-h3 (regla del
+   proyecto: títulos y logo). */
 .header__logo {
   display: inline-flex;
   align-items: center;
@@ -98,6 +110,8 @@
   margin-top: var(--espaciado-2);
 }
 
+/* La lupa dentro del input: absoluta y sin pointer-events para no tapar
+   el click en el campo. El padding-left del input le deja lugar. */
 .header__search i {
   position: absolute;
   top: 50%;
@@ -132,7 +146,11 @@
   border-color: var(--primario-c1);
 }
 
-/* ---------- Derecha: carrito + avatar ---------- */
+/* ---------- Derecha: carrito + avatar ----------
+   Los tres menús (hamburguesa, carrito y cuenta) comparten .menu-dropdown;
+   cada uno tiene su wrapper con position: relative para anclarlo. El
+   carrito y la cuenta van alineados a la derecha (right: 0) para no
+   salirse de la pantalla. */
 
 .header__actions {
   grid-area: actions;
@@ -220,7 +238,9 @@
   transition: box-shadow 0.2s ease;
 }
 
-/* Hasta que el JS de sesión toggee esto, el atributo hidden manda */
+/* sesion.js muestra uno de los dos avatares (usuario o invitado) con el
+   atributo hidden. Esta regla repite lo que ya hace [hidden] en base.css,
+   para que se vea acá que display: inline-flex no lo pisa. */
 .header__avatar[hidden] {
   display: none;
 }
@@ -235,6 +255,7 @@
   object-fit: cover;
 }
 
+/* Avatar sin sesión: es un <a> a login.html con un ícono sobre fondo claro. */
 .header__avatar--invitado {
   align-items: center;
   justify-content: center;
@@ -243,7 +264,11 @@
   font-size: 22px;
 }
 
-/* ---------- Variante juego ---------- */
+/* ---------- Variante juego ----------
+   .header--juego: logo a la izquierda, estado de guardado al centro y
+   acciones a la derecha. Sin menú ni buscador para no distraer mientras
+   se juega. La grilla se repite en el @media de abajo porque .header la
+   pisa ahí con la de 3 columnas del buscador. */
 
 .header--juego {
   grid-template-columns: 1fr auto 1fr;
@@ -251,6 +276,7 @@
   padding-block: var(--espaciado-3);
 }
 
+/* "Partida guardada" (role="status" en el HTML). */
 .header__status {
   grid-area: status;
   margin: 0;
@@ -258,6 +284,8 @@
   font: 500 14px/1.4 var(--font-ui);
 }
 
+/* "Volver al menú" más bajito que un .btn normal para que entre en la
+   fila del header. */
 .header--juego .btn {
   min-height: 36px;
   padding: 0 var(--espaciado-4);
@@ -266,6 +294,8 @@
 
 /* =========================================================
    Tablet / desktop: todo en una fila, buscador centrado
+   Las dos columnas de los costados son iguales (1fr), así el buscador
+   queda centrado en la página y no entre el logo y las acciones.
    ========================================================= */
 @media (min-width: 48rem) {
   .header {
@@ -300,12 +330,16 @@
     z-index: 200;
   }
 
+  /* Sin este bloque la regla .header de arriba (misma especificidad, más
+     tarde en el archivo) le pisaría las columnas al header del juego. */
   .header--juego {
     grid-template-columns: 1fr auto 1fr;
     grid-template-areas: "start status actions";
   }
 }
 
+/* Desktop: solo cambia la variable del ancho del buscador. Como no repite
+   grid-template-columns, no compite con .header--juego. */
 @media (min-width: 64rem) {
   .header {
     --ancho-buscador: 24rem;

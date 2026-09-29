@@ -1,7 +1,13 @@
 /*
-  login.css — Login / Registro
-  Depende de variables.css, base.css y components.css (usa .field y .link
-  ya definidos ahí). Layout pensado solo para desktop (regla del proyecto).
+  login.css: Login / Registro (login.html)
+  Se carga al final. Usa tokens de variables.css, y de components.css los
+  botones (.btn), los campos (.field) y .link. login.html no tiene header
+  ni footer, aunque también cargue header.css y footer.css.
+  Secciones: splash de 2 columnas, selector Crear Cuenta / Ingresar,
+  formularios, campo de contraseña, checkboxes y captcha simulado,
+  botones sociales y bloque de éxito del registro.
+  Layout pensado solo para desktop (regla del proyecto), por eso casi no
+  hay @media. login.js prende y apaga las clases .active y is-visible.
 */
 
 /* ---------- Splash de 2 columnas ----------
@@ -32,6 +38,7 @@
   background: linear-gradient(160deg, var(--primario-o2), var(--fondo));
 }
 
+/* Flota con @keyframes auth-brand-float. */
 .auth-brand__logo {
   width: 96px;
   height: 96px;
@@ -66,6 +73,8 @@
   background: var(--fondo);
 }
 
+/* La card del formulario. Los dos forms (registro e ingreso) viven adentro,
+   solo uno se muestra a la vez. */
 .auth-card {
   width: 100%;
   max-width: 30rem; /* 480px: en 2 columnas no necesita los 600px de antes */
@@ -74,7 +83,9 @@
   background: var(--superficie);
 }
 
-/* ---------- Selector Crear Cuenta / Ingresar ---------- */
+/* ---------- Selector Crear Cuenta / Ingresar ----------
+   Es un role="tablist" con dos botones role="tab". login.js pone la clase
+   .active en el botón elegido y en el form (tabpanel) que le corresponde. */
 .auth-switch {
   display: flex;
   gap: var(--espaciado-1);
@@ -110,7 +121,8 @@
   color: var(--primario-c3);
 }
 
-/* ---------- Paneles de formulario ---------- */
+/* ---------- Paneles de formulario ----------
+   Ocultos por default, solo se ve el que tiene .active. */
 .auth-card__form {
   display: none;
   flex-direction: column;
@@ -128,6 +140,7 @@
   display: flex;
 }
 
+/* Dos campos lado a lado (ej. vencimiento y CVV); en columna hasta 48rem. */
 .field-row {
   display: flex;
   flex-direction: column;
@@ -186,7 +199,10 @@
   font-size: 20px;
 }
 
-/* ---------- Checkboxes ---------- */
+/* ---------- Checkboxes ----------
+   El <input> real está invisible (opacity: 0) pero sigue ahí, así conserva
+   foco y teclado. El cuadradito que se ve es .check-block__mark, que se
+   pinta con el selector de hermano input:checked ~ .check-block__mark. */
 .check-block {
   position: relative;
   display: flex;
@@ -231,6 +247,7 @@
   transform: rotate(45deg);
 }
 
+/* El foco lo tiene el input invisible; se dibuja en la marca. */
 .check-block input:focus-visible ~ .check-block__mark {
   outline: 3px solid var(--foco);
   outline-offset: 2px;
@@ -243,10 +260,12 @@
   line-height: 1.4;
 }
 
-/* Fila del captcha: simulado, pero con la paleta gris clara del widget
-   real de reCAPTCHA de Google en vez de los tokens violeta del sitio — es
+/* ---------- Captcha simulado ----------
+   Fila del captcha: simulado, pero con la paleta gris clara del widget
+   real de reCAPTCHA de Google en vez de los tokens violeta del sitio. Es
    un widget de un tercero (se ve igual en cualquier página que lo use,
-   nunca toma el tema de quien lo integra). align-items:center (en vez de
+   nunca toma el tema de quien lo integra). Es la única parte del CSS con
+   colores escritos a mano, a propósito. align-items:center (en vez de
    heredar el flex-start de .check-block, pensado para labels de varias
    líneas como "Acepto los términos...") porque acá todo el contenido es
    de una sola línea y tiene que quedar centrado, no arrancando arriba. */
@@ -316,6 +335,8 @@
   gap: var(--espaciado-3);
 }
 
+/* Línea con texto en el medio ("o continuá con..."). Las dos rayas son
+   ::before y ::after con flex: 1. */
 .divider {
   display: flex;
   align-items: center;
@@ -356,6 +377,8 @@
   color: var(--exito);
 }
 
+/* Es un texto de bloque, no un h1-h3, pero queda en Orbitron por ser el
+   título del mensaje de éxito. */
 .auth-success__title {
   margin: 0;
   color: var(--primario-c3);
@@ -393,7 +416,9 @@
   }
 }
 
-/* ---------- Reduced motion ---------- */
+/* ---------- Reduced motion ----------
+   Sin flotado del logo ni animación de éxito. El bloque de éxito igual se
+   muestra, solo que sin el fade + scale. */
 @media (prefers-reduced-motion: reduce) {
   .toggle-pass,
   .check-block__mark {

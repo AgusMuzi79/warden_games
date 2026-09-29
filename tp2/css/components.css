@@ -1,18 +1,35 @@
 /*
-  components.css — Componentes reutilizables
-  Botones, cards, inputs. Depende de variables.css y base.css.
-  Header vive en header.css, footer en footer.css.
+  components.css: componentes reutilizables
+  Se carga tercero, después de variables.css y base.css, en las 4 páginas.
+  Usa solo tokens. El header vive en header.css y el footer en footer.css;
+  el CSS de cada página se carga después y puede ajustar lo de acá.
+  Índice (buscá el título con los ====):
+    Botones (.btn y variantes)      Links (.link)
+    Cards y badges                  Menú desplegable (hamburguesa, cuenta)
+    Carrito (dentro del menú)       Modal (<dialog> de pago)
+    Campos (.field)                 Ficha de un juego (juego y producto):
+      breadcrumb, layout de 2 columnas, ficha, Sobre el juego, Galería,
+      Compartir, Comunidad, Dejá tu reseña
+  Regla de este archivo: acá van los componentes que usa más de una página.
+  Lo que es de una sola página va en su propio CSS.
 */
 
-/* Botones */
+/* =========================================================
+   Botones
+   4 variantes, cada una con un hover distinto (pedido de la cátedra):
+   .btn--primario se eleva, .btn--secundario rellena deslizando,
+   .btn--terciario subraya y .btn--destructivo pulsa en rojo.
+   ========================================================= */
 .btn {
   appearance: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  /* Ancla acá el z-index:-1 del relleno de .btn--secundario, para que
-     nunca dependa del fondo de lo que lo rodee (ver DECISIONES.md). */
+  /* z-index: 0 vuelve a cada botón la raíz de su propio apilamiento. Así el
+     ::before con z-index: -1 de .btn--secundario queda detrás del texto pero
+     delante del fondo del botón, y no detrás del fondo de un ancestro (ver
+     DECISIONES.md, "Bug: la animación de .btn--secundario"). */
   z-index: 0;
   min-height: var(--control-alto);
   padding: 0 var(--espaciado-6);
@@ -101,6 +118,7 @@
   color: var(--acento);
 }
 
+/* La raya que crece es un ::after, con el mismo ancho que el padding. */
 .btn--terciario::after {
   content: "";
   position: absolute;
@@ -119,6 +137,7 @@
   transform: scaleX(1);
 }
 
+/* Estado deshabilitado, común a todas las variantes. */
 .btn:disabled {
   background: var(--primario-o2);
   color: var(--primario-c1);
@@ -135,6 +154,8 @@
   box-shadow: none;
 }
 
+/* Sin movimiento: no hay elevación ni relleno animado, y el destructivo
+   muestra el resplandor fijo para no perder el feedback del hover. */
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .btn--secundario::before,
@@ -154,6 +175,11 @@
   }
 }
 
+/* =========================================================
+   Links
+   Dos variantes: .link (celeste, para resaltar dentro de una oración) y
+   .link--blanco (hereda el color, se marca recién en hover).
+   ========================================================= */
 /* Link de texto celeste, para resaltar una palabra suelta dentro de una
    oración (ej. "Acepto los términos" del checkbox de login) — mismo
    subrayado animado que .btn--terciario, pero no es un botón. */
@@ -215,6 +241,9 @@
   .link--blanco { transition: none; }
 }
 
+/* =========================================================
+   Cards y badges
+   ========================================================= */
 /* Cards — el hover se levanta por encima de las vecinas.
    En Figma esto no se puede mostrar porque el z-index es
    estatico; aca si. */
@@ -227,6 +256,7 @@
   transition: transform 150ms ease-out;
 }
 
+/* z-index: 1 en hover para que la card agrandada tape a las vecinas. */
 .card:hover,
 .card:focus-within {
   transform: scale(1.06);
@@ -251,6 +281,8 @@
   letter-spacing: 0.03em;
 }
 
+/* Dos variantes de color: precio (violeta, sirve también para "Gratis") y
+   nuevo (celeste, el mismo par de colores de "Destacado" en el banner). */
 .badge--precio {
   background: var(--primario-o1);
   border: 1px solid var(--primario-c1);
@@ -262,9 +294,13 @@
   color: var(--fondo);
 }
 
-/* Menú desplegable — mismo componente para el menú hamburguesa y el de
-   cuenta (unificados en la 2ª corrección: antes tenían estilos distintos).
-   Quien lo posiciona respecto al botón que lo abre es header.css. */
+/* =========================================================
+   Menú desplegable
+   Un solo componente para el menú hamburguesa, el de cuenta y el del
+   carrito. Quien lo posiciona respecto al botón que lo abre es header.css;
+   js/menu.js lo abre y lo cierra.
+   ========================================================= */
+/* Panel flotante. Sin top/left/right acá: los pone header.css por variante. */
 .menu-dropdown {
   position: absolute;
   /* Más alto que las cards del banner coverflow (llegan a z-index: 100),
@@ -280,6 +316,7 @@
   box-shadow: 0 12px 30px var(--sombra-elevacion);
 }
 
+/* Título chico de cada sección del menú ("Jugar", "Categorías"). */
 .menu-dropdown__titulo {
   margin: 0 0 var(--espaciado-2);
   color: var(--primario-c1);
@@ -294,6 +331,9 @@
   gap: var(--espaciado-1);
 }
 
+/* Los links de cada sección: ícono + texto, 44px de alto. Esta regla es más
+   específica que .btn, por eso "Contáctanos" (un .btn adentro) necesita los
+   ajustes de .menu-dropdown__seccion--contacto más abajo. */
 .menu-dropdown__seccion a {
   display: flex;
   align-items: center;
@@ -382,7 +422,11 @@
   text-decoration: none;
 }
 
-/* ---------- Carrito ---------- */
+/* =========================================================
+   Carrito (dentro del menú desplegable)
+   El contador sobre el ícono está en header.css (.carrito__contador).
+   carrito.js arma la lista.
+   ========================================================= */
 .carrito__vacio {
   margin: 0;
   color: var(--primario-c1);
@@ -454,6 +498,8 @@
   width: 100%;
 }
 
+/* "Cerrar sesión" es un <button> (no un link) que se ve como un item del
+   menú, pero en rojo. */
 .menu-dropdown__cerrar-sesion {
   appearance: none;
   display: block;
@@ -474,7 +520,13 @@
   background: var(--primario-o2);
 }
 
-/* ---------- Modal (ej. "Pagar carrito") ---------- */
+/* =========================================================
+   Modal
+   <dialog> nativo (ej. "Pagar carrito"): el navegador resuelve el foco
+   atrapado, Escape y el fondo oscuro (::backdrop). compras.js lo abre.
+   ========================================================= */
+/* position: fixed + margin: auto lo centra. El <dialog> ya trae position
+   fixed, se repite para que se vea. */
 .modal {
   position: fixed;
   margin: auto;
@@ -502,6 +554,8 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* Botón "X": mismas medidas que .header__icon-btn, pero con clase propia
+   porque ese nombre pertenece al bloque .header. */
 .modal__cerrar {
   position: absolute;
   top: var(--espaciado-3);
@@ -535,6 +589,7 @@
   font-size: 14px;
 }
 
+/* Dos campos en una fila (vencimiento y CVV); se apilan si no entran. */
 .modal__fila {
   display: flex;
   flex-wrap: wrap;
@@ -589,7 +644,11 @@
   }
 }
 
-/* Inputs */
+/* =========================================================
+   Campos de formulario
+   Un .field es label + input (o textarea) en columna. Lo usan login,
+   el modal de pago y el newsletter.
+   ========================================================= */
 .field {
   display: flex;
   flex-direction: column;
@@ -602,6 +661,8 @@
   color: var(--primario-c1);
 }
 
+/* Borde en --primario: da 3,59:1 contra la card y WCAG 1.4.11 pide 3:1
+   para el límite de un campo (ver DECISIONES.md, T08b). */
 .field input {
   background: var(--fondo);
   border: 1px solid var(--primario);
@@ -624,12 +685,12 @@
 }
 
 /* ============================================================
-   Ficha de un juego — usado por juego.html (Neon Circuit) y por
-   producto.html (cualquier otro juego del catálogo). Antes vivía en
-   juego.css; se movió acá al pasar a compartirse entre dos páginas
-   (mismo criterio que ya se usó con crearBotonCarrito()/crearBadge() en
-   carrito.js). El tablero y la Ayuda (específicos de Neon Circuit) siguen
-   en juego.css.
+   Ficha de un juego
+   Usado por juego.html (Neon Circuit) y por producto.html (cualquier otro
+   juego del catálogo). Antes vivía en juego.css; se movió acá al pasar a
+   compartirse entre dos páginas (mismo criterio que con crearBotonCarrito()
+   y crearBadge() en carrito.js). El tablero y la Ayuda, específicos de
+   Neon Circuit, siguen en juego.css.
    ============================================================ */
 
 /* ---------- Ruta de navegación (breadcrumb) ----------
@@ -685,7 +746,9 @@
   margin-top: var(--espaciado-6);
 }
 
-/* La fila 2 no necesita igualar alturas: con align-items:stretch general
+/* Fila 2: "Sobre el juego" + Galería a la izquierda y Compartir a la derecha.
+   Compartir queda debajo de Ayuda, en la misma columna lateral.
+   La fila 2 no necesita igualar alturas: con align-items:stretch general
    de arriba, si no ponemos esto, un ítem más corto quedaría con una card
    más alta que su contenido, con aire de sobra adentro. */
 .juego-layout__secundario,
@@ -704,6 +767,7 @@
   margin-top: 0;
 }
 
+/* Ficha + Ayuda en juego.html; solo la ficha en producto.html. */
 .panel-lateral {
   display: flex;
   flex-direction: column;
@@ -792,8 +856,9 @@
 }
 
 /* ---------- Galería ----------
-   6 tiles con gradientes de la paleta del tablero. Sin fotos reales
-   todavía (ver DECISIONES.md, "Pendientes de decidir"). */
+   Las dos páginas usan el carrusel de flip (más abajo). La grilla de 6
+   tiles con gradientes (.galeria__grid y .galeria__tile--1 a --6) era el
+   placeholder de antes de tener capturas y ya no la usa ningún HTML. */
 .galeria {
   margin-top: var(--espaciado-8);
 }
@@ -835,6 +900,7 @@
 .galeria__tile--6 { background: linear-gradient(135deg, var(--primario), var(--tablero-seleccionado) 60%, var(--tablero-activo)); }
 
 /* Capturas reales (Neon Circuit, juego.html): llenan el tile sin deformarse. */
+/* Imagen de cada cara del carrusel. */
 .galeria__img {
   display: block;
   width: 100%;
@@ -870,9 +936,8 @@
   font: 400 16px/1.4 var(--font-ui);
 }
 
-/* ---------- Galería animada: carrusel de flip (solo juego.html) ----------
-   producto.html sigue con la grilla de gradientes de arriba (sin fotos
-   reales). Acá, en cambio, se ve una sola foto grande a la vez; al pasar a
+/* ---------- Galería animada: carrusel de flip (juego.html y producto.html) ----------
+   Se ve una sola foto grande a la vez; al pasar a
    la siguiente, la tarjeta gira en 3D como una ficha que se da vuelta —
    una animación de rotación real, no un simple desplazamiento. La lógica
    que dispara el giro (qué foto va en cada cara y cuándo) vive en
@@ -972,7 +1037,9 @@
   }
 }
 
-/* ---------- Compartir ---------- */
+/* ---------- Compartir ----------
+   Redes y "Mensaje" son placeholders sin destino; solo "Copiar" hace algo
+   (compartir.js). */
 .compartir {
   padding: var(--espaciado-4);
   border: 1px solid var(--primario-o1);
@@ -1048,7 +1115,9 @@
   color: var(--fondo);
 }
 
-/* ---------- Comunidad ---------- */
+/* ---------- Comunidad ----------
+   Lista de reseñas. min-width: 0 deja que la columna se achique dentro
+   del grid en vez de estirarlo. */
 .comunidad {
   min-width: 0;
 }
@@ -1116,6 +1185,8 @@
   font: 400 13px/1.4 var(--font-ui);
 }
 
+/* Estrellas de la reseña: caracteres de Phosphor con un sr-only al lado
+   que dice el puntaje en palabras. */
 .resena__puntaje {
   margin: 0;
   color: var(--tablero-seleccionado);
@@ -1139,6 +1210,7 @@
   gap: var(--espaciado-4);
 }
 
+/* "Útil" y "Responder": botones que parecen texto. */
 .resena__util,
 .resena__responder {
   appearance: none;
@@ -1161,6 +1233,7 @@
    estrellas al revés en el HTML (5,4,3,2,1) y darlas vuelta visualmente
    con row-reverse, así "esta y las siguientes en el HTML" son, en
    pantalla, "esta y las anteriores" — la selección natural de un rating. */
+/* align-self: center: la card no se estira contra la altura de Comunidad. */
 .resena-form {
   align-self: center;
   padding: var(--espaciado-6);
@@ -1187,6 +1260,8 @@
   font: 500 14px/1 var(--font-ui);
 }
 
+/* Los inputs van en orden 5,4,3,2,1 en el HTML; row-reverse los muestra
+   1 a 5. */
 .estrellas {
   display: flex;
   flex-direction: row-reverse;
@@ -1195,6 +1270,8 @@
   width: fit-content;
 }
 
+/* Radios invisibles pero con 44px de área, así siguen recibiendo foco y
+   selección por teclado. */
 .estrellas input {
   position: absolute;
   width: var(--control-alto);

@@ -1,15 +1,24 @@
 /* ============================================================
-   Warden — variables
-   Generado basado en el design system de Figma.
+   variables.css: tokens del design system y clases de tipografía
+   Se carga primero en las 4 páginas (index, producto, juego y login),
+   porque todo el CSS de después usa var(--token) y no escribe
+   colores, espaciados, radios ni fuentes a mano. Si falta un token,
+   se agrega acá. Ninguna regla de este archivo depende de otro CSS.
+   Los valores salen del design system de Figma, pero si Figma y este
+   archivo difieren, gana este.
    ============================================================ */
 
 :root {
-  /* ---- Color: base ---- */
+  /* ---- Color: base ----
+     --superficie es el fondo de cards, header, footer y menús. Apunta a
+     --primario-o2 en vez de repetir el hex, así hay un solo lugar donde
+     cambiarlo. --fondo-o1 es --fondo al 75%, para círculos sobre imágenes. */
   --fondo:            #19042A;
   --fondo-o1:         rgba(25, 4, 42, 0.75);
   --superficie:       var(--primario-o2);
 
-  /* ---- Color: primario (violeta) ---- */
+  /* ---- Color: primario (violeta) ----
+     Escala de claro (c3) a oscuro (o2). c = más claro, o = más oscuro. */
   --primario-c3:     #ECDBFA;
   --primario-c2:     #DAB7F5;
   --primario-c1:     #CBA0EE;
@@ -17,7 +26,8 @@
   --primario-o1:     #731EB8;
   --primario-o2:     #2C0849;
 
-  /* ---- Color: acento (celeste) ---- */
+  /* ---- Color: acento (celeste) ----
+     Links, hovers, foco de campos y detalles. Misma lógica de c/o. */
   --acento-c3:       #DEF5F7;      
   --acento:          #52D1DC;  
   --acento-o2:       #158993;  
@@ -27,7 +37,8 @@
   --error:            #F87171;
   --exito:            #4ADE80;
 
-  /* ---- Color: utilidad ---- */
+  /* ---- Color: utilidad ----
+     --foco es el amarillo del anillo de :focus-visible (ver abajo). */
   --foco:             #EEF434;
   --sombra-elevacion: rgba(0, 0, 0, 0.35);
   --velo-modal:       rgba(0, 0, 0, 0.6);   /* fondo oscurecido detrás de un <dialog> */
@@ -36,14 +47,17 @@
   /* ---- Color: tablero (página del juego) ----
      Paleta propia del tablero de Peg Solitaire / "Neon Circuit", separada
      a propósito del violeta/celeste del resto del sitio (ver DECISIONES.md,
-     "Página del juego"). Pendiente de ajustar a ojo contra Figma. */
+     "Página del juego"). Los valores ya están definidos y no se tocan.
+     Los usa juego.css (fichas, leyenda, grilla de fondo). */
   --tablero-activo:        #FF6A1A;
   --tablero-descargado:    #0B0710;
   --tablero-seleccionado:  #3FE8E4;
   --tablero-destino:       #4C7DFF;
   --tablero-grilla:        rgba(155, 75, 221, 0.15);
 
-  /* ---- Espaciado ---- */
+  /* ---- Espaciado ----
+     Son múltiplos de 4px. Se saltea el 7 a propósito, y el 5 se sumó
+     después porque hacía falta un 20px para el gap del tablero. */
   --espaciado-1:      4px;
   --espaciado-2:      8px;
   --espaciado-3:      12px;
@@ -69,6 +83,9 @@
 
 /* ============================================================
    Tipografias
+   Clases utilitarias del design system. Solo las de display, h1, h2 y h3
+   usan Orbitron (títulos); el resto va en Roboto Flex. Hoy ningún
+   HTML las usa: los títulos toman el tamaño de base.css.
    ============================================================ */
 
 .t-display  { font: 700 48px/1.10 var(--font-display); }
@@ -84,6 +101,9 @@
 
 /* ============================================================
    Cuando se hace tab en los botones
+   Foco visible global para quien navega con teclado. :where() deja la
+   especificidad en 0, así cualquier componente puede ajustar el outline
+   sin pelear. :focus-visible evita que salga al hacer click con mouse.
    ============================================================ */
 
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {

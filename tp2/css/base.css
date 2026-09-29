@@ -1,18 +1,27 @@
 /*
-  base.css — Reset y estilos globales
-  Depende de variables.css (debe importarse antes en el <head>).
+  base.css: reset y estilos por etiqueta
+  Se carga segundo en todas las páginas. Usa los tokens de variables.css.
+  Acá no hay clases de componentes, solo el reset, .sr-only, el atributo
+  [hidden], el scrollbar y el estilo base de body, títulos, links, listas,
+  imágenes y main. Lo específico se pisa después en components.css y en
+  el CSS de cada página.
 */
 
+/* Con border-box el padding y el borde entran dentro del ancho declarado. */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
+/* Única excepción al "sin !important" del proyecto: sin esto, cualquier
+   display de una clase (flex, grid) le gana al atributo hidden y el
+   elemento no se oculta. */
 [hidden] {
   display: none !important;
 }
 
+/* Texto solo para lectores de pantalla (labels ocultos, avisos). */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -25,6 +34,8 @@
   border: 0;
 }
 
+/* color-scheme: dark hace que los controles nativos (inputs, scrollbar del
+   sistema, <dialog>) salgan oscuros sin estilarlos uno por uno. */
 html {
   color-scheme: dark;
   /* Firefox: no hay pseudo-elementos ahí, es la única forma de tocar el
@@ -60,6 +71,7 @@ html {
   background: var(--acento);
 }
 
+/* ---- Estilos por etiqueta ---- */
 body {
   margin: 0;
   min-height: 100vh;
@@ -68,6 +80,8 @@ body {
   font: 400 16px/1.5 var(--font-ui);
 }
 
+/* Orbitron solo en h1-h3 (corrección del profesor). h4 queda en Roboto
+   Flex por eso está separado. */
 h1, h2, h3 {
   font-family: var(--font-display);
   margin: 0 0 var(--espaciado-2);
@@ -93,6 +107,8 @@ a {
   text-decoration: none;
 }
 
+/* Este subrayado también le llega a los <a class="btn">; components.css
+   lo anula ahí para que solo se vea el de la animación del botón. */
 a:hover {
   text-decoration: underline;
 }
@@ -112,6 +128,7 @@ button {
   font-family: inherit;
 }
 
+/* Contenedor de contenido centrado. login.css lo pisa con .auth-shell. */
 main {
   display: block;
   width: 100%;
