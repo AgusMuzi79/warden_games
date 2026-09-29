@@ -609,6 +609,14 @@
   border-color: var(--acento);
 }
 
+/* Texto de ayuda debajo de un input (ej: requisitos de la contraseña).
+   Se ve chico a propósito, pero siempre presente: la idea es que la
+   persona lo lea antes de escribir, no que se entere recién con un error. */
+.field__hint {
+  font-size: 12px;
+  color: var(--primario-c1);
+}
+
 /* ============================================================
    Ficha de un juego — usado por juego.html (Neon Circuit) y por
    producto.html (cualquier otro juego del catálogo). Antes vivía en

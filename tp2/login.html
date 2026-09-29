@@ -62,7 +62,7 @@
           <div class="field">
             <label for="reg-password">Contraseña</label>
             <div class="password-wrap">
-              <input type="password" id="reg-password" name="password" placeholder="••••••••••" required minlength="8">
+              <input type="password" id="reg-password" name="password" placeholder="••••••••••" required minlength="8" aria-describedby="reg-password-hint">
               <button type="button" class="toggle-pass" data-target="reg-password" aria-label="Mostrar contraseña">
                 <i class="ph ph-eye-slash toggle-pass__icon" aria-hidden="true"></i>
               </button>
@@ -78,6 +78,7 @@
             </div>
           </div>
         </div>
+        <p class="field__hint" id="reg-password-hint">Mínimo 8 caracteres, con una mayúscula y un número.</p>
 
         <label class="check-block check-block--captcha">
           <input type="checkbox" id="reg-captcha" required>

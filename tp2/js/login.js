@@ -72,6 +72,18 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // El HTML (minlength) solo exige el largo; mayúscula y número los
+    // valida acá porque no hay un atributo nativo para eso sin `pattern`
+    // (y `pattern` no deja mostrar un mensaje en español propio).
+    const tieneMayuscula = /[A-Z]/.test(password.value);
+    const tieneNumero = /[0-9]/.test(password.value);
+    if (!tieneMayuscula || !tieneNumero) {
+      password.setCustomValidity('La contraseña tiene que tener una mayúscula y un número.');
+      password.reportValidity();
+      return;
+    }
+    password.setCustomValidity('');
+
     if (password.value !== password2.value) {
       password2.setCustomValidity('Las contraseñas no coinciden');
       password2.reportValidity();
@@ -115,6 +127,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Limpia el mensaje de error custom si el usuario vuelve a escribir
+  document.getElementById('reg-password').addEventListener('input', function () {
+    this.setCustomValidity('');
+  });
   document.getElementById('reg-password2').addEventListener('input', function () {
     this.setCustomValidity('');
   });
