@@ -5,6 +5,10 @@
   Controla: el cambio entre form de registro y de login (agrega/saca
   .active y actualiza aria-selected), el ícono y tipo de los inputs de
   contraseña, y la validación de los dos formularios.
+  Depende de sesion.js (iniciarSesion), que login.html carga antes. No
+  expone nada global: todo corre adentro del DOMContentLoaded.
+  Login y registro son simulados: si pasan la validación, guardan la sesión
+  y llevan a index.html.
 */
 document.addEventListener('DOMContentLoaded', () => {
 

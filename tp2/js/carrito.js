@@ -3,9 +3,19 @@
 // DECISIONES.md): cada ítem guarda solo id/nombre/imagen, sin cantidad —
 // un juego entra una sola vez. Se carga antes que home.js y carousel.js,
 // que son quienes agregan juegos al carrito.
+//
+// Depende de los ids del header (#carrito-contador, #carrito-lista,
+// #carrito-vacio, #btn-pagar-carrito); si la página no los tiene, el render
+// del desplegable se saltea.
+// Expone (globales): obtenerCarrito, agregarAlCarrito, quitarDelCarrito,
+// vaciarCarrito, estaEnElCarrito, alternarCarrito, obtenerComprados,
+// agregarComprados, esDePago, esNuevo, crearBotonCarrito, crearBadge,
+// CLAVE_CARRITO y CLAVE_COMPRAS (las borra sesion.js al cerrar sesión).
+// Avisa cada cambio con el evento 'carrito:actualizado' en document.
 
 const CLAVE_CARRITO = 'warden-carrito';
 
+// Sin nada guardado, o con un JSON roto, devuelve un carrito vacío.
 function obtenerCarrito() {
   try {
     return JSON.parse(localStorage.getItem(CLAVE_CARRITO)) ?? [];
@@ -14,6 +24,9 @@ function obtenerCarrito() {
   }
 }
 
+// Todos los cambios pasan por acá. El evento es lo que hace que el numerito
+// del header y los botones de las cards se actualicen solos (ver el listener
+// al final del archivo).
 function guardarCarrito(items) {
   localStorage.setItem(CLAVE_CARRITO, JSON.stringify(items));
   document.dispatchEvent(new CustomEvent('carrito:actualizado'));
@@ -51,6 +64,8 @@ function obtenerComprados() {
   }
 }
 
+// Suma juegos a la lista de comprados sin repetir los que ya están. No
+// dispara 'carrito:actualizado': el que compra llama a vaciarCarrito() después.
 function agregarComprados(juegos) {
   const yaComprados = obtenerComprados();
   const nuevos = juegos.filter((juego) => !yaComprados.some((item) => item.id === juego.id));
@@ -78,10 +93,12 @@ const PRECIO_SIMULADO = '$9.99';
 
 // ---- Ícono del header: numerito + lista del desplegable ----
 
+// Estos elementos son null en las páginas sin carrito en el header.
 const contadorCarrito = document.getElementById('carrito-contador');
 const listaCarrito = document.getElementById('carrito-lista');
 const vacioCarrito = document.getElementById('carrito-vacio');
 
+// Arma un <li> del desplegable: miniatura, nombre y botón para quitarlo.
 function crearItemCarrito(item) {
   const li = document.createElement('li');
   li.className = 'carrito__item';
@@ -113,6 +130,7 @@ function crearItemCarrito(item) {
   return li;
 }
 
+// Vuelve a dibujar el desplegable desde cero con lo que haya guardado.
 function renderizarCarritoHeader() {
   if (!contadorCarrito) return; // Páginas sin este carrito en el header.
 
@@ -141,6 +159,8 @@ function renderizarCarritoHeader() {
 // cualquier cambio del carrito (agregar, quitar, quitar desde el
 // desplegable), todos se actualicen solos sin que cada uno escuche el evento.
 
+// Sincroniza un botón con el carrito: aria-pressed y aria-label según si su
+// juego ya está adentro.
 function actualizarBotonCarrito(boton) {
   const id = Number(boton.dataset.carritoId);
   const nombre = boton.dataset.carritoNombre;
@@ -201,6 +221,8 @@ function crearBadge(juego) {
   return badge;
 }
 
+// Si el juego está en el carrito lo saca, si no lo agrega. Recibe el formato
+// del carrito ({id, nombre, imagen}), no el objeto crudo de la API.
 function alternarCarrito(juego) {
   if (estaEnElCarrito(juego.id)) {
     quitarDelCarrito(juego.id);
@@ -209,6 +231,8 @@ function alternarCarrito(juego) {
   }
 }
 
+// Cualquier cambio del carrito refresca el header y todos los botones de las
+// cards. El render inicial de abajo cubre lo que ya había guardado al cargar.
 document.addEventListener('carrito:actualizado', () => {
   renderizarCarritoHeader();
   actualizarBotonesDeCarrito();

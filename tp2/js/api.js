@@ -1,10 +1,14 @@
 // api.js — Cliente fetch para la API de la cátedra (api-vj-interfaces)
 // Doc: https://github.com/jimartinezabadias/api-vj-interfaces
+//
+// No depende de otros scripts. Expone (globales): obtenerJuegos(),
+// CATEGORIAS y esDeGenero(), que usan home.js, carousel.js y producto.js.
 
 const BASE_URL = 'https://vj.interfaces.jima.com.ar/api';
 
 // Usamos /api (lista básica) y no /api/v2: no necesitamos las descripciones,
 // que vienen en inglés, para no mezclar idiomas en una interfaz en español.
+// Clave del caché del catálogo en sessionStorage (dura lo que la pestaña).
 const CLAVE_CACHE_JUEGOS = 'warden-juegos';
 
 // La API no tiene endpoint por id: solo existe la lista completa. Para no
@@ -27,6 +31,8 @@ function guardarCacheJuegos(juegos) {
   }
 }
 
+// Devuelve la lista de juegos, del caché si está. Si la API falla tira un
+// error: quien la llama (home.js, producto.js) decide qué mostrar en ese caso.
 async function obtenerJuegos() {
   const enCache = leerCacheJuegos();
   if (enCache) return enCache;
@@ -58,6 +64,7 @@ const CATEGORIAS = [
   { titulo: 'Estrategia', genero: 'Strategy' },
 ];
 
+// Un juego puede tener varios géneros, por eso se busca en toda la lista.
 function esDeGenero(juego, genero) {
   return juego.genres.some((g) => g.name === genero);
 }

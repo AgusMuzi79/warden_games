@@ -2,6 +2,12 @@
 // Sin pasarela real (ver DECISIONES.md): el form no valida contra nada ni
 // manda datos a ningún lado. "Confirmar compra" simula el éxito, mueve los
 // juegos del carrito a la lista de comprados (carrito.js) y vacía el carrito.
+//
+// Depende de carrito.js (obtenerCarrito, agregarComprados, vaciarCarrito) y de
+// sesion.js (haySesionGuardada), que se cargan antes. Del HTML necesita el
+// <dialog id="modal-pago"> con su form, el resumen, el bloque de éxito y el
+// aviso de registro, más el botón #btn-pagar-carrito del desplegable del
+// carrito. No expone nada: solo engancha eventos.
 
 const modalPago = document.getElementById('modal-pago');
 const botonPagar = document.getElementById('btn-pagar-carrito');
@@ -11,6 +17,8 @@ const resumenPago = document.getElementById('pago-resumen');
 const exitoPago = document.getElementById('pago-exito');
 const avisoRegistro = document.getElementById('pago-registro');
 
+// Abre el modal en uno de dos estados: aviso de registro (invitado) o form de
+// pago con el resumen de cuántos juegos se compran (con sesión).
 function abrirModalPago() {
   const items = obtenerCarrito();
   if (items.length === 0) return; // No tiene sentido pagar un carrito vacío.
@@ -41,6 +49,8 @@ modalPago.addEventListener('click', (evento) => {
   if (evento.target === modalPago) modalPago.close();
 });
 
+// Compra simulada: no se lee ningún campo del form, solo importa que el
+// navegador lo haya dado por válido antes de disparar el submit.
 formPago.addEventListener('submit', (evento) => {
   evento.preventDefault();
 
