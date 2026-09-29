@@ -1150,6 +1150,7 @@
    con row-reverse, así "esta y las siguientes en el HTML" son, en
    pantalla, "esta y las anteriores" — la selección natural de un rating. */
 .resena-form {
+  align-self: center;
   padding: var(--espaciado-6);
   border: 1px solid var(--primario-o1);
   border-radius: var(--radio-xl);
