@@ -254,6 +254,14 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   header y cualquier página lo puede activar sumando una clase.
 - **`z-index: 200`:** el mismo que los menús desplegables, por encima del banner
   coverflow (llega a 100). El loading (500) sigue tapándolo mientras carga.
+- **Actualización: pasó a `scroll-margin-top` en cada destino** (`.carrusel h2`,
+  `#banner`, `.busqueda-estado`), mismo valor. Con `scroll-padding-top` en
+  `html`, al escribir en el buscador estando abajo en la página, la página
+  scrolleaba para arriba en cada tecla: el navegador mantiene el cursor fuera
+  de la zona marcada por el padding, y el input del header fijo vive justo
+  ahí, así que nunca lo lograba y seguía subiendo. `scroll-margin-top` solo
+  aplica cuando se scrollea hasta esos elementos. Los párrafos de abajo que
+  mencionan `scroll-padding-top` describen la versión anterior.
 - **`scroll-padding-top` en `html` (`home.css`, desde tablet):** con el header fijo,
   el link "Mis juegos" del menú (`index.html#fila-mis-juegos`) dejaba el título
   de la fila tapado. El valor sale de tokens: alto del control + padding de arriba

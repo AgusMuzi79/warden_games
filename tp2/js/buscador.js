@@ -70,7 +70,7 @@ function filtrarJuegos(consulta) {
   }
 
   // El banner ocupa casi toda la primera pantalla: sin esto, al apretar
-  // Enter no se vería que pasó algo. Con el header fijo, el scroll-padding-top
+  // Enter no se vería que pasó algo. Con el header fijo, el scroll-margin-top
   // de home.css deja el mensaje justo debajo. Sin animación si el usuario
   // pidió movimiento reducido.
   const sinAnimacion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;

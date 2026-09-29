@@ -6,7 +6,7 @@
     1. Loading simulado de 5 segundos (overlay con aro de progreso)
     2. Banner "Destacados" (carrusel coverflow 3D)
     3. Filas de juegos por categoría (carrusel de scroll nativo + cards)
-    4. Detalles de la página (scroll-padding, resultado de búsqueda)
+    4. Detalles de la página (scroll-margin, resultado de búsqueda)
   Mobile first: los estilos base son de mobile y los @media (min-width)
   agrandan. Cada animación tiene su bloque prefers-reduced-motion.
 */
@@ -667,12 +667,18 @@
    ========================================================= */
 /* Con el header fijo (desde tablet, ver .header--fijo en header.css), un
    link a un ancla como "Mis juegos" (index.html#fila-mis-juegos) dejaba el
-   título de la fila tapado por el header. scroll-padding-top le dice al
-   navegador cuánto espacio dejar arriba al scrollear a un ancla: alto del
-   header (control + padding de arriba y de abajo) más un poco de aire. */
+   título de la fila tapado por el header. scroll-margin-top le dice al
+   navegador cuánto espacio dejar arriba cuando scrollea hasta ese elemento:
+   alto del header (control + padding de arriba y de abajo) más un poco de aire.
+   Va en cada destino (títulos de fila, banner, mensaje de búsqueda) y no como
+   scroll-padding-top en html: ese margen marcaba toda la franja del header
+   como "tapada", y al escribir en el buscador (que vive ahí) el navegador
+   scrolleaba para arriba en cada tecla intentando sacar el cursor de esa zona. */
 @media (min-width: 48rem) {
-  html {
-    scroll-padding-top: calc(var(--control-alto) + 2 * var(--espaciado-2) + var(--espaciado-4));
+  .carrusel h2,
+  #banner,
+  .busqueda-estado {
+    scroll-margin-top: calc(var(--control-alto) + 2 * var(--espaciado-2) + var(--espaciado-4));
   }
 }
 
