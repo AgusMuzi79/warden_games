@@ -1,4 +1,10 @@
 // compartir.js — Botón "Copiar" del link para compartir (sección Compartir)
+//
+// Depende de #btn-copiar-link y del input #link-juego. En producto.html el
+// valor de ese input lo pone producto.js. Se carga en juego.html y
+// producto.html. No expone nada.
+// Los botones de redes y "Mensaje" son placeholders, el único que hace algo
+// es "Copiar".
 
 const botonCopiar = document.getElementById('btn-copiar-link');
 const inputLink = document.getElementById('link-juego');

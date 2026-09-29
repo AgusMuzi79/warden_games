@@ -1,7 +1,15 @@
-// juego.js — Lógica del juego (Peg Solitaire)
-// Parte 2 (Etapa 4): solo arma el grid visual del tablero (33 posiciones,
-// forma de cruz clásica). Reglas de movimiento, detección de fin de juego
-// y persistencia de puntaje (vía api.js) quedan para una parte aparte.
+// juego.js — Página del juego (Neon Circuit, un Peg Solitaire)
+//
+// Qué hace hoy:
+//   1. Arma el tablero visual de 33 posiciones (forma de cruz).
+//   2. Maneja la portada: el botón "Jugar" la reemplaza por el tablero.
+//   3. Le pasa las 6 capturas del juego a la galería animada.
+// Todavía no hay reglas de movimiento ni detección de fin de partida.
+//
+// Depende de juego.html: #tablero-grid, #tablero-cabecera, #tablero-portada,
+// #tablero-juego y #btn-jugar. También de js/galeria.js, que tiene que
+// cargarse antes porque de ahí sale iniciarGaleria().
+// No expone nada: los otros scripts no llaman a este.
 
 const grilla = document.getElementById('tablero-grid');
 
@@ -19,6 +27,9 @@ function esPosicionValida(fila, columna) {
   return (fila >= 2 && fila <= 4) || (columna >= 2 && columna <= 4);
 }
 
+// Recorre las 49 celdas del 7x7. Las que no son parte de la cruz se crean
+// igual, como huecos invisibles, para que el CSS Grid conserve la forma.
+// El centro arranca descargado y el resto activo.
 for (let fila = 0; fila < FILAS; fila++) {
   for (let columna = 0; columna < COLUMNAS; columna++) {
     const casillero = document.createElement('div');
@@ -35,11 +46,9 @@ for (let fila = 0; fila < FILAS; fila++) {
   }
 }
 
-// Portada: se ve primero, con el botón "Jugar" para arrancar la partida.
-// Al clickearlo, se oculta la portada y se muestra el tablero de una vez
-// (no hay lógica de juego todavía — eso es de una etapa aparte). La
-// cabecera con el nombre ("Neon Circuit") arranca oculta porque la
-// portada ya lo trae dibujado adentro; aparece recién con el tablero.
+// Portada: es lo primero que se ve. Al clickear "Jugar" se oculta y se
+// muestra el tablero. La cabecera con el nombre arranca oculta porque la
+// imagen de la portada ya trae el nombre dibujado; aparece con el tablero.
 const cabecera = document.getElementById('tablero-cabecera');
 const portada = document.getElementById('tablero-portada');
 const tableroJuego = document.getElementById('tablero-juego');
@@ -50,17 +59,16 @@ btnJugar.addEventListener('click', () => {
   cabecera.hidden = false;
   tableroJuego.hidden = false;
 
-  // El botón "Jugar" (que tenía el foco) desaparece con la portada: sin
-  // esto, el foco cae al <body> y quien navega con teclado o lector de
-  // pantalla queda "perdido". La cabecera es lo primero visible del
-  // tablero real, por eso recibe el foco (tabindex="-1" en el HTML).
+  // "Jugar" tenía el foco y desaparece con la portada. Sin esto el foco cae
+  // al <body> y quien navega con teclado o lector de pantalla se pierde.
+  // La cabecera es lo primero visible del tablero, y por eso puede recibir
+  // el foco por código (tiene tabindex="-1" en el HTML).
   cabecera.focus();
 });
 
-// Galería animada (Etapa 4 parte 5, animada en la 2ª corrección del TPE2):
-// las 6 capturas reales de Neon Circuit. El motor del flip (genérico, lo
-// comparte producto.html) vive en js/galeria.js, cargado antes que este
-// archivo en juego.html.
+// Galería: las 6 capturas reales de Neon Circuit, en el orden en que se
+// ven. El motor del flip es genérico (lo comparte producto.html) y vive en
+// js/galeria.js. Cada foto lleva su propio alt.
 const FOTOS_GALERIA_JUEGO = [
   { src: 'assets/img/inicio-juego.png', alt: 'Tablero de Neon Circuit al arrancar la partida, con los 33 nodos activos y el hueco central.' },
   { src: 'assets/img/ficha-seleccionada.png', alt: 'Un nodo seleccionado en el tablero, listo para saltar.' },

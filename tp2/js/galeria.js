@@ -1,28 +1,29 @@
-// Motor de la galería animada (carrusel de flip 3D). No trae datos
-// propios: es genérico, lo comparten juego.html (Neon Circuit, 6 fotos
-// reales, ver js/juego.js) y producto.html (un juego del catálogo de la
-// API, que solo tiene 1 foto real — la portada, ver js/producto.js). Cada
-// página le pasa su propia lista de fotos llamando a iniciarGaleria(fotos)
-// una vez que las tiene listas.
+// galeria.js — Motor de la galería animada (carrusel de flip 3D)
 //
-// El giro en sí (la animación) lo resuelve el CSS (.galeria__carta,
-// components.css) con la variable --angulo y una transition sobre
-// transform. Acá solo decidimos DOS cosas en cada click: qué foto le toca
-// a la cara que está escondida, y cuánto hay que sumarle al ángulo para
-// que esa cara pase al frente.
+// Es genérico y no trae fotos propias. Lo usan juego.html (6 capturas de
+// Neon Circuit, desde juego.js) y producto.html (1 sola foto, la portada,
+// desde producto.js). Cada página llama a iniciarGaleria(fotos) cuando ya
+// tiene su lista.
+//
+// Depende de estos ids del HTML: galeria-carta, galeria-img-a, galeria-img-b,
+// galeria-contador, galeria-prev, galeria-next y, opcional, galeria-vacio.
+// Expone una sola función global: iniciarGaleria(fotos). Tiene que cargarse
+// antes que el script que la llama.
+//
+// La animación la hace el CSS (.galeria__carta en components.css): una
+// transition sobre transform que sigue la variable --angulo. Acá solo se
+// decide, en cada click, qué foto va en la cara escondida y cuántos grados
+// se le suman al ángulo para que esa cara pase al frente.
 
-// fotos: array de { src, alt }, con al menos 1 elemento. Si solo hay 1
-// foto real (como en producto.html) y la página tiene la cara "sin más
-// capturas" (#galeria-vacio), esa cara hace de 2da diapositiva: las flechas
-// siguen girando la tarjeta, pero en vez de repetir la misma foto se ve un
-// mensaje que dice que no hay más. Sin esa cara, con 1 sola foto las 2
-// caras muestran la misma.
+// fotos: array de { src, alt }, con al menos 1 elemento.
+// Caso de una sola foto: si la página tiene la cara "sin más capturas"
+// (#galeria-vacio), esa cara hace de 2ª diapositiva. Las flechas giran igual,
+// pero en vez de repetir la foto se ve un mensaje. Sin esa cara, las 2 caras
+// muestran la misma foto.
 function iniciarGaleria(fotos) {
   const carta = document.getElementById('galeria-carta');
 
-  // No todas las páginas tienen esta galería (aunque hoy la tengan las 2
-  // que la llaman) — sin este chequeo, cualquier página sin el HTML
-  // correspondiente tiraría error acá.
+  // No toda página tiene el HTML de la galería: sin este chequeo tiraría error.
   if (!carta || !fotos || fotos.length === 0) return;
 
   const imgA = document.getElementById('galeria-img-a');
@@ -32,16 +33,16 @@ function iniciarGaleria(fotos) {
   const botonNext = document.getElementById('galeria-next');
   const vacio = document.getElementById('galeria-vacio');
 
-  // Las "diapositivas" son las fotos reales, más un marcador { vacio: true }
-  // como 2da cuando hay una sola foto y la página tiene la cara de "sin más
-  // capturas". El vacío vive siempre en la cara B: con 2 diapositivas y 2
-  // caras que se alternan, la diapositiva 1 siempre cae en la B.
+  // Diapositivas: las fotos reales, más un marcador { vacio: true } como 2ª
+  // cuando hay una sola foto y existe la cara de "sin más capturas". El vacío
+  // cae siempre en la cara B: con 2 diapositivas y 2 caras que se alternan,
+  // la diapositiva 1 va siempre en la B.
   const hayUnaSolaFoto = fotos.length === 1 && vacio !== null;
   const diapositivas = hayUnaSolaFoto ? [fotos[0], { vacio: true }] : fotos;
 
-  // Pone una diapositiva en una cara (img = imgA o imgB). Si es el vacío, en
-  // vez de una foto se muestra el mensaje; si es una foto, se asegura de
-  // que la cara B vuelva a mostrar su <img> y no el mensaje.
+  // Pone una diapositiva en una cara (img es imgA o imgB). Si es el vacío,
+  // esconde la <img> y muestra el mensaje. Si es una foto, se asegura de que
+  // la cara B muestre su <img> y no el mensaje.
   function ponerEnCara(img, diapositiva) {
     if (diapositiva.vacio) {
       img.hidden = true;
@@ -54,31 +55,28 @@ function iniciarGaleria(fotos) {
     img.alt = diapositiva.alt;
   }
 
-  // Deja las 2 caras con las primeras 2 diapositivas (si solo hay 1 foto y
-  // no hay cara de vacío, Math.min hace que las 2 arranquen con esa misma).
+  // Estado inicial: las 2 caras con las 2 primeras diapositivas. Si hay una
+  // sola y no hay cara de vacío, Math.min hace que las dos arranquen con la misma.
   ponerEnCara(imgA, diapositivas[0]);
   ponerEnCara(imgB, diapositivas[Math.min(1, diapositivas.length - 1)]);
 
-  // Índice de la foto que se ve ahora mismo (arranca en 0: la que se
-  // acaba de poner en la cara A).
+  // Índice de la diapositiva que se ve ahora (arranca en 0, la de la cara A).
   let indiceVisible = 0;
 
-  // Cuál de las 2 caras NO se ve en este momento. Arranca en 'b' porque
-  // así la dejamos recién: cara A al frente (0°, su rotación por
-  // defecto) con la foto 0, cara B escondida (pre-girada 180° en el CSS)
-  // con la foto 1 (o la 0 repetida, si no hay una 2da foto real).
+  // Cuál de las 2 caras no se ve. Arranca en 'b': la A está al frente (0°,
+  // su rotación por defecto) y la B está escondida, pre-girada 180° en el CSS.
   let caraOculta = 'b';
 
-  // Ángulo acumulado de la tarjeta. Nunca "vuelve" a 0 al llegar a 360:
-  // se lo deja seguir sumando (o restando) para que el giro visual
-  // siempre continúe para el mismo lado en el que se lo empujó, sin
-  // saltos raros hacia atrás.
+  // Ángulo acumulado de la tarjeta. No se resetea a 0 al llegar a 360°: sigue
+  // sumando o restando, para que el giro continúe siempre hacia el lado en
+  // que se lo empujó. Si volviera a 0, la transition giraría "hacia atrás"
+  // una vuelta entera en vez de seguir.
   let angulo = 0;
 
-  // El contador cuenta solo fotos reales (fotos.length): con el mensaje de
-  // "sin más capturas" a la vista dice eso mismo, en vez de "Foto 2 de 1".
-  // El mensaje también queda oculto para lectores de pantalla mientras está
-  // en la cara de atrás: se lee solo cuando de verdad se ve.
+  // El contador cuenta solo fotos reales (fotos.length): con el mensaje a la
+  // vista dice "Sin más capturas" y no "Foto 2 de 1". El mensaje queda
+  // aria-hidden mientras está en la cara de atrás, así el lector de pantalla
+  // lo lee solo cuando se ve.
   function actualizarContador() {
     const seVeElVacio = diapositivas[indiceVisible].vacio === true;
     contador.textContent = seVeElVacio
@@ -88,31 +86,27 @@ function iniciarGaleria(fotos) {
   }
   actualizarContador();
 
-  // direccion: 1 para "foto siguiente", -1 para "foto anterior".
+  // direccion: 1 para "siguiente", -1 para "anterior".
   function girar(direccion) {
     const total = diapositivas.length;
 
-    // Calculamos qué diapositiva va a mostrarse ahora, en base a la que se
-    // ve hoy (no a lo que se venía preparando de antes): así el carrusel
-    // responde bien aunque el click cambie de dirección respecto del
-    // anterior (ej: "siguiente" y después "anterior" seguidos).
+    // La diapositiva nueva se calcula a partir de la que se ve hoy, no de una
+    // que se haya precargado antes. Así funciona bien si el click cambia de
+    // dirección respecto del anterior (ej: "siguiente" y después "anterior").
     const nuevoIndice = direccion > 0
       ? (indiceVisible + 1) % total
       : (indiceVisible - 1 + total) % total;
 
-    // La cargamos en la cara que en este momento está escondida: como no
-    // se ve, este cambio es invisible hasta que la tarjeta gire.
+    // Se carga en la cara escondida: el cambio de src no se ve hasta que gire.
     const imgDestino = caraOculta === 'a' ? imgA : imgB;
     ponerEnCara(imgDestino, diapositivas[nuevoIndice]);
 
-    // Giramos la tarjeta 180° hacia el lado que corresponda a la
-    // dirección: esto es lo único que dispara la animación (el resto lo
-    // hace la transition del CSS al cambiar esta variable).
+    // Cambiar --angulo es lo único que dispara la animación: el giro lo hace
+    // la transition del CSS.
     angulo += direccion * 180;
     carta.style.setProperty('--angulo', `${angulo}deg`);
 
-    // Con el giro, las 2 caras intercambian su rol: la que estaba
-    // escondida pasa a ser la visible, y al revés.
+    // Después del giro las caras intercambian rol.
     caraOculta = caraOculta === 'a' ? 'b' : 'a';
     indiceVisible = nuevoIndice;
     actualizarContador();

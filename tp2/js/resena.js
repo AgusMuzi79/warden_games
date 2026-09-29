@@ -1,4 +1,9 @@
 // resena.js — Contador de caracteres y envío de "Dejá tu reseña"
+//
+// Depende del HTML de la sección "Dejá tu reseña": #resena-texto (textarea),
+// #resena-contador, #form-resena y #resena-estado (región role="status").
+// Se carga en juego.html y producto.html. No expone nada.
+// El puntaje con estrellas no pasa por acá: es CSS puro (radios + labels).
 
 const textareaResena = document.getElementById('resena-texto');
 const contadorResena = document.getElementById('resena-contador');
