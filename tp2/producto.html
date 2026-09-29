@@ -234,6 +234,31 @@
             </div>
           </dl>
         </section>
+
+        <!-- Compartir vive acá adentro (no en su propia fila del grid, como
+             en juego.html) porque esta página no tiene Ayuda para llenar la
+             columna: sin eso, quedaba pegado bien abajo, lejos de la ficha. -->
+        <section class="compartir" aria-labelledby="compartir-titulo">
+          <h2 id="compartir-titulo">Compartir</h2>
+
+          <ul class="compartir__redes">
+            <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          </ul>
+
+          <div class="compartir__acciones">
+            <a class="btn btn--secundario" href="mailto:?subject=Mir%C3%A1%20este%20juego" id="producto-compartir-mail">Enviar mail</a>
+            <button type="button" class="btn btn--secundario">Mensaje</button>
+          </div>
+
+          <div class="compartir__link">
+            <label class="sr-only" for="link-juego">Enlace para compartir</label>
+            <input type="text" id="link-juego" value="" readonly>
+            <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
+          </div>
+        </section>
       </aside>
 
       <div class="juego-layout__secundario">
@@ -281,28 +306,6 @@
           </div>
         </section>
       </div>
-
-      <section class="compartir" aria-labelledby="compartir-titulo">
-        <h2 id="compartir-titulo">Compartir</h2>
-
-        <ul class="compartir__redes">
-          <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
-          <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
-          <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
-          <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
-        </ul>
-
-        <div class="compartir__acciones">
-          <a class="btn btn--secundario" href="mailto:?subject=Mir%C3%A1%20este%20juego" id="producto-compartir-mail">Enviar mail</a>
-          <button type="button" class="btn btn--secundario">Mensaje</button>
-        </div>
-
-        <div class="compartir__link">
-          <label class="sr-only" for="link-juego">Enlace para compartir</label>
-          <input type="text" id="link-juego" value="" readonly>
-          <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
-        </div>
-      </section>
 
     </div>
 
