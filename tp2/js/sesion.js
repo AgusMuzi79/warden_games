@@ -13,8 +13,13 @@ function iniciarSesion() {
   localStorage.setItem(CLAVE_SESION, 'usuario');
 }
 
+// También borra carrito y compras (claves de carrito.js): al no haber cuentas
+// reales, no hay "tu cuenta" a la que asociarlos, y un invitado no debería ver
+// lo que compró otra sesión. Solo la llama menu.js, en páginas que ya cargan carrito.js.
 function cerrarSesion() {
   localStorage.removeItem(CLAVE_SESION);
+  localStorage.removeItem(CLAVE_CARRITO);
+  localStorage.removeItem(CLAVE_COMPRAS);
 }
 
 // Refleja el estado guardado en los avatares del header (si esta página

@@ -734,6 +734,92 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
 - **Descartado:** dejar que la card crezca en su lugar — empujaba todas las
   cards de la fila y todo lo de abajo cada vez que se pasaba el mouse.
 
+### El catálogo de la API se cachea en `sessionStorage`
+- **Qué:** `obtenerJuegos()` (`api.js`) primero busca la lista en
+  `sessionStorage` (clave `warden-juegos`); si no está, hace el fetch y la
+  guarda. Si el storage falla (bloqueado, lleno), se ignora y se pide a la API.
+- **Por qué:** `producto.html` hacía el fetch de la lista completa (~28 KB)
+  solo para encontrar un juego por id. La API no tiene endpoint por id
+  (`/api/<id>` da 404), así que no se puede pedir un solo juego; y la ficha
+  necesita nombre, rating y géneros, no solo la imagen. Con la caché, si
+  se entra desde la Home la ficha no hace ninguna llamada de red.
+- **`sessionStorage` y no `localStorage`:** se borra al cerrar la pestaña, así
+  el catálogo se refresca solo y no hace falta manejar vencimientos ni datos
+  viejos.
+- **Sin cambios en `home.js`, `carousel.js` ni `producto.js`:** todos ya llaman
+  a `obtenerJuegos()`.
+- **Descartado:** guardar solo la imagen por id. No alcanza para la ficha y
+  igual habría que traer la lista completa la primera vez.
+
+### Un invitado arma el carrito, pero para pagar tiene que registrarse
+- **Qué:** agregar al carrito (cards, "Comprar" de la ficha) funciona igual
+  con o sin sesión. Al clickear "Pagar carrito" sin sesión, `abrirModalPago()`
+  (`compras.js`) muestra en el mismo `<dialog>` un aviso (`#pago-registro`,
+  "Para continuar con la compra debés registrarte") con un link "Registrarme"
+  a `login.html`, en vez del form de pago. Con sesión no cambia nada.
+- **Por qué:** pedido de Agus. Primero se había hecho que cualquier acción de
+  compra redirigiera al registro, pero era demasiado brusco: el invitado
+  puede explorar y armar el carrito, y recién al pagar se le pide la cuenta.
+- **Mismo `<dialog>` y clases del éxito** (`.modal__exito` + `.modal__registro`
+  solo para el color del ícono): no se suma otro componente. `role="alert"`
+  para que el lector de pantalla lo anuncie. Al cerrar el modal, el handler de
+  `close` vuelve a ocultarlo.
+- **Después del registro se vuelve a la Home**, no a la ficha (`login.js`
+  siempre redirige a `index.html`). El carrito se conserva en `localStorage`.
+- **Descartado:** un `alert()` nativo (bloquea el hilo y no se puede estilar)
+  y redirigir directo al registro (lo que se hizo primero).
+
+### "Cerrar sesión" borra carrito y compras
+- **Qué:** `cerrarSesion()` (`sesion.js`) también borra `warden-carrito` y
+  `warden-compras`.
+- **Por qué:** esas listas vivían en `localStorage` sin depender de la sesión:
+  como invitado se seguía viendo "Mis juegos" y los badges de lo comprado. No
+  hay cuentas reales ni backend, así que no hay "tu cuenta" a la que asociar
+  las compras.
+- **Costo asumido:** si se vuelve a iniciar sesión, las compras no vuelven.
+- **Descartado:** conservarlas y ocultarlas sin sesión. Había que condicionar
+  "Mis juegos", los badges y el botón de la ficha, y otra persona que se
+  registre en el mismo navegador heredaría las compras.
+
+### `producto.html` usa el header de juego, con carrito y sin "Partida guardada"
+- **Qué:** el header de `producto.html` pasa de `.header` a
+  `.header.header--juego` (modo foco, igual que `juego.html`): logo a la
+  izquierda; a la derecha "Volver al menú", el carrito y el avatar (con y sin
+  sesión). Se sacaron el menú hamburguesa, la lupa y el buscador, y el
+  `<script>` de `buscador.js` (ya no hay nada que enganchar).
+- **Por qué:** pedido de Agus. Una ficha de juego es una pantalla de
+  "foco" como la de Neon Circuit, y las dos tenían headers distintos.
+- **El carrito se queda, a diferencia de `juego.html`:** "Comprar" abre el
+  desplegable del carrito (`.menu-carrito .header__icon-btn`) y "Pagar carrito"
+  lleva al popup de registro. Sin ese botón la compra no funcionaba.
+- **Sin "Partida guardada":** el estado de guardado solo tiene sentido en un
+  juego jugable; en la ficha de un juego del catálogo no hay partida.
+- **Reemplaza dos decisiones anteriores:** "Se aplica también a `producto.html`"
+  (lupa y buscador, en "En mobile el buscador se esconde tras una lupa...") y
+  el buscador con `?q=` desde `producto.html` ("El buscador filtra en el lugar
+  o lleva a la Home"). Desde la ficha ya no se busca ni se navega por
+  categorías: se vuelve con "Volver al menú" o el logo. `buscador.js` y
+  `home.js` siguen soportando `?q=`, aunque hoy nada lo genera.
+- **Descartado:** copiar el header de `juego.html` tal cual (sin carrito):
+  rompía la compra.
+
+### Ayuda hace scroll adentro en vez de empujar lo de abajo
+- **Qué:** en `juego.css`, `.juego-layout` define `--alto-tablero: 660px`,
+  que usan `.tablero` (`min-height`) y `.juego-layout .panel-lateral`
+  (`max-height`). `.ayuda` suma `overflow-y: auto` y `.ficha-juego`
+  `flex-shrink: 0`.
+- **Por qué:** pedido de Agus. La fila de arriba del grid mide lo que mida el
+  más alto de sus dos ítems. Al abrir otro desplegable de Ayuda, el panel
+  lateral pasaba de los 660px del tablero, la fila crecía y "Sobre el juego",
+  la Galería y Compartir bajaban. Con el tope, la fila queda fija y Ayuda
+  scrollea por dentro (la barra usa el estilo global de `base.css`).
+- **Una variable y no el `660px` repetido:** tablero y tope tienen que medir
+  lo mismo; si se cambia uno y se olvida el otro, vuelve el salto.
+- **Solo en `juego.html`:** vive en `juego.css`, así que `producto.html` (que
+  también usa `.panel-lateral`) no cambia.
+- **Descartado:** dejar que todo baje o poner un alto fijo a Ayuda sin
+  scroll (cortaría el texto de los desplegables abiertos).
+
 ### Datos de respaldo si la API falla
 - **Qué:** `home.js` tiene `JUEGOS_DE_RESPALDO`, 5 juegos reales con género
   incluido, elegidos para cubrir las 4 categorías fijas y el simulado de
@@ -1653,11 +1739,19 @@ más una que sumamos nosotros al revisar:
 - **Por qué:** es justo el tipo de dato repetido/genérico que el enunciado
   pide evitar. Los avatares son un círculo con iniciales (sin foto real
   todavía), con un color distinto por reseña.
-- **Estrellas con caracteres Unicode, no íconos:** `★`/`☆` como texto,
-  `aria-hidden` en el visual y un `sr-only` al lado con el puntaje en
-  palabras ("Puntaje: 5 de 5"). Evita depender de un ícono "relleno" que no
-  existe en la hoja de Phosphor que carga el proyecto (ver el bug que le
-  marcamos a Agus en el PR de la Home: la hoja `regular` no trae `-fill`).
+- **Estrellas de Phosphor, siempre de contorno, la puntuación se marca con el
+  color** (pedido de Agus, reemplaza los caracteres Unicode `★`/`☆` de la
+  primera versión). Cada reseña lleva 5 `<i class="ph ph-star resena__estrella">`
+  en un `<span aria-hidden="true">`, con un `sr-only` al lado con el puntaje
+  en palabras ("Puntaje: 5 de 5"); las apagadas suman `resena__estrella--vacia`
+  (`--primario-o1`, las prendidas usan `--tablero-seleccionado`). Igual en el
+  selector de "Dejá tu reseña": un `ph-star` por label, prendido con el
+  mismo `:checked ~ label` / hover de antes. Sirve la hoja `regular` que ya
+  carga el proyecto (no trae `-fill`, ver el bug de la Home) y las estrellas
+  quedan iguales a la de la ficha (`ph-star`) en cualquier sistema.
+- **Costo:** una estrella apagada no se distingue por forma sino por color
+  (violeta oscuro contra cian). Compensa que en las reseñas el puntaje
+  también está en el `sr-only`, y que en el selector el foco y el hover se ven.
 
 ### "Dejá tu reseña": el puntaje es CSS puro (radios + labels), sin JS
 - **Qué:** `.estrellas` es un `<fieldset>` con 5 `<input type="radio">` en

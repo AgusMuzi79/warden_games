@@ -568,6 +568,12 @@
   color: var(--exito);
 }
 
+/* Aviso a invitados: mismo layout que el éxito, pero el ícono no es verde
+   (no es una confirmación). */
+.modal__registro .modal__exito-icono {
+  color: var(--acento);
+}
+
 .modal__exito-titulo {
   margin: 0;
 }
@@ -1117,6 +1123,12 @@
   letter-spacing: 2px;
 }
 
+/* Estrellas de Phosphor (variante regular, siempre de contorno): la
+   puntuación se marca con el color, no con relleno. */
+.resena__estrella--vacia {
+  color: var(--primario-o1);
+}
+
 .resena__texto {
   margin: 0 0 var(--espaciado-3);
   color: var(--primario-c1);
@@ -1200,10 +1212,6 @@
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
-}
-
-.estrellas label::before {
-  content: "★";
 }
 
 .estrellas input:checked ~ label,

@@ -17,68 +17,17 @@
 </head>
 <body>
 
-  <header class="header">
+  <header class="header header--juego">
   <div class="header__start">
-    <div class="menu-hamburguesa">
-      <button class="header__icon-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
-        <i class="ph ph-list" aria-hidden="true"></i>
-      </button>
-
-      <div id="menu-principal" class="menu-dropdown menu-dropdown--hamburguesa" hidden>
-        <nav class="menu-dropdown__seccion" aria-labelledby="menu-jugar-titulo">
-          <h2 class="menu-dropdown__titulo" id="menu-jugar-titulo">Jugar</h2>
-          <ul>
-            <li><a href="index.html#banner"><i class="ph ph-star" aria-hidden="true"></i> Destacados</a></li>
-            <li><a href="#"><i class="ph ph-sparkle" aria-hidden="true"></i> Últimos</a></li>
-            <li><a href="#"><i class="ph ph-clock" aria-hidden="true"></i> Recientes</a></li>
-            <li><a href="#"><i class="ph ph-trophy" aria-hidden="true"></i> Top 100</a></li>
-            <li><a href="#"><i class="ph ph-arrows-clockwise" aria-hidden="true"></i> Actualizados</a></li>
-          </ul>
-        </nav>
-
-        <hr class="menu-dropdown__divisor">
-
-        <!-- Cada categoría apunta a su fila de la Home: los ids los arma crearFila()
-             en home.js como "fila-" + título en minúscula. -->
-        <nav class="menu-dropdown__seccion" aria-labelledby="menu-categorias-titulo">
-          <h2 class="menu-dropdown__titulo" id="menu-categorias-titulo">Categorías</h2>
-          <ul>
-            <li><a href="index.html#fila-acción"><i class="ph ph-lightning" aria-hidden="true"></i> Acción</a></li>
-            <li><a href="index.html#fila-shooters"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> Shooters</a></li>
-            <li><a href="index.html#fila-rpg"><i class="ph ph-sword" aria-hidden="true"></i> RPG</a></li>
-            <li><a href="index.html#fila-indie"><i class="ph ph-palette" aria-hidden="true"></i> Indie</a></li>
-            <li><a href="index.html#fila-aventura"><i class="ph ph-compass" aria-hidden="true"></i> Aventura</a></li>
-            <li><a href="index.html#fila-plataformas"><i class="ph ph-game-controller" aria-hidden="true"></i> Plataformas</a></li>
-            <li><a href="index.html#fila-puzzle"><i class="ph ph-puzzle-piece" aria-hidden="true"></i> Puzzle</a></li>
-            <li><a href="index.html#fila-estrategia"><i class="ph ph-brain" aria-hidden="true"></i> Estrategia</a></li>
-          </ul>
-        </nav>
-
-        <hr class="menu-dropdown__divisor">
-
-        <div class="menu-dropdown__seccion menu-dropdown__seccion--contacto">
-          <a class="btn btn--secundario" href="mailto:hola@warden.gg">Contáctanos</a>
-        </div>
-      </div>
-    </div>
-
     <a class="header__logo" href="index.html" aria-label="Warden, ir al inicio">
       <img src="assets/img/logo.png" alt="" width="32" height="32">
       <span>Warden</span>
     </a>
   </div>
 
-  <button class="header__icon-btn header__search-toggle" type="button" aria-label="Buscar juegos" aria-expanded="false">
-    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-  </button>
-
-  <form class="header__search" role="search" action="#">
-    <label class="sr-only" for="buscar">Buscar juegos</label>
-    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
-    <input type="search" id="buscar" name="q" placeholder="Buscar juegos" autocomplete="off">
-  </form>
-
   <div class="header__actions">
+    <a class="btn btn--secundario" href="index.html">Volver al menú</a>
+
     <div class="menu-carrito">
       <button class="header__icon-btn" type="button" aria-label="Carrito" aria-expanded="false" aria-controls="menu-carrito-panel">
         <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
@@ -187,6 +136,13 @@
       <i class="ph ph-check-circle modal__exito-icono" aria-hidden="true"></i>
       <h2 class="modal__exito-titulo">¡Compra realizada!</h2>
       <p class="modal__exito-texto">Gracias por tu compra.</p>
+    </div>
+
+    <div class="modal__exito modal__registro" id="pago-registro" role="alert" hidden>
+      <i class="ph ph-lock-key modal__exito-icono" aria-hidden="true"></i>
+      <h2 class="modal__exito-titulo">Necesitás una cuenta</h2>
+      <p class="modal__exito-texto">Para continuar con la compra debés registrarte.</p>
+      <a class="btn btn--primario" href="login.html">Registrarme</a>
     </div>
   </dialog>
 
@@ -326,7 +282,7 @@
               <span class="resena__avatar resena__avatar--1" aria-hidden="true">MF</span>
               <div>
                 <p class="resena__nombre">Malena F. <span class="resena__fecha">14 ago 2026</span></p>
-                <p class="resena__puntaje"><span aria-hidden="true">★★★★★</span><span class="sr-only">Puntaje: 5 de 5</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
               </div>
             </div>
             <p class="resena__texto">Le metí varias horas ya y sigue siendo de lo mejor que jugué este año. Lo recomiendo sin dudar.</p>
@@ -341,7 +297,7 @@
               <span class="resena__avatar resena__avatar--2" aria-hidden="true">BI</span>
               <div>
                 <p class="resena__nombre">Bruno Ibarra <span class="resena__fecha">10 ago 2026</span></p>
-                <p class="resena__puntaje"><span aria-hidden="true">★★★★☆</span><span class="sr-only">Puntaje: 4 de 5</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella resena__estrella--vacia"></i></span><span class="sr-only">Puntaje: 4 de 5</span></p>
               </div>
             </div>
             <p class="resena__texto">Muy buena experiencia en general, aunque tuve algún problemita de rendimiento en mi compu.</p>
@@ -356,7 +312,7 @@
               <span class="resena__avatar resena__avatar--3" aria-hidden="true">CN</span>
               <div>
                 <p class="resena__nombre">Carla Núñez <span class="resena__fecha">2 jul 2026</span></p>
-                <p class="resena__puntaje"><span aria-hidden="true">★★★★★</span><span class="sr-only">Puntaje: 5 de 5</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
               </div>
             </div>
             <p class="resena__texto">Adictivo. Me senté "un ratito" y perdí la tarde.</p>
@@ -376,15 +332,15 @@
             <legend>Tu puntaje</legend>
             <div class="estrellas">
               <input type="radio" id="estrella-5" name="puntaje" value="5">
-              <label for="estrella-5"><span class="sr-only">5 estrellas</span></label>
+              <label for="estrella-5"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">5 estrellas</span></label>
               <input type="radio" id="estrella-4" name="puntaje" value="4" checked>
-              <label for="estrella-4"><span class="sr-only">4 estrellas</span></label>
+              <label for="estrella-4"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">4 estrellas</span></label>
               <input type="radio" id="estrella-3" name="puntaje" value="3">
-              <label for="estrella-3"><span class="sr-only">3 estrellas</span></label>
+              <label for="estrella-3"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">3 estrellas</span></label>
               <input type="radio" id="estrella-2" name="puntaje" value="2">
-              <label for="estrella-2"><span class="sr-only">2 estrellas</span></label>
+              <label for="estrella-2"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">2 estrellas</span></label>
               <input type="radio" id="estrella-1" name="puntaje" value="1">
-              <label for="estrella-1"><span class="sr-only">1 estrella</span></label>
+              <label for="estrella-1"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">1 estrella</span></label>
             </div>
           </fieldset>
 
@@ -549,7 +505,6 @@
   <script src="./js/resena.js" defer></script>
   <script src="./js/compartir.js" defer></script>
   <script src="./js/menu.js" defer></script>
-  <script src="./js/buscador.js" defer></script>
   <script src="./js/footer.js" defer></script>
 </body>
 </html>

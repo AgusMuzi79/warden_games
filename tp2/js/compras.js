@@ -9,10 +9,20 @@ const botonCerrarPago = document.getElementById('btn-cerrar-pago');
 const formPago = document.getElementById('form-pago');
 const resumenPago = document.getElementById('pago-resumen');
 const exitoPago = document.getElementById('pago-exito');
+const avisoRegistro = document.getElementById('pago-registro');
 
 function abrirModalPago() {
   const items = obtenerCarrito();
   if (items.length === 0) return; // No tiene sentido pagar un carrito vacío.
+
+  // Un invitado puede armar el carrito, pero para pagar tiene que tener
+  // cuenta: en vez del form de pago se muestra el aviso con el link a registrarse.
+  if (!haySesionGuardada()) {
+    formPago.hidden = true;
+    avisoRegistro.hidden = false;
+    modalPago.showModal();
+    return;
+  }
 
   resumenPago.textContent = items.length === 1
     ? 'Vas a comprar 1 juego.'
@@ -53,4 +63,5 @@ modalPago.addEventListener('close', () => {
   formPago.reset();
   formPago.hidden = false;
   exitoPago.hidden = true;
+  avisoRegistro.hidden = true;
 });
