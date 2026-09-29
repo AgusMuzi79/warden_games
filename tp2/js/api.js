@@ -5,14 +5,41 @@ const BASE_URL = 'https://vj.interfaces.jima.com.ar/api';
 
 // Usamos /api (lista básica) y no /api/v2: no necesitamos las descripciones,
 // que vienen en inglés, para no mezclar idiomas en una interfaz en español.
+const CLAVE_CACHE_JUEGOS = 'warden-juegos';
+
+// La API no tiene endpoint por id: solo existe la lista completa. Para no
+// repetir ese fetch en cada página (Home, ficha de producto), se guarda en
+// sessionStorage. Si el storage falla o está vacío, se pide a la API igual.
+function leerCacheJuegos() {
+  try {
+    const guardado = sessionStorage.getItem(CLAVE_CACHE_JUEGOS);
+    return guardado ? JSON.parse(guardado) : null;
+  } catch {
+    return null;
+  }
+}
+
+function guardarCacheJuegos(juegos) {
+  try {
+    sessionStorage.setItem(CLAVE_CACHE_JUEGOS, JSON.stringify(juegos));
+  } catch {
+    // Sin storage disponible o lleno: se sigue sin caché.
+  }
+}
+
 async function obtenerJuegos() {
+  const enCache = leerCacheJuegos();
+  if (enCache) return enCache;
+
   const respuesta = await fetch(BASE_URL);
 
   if (!respuesta.ok) {
     throw new Error(`La API de juegos respondió ${respuesta.status}`);
   }
 
-  return respuesta.json();
+  const juegos = await respuesta.json();
+  guardarCacheJuegos(juegos);
+  return juegos;
 }
 
 // Categorías fijas (las mismas que arma home.js para las filas de la Home y
