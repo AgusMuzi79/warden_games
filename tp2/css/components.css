@@ -856,9 +856,7 @@
 }
 
 /* ---------- Galería ----------
-   Las dos páginas usan el carrusel de flip (más abajo). La grilla de 6
-   tiles con gradientes (.galeria__grid y .galeria__tile--1 a --6) era el
-   placeholder de antes de tener capturas y ya no la usa ningún HTML. */
+   Las dos páginas usan el carrusel de flip (más abajo). */
 .galeria {
   margin-top: var(--espaciado-8);
 }
@@ -880,27 +878,7 @@
   font: 400 13px/1 var(--font-ui);
 }
 
-.galeria__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--espaciado-4);
-}
-
-.galeria__tile {
-  aspect-ratio: 16 / 9;
-  border-radius: var(--radio-md);
-  overflow: hidden;
-}
-
-.galeria__tile--1 { background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-destino)); }
-.galeria__tile--2 { background: linear-gradient(135deg, var(--tablero-seleccionado), var(--primario-o1)); }
-.galeria__tile--3 { background: linear-gradient(135deg, var(--tablero-destino), var(--tablero-activo) 70%); }
-.galeria__tile--4 { background: linear-gradient(135deg, var(--acento), var(--tablero-destino)); }
-.galeria__tile--5 { background: linear-gradient(135deg, var(--tablero-activo), var(--tablero-seleccionado)); }
-.galeria__tile--6 { background: linear-gradient(135deg, var(--primario), var(--tablero-seleccionado) 60%, var(--tablero-activo)); }
-
-/* Capturas reales (Neon Circuit, juego.html): llenan el tile sin deformarse. */
-/* Imagen de cada cara del carrusel. */
+/* Imagen de cada cara del carrusel: llena la cara sin deformarse. */
 .galeria__img {
   display: block;
   width: 100%;

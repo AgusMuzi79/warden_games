@@ -1609,9 +1609,11 @@ más una que sumamos nosotros al revisar:
 - **Sin recorte:** las 6 imágenes vienen a 1920×1080, exactamente 16:9 —
   coincide con el `aspect-ratio` que ya usaban los tiles de la grilla, así
   que `object-fit: cover` no tiene nada que recortar.
-- **`.galeria__tile--1..6` (las clases de gradiente) se dejan intactas en
-  `components.css`:** siguen en uso por `producto.html`, que sí necesita el
-  placeholder para juegos de terceros sin capturas.
+- **`.galeria__tile--1..6` (las clases de gradiente) se dejaron en
+  `components.css`** mientras `producto.html` las usó como placeholder.
+  **Actualización:** cuando `producto.html` pasó también al carrusel de flip,
+  quedaron sin uso en ningún HTML ni JS y se borraron junto con
+  `.galeria__grid` y `.galeria__tile`.
 - **Ruta de los archivos:** igual que las portadas — Fran las deja en
   `assets/` (raíz del repo) y se copian a `tp2/assets/img/` con nombre en
   minúsculas y sin espacios (ya venían así).
