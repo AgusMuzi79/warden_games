@@ -10,6 +10,13 @@
    El grid de 33 fichas (parte 2) se arma dentro de este mismo #board,
    en js/juego.js.
    ============================================================ */
+/* Alto "base" de la fila de arriba (tablero + panel lateral). Una sola
+   variable para las dos cosas que tienen que medir lo mismo: el tablero
+   (min-height) y el tope del panel lateral (max-height, más abajo). */
+.juego-layout {
+  --alto-tablero: 660px;
+}
+
 .tablero {
   display: flex;
   flex-direction: column;
@@ -24,7 +31,7 @@
      fija el alto "base" (el que tiene con Ayuda en su estado por
      default), independiente de cuánto crezca Ayuda después. */
   align-self: start;
-  min-height: 660px;
+  min-height: var(--alto-tablero);
 }
 
 /* Franja de cabecera, de un violeta más claro que el cuerpo — así se ve en
@@ -299,7 +306,20 @@
    .ficha-juego (padding/borde/radio/fondo) repetido a propósito: son 5
    líneas, no vale la pena una clase compartida solo para esto.
    ============================================================ */
+/* El panel lateral no puede pasar del alto del tablero: si Ayuda crece al
+   abrir un desplegable, la fila del grid crecía con ella y empujaba hacia
+   abajo "Sobre el juego", la Galería y Compartir. Con el tope, la ficha
+   mantiene su alto y Ayuda hace scroll adentro (overflow-y: auto). */
+.juego-layout .panel-lateral {
+  max-height: var(--alto-tablero);
+}
+
+.juego-layout .ficha-juego {
+  flex-shrink: 0;
+}
+
 .ayuda {
+  overflow-y: auto;
   padding: var(--espaciado-4);
   border: 1px solid var(--primario-o1);
   border-radius: var(--radio-xl);
