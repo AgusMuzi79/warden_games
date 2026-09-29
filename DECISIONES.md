@@ -2066,6 +2066,25 @@ más una que sumamos nosotros al revisar:
   el navegador le pinta su fondo nativo encima (el mismo bug ya documentado
   para `.btn` y para `.auth-switch__btn` de Fran en el PR de login).
 
+### Hover visible en los ítems de los menús (hamburguesa y cuenta)
+- **Qué:** en `components.css`, el hover de los links de las secciones
+  (`.menu-dropdown__seccion a`) y de las redes (`.menu-dropdown__social a`)
+  pasa de fondo `--primario-o2` a `--primario-o1`; las redes además pasan el
+  ícono a `--acento`. "Cerrar sesión" invierte colores en hover: fondo
+  `--error`, texto `--fondo`.
+- **Por qué:** pedido de Agus, "no tienen hover". Sí lo tenían, pero el fondo
+  del hover era `--primario-o2` y el menú es `--superficie`, que vale lo mismo:
+  se pintaba igual que el fondo. `--primario-o1` contra el menú da 2,11:1, el
+  texto queda en 6,97:1 y los íconos cian en 4,42:1.
+- **"Cerrar sesión" distinto:** el rojo sobre `--primario-o1` da 2,91:1, no
+  llega a 4,5:1 para texto. Invertido da 6,95:1 y se lee como acción
+  destructiva.
+- **"Contáctanos" no cambia:** es un `.btn--secundario` dentro de una sección
+  del menú y caía en la misma regla; una regla de más especificidad le deja
+  el fondo transparente para que su relleno deslizante se vea como antes.
+- **Pendiente, no se tocó:** `.carrito__quitar:hover` tiene el mismo fondo
+  invisible, pero cambia el color del ícono a rojo, así que el hover se nota.
+
 ### `js/menu.js`: un solo archivo maneja los dos menús
 - **Qué:** busca todos los botones con `aria-controls` + `aria-expanded` y
   les engancha abrir/cerrar, cerrar al clickear afuera, cerrar con Escape

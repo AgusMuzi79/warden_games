@@ -346,9 +346,12 @@
   transition: background-color 0.15s ease;
 }
 
+/* Hover en --primario-o1 y no en --primario-o2: el menú entero es
+   --superficie, que vale --primario-o2, así que ese hover no se veía. Contra
+   el menú da 2,11:1; el texto queda en 6,97:1 y los íconos cian en 4,42:1. */
 .menu-dropdown__seccion a:hover,
 .menu-dropdown__seccion a:focus-visible {
-  background: var(--primario-o2);
+  background: var(--primario-o1);
   text-decoration: none;
 }
 
@@ -371,6 +374,14 @@
      queda más chico y el subrayado del hover, más finito, que en el
      resto de los .btn--secundario del sitio. */
   font-size: 16px;
+}
+
+/* "Contáctanos" también cae en ".menu-dropdown__seccion a:hover": sin esto,
+   mientras entra el relleno cian del secundario se vería el fondo violeta del
+   hover de los links detrás. (0,3,0) le gana a (0,2,1). */
+.menu-dropdown__seccion--contacto .btn:hover,
+.menu-dropdown__seccion--contacto .btn:focus-visible {
+  background: transparent;
 }
 
 /* ---------- Cabecera del menú de cuenta (avatar + nombre) ---------- */
@@ -417,8 +428,10 @@
   transition: background-color 0.15s ease;
 }
 
+/* Mismo hover que los links de las secciones (ver arriba). */
 .menu-dropdown__social a:hover {
-  background: var(--primario-o2);
+  background: var(--primario-o1);
+  color: var(--acento);
   text-decoration: none;
 }
 
@@ -516,8 +529,12 @@
   transition: background-color 0.15s ease;
 }
 
+/* Colores invertidos en vez del hover violeta de los otros ítems: el rojo
+   sobre --primario-o1 da 2,91:1 (no llega a 4,5:1). Fondo --error con texto
+   --fondo da 6,95:1 y se lee como acción destructiva. */
 .menu-dropdown__cerrar-sesion:hover {
-  background: var(--primario-o2);
+  background: var(--error);
+  color: var(--fondo);
 }
 
 /* =========================================================
