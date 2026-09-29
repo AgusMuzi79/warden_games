@@ -110,22 +110,46 @@
   margin-top: var(--espaciado-2);
 }
 
-/* La lupa dentro del input: absoluta y sin pointer-events para no tapar
-   el click en el campo. El padding-left del input le deja lugar. */
-.header__search i {
+/* La lupa dentro del input es un botón submit: clickearla busca igual que
+   Enter (dispara el mismo submit que maneja buscador.js). Área de 44px
+   (--control-alto) aunque el ícono sea de 16; el centro del botón queda a
+   --espaciado-6 del borde, donde estaba el ícono antes. El padding-left del
+   input le deja lugar para que no se superponga con el texto. */
+.header__search-btn {
   position: absolute;
   top: 50%;
-  left: var(--espaciado-4);
-  transform: translateY(-50%);
+  left: calc(var(--espaciado-6) - var(--control-alto) / 2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
   color: var(--primario-c1);
   font-size: 16px;
-  pointer-events: none;
+  transform: translateY(-50%);
+  cursor: pointer;
+  appearance: none;
+  transition: color 0.2s ease;
+}
+
+.header__search-btn:hover {
+  color: var(--acento);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header__search-btn {
+    transition: none;
+  }
 }
 
 .header__search input {
   width: 100%;
   min-height: 40px;
-  padding: 0 var(--espaciado-4) 0 calc(var(--espaciado-4) + 24px);
+  padding: 0 var(--espaciado-4) 0 calc(var(--espaciado-6) + var(--control-alto) / 2);
   background: var(--fondo);
   /* Borde visible en reposo: --primario sobre --superficie (el fondo del
      header) da 3,59:1, y WCAG 1.4.11 pide 3:1 para el límite de un campo.

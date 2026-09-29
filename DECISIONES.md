@@ -312,6 +312,19 @@ Este archivo es la base para justificar los patrones de diseño en la defensa.
   aportar nada. También se descartó normalizar tildes ("accion" = "Acción"): los
   nombres de la API son casi todos en inglés.
 
+### La lupa del buscador también busca (botón submit)
+- **Qué:** en `index.html`, la lupa dentro del input pasa de `<i>` decorativo a
+  `<button type="submit" class="header__search-btn" aria-label="Buscar">`.
+  Clickearla dispara el mismo `submit` del form que ya maneja `buscador.js`,
+  así que no hizo falta JS nuevo.
+- **Por qué:** pedido de Agus. Una lupa dentro de un buscador se lee como botón
+  (Nielsen #4, convenciones); antes solo Enter buscaba.
+- **Área de 44px** (`--control-alto`) aunque el ícono sea de 16, centrada donde
+  estaba el ícono. El `padding-left` del input creció 6px para que el texto no
+  quede debajo del botón. Hover a `--acento`, con `prefers-reduced-motion`.
+- **No es la lupa de mobile** (`.header__search-toggle`), que sigue abriendo y
+  cerrando el buscador: esa está afuera del form.
+
 ### Header de mobile a 320px: gap chico y sin el texto del logo bajo 360px (T06b)
 - **Qué:** en `header.css`, el gap horizontal de la grilla mobile pasa de
   `--espaciado-3` (12px) a `--espaciado-1` (4px), y el texto "Warden" del logo
