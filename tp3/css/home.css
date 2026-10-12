@@ -181,7 +181,7 @@
   left: 50%;
   width: 62%;
   height: 100%;
-  margin-left: -31%; /* centrado: la mitad de su propio ancho */
+  margin-left: -31%;
   border-radius: var(--radio-md);
   overflow: hidden;
   background-size: cover;
@@ -211,10 +211,12 @@
   transition: opacity var(--duracion-hover) ease;
 }
 
+/* Card activa: deja de estar "hidden", pero sigue en opacity 0 hasta el hover. */
 .banner__slide--activo .banner__jugar {
   visibility: visible;
 }
 
+/* Hover sobre la card activa o foco de teclado: el botón aparece con fade. */
 .banner__slide--activo:hover .banner__jugar,
 .banner__jugar:focus-visible {
   opacity: 1;

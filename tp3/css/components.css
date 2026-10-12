@@ -80,6 +80,10 @@
 .btn--destructivo:hover   { background: var(--error); color: var(--fondo); animation: pulso-error calc(2 * var(--duracion-estado)) ease-out infinite; }
 .btn--destructivo:active  { background: var(--error); color: var(--fondo); animation: none; box-shadow: none; }
 
+/* Esta sí es una animación por pasos (@keyframes) y no una transition porque se
+   repite sola en loop: una transition solo va de un estado A a un estado B.
+   La sombra arranca pegada al botón (0 px) y crece a 10 px mientras se
+   vuelve transparente, así que se "desvanece". */
 @keyframes pulso-error {
   0%   { box-shadow: 0 0 0 0 var(--resplandor-error); }
   100% { box-shadow: 0 0 0 10px transparent; }
@@ -92,6 +96,7 @@
   color: var(--acento);
 }
 
+/* El relleno es un pseudo-elemento (una capa extra) que cubre todo el botón. */
 .btn--secundario::before {
   content: "";
   position: absolute;
@@ -127,11 +132,14 @@
   transform: scale(0.98);
 }
 
+/* En hover (o con foco de teclado) el relleno pasa de scaleX(0) a scaleX(1): la
+   transition de arriba hace que crezca de izquierda a derecha. */
 .btn--secundario:hover::before,
 .btn--secundario:focus-visible::before {
   transform: scaleX(1);
 }
 
+/* Al hacer clic el relleno cambia de color (celeste → violeta oscuro). */
 .btn--secundario:active::before {
   background: var(--primario-o1);
 }
@@ -623,10 +631,14 @@
   background: var(--velo-modal);
 }
 
+/* [open] es el atributo que el navegador le pone al <dialog> cuando se abre
+   (showModal()). La animación corre justo en ese momento, una sola vez. */
 .modal[open] {
   animation: modal-pop var(--duracion-estado) var(--easing-rebote);
 }
 
+/* "pop": aparece de transparente a visible mientras crece del 92 % al 100 %.
+   La reusa .modal__exito (más abajo) con 0,4 s. */
 @keyframes modal-pop {
   from { opacity: 0; transform: scale(0.92); }
   to   { opacity: 1; transform: scale(1); }

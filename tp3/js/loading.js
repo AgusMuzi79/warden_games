@@ -21,7 +21,7 @@ const DURACION_MS = 5000;
 // El avance va de 0 a 100 %.
 const PASOS = 100;
 const intervalo = DURACION_MS / PASOS;
-const CIRCUNFERENCIA = 2 * Math.PI * 54; // mismo radio que el <circle> de index.html
+const CIRCUNFERENCIA = 2 * Math.PI * 54;
 
 // Puramente decorativas (aria-hidden en index.html, ver DECISIONES.md): el
 // lector de pantalla no las lee, ya tiene su propio anuncio fijo — leer
@@ -64,8 +64,11 @@ const inicioCarga = performance.now();
 // circunferencia completa, aro vacío, a 0, aro lleno) y la frase.
 const timer = setInterval(() => {
   const transcurrido = performance.now() - inicioCarga;
+  // transcurrido / DURACION_MS da 0 a 1; × PASOS lo pasa a 0-100; floor redondea
+  // para abajo y min evita que se pase de 100.
   porcentaje = Math.min(PASOS, Math.floor((transcurrido / DURACION_MS) * PASOS));
   numero.textContent = porcentaje;
+  // Cuánto del aro queda sin dibujar: con 0 % es todo (339), con 100 % es 0.
   anillo.style.strokeDashoffset = CIRCUNFERENCIA * (1 - porcentaje / PASOS);
   actualizarFrase();
 
