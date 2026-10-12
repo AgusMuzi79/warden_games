@@ -61,20 +61,20 @@ function filtroGrises(imageData) {
   return salida;
 }
 
-// Brillo +30 %: se multiplica cada canal por 1,3, así todo se aclara en la
-// misma proporción. Math.min(255, ...) evita pasarse del máximo: un canal
-// que ya era 250 daría 325, que no es un valor de color válido.
-const AUMENTO_BRILLO = 0.3;
+// Brillo al 30 %: se multiplica cada canal por 0,3, así todo se oscurece en la
+// misma proporción (un píxel claro sigue siendo más claro que uno oscuro).
+// Multiplicar por un número entre 0 y 1 nunca se pasa de 255 ni baja de 0,
+// así que no hace falta limitar el resultado.
+const FACTOR_BRILLO = 0.3;
 
 function filtroBrillo(imageData) {
   const salida = new ImageData(imageData.width, imageData.height);
-  const factor = 1 + AUMENTO_BRILLO;
 
   for (let x = 0; x < imageData.width; x++) {
     for (let y = 0; y < imageData.height; y++) {
-      const r = Math.min(255, getRed(imageData, x, y) * factor);
-      const g = Math.min(255, getGreen(imageData, x, y) * factor);
-      const b = Math.min(255, getBlue(imageData, x, y) * factor);
+      const r = getRed(imageData, x, y) * FACTOR_BRILLO;
+      const g = getGreen(imageData, x, y) * FACTOR_BRILLO;
+      const b = getBlue(imageData, x, y) * FACTOR_BRILLO;
       setPixel(salida, x, y, r, g, b, 255);
     }
   }

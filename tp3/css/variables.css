@@ -89,6 +89,9 @@
   --duracion-estado:  500ms;  /* cambios de estado: carruseles, menús, modales */
   /* Curva con rebote: se pasa un poco del valor final y vuelve. */
   --easing-rebote:    cubic-bezier(.34, 1.56, .64, 1);
+  /* Curva de frenado: arranca rápido y afloja hasta detenerse (rodillos del
+     sorteo de Blocka). */
+  --easing-frenado:   cubic-bezier(0.15, 0.7, 0.2, 1);
   /* Resplandor celeste (--acento al 55%) para el hover de los botones. */
   --glow-acento:      0 0 16px rgba(82, 209, 220, 0.55);
 }

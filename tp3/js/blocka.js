@@ -10,7 +10,7 @@
 //   3. Motor del nivel: carga la imagen sorteada, la corta en piezas, les
 //      aplica los filtros del nivel, las gira al azar y deja girarlas con el
 //      mouse (clic izquierdo a la izquierda, clic derecho a la derecha) hasta
-//      armar la imagen. Al armarla se quitan los filtros.
+//      armar la imagen. Al armarla se quitan los filtros con un fundido.
 //   4. Temporizador (arranca al terminar el sorteo, se frena al armar la imagen),
 //      récord por nivel guardado en localStorage y paso entre niveles
 //      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
@@ -77,13 +77,18 @@ const BANCO_IMAGENES = [
 // suyo (en el orden de lectura: de izquierda a derecha y de arriba hacia
 // abajo; con 9 o 16 piezas el patrón se repite). Los nombres son las claves de
 // FILTROS (js/filtros.js). Los niveles van de menos a más difíciles: el
-// primero no tiene límite de tiempo y los dos avanzados sí. Si se acaba el
-// tiempo, se pierde el nivel. tiempoMax está pensado para 4 piezas y crece con
-// la dificultad (ver limiteSegundos()).
+// primero (escala de grises) no tiene límite de tiempo; el segundo (negativo)
+// y el tercero (filtros mezclados) sí. Si se acaba el tiempo, se pierde el
+// nivel. tiempoMax está pensado para 4 piezas y crece con la dificultad (ver
+// limiteSegundos()).
+// En el nivel 3, la lista de 4 filtros hace que aparezcan los tres en
+// cualquier dificultad: con 4 piezas, una por filtro (y el negativo dos
+// veces); con 9, la pieza i usa el filtro i % 4; con 16 (4 por fila), cada
+// columna repite el mismo filtro.
 // "nombre" es el texto que se muestra en la pantalla de inicio.
 const NIVELES = [
-  { nombre: 'Brillo', filtros: ['brillo'] },
-  { nombre: 'Escala de grises', filtros: ['grises'], tiempoMax: 60 },
+  { nombre: 'Escala de grises', filtros: ['grises'] },
+  { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: 60 },
   { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'negativo'], tiempoMax: 60 },
 ];
 
@@ -119,6 +124,8 @@ function limiteSegundos(indice, cantidad) {
 }
 
 // Lo que suma "Ayudita" al contador cada vez que se usa (enunciado: 5 s).
+// También es el margen mínimo para usarla: si quedan menos de 5 s, el botón se
+// deshabilita (usarla haría perder al instante).
 const PENALIZACION_AYUDITA_MS = 5000;
 
 // Índice del nivel que se está jugando (0 = primero). "Siguiente nivel" lo
@@ -434,26 +441,33 @@ function mezclar() {
   } while (estaArmada() && intentos < 50);
 }
 
-// Dibuja todas las piezas. Cada una se dibuja en su casillero, girada según
-// sus giros.
+// Dibuja una pieza en su casillero, girada según sus giros. "lienzo" es lo que
+// se pinta: el recorte con filtro o el original (el fundido del final usa los
+// dos).
+function dibujarPieza(pieza, lienzo) {
+  const tamano = ladoPieza();
+  // Centro del casillero donde va esta pieza en el canvas.
+  const centroX = pieza.columna * tamano + tamano / 2;
+  const centroY = pieza.fila * tamano + tamano / 2;
+
+  ctx.save();
+  // translate mueve el origen (0,0) al centro del casillero, y rotate gira
+  // alrededor de ese origen: así la pieza gira sobre su propio centro.
+  ctx.translate(centroX, centroY);
+  ctx.rotate(pieza.giros * Math.PI / 2);
+  // El destino va desde -mitad hasta +mitad porque el origen ya está en el
+  // centro de la pieza.
+  ctx.drawImage(lienzo, -tamano / 2, -tamano / 2);
+  ctx.restore();
+}
+
+// Dibuja todas las piezas, cada una con su lienzo actual.
 function dibujar() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const tamano = ladoPieza();
 
   piezas.forEach((pieza) => {
-    // Centro del casillero donde va esta pieza en el canvas.
-    const centroX = pieza.columna * tamano + tamano / 2;
-    const centroY = pieza.fila * tamano + tamano / 2;
-
-    ctx.save();
-    // translate mueve el origen (0,0) al centro del casillero, y rotate gira
-    // alrededor de ese origen: así la pieza gira sobre su propio centro.
-    ctx.translate(centroX, centroY);
-    ctx.rotate(pieza.giros * Math.PI / 2);
-    // El destino va desde -mitad hasta +mitad porque el origen ya está en el
-    // centro de la pieza.
-    ctx.drawImage(pieza.lienzo, -tamano / 2, -tamano / 2);
-    ctx.restore();
+    dibujarPieza(pieza, pieza.lienzo);
 
     // Las partes que dejó fijas Ayudita llevan un borde del color de acento,
     // para distinguirlas. Se dibuja después de restore(), sin giro.
@@ -474,6 +488,65 @@ function colorMarca() {
   return getComputedStyle(document.documentElement).getPropertyValue('--acento').trim();
 }
 
+// ---------- Fundido al ganar ----------
+
+// Id del requestAnimationFrame del fundido en curso (null si no hay ninguno).
+// Se guarda para poder cancelarlo si arranca otro nivel a mitad del fundido.
+let cuadroFundido = null;
+
+// Duración del fundido: el token --duracion-estado de variables.css
+// ("500ms"). parseFloat lee el número y deja de leer en "ms". Si no se
+// pudiera leer, se usan 500 ms.
+function duracionFundidoMs() {
+  const valor = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--duracion-estado'));
+  return Number.isNaN(valor) ? 500 : valor;
+}
+
+function cancelarFundido() {
+  cancelAnimationFrame(cuadroFundido);
+  cuadroFundido = null;
+}
+
+// Quita los filtros: las piezas pasan de su lienzo con filtro al recorte
+// original. En cada cuadro se dibujan las piezas con filtro y, encima, las
+// originales con una opacidad (globalAlpha) que va de 0 a 1: la imagen real
+// "aparece" sobre la filtrada. Con movimiento reducido el cambio es directo.
+function quitarFiltros() {
+  cancelarFundido();
+  if (sinMovimiento) {
+    piezas.forEach((p) => { p.lienzo = p.original; });
+    dibujar();
+    return;
+  }
+
+  const duracion = duracionFundidoMs();
+  const inicioFundido = performance.now();
+
+  function pasoFundido() {
+    // avance va de 0 a 1 según el tiempo que pasó.
+    const avance = Math.min(1, (performance.now() - inicioFundido) / duracion);
+    // Curva "ease-out": cambia rápido al principio y frena al final.
+    const opacidad = 1 - (1 - avance) * (1 - avance);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    piezas.forEach((p) => dibujarPieza(p, p.lienzo));
+    ctx.globalAlpha = opacidad;
+    piezas.forEach((p) => dibujarPieza(p, p.original));
+    ctx.globalAlpha = 1;
+
+    if (avance < 1) {
+      cuadroFundido = requestAnimationFrame(pasoFundido);
+    } else {
+      // Terminó: las piezas quedan con su original, como si nunca hubieran
+      // tenido filtro.
+      piezas.forEach((p) => { p.lienzo = p.original; });
+      cuadroFundido = null;
+    }
+  }
+
+  cuadroFundido = requestAnimationFrame(pasoFundido);
+}
+
 function iniciarReloj() {
   detenerReloj();
   inicioMs = performance.now();
@@ -491,14 +564,40 @@ function limiteDelNivel() {
   return limiteSegundos(indiceNivel, cantidadPiezas);
 }
 
+// true si el nivel tiene tiempo máximo y ya se alcanzó. Se revisa en cada
+// tick del reloj y también en el momento de un clic, antes de dar por ganado
+// el nivel: así no cuenta una victoria que llega después del límite (el tick
+// corre cada 100 ms y el clic puede caer entre dos ticks).
+function tiempoAgotado() {
+  const limite = limiteDelNivel();
+  return limite !== undefined && performance.now() - inicioMs >= limite * 1000;
+}
+
 // Muestra el tiempo transcurrido y, si el nivel tiene tiempo máximo, pierde
 // el nivel cuando se alcanza. Corre cada 100 ms y también después de que
 // "Ayudita" suma sus 5 segundos.
 function actualizarReloj() {
-  const transcurrido = performance.now() - inicioMs;
+  datoTiempo.textContent = textoTiempo(performance.now() - inicioMs, limiteDelNivel());
+  if (tiempoAgotado()) {
+    perderNivel();
+    return;
+  }
+  actualizarAyudita();
+}
+
+// Habilita o deshabilita "Ayudita". Se deshabilita si no quedan partes mal
+// puestas (no hay nada que ayudar) o si el nivel tiene tiempo máximo y quedan
+// menos de 5 s (los 5 s que suma harían perder al instante). Corre en cada
+// tick del reloj y después de cada giro o Ayudita.
+function actualizarAyudita() {
+  const quedanMalPuestas = piezas.some((p) => !p.fija && !estaBienPuesta(p));
   const limite = limiteDelNivel();
-  datoTiempo.textContent = textoTiempo(transcurrido, limite);
-  if (limite !== undefined && transcurrido >= limite * 1000) perderNivel();
+  const restanteMs = limite === undefined ? Infinity : limite * 1000 - (performance.now() - inicioMs);
+  btnAyudita.disabled = !nivelActivo || !quedanMalPuestas || restanteMs < PENALIZACION_AYUDITA_MS;
+
+  // Un botón deshabilitado pierde el foco: se pasa al canvas para que quien
+  // usa teclado no quede en el <body>.
+  if (btnAyudita.disabled && document.activeElement === btnAyudita) canvas.focus();
 }
 
 // Muestra el récord del nivel actual en el HUD y en la ficha del juego. Por
@@ -523,6 +622,9 @@ function ocultarAcciones() {
 // "Reintentar nivel".
 function iniciarNivel() {
   detenerReloj();
+  // Si el nivel anterior todavía estaba en su fundido final, se corta: si no,
+  // seguiría dibujando sobre el canvas del nivel nuevo.
+  cancelarFundido();
   nivelActivo = false;
   ocultarAcciones();
   datoNivel.textContent = `${indiceNivel + 1} de ${NIVELES.length} · ${cantidadPiezas} piezas`;
@@ -572,7 +674,7 @@ function arrancarNivel(indiceImagen) {
     try {
       piezas = crearPiezas(NIVELES[indiceNivel]);
     } catch (error) {
-      estado.textContent = 'Los filtros necesitan un servidor: abrí la página desde http://localhost, no con doble clic.';
+      mostrarErrorDeCarga('Los filtros necesitan un servidor: abrí la página desde http://localhost, no con doble clic.');
       return;
     }
     mezclar();
@@ -582,11 +684,23 @@ function arrancarNivel(indiceImagen) {
     btnTrampa.hidden = false;
     estado.textContent = 'Girá cada parte hasta armar la imagen.';
     iniciarReloj();
+    // Ayudita arranca habilitada en cada nivel nuevo (si hay partes mal puestas).
+    actualizarAyudita();
   };
   cargando.onerror = () => {
-    estado.textContent = 'No se pudo cargar la imagen. Probá recargar la página.';
+    mostrarErrorDeCarga('No se pudo cargar la imagen. Probá reintentar el nivel.');
   };
   cargando.src = BANCO_IMAGENES[indiceImagen].src;
+}
+
+// Si la imagen no carga (o no se pueden leer sus píxeles), el nivel no puede
+// arrancar. Se muestra el aviso junto con "Reintentar nivel" (sortea otra
+// imagen) y "Volver al inicio", para no dejar la partida sin ningún botón.
+function mostrarErrorDeCarga(mensaje) {
+  estado.textContent = mensaje;
+  btnReintentar.hidden = false;
+  btnInicio.hidden = false;
+  btnReintentar.focus();
 }
 
 // ---------- Sorteo (tragamonedas) ----------
@@ -699,6 +813,7 @@ function sortear(indiceGanadora) {
 // no hay partida: se elige la dificultad con "Comenzar".
 function mostrarInicio() {
   detenerReloj();
+  cancelarFundido();
   nivelActivo = false;
   indiceNivel = 0;
   partida.hidden = true;
@@ -824,10 +939,12 @@ function terminarNivel(conTrampa = false) {
   const tiempo = performance.now() - inicioMs;
   datoTiempo.textContent = textoTiempo(tiempo, limiteDelNivel());
 
-  // Se quitan los filtros y las marcas de Ayudita: cada pieza vuelve a
-  // dibujar su recorte original, y se ve la imagen con sus colores reales.
-  piezas.forEach((p) => { p.lienzo = p.original; p.fija = false; });
-  dibujar();
+  // Se quitan las marcas de Ayudita y los filtros: con un fundido, cada pieza
+  // pasa a su recorte original y se ve la imagen con sus colores reales. Los
+  // botones aparecen enseguida; si se aprieta uno durante el fundido, el nivel
+  // nuevo lo cancela (ver iniciarNivel()).
+  piezas.forEach((p) => { p.fija = false; });
+  quitarFiltros();
 
   const hayOtroNivel = indiceNivel < NIVELES.length - 1;
   const mensajeFinal = hayOtroNivel ? '' : ' Completaste todos los niveles.';
@@ -883,7 +1000,12 @@ btnAyudita.addEventListener('click', () => {
   dibujar();
   estado.textContent = 'Ayudita: una parte quedó fija en su lugar. Se sumaron 5 segundos.';
 
-  if (estaArmada()) {
+  // Primero el límite: si con los 5 s se pasó, se pierde aunque la imagen
+  // haya quedado armada. Si no, se gana o sigue el juego (actualizarReloj()
+  // también actualiza el botón de Ayudita).
+  if (tiempoAgotado()) {
+    perderNivel();
+  } else if (estaArmada()) {
     terminarNivel();
   } else {
     actualizarReloj();
@@ -930,6 +1052,12 @@ function piezaEnPunto(evento) {
 // Sumar 4 antes del módulo evita números negativos: (0 - 1 + 4) % 4 = 3.
 function girarPieza(evento, sentido) {
   if (!nivelActivo) return;
+  // Si el clic llega con el tiempo ya agotado (entre dos ticks del reloj), se
+  // pierde el nivel en vez de girar: así nunca se gana pasado el límite.
+  if (tiempoAgotado()) {
+    perderNivel();
+    return;
+  }
   const pieza = piezaEnPunto(evento);
   // Las partes fijadas por Ayudita y las lisas (fijas desde el inicio) no giran.
   if (!pieza || pieza.fija || esLisa(pieza)) return;
@@ -937,7 +1065,11 @@ function girarPieza(evento, sentido) {
   pieza.giros = (pieza.giros + sentido + 4) % 4;
   dibujar();
 
-  if (estaArmada()) terminarNivel();
+  if (estaArmada()) {
+    terminarNivel();
+  } else {
+    actualizarAyudita();
+  }
 }
 
 // Clic izquierdo: gira hacia la izquierda.

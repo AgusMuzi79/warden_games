@@ -79,9 +79,10 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ## Motor del juego
 
-### Un solo `<canvas>` de 520×520 que se redibuja entero
-- **Qué:** el juego vive en `#blocka-canvas`. La imagen se corta en 4 piezas
-  (2×2, de 260×260 px) y cada vez que algo cambia se vuelven a dibujar las 4.
+### Un solo `<canvas>` de 480×480 que se redibuja entero
+- **Qué:** el juego vive en `#blocka-canvas`. La imagen se corta en 4, 9 o 16
+  piezas (de 240, 160 o 120 px, ver "Un solo tablero de 480x480 píxeles") y cada
+  vez que algo cambia se vuelven a dibujar todas.
 - **Por qué:** es la técnica que explicó la cátedra (`cargar-imagen.html`) y la
   que permite aplicar los filtros píxel por píxel con `getImageData`. Con 4
   piezas, redibujar todo es instantáneo.
@@ -101,7 +102,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Qué:** `click` gira a la izquierda; `contextmenu` (clic derecho) gira a la
   derecha y llama a `preventDefault()` para que no abra el menú del navegador.
   Para saber qué pieza se tocó se convierte la posición del mouse a
-  coordenadas del canvas (el CSS puede mostrarlo más chico que sus 520 px).
+  coordenadas del canvas (el CSS puede mostrarlo más chico que sus 480 px).
 - **Por qué:** lo pide el enunciado. `contextmenu` es el evento estándar del
   botón derecho.
 - **Costo asumido:** el clic derecho no existe en touch ni con teclado. Como
@@ -129,18 +130,24 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **`index` con `const`:** la plantilla lo deja como variable global sin
   declarar; acá es local a cada función.
 
-### Brillo 30 %: multiplicar por 1,3, no sumar 30
-- **Qué:** cada canal se multiplica por 1,3 y se limita a 255 con `Math.min`.
-- **Por qué:** multiplicar aclara en proporción (un píxel oscuro sigue siendo
-  más oscuro que uno claro); sumar un valor fijo lava los tonos oscuros y les
-  quita contraste. El tope en 255 evita valores de color inválidos.
-- **Descartado:** sumar 30 % de 255 (~77) a cada canal.
+### Brillo al 30 %: multiplicar cada canal por 0,3
+- **Qué:** `filtroBrillo` multiplica cada canal por 0,3 (`FACTOR_BRILLO`): la
+  imagen queda al 30 % de su brillo, más oscura.
+- **Por qué:** decisión del equipo: "brillo 30 %" es el brillo que queda, no
+  un aumento. Multiplicar oscurece en proporción (un píxel claro sigue siendo
+  más claro que uno oscuro). Un número entre 0 y 1 nunca da menos de 0 ni más
+  de 255, así que no hace falta el `Math.min` de antes.
+- **Antes:** se multiplicaba por 1,3 (+30 %, más claro). Se revirtió por
+  decisión del equipo.
+- **Descartado:** restar un valor fijo a cada canal (aplasta los tonos oscuros
+  a negro y les quita contraste).
 
 ### Los filtros se aplican por pieza, una sola vez, al armar el nivel
 - **Qué:** cada pieza guarda su recorte `original` y un `lienzo` ya filtrado
-  (dos canvas chicos de 260×260 fuera de la página). El juego dibuja siempre el
-  `lienzo`. Al ganar, `lienzo` pasa a apuntar al `original`: se ven los colores
-  reales sin recalcular nada.
+  (dos canvas chicos del tamaño de la pieza, fuera de la página). El juego
+  dibuja siempre el `lienzo`. Al ganar, un fundido pasa de uno al otro y
+  `lienzo` queda apuntando al `original`: se ven los colores reales sin
+  recalcular nada (ver "Fundido al ganar").
 - **Por qué:** lo pide el enunciado ("filtros aplicados en tiempo de carga, en
   el setup del nivel") y permite que cada pieza lleve un filtro distinto.
   Filtrar la imagen completa y recortar después no lo permitiría. Los giros
@@ -148,9 +155,13 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ### Niveles en un array de configuración (`NIVELES`)
 - **Qué:** `NIVELES` es una lista de objetos `{ filtros: [...] }`. Con un solo
-  nombre, el filtro vale para las 4 piezas; con cuatro, cada pieza lleva el
-  suyo. Hoy: nivel 1 brillo, nivel 2 grises, nivel 3 un filtro distinto por
-  pieza (negativo, brillo, grises, negativo).
+  nombre, el filtro vale para todas las piezas; con cuatro, cada pieza lleva el
+  suyo. Hoy (decisión del equipo): nivel 1 escala de grises, sin tiempo
+  máximo; nivel 2 negativo, con tiempo máximo; nivel 3 un filtro distinto por
+  pieza (negativo, brillo, grises, negativo), con tiempo máximo.
+- **Antes:** nivel 1 brillo, nivel 2 grises. Se reordenó de menos a más
+  difícil: los grises se reconocen enseguida, el negativo cuesta más y la
+  mezcla es lo más difícil.
 - **Por qué:** agregar o cambiar un nivel es editar una línea, sin tocar la
   lógica. Cubre lo que pide el enunciado: tres niveles, los tres filtros, y en
   los avanzados un filtro distinto por subimagen.
@@ -161,6 +172,30 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Por qué:** abriendo el archivo con doble clic (`file:///`) el navegador
   bloquea la lectura de píxeles. Sin aviso el juego quedaría vacío y sin
   explicación. En GitHub Pages (https) no pasa.
+- **Con "Reintentar nivel" y "Volver al inicio" (bug corregido):** antes, si
+  la imagen no cargaba (`onerror`) o el canvas estaba contaminado, el aviso
+  aparecía pero todos los botones quedaban ocultos y la partida no tenía
+  salida. Ahora `mostrarErrorDeCarga()` muestra el aviso junto con esos dos
+  botones (el foco va a "Reintentar nivel").
+
+### Fundido al ganar
+- **Qué:** al armar la imagen (o con Trampa), `quitarFiltros()` hace un fundido
+  en el mismo canvas con `requestAnimationFrame`: en cada cuadro dibuja las
+  piezas con filtro y, encima, las originales con `globalAlpha` de 0 a 1,
+  durante `--duracion-estado` (500 ms, leído de `variables.css`) con una curva
+  que frena al final. Mientras dura, los clics no giran nada (el nivel ya no
+  está activo) y los botones del final ya están visibles.
+- **Por qué:** antes los colores reales aparecían de golpe; el fundido hace
+  visible el cambio de estado (corrección del profesor: animaciones más
+  marcadas). Si se aprieta un botón a mitad del fundido, `iniciarNivel()` y
+  `mostrarInicio()` lo cancelan (`cancelAnimationFrame`), para que no siga
+  dibujando sobre el nivel nuevo.
+- **Movimiento reducido:** con `prefers-reduced-motion: reduce` el cambio es
+  directo, como antes.
+- **El giro de las piezas sigue sin animación** (decisión del equipo): cada
+  clic cambia el giro al instante.
+- **Descartado:** una transición CSS de opacidad sobre un segundo canvas
+  encimado: más HTML y CSS para el mismo efecto.
 
 ## Niveles, temporizador y récord
 
@@ -238,11 +273,11 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   mientras toque la misma que la anterior (`ultimaImagen`). El enunciado dice
   que cada nivel usa "otra imagen".
 
-### Canvas mostrado a 440 px (resolución real de 520 px)
-- **Qué:** el `<canvas>` sigue siendo de 520×520 píxeles, pero el CSS lo
-  muestra a 440 px.
+### Canvas mostrado a 440 px (resolución real de 480 px)
+- **Qué:** el `<canvas>` es de 480×480 píxeles, pero el CSS lo muestra a
+  440 px (`--ancho-canvas`).
 - **Por qué:** la card mide 660 px de alto (igual a la del Peg) y, con el HUD,
-  el texto de estado y la fila de botones, a 520 px no entraba. Medido: los
+  el texto de estado y la fila de botones, a tamaño real no entraba. Medido: los
   botones terminan 38 px antes del borde de la card.
 - **Los clics no se ven afectados:** `piezaEnPunto()` ya escala la posición del
   mouse con la relación entre el tamaño real y el mostrado.
@@ -286,8 +321,21 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   "Volver al inicio".
 - **Por qué:** lo pide el extra del enunciado ("al menos los más avanzados").
   Poner el límite en la configuración del nivel permite cambiarlo en una línea.
-- **Ayudita también puede hacer perder:** `actualizarReloj()` se llama justo
-  después de sumar los 5 s, así que si pasa el límite se pierde en el momento.
+- **Ayudita se deshabilita** (`actualizarAyudita()`, atributo `disabled`)
+  cuando no quedan partes mal puestas o, en los niveles con tiempo máximo,
+  cuando quedan menos de 5 s (los 5 s que suma harían perder al instante). Se
+  revisa en cada tick del reloj y después de cada giro o Ayudita, y vuelve a
+  habilitarse al empezar un nivel. Así el botón nunca invita a una acción que
+  no sirve o que hace perder. Si igual se pasara del límite (el tick es cada
+  100 ms), se pierde en el momento.
+- **Descartado:** dejarlo habilitado y que haga perder (la versión anterior):
+  un botón que hace perder sin avisar es una trampa para el jugador.
+- **Una victoria pasado el límite no cuenta (bug corregido):** el límite solo
+  se revisaba en el tick de 100 ms, así que un clic que armaba la imagen entre
+  dos ticks (o una Ayudita cuyos 5 s pasaban el límite) ganaba y guardaba
+  récord. Ahora `tiempoAgotado()` se revisa también al hacer clic, antes de
+  girar, y después de la Ayudita, antes de dar el nivel por ganado: si ya se
+  pasó, se pierde.
 - **Los botones se muestran según el momento** (`ocultarAcciones()`): jugando,
   "Ayudita" y "Trampa"; al ganar, "Reintentar nivel", "Volver al inicio" y
   "Siguiente nivel"; al perder, "Reintentar nivel" y "Volver al inicio". Así nunca hay botones que no
@@ -443,7 +491,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   Si alguna no lo fuera, se usaría el cuadrado del centro (el lado más corto)
   para que las piezas sigan siendo cuadradas.
 - **El patrón de filtros se repite:** el nivel 3 (filtros mixtos) tiene 4
-  filtros; con más piezas la pieza `i` usa el filtro `i % 4`.
+  filtros; con más piezas la pieza `i` usa el filtro `i % 4`. Así los tres
+  filtros aparecen con 4, 9 y 16 piezas (con 16, cada columna lleva uno).
 
 ### Más piezas, más tiempo límite (proporcional)
 - **Qué:** `tiempoMax` de cada nivel está pensado para 4 piezas y
