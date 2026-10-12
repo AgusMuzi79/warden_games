@@ -133,15 +133,20 @@
   transform: translateY(-50%);
   cursor: pointer;
   appearance: none;
-  transition: color 0.2s ease;
+  transition: color var(--duracion-rapida) ease;
 }
 
 .header__search-btn:hover {
   color: var(--acento);
 }
 
+/* Sin movimiento: los hovers del header (lupa, campo, íconos y avatar)
+   cambian de golpe, sin transición. */
 @media (prefers-reduced-motion: reduce) {
-  .header__search-btn {
+  .header__search-btn,
+  .header__search input,
+  .header__icon-btn,
+  .header__avatar {
     transition: none;
   }
 }
@@ -159,7 +164,7 @@
   border-radius: 999px;
   color: var(--primario-c3);
   font: 400 14px/1 var(--font-ui);
-  transition: border-color 0.2s ease;
+  transition: border-color var(--duracion-rapida) ease;
 }
 
 .header__search input::placeholder {
@@ -199,7 +204,7 @@
   color: var(--primario-c3);
   font-size: 24px;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 .header__icon-btn:hover {
@@ -259,7 +264,7 @@
   overflow: hidden;
   background: none;
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow var(--duracion-rapida) ease;
 }
 
 /* sesion.js muestra uno de los dos avatares (usuario o invitado) con el

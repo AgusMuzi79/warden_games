@@ -33,6 +33,12 @@ const FRASES = [
 ];
 const FRASE_FINAL = 'Todo listo, a viciar.';
 
+// Con movimiento reducido el overlay se oculta de golpe, como antes.
+const cargaSinMovimiento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+// Respaldo por si nunca llega el transitionend (pestaña en segundo plano, CSS
+// que no cargó): un poco más que --duracion-estado (500ms, variables.css).
+const ESPERA_MAXIMA_SALIDA_MS = 700;
+
 let porcentaje = 0;
 let indiceAnterior = -1;
 
@@ -65,7 +71,35 @@ const timer = setInterval(() => {
 
   if (porcentaje >= PASOS) {
     clearInterval(timer);
-    overlay.hidden = true;
     bloqueados.forEach((el) => el.removeAttribute('inert'));
+    salirDeLaCarga();
   }
 }, intervalo);
+
+// Al llegar a 100 % el overlay no desaparece de golpe: la clase
+// --saliendo lo desvanece y agranda el centro (home.css), y recién cuando
+// termina esa transición se le pone hidden. carousel.js espera ese hidden
+// para arrancar el autoplay. La página ya quedó usable (sin inert) antes de
+// empezar la salida.
+function salirDeLaCarga() {
+  if (cargaSinMovimiento) {
+    overlay.hidden = true;
+    return;
+  }
+
+  let terminado = false;
+  function ocultar() {
+    if (terminado) return;
+    terminado = true;
+    overlay.hidden = true;
+  }
+
+  // transitionend también llega desde .loading__centro (los eventos suben
+  // al padre): solo cuenta el del propio overlay (su opacity).
+  overlay.addEventListener('transitionend', (evento) => {
+    if (evento.target === overlay) ocultar();
+  });
+  setTimeout(ocultar, ESPERA_MAXIMA_SALIDA_MS);
+
+  overlay.classList.add('loading-overlay--saliendo');
+}

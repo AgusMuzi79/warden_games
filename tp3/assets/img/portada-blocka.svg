@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 500">
+  <!-- Portada de Blocka para el banner "Destacados": 6 fichas de colores en
+       una grilla de 2x3. Cada ficha tiene una marca en una esquina; dos están
+       giradas 90° y 180°, como un rompecabezas todavía sin resolver. -->
+  <defs>
+    <linearGradient id="fondo" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2C0849"/>
+      <stop offset="1" stop-color="#19042A"/>
+    </linearGradient>
+    <!-- Marca de orientación: un triángulo en la esquina superior izquierda. -->
+    <polygon id="marca" points="-44,-44 16,-44 -44,16" fill="#19042A" fill-opacity=".55"/>
+  </defs>
+  <rect width="600" height="500" fill="url(#fondo)"/>
+  <rect x="88" y="106" width="424" height="288" rx="24" fill="none" stroke="#731EB8" stroke-width="2"/>
+  <g transform="translate(164 182)"><rect x="-60" y="-60" width="120" height="120" rx="14" fill="#FF6A1A"/><use href="#marca"/></g>
+  <g transform="translate(300 182)"><rect x="-60" y="-60" width="120" height="120" rx="14" fill="#52D1DC"/><use href="#marca" transform="rotate(90)"/></g>
+  <g transform="translate(436 182)"><rect x="-60" y="-60" width="120" height="120" rx="14" fill="#9B4BDD"/><use href="#marca"/></g>
+  <g transform="translate(164 318)"><rect x="-60" y="-60" width="120" height="120" rx="14" fill="#4ADE80"/><use href="#marca"/></g>
+  <g transform="translate(300 318)"><rect x="-60" y="-60" width="120" height="120" rx="14" fill="#EEF434"/><use href="#marca"/></g>
+  <g transform="translate(436 318)"><rect x="-60" y="-60" width="120" height="120" rx="14" fill="#F87171"/><use href="#marca" transform="rotate(180)"/></g>
+</svg>

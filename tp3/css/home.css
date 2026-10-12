@@ -24,6 +24,24 @@
   display: grid;
   place-items: center;
   background: var(--fondo);
+  transition: opacity var(--duracion-estado) ease;
+}
+
+/* Salida: al llegar a 100 %, loading.js le suma esta clase. El overlay se
+   desvanece y el centro se agranda un poco, como si se acercara. Recién
+   cuando termina la transición, loading.js le pone hidden. pointer-events
+   none: mientras se desvanece, los clicks ya pasan a la página. */
+.loading-overlay--saliendo {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading__centro {
+  transition: transform var(--duracion-estado) var(--easing-rebote);
+}
+
+.loading-overlay--saliendo .loading__centro {
+  transform: scale(1.1);
 }
 
 /* Columna centrada: logo con aro, porcentaje y frase. */
@@ -69,12 +87,12 @@
   transition: stroke-dashoffset 0.05s linear;
 }
 
-/* El logo late con @keyframes latido (scale + resplandor). */
+/* El logo queda quieto: la animación infinita que tenía era decorativa y no comunicaba
+   nada (el avance ya lo muestran el aro y el %). */
 .loading__logo {
   width: 56px;
   height: 56px;
   border-radius: var(--radio-md);
-  animation: latido 1.6s ease-in-out infinite;
   filter: drop-shadow(0 0 10px var(--primario));
 }
 
@@ -94,16 +112,11 @@
   font: 400 14px var(--font-ui);
 }
 
-@keyframes latido {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.1); }
-}
-
+/* Sin movimiento: loading.js oculta el overlay de golpe (sin la clase de
+   salida); igual se apagan las transiciones por si acaso. */
 @media (prefers-reduced-motion: reduce) {
-  .loading__logo {
-    animation: none;
-  }
-
+  .loading-overlay,
+  .loading__centro,
   .loading__ring-relleno {
     transition: none;
   }
@@ -175,14 +188,15 @@
   background-position: center;
   box-shadow: 0 12px 30px var(--sombra-elevacion);
   cursor: pointer;
-  transition: transform 0.6s ease, opacity 0.6s ease;
+  transition: transform var(--duracion-estado) var(--easing-rebote), opacity var(--duracion-estado) ease;
 }
 
 .banner__slide--activo {
   cursor: default;
 }
 
-/* Botón "Jugar" de Neon Circuit: solo existe en esa card (carousel.js). Con
+/* Botón "Jugar" de los juegos propios (Neon Circuit, Blocka): solo existe en
+   esas cards (carousel.js, esJuegoPropio) y lleva al href de cada juego. Con
    visibility:hidden por default: cuando la card no es la activa (rotada al
    costado, chica), no se ve ni es alcanzable con Tab. Recién cuando es la
    activa pasa a visible, y ahí el hover/foco la muestra. */
@@ -194,7 +208,7 @@
   justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.25s ease;
+  transition: opacity var(--duracion-hover) ease;
 }
 
 .banner__slide--activo .banner__jugar {
@@ -215,7 +229,7 @@
 
 /* Dispositivos sin hover (touch): el botón "Jugar" no puede depender del
    hover porque ahí no existe, y era el único acceso a juego.html desde la
-   Home. Se muestra fijo en la card activa. Sin el velo oscuro de ::before,
+   Home a los juegos propios. Se muestra fijo en la card activa. Sin el velo oscuro de ::before,
    que taparía la portada todo el tiempo: alcanza con el círculo de play. Con
    mouse sigue igual: aparece solo con hover o foco (ver DECISIONES.md,
    "Neon Circuit es clickeable"). */
@@ -247,7 +261,7 @@
 .banner__etiquetas,
 .banner__nombre {
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--duracion-hover) ease;
 }
 
 .banner__slide--activo .banner__etiquetas,
@@ -311,7 +325,7 @@
 }
 
 /* Link invisible que cubre TODA la card (inset: 0, como .banner__jugar):
-   clickear la card activa de cualquier juego que no sea Neon Circuit
+   clickear la card activa de cualquier juego que no sea propio
    lleva a su ficha (producto.html) — reemplaza al agregar-al-carrito
    directo que tenía antes este banner (ver DECISIONES.md, "Ficha de
    producto", etapa 3).
@@ -366,7 +380,7 @@
   /* --primario sobre --fondo: 4,07:1 (antes --primario-o1, 2,39:1, y WCAG
      1.4.11 pide 3:1 para componentes de interfaz; ver AUDITORIA.md, T08). */
   background: var(--primario);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--duracion-rapida) ease;
 }
 
 .banner__dot:hover::before {
@@ -451,7 +465,7 @@
   color: var(--primario-c3);
   font-size: 18px;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease, opacity var(--duracion-rapida) ease;
 }
 
 .carrusel__flecha:hover:not(:disabled) {
@@ -639,7 +653,7 @@
   z-index: 1;
   margin-left: auto;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease, transform var(--duracion-hover) var(--easing-rebote);
 }
 
 .game-card__carrito:hover {
@@ -657,6 +671,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .carrusel__flecha,
   .game-card__carrito {
     transition: none;
   }

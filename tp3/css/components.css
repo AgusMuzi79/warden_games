@@ -17,8 +17,12 @@
 /* =========================================================
    Botones
    4 variantes, cada una con un hover distinto (pedido de la cátedra):
-   .btn--primario se eleva, .btn--secundario rellena deslizando,
+   .btn--primario se eleva, .btn--secundario rellena deslizando y crece,
    .btn--terciario subraya y .btn--destructivo pulsa en rojo.
+   Todas usan los tokens de "Movimiento" (variables.css): los colores cambian
+   rápido (--duracion-rapida) y el movimiento usa --duracion-hover con la
+   curva con rebote (--easing-rebote), más el resplandor celeste
+   (--glow-acento). Corrección del profesor: las animaciones eran muy sutiles.
    ========================================================= */
 .btn {
   appearance: none;
@@ -39,7 +43,13 @@
   cursor: pointer;
   text-decoration: none;
   background: none;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color var(--duracion-rapida) ease,
+    border-color var(--duracion-rapida) ease,
+    color var(--duracion-rapida) ease,
+    transform var(--duracion-hover) var(--easing-rebote),
+    box-shadow var(--duracion-hover) ease,
+    text-shadow var(--duracion-hover) ease;
 }
 
 .btn:active {
@@ -54,18 +64,20 @@
   text-decoration: none;
 }
 
-/* Primario: se eleva y tira sombra al pasar el mouse (animación 1).
+/* Primario: se eleva 4px y tira sombra + resplandor celeste (animación 1).
    Fondo --primario-o1 en reposo: con --primario-c3 da 6,17:1. El --primario
    anterior daba 3,62:1 y no llegaba al 4,5:1 que pide WCAG 1.4.3 para texto
    de 16px (ver AUDITORIA.md, T02). En :active el fondo sigue siendo el de
    reposo, así que se oscurece con filter para que igual se note el clic. */
 .btn--primario            { background: var(--primario-o1); color: var(--primario-c3); }
-.btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); transform: translateY(-3px); box-shadow: 0 6px 14px var(--sombra-elevacion); }
+.btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); transform: translateY(-4px); box-shadow: 0 8px 16px var(--sombra-elevacion), var(--glow-acento); }
 .btn--primario:active     { background: var(--primario-o1); filter: brightness(0.85); transform: translateY(0) scale(0.98); box-shadow: none; }
 
-/* Destructivo: pulso/resplandor rojo que crece y se desvanece (animación 4) */
+/* Destructivo: pulso/resplandor rojo que crece y se desvanece (animación 4).
+   Cada pulso dura el doble de un cambio de estado (1s). Hoy no lo usa
+   ninguna pantalla (ver DECISIONES.md, T01). */
 .btn--destructivo         { border-color: var(--error); color: var(--error); }
-.btn--destructivo:hover   { background: var(--error); color: var(--fondo); animation: pulso-error 1.2s ease-out infinite; }
+.btn--destructivo:hover   { background: var(--error); color: var(--fondo); animation: pulso-error calc(2 * var(--duracion-estado)) ease-out infinite; }
 .btn--destructivo:active  { background: var(--error); color: var(--fondo); animation: none; box-shadow: none; }
 
 @keyframes pulso-error {
@@ -73,7 +85,8 @@
   100% { box-shadow: 0 0 0 10px transparent; }
 }
 
-/* Secundario: el relleno entra deslizando de izquierda a derecha (animación 2) */
+/* Secundario: el relleno entra deslizando de izquierda a derecha y el botón
+   crece un 6 % con resplandor celeste (animación 2) */
 .btn--secundario {
   border-color: var(--acento);
   color: var(--acento);
@@ -88,7 +101,9 @@
   background: var(--acento);
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.25s ease-out;
+  /* ease-out y no la curva con rebote: con rebote el relleno se pasaría del
+     ancho del botón y asomaría por fuera del borde. */
+  transition: transform var(--duracion-hover) ease-out;
 }
 
 /* .btn.btn--secundario (no solo .btn--secundario): necesita más especificidad
@@ -102,6 +117,14 @@
      selector busca la etiqueta <a>, así que a los .btn--secundario que son
      <button> (ej. "Mensaje", "Suscribirse") nunca les llegaba. */
   text-decoration: underline;
+  transform: scale(1.06);
+  box-shadow: var(--glow-acento);
+}
+
+/* Misma especificidad que el hover y va después: si no, el hover (scale 1.06)
+   le ganaba a .btn:active y el clic no se notaba. */
+.btn.btn--secundario:active {
+  transform: scale(0.98);
 }
 
 .btn--secundario:hover::before,
@@ -113,7 +136,8 @@
   background: var(--primario-o1);
 }
 
-/* Terciario: el subrayado crece de izquierda a derecha (animación 3) */
+/* Terciario: el subrayado crece de izquierda a derecha y el texto toma un
+   resplandor celeste suave (animación 3). El texto no se mueve. */
 .btn--terciario {
   color: var(--acento);
 }
@@ -129,12 +153,18 @@
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.25s ease-out;
+  transition: transform var(--duracion-hover) var(--easing-rebote);
+}
+
+.btn--terciario:hover,
+.btn--terciario:focus-visible {
+  text-shadow: var(--glow-acento);
 }
 
 .btn--terciario:hover::after,
 .btn--terciario:focus-visible::after {
   transform: scaleX(1);
+  box-shadow: var(--glow-acento);
 }
 
 /* Estado deshabilitado, común a todas las variantes. */
@@ -152,10 +182,12 @@
 .btn:disabled:active {
   transform: none;
   box-shadow: none;
+  text-shadow: none;
 }
 
-/* Sin movimiento: no hay elevación ni relleno animado, y el destructivo
-   muestra el resplandor fijo para no perder el feedback del hover. */
+/* Sin movimiento: no hay elevación, crecimiento ni relleno animado. El
+   resplandor celeste sí queda (fijo, aparece de golpe): no es movimiento y
+   sigue avisando el hover. El destructivo muestra el resplandor fijo. */
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .btn--secundario::before,
@@ -165,7 +197,10 @@
 
   .btn--primario:hover,
   .btn--primario:active,
-  .btn:active {
+  .btn:active,
+  .btn.btn--secundario:hover,
+  .btn.btn--secundario:focus-visible,
+  .btn.btn--secundario:active {
     transform: none;
   }
 
@@ -204,7 +239,7 @@
   background: currentColor;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.25s ease-out;
+  transition: transform var(--duracion-hover) var(--easing-rebote);
 }
 
 .link:hover::after,
@@ -224,7 +259,7 @@
    celeste, pensado para resaltar dentro de una oración). */
 .link--blanco {
   color: inherit;
-  transition: color 0.2s ease;
+  transition: color var(--duracion-rapida) ease;
 }
 
 .link--blanco::after {
@@ -253,7 +288,7 @@
   border-radius: var(--radio-md);
   padding: var(--espaciado-6);
   background: var(--primario-o2);
-  transition: transform 150ms ease-out;
+  transition: transform var(--duracion-hover) var(--easing-rebote);
 }
 
 /* z-index: 1 en hover para que la card agrandada tape a las vecinas. */
@@ -314,6 +349,17 @@
   border-radius: var(--radio-md);
   background: var(--superficie);
   box-shadow: 0 12px 30px var(--sombra-elevacion);
+  /* Entrada: aparece, baja un poco y crece desde arriba (donde está el botón
+     que lo abre). menu.js lo abre sacándole hidden: al pasar de display none
+     a visible, el navegador vuelve a correr la animación cada vez. Al cerrar
+     desaparece de golpe (no hace falta animar la salida). */
+  transform-origin: top;
+  animation: menu-entrada var(--duracion-estado) var(--easing-rebote);
+}
+
+@keyframes menu-entrada {
+  from { opacity: 0; transform: translateY(calc(-1 * var(--espaciado-2))) scale(0.95); }
+  to   { opacity: 1; transform: none; }
 }
 
 /* Título chico de cada sección del menú ("Jugar", "Categorías"). */
@@ -343,7 +389,7 @@
   border-radius: var(--radio-sm);
   color: var(--primario-c3);
   font: 500 15px/1.4 var(--font-ui);
-  transition: background-color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease;
 }
 
 /* Hover en --primario-o1 y no en --primario-o2: el menú entero es
@@ -425,7 +471,7 @@
   border-radius: var(--radio-sm);
   color: var(--primario-c3);
   font-size: 20px;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 /* Mismo hover que los links de las secciones (ver arriba). */
@@ -492,7 +538,7 @@
   color: var(--primario-c1);
   font-size: 16px;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 .carrito__quitar:hover {
@@ -526,7 +572,7 @@
   font: 500 15px var(--font-ui);
   text-align: left;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 /* Colores invertidos en vez del hover violeta de los otros ítems: el rojo
@@ -535,6 +581,21 @@
 .menu-dropdown__cerrar-sesion:hover {
   background: var(--error);
   color: var(--fondo);
+}
+
+/* Sin movimiento: el menú aparece de golpe y los hovers cambian de color
+   sin transición. */
+@media (prefers-reduced-motion: reduce) {
+  .menu-dropdown {
+    animation: none;
+  }
+
+  .menu-dropdown__seccion a,
+  .menu-dropdown__social a,
+  .carrito__quitar,
+  .menu-dropdown__cerrar-sesion {
+    transition: none;
+  }
 }
 
 /* =========================================================
@@ -563,7 +624,7 @@
 }
 
 .modal[open] {
-  animation: modal-pop 0.25s ease-out;
+  animation: modal-pop var(--duracion-estado) var(--easing-rebote);
 }
 
 @keyframes modal-pop {
@@ -589,7 +650,7 @@
   color: var(--primario-c3);
   font-size: 20px;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 .modal__cerrar:hover {
@@ -632,7 +693,7 @@
   gap: var(--espaciado-3);
   padding: var(--espaciado-6) 0;
   text-align: center;
-  animation: modal-pop 0.4s ease-out;
+  animation: modal-pop var(--duracion-estado) var(--easing-rebote);
 }
 
 .modal__exito-icono {
@@ -658,6 +719,10 @@
   .modal[open],
   .modal__exito {
     animation: none;
+  }
+
+  .modal__cerrar {
+    transition: none;
   }
 }
 
@@ -962,7 +1027,9 @@
   border-radius: var(--radio-md);
   transform-style: preserve-3d;
   transform: rotateY(var(--angulo, 0deg));
-  transition: transform 0.7s ease-in-out;
+  /* Curva con rebote: la tarjeta se pasa unos grados del giro y vuelve,
+     como una ficha que se asienta. */
+  transition: transform var(--duracion-estado) var(--easing-rebote);
 }
 
 /* Las 2 caras de la tarjeta, superpuestas exactamente en el mismo lugar
@@ -1011,7 +1078,7 @@
   color: var(--primario-c3);
   font-size: 20px;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 .galeria__flecha:hover,
@@ -1027,7 +1094,8 @@
    funcional), pero de golpe, sin el giro — se saca la única propiedad que
    anima el cambio (transition), nada más. */
 @media (prefers-reduced-motion: reduce) {
-  .galeria__carta {
+  .galeria__carta,
+  .galeria__flecha {
     transition: none;
   }
 }
@@ -1058,7 +1126,7 @@
   border-radius: var(--radio-sm);
   color: var(--primario-c3);
   font-size: 20px;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--duracion-rapida) ease;
 }
 
 .compartir__redes a:hover {
@@ -1102,12 +1170,19 @@
   color: var(--acento);
   font: 600 14px/1 var(--font-ui);
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 .compartir__copiar:hover {
   background: var(--acento);
   color: var(--fondo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compartir__redes a,
+  .compartir__copiar {
+    transition: none;
+  }
 }
 
 /* ---------- Comunidad ----------

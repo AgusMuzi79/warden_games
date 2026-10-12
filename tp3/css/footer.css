@@ -31,11 +31,18 @@
 
 .footer a {
   color: inherit;
-  transition: color 0.2s ease;
+  transition: color var(--duracion-rapida) ease;
 }
 
 .footer a:hover {
   color: var(--acento);
+}
+
+/* Sin movimiento: el color cambia de golpe. */
+@media (prefers-reduced-motion: reduce) {
+  .footer a {
+    transition: none;
+  }
 }
 
 .footer__divider {

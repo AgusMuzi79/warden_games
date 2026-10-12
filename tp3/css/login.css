@@ -38,11 +38,11 @@
   background: linear-gradient(160deg, var(--primario-o2), var(--fondo));
 }
 
-/* Flota con @keyframes auth-brand-float. */
+/* Quieto: el flotado infinito era decorativo y no comunicaba nada
+   (corrección del profesor: animar solo lo que comunica). */
 .auth-brand__logo {
   width: 96px;
   height: 96px;
-  animation: auth-brand-float 3s ease-in-out infinite;
 }
 
 .auth-brand__title {
@@ -53,15 +53,6 @@
   max-width: 26rem;
   margin: 0;
   color: var(--primario-c1);
-}
-
-@keyframes auth-brand-float {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-12px);
-  }
 }
 
 /* ---------- Panel del formulario (derecha) ---------- */
@@ -106,7 +97,7 @@
   color: var(--primario-c1);
   font: 600 15px/1 var(--font-ui);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
 .auth-switch__btn:hover {
@@ -184,7 +175,7 @@
   border-radius: var(--radio-sm);
   color: var(--primario-c1);
   cursor: pointer;
-  transition: color 0.15s ease;
+  transition: color var(--duracion-rapida) ease;
 }
 
 .toggle-pass:hover {
@@ -227,7 +218,7 @@
   border: 2px solid var(--primario);
   border-radius: var(--radio-sm);
   background: var(--fondo);
-  transition: background-color 0.15s ease, border-color 0.15s ease;
+  transition: background-color var(--duracion-rapida) ease, border-color var(--duracion-rapida) ease;
 }
 
 .check-block input:checked ~ .check-block__mark {
@@ -369,7 +360,7 @@
   gap: var(--espaciado-3);
   padding: var(--espaciado-8) var(--espaciado-6);
   text-align: center;
-  animation: auth-success-pop 0.4s ease-out;
+  animation: auth-success-pop var(--duracion-estado) var(--easing-rebote);
 }
 
 .auth-success__icon {
@@ -417,16 +408,16 @@
 }
 
 /* ---------- Reduced motion ----------
-   Sin flotado del logo ni animación de éxito. El bloque de éxito igual se
-   muestra, solo que sin el fade + scale. */
+   Sin animación de éxito. El bloque de éxito igual se muestra, solo que
+   sin el fade + scale. */
 @media (prefers-reduced-motion: reduce) {
+  .auth-switch__btn,
   .toggle-pass,
   .check-block__mark {
     transition: none;
   }
 
-  .auth-success,
-  .auth-brand__logo {
+  .auth-success {
     animation: none;
   }
 }

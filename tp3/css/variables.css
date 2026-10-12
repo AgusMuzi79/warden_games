@@ -79,6 +79,18 @@
      Orbitron solo en h1-h3 y el logo. Roboto Flex todo el resto. */
   --font-display:     'Orbitron', sans-serif;
   --font-ui:          'Roboto Flex', system-ui, sans-serif;
+
+  /* ---- Movimiento ----
+     Duraciones y curvas de todas las animaciones (corrección del profesor:
+     las animaciones eran demasiado sutiles). Cada archivo tiene su bloque
+     prefers-reduced-motion que las apaga. */
+  --duracion-rapida:  150ms;  /* cambios solo de color (hover de íconos y links) */
+  --duracion-hover:   300ms;  /* hover de botones y cards */
+  --duracion-estado:  500ms;  /* cambios de estado: carruseles, menús, modales */
+  /* Curva con rebote: se pasa un poco del valor final y vuelve. */
+  --easing-rebote:    cubic-bezier(.34, 1.56, .64, 1);
+  /* Resplandor celeste (--acento al 55%) para el hover de los botones. */
+  --glow-acento:      0 0 16px rgba(82, 209, 220, 0.55);
 }
 
 /* ============================================================

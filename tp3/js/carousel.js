@@ -43,12 +43,20 @@ const prefiereMovimientoReducido = window.matchMedia('(prefers-reduced-motion: r
 // que se pausa con hover o foco, sin botón de pausa").
 const puedePausarConHover = window.matchMedia('(hover: hover)').matches;
 
-// Nuestro propio juego: no viene de la API (esa trae juegos de terceros
-// para el catálogo), así que va hardcodeado y siempre primero, sin pelear
-// por rating contra el resto.
+// Nuestros propios juegos: no vienen de la API (esa trae juegos de terceros
+// para el catálogo), así que van hardcodeados y siempre primeros, sin pelear
+// por rating contra el resto. La propiedad href (la página donde se juega)
+// es lo que los distingue de un juego de la API (ver esJuegoPropio).
 const NEON_CIRCUIT = {
   name: 'Neon Circuit',
   background_image: 'assets/img/portada-tronpeg-1616x1320.png',
+  href: 'juego.html',
+};
+
+const BLOCKA = {
+  name: 'Blocka',
+  background_image: 'assets/img/portada-blocka.svg',
+  href: 'blocka.html',
 };
 
 // Si la API falla, destacamos estos juegos reales igual.
@@ -67,13 +75,20 @@ let dots = [];
 let indiceActivo = 0;
 let timerAutoplay = null;
 
-// Neon Circuit siempre primero (así arranca como card activa) y después los
-// mejor puntuados de la API.
+// Neon Circuit siempre primero (así arranca como card activa), Blocka
+// segundo y después los mejor puntuados de la API, hasta completar
+// CANTIDAD_DESTACADOS (los 2 propios + 3 de la API).
 function elegirDestacados(juegos) {
   const otros = [...juegos]
     .sort((a, b) => b.rating - a.rating)
-    .slice(0, CANTIDAD_DESTACADOS - 1);
-  return [NEON_CIRCUIT, ...otros];
+    .slice(0, CANTIDAD_DESTACADOS - 2);
+  return [NEON_CIRCUIT, BLOCKA, ...otros];
+}
+
+// Un juego es nuestro si tiene página propia para jugarlo (href). Los de la
+// API no la tienen: esos llevan a su ficha (producto.html).
+function esJuegoPropio(juego) {
+  return Boolean(juego.href);
 }
 
 // Distancia más corta a la card activa, considerando el ciclo (si hay 5
@@ -119,7 +134,8 @@ function actualizarPosiciones() {
 }
 
 // Arma una card del banner: imagen de fondo, etiquetas arriba a la izquierda,
-// nombre abajo y un link a pantalla completa (a juego.html o a la ficha).
+// nombre abajo y un link a pantalla completa (a la página del juego propio o
+// a la ficha).
 function crearSlide(juego, index) {
   const slide = document.createElement('div');
   slide.className = 'banner__slide';
@@ -134,10 +150,10 @@ function crearSlide(juego, index) {
   etiquetas.className = 'banner__etiquetas';
   etiquetas.append(etiqueta);
 
-  // Neon Circuit no viene de la API: no tiene id real para esDePago() y
-  // esNuevo() ni puede estar en "comprados", así que no lleva badge de
-  // Gratis, precio o Nuevo. Ya tiene su propia acción ("Jugar").
-  if (juego !== NEON_CIRCUIT) {
+  // Los juegos propios no vienen de la API: no tienen id real para
+  // esDePago() y esNuevo() ni pueden estar en "comprados", así que no llevan
+  // badge de Gratis, precio o Nuevo. Ya tienen su propia acción ("Jugar").
+  if (!esJuegoPropio(juego)) {
     const badge = crearBadge(juego);
     if (badge) etiquetas.append(badge);
   }
@@ -148,14 +164,14 @@ function crearSlide(juego, index) {
 
   slide.append(etiquetas, nombre);
 
-  // Es nuestro propio juego: además de poder saltar a esta card como al
-  // resto de los destacados, tiene una acción real (ir a jugar). Solo se ve y
-  // recibe foco cuando la card está activa (ver home.css).
-  if (juego === NEON_CIRCUIT) {
+  // Es un juego propio: además de poder saltar a esta card como al resto de
+  // los destacados, tiene una acción real (ir a jugar a su página). Solo se
+  // ve y recibe foco cuando la card está activa (ver home.css).
+  if (esJuegoPropio(juego)) {
     const jugar = document.createElement('a');
     jugar.className = 'banner__jugar';
-    jugar.href = 'juego.html';
-    jugar.setAttribute('aria-label', 'Jugar a Neon Circuit');
+    jugar.href = juego.href;
+    jugar.setAttribute('aria-label', `Jugar a ${juego.name}`);
     // Evita que el click también dispare el irA(index) del slide: no
     // cambiaría nada (ya está activa), pero no hace falta que compita.
     jugar.addEventListener('click', (evento) => evento.stopPropagation());
@@ -168,11 +184,11 @@ function crearSlide(juego, index) {
     slide.append(jugar);
   }
 
-  // Cualquier juego que no sea Neon Circuit: clickear la card activa lleva a
-  // su ficha (producto.html). Reemplaza al agregar-al-carrito directo que
-  // tenía este banner antes (ver DECISIONES.md, "Ficha de producto", etapa 3).
-  // Neon Circuit tiene su propio link ("Jugar", arriba).
-  if (juego !== NEON_CIRCUIT) {
+  // Cualquier juego de la API: clickear la card activa lleva a su ficha
+  // (producto.html). Reemplaza al agregar-al-carrito directo que tenía este
+  // banner antes (ver DECISIONES.md, "Ficha de producto", etapa 3). Los
+  // juegos propios tienen su propio link ("Jugar", arriba).
+  if (!esJuegoPropio(juego)) {
     const ver = document.createElement('a');
     ver.className = 'banner__ver';
     ver.href = `producto.html?id=${juego.id}`;
