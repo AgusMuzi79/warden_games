@@ -68,7 +68,7 @@
    solo uno se muestra a la vez. */
 .auth-card {
   width: 100%;
-  max-width: 30rem; /* 480px: en 2 columnas no necesita los 600px de antes */
+  max-width: 30rem;
   padding: var(--espaciado-6);
   border-radius: var(--radio-xl);
   background: var(--superficie);

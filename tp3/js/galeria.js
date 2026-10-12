@@ -93,6 +93,8 @@ function iniciarGaleria(fotos) {
     // La diapositiva nueva se calcula a partir de la que se ve hoy, no de una
     // que se haya precargado antes. Así funciona bien si el click cambia de
     // dirección respecto del anterior (ej: "siguiente" y después "anterior").
+    // % total es el "resto": hace que después de la última vuelva a la primera.
+    // En "anterior" se suma total antes del % para que -1 no dé un número negativo.
     const nuevoIndice = direccion > 0
       ? (indiceVisible + 1) % total
       : (indiceVisible - 1 + total) % total;

@@ -117,6 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Muestra el bloque de éxito en vez del form: dispara la animación
     // "auth-success-pop" definida en login.css (fade + scale al aparecer).
     formRegister.hidden = true;
+    // Al sacarle [hidden] el bloque pasa a display: flex y su animation arranca:
+    // una animación CSS corre cuando el elemento empieza a mostrarse.
     document.getElementById('registerSuccess').hidden = false;
 
     // Simula que la cuenta queda logueada (ver sesion.js: no hay backend
