@@ -1,0 +1,694 @@
+/*
+  home.css: estilos de la Home (index.html)
+  Se carga al final, después de header.css y footer.css. Usa tokens de
+  variables.css y las piezas de components.css (.card, .badge, .btn).
+  Secciones, en orden:
+    1. Loading simulado de 5 segundos (overlay con aro de progreso)
+    2. Banner "Destacados" (carrusel coverflow 3D)
+    3. Filas de juegos por categoría (carrusel de scroll nativo + cards)
+    4. Detalles de la página (scroll-margin, resultado de búsqueda)
+  Mobile first: los estilos base son de mobile y los @media (min-width)
+  agrandan. Cada animación tiene su bloque prefers-reduced-motion.
+*/
+
+/* =========================================================
+   1. Loading simulado
+   El JS (loading.js) mueve el % y el aro; acá solo está el aspecto.
+   ========================================================= */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  /* Más alto que el banner coverflow (llega a z-index: 100) y que los
+     menús del header (z-index: 200): mientras carga, tiene que tapar todo. */
+  z-index: 500;
+  display: grid;
+  place-items: center;
+  background: var(--fondo);
+}
+
+/* Columna centrada: logo con aro, porcentaje y frase. */
+.loading__centro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-6);
+}
+
+.loading__logo-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: grid;
+  place-items: center;
+}
+
+/* Aro de progreso real: el relleno avanza junto con el % (loading.js), no
+   es un spinner infinito sin relación con el avance. */
+.loading__ring {
+  position: absolute;
+  inset: 0;
+  transform: rotate(-90deg);
+}
+
+.loading__ring-fondo {
+  fill: none;
+  stroke: var(--primario-o1);
+  stroke-width: 4;
+}
+
+/* stroke-dasharray es el largo de la circunferencia (2 * pi * r con r = 54).
+   loading.js baja el dashoffset de ese valor a 0 a medida que sube el %. */
+.loading__ring-relleno {
+  fill: none;
+  stroke: var(--acento);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 339.292;
+  stroke-dashoffset: 339.292;
+  filter: drop-shadow(0 0 4px var(--acento));
+  transition: stroke-dashoffset 0.05s linear;
+}
+
+/* El logo late con @keyframes latido (scale + resplandor). */
+.loading__logo {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radio-md);
+  animation: latido 1.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px var(--primario));
+}
+
+/* El % va en Orbitron: es un número grande, casi un título. */
+.loading__pct {
+  font: 600 24px/1 var(--font-display);
+  color: var(--primario-c3);
+}
+
+/* Frases graciosas que van rotando (loading.js) — puramente decorativas,
+   ver el aria-hidden en index.html. */
+.loading__texto {
+  margin: 0;
+  max-width: 22rem;
+  text-align: center;
+  color: var(--primario-c1);
+  font: 400 14px var(--font-ui);
+}
+
+@keyframes latido {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading__logo {
+    animation: none;
+  }
+
+  .loading__ring-relleno {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   2. Banner "Destacados"
+   ========================================================= */
+/* Carrusel coverflow: la card activa queda de frente
+   al centro; las de los costados se corren, se achican y giran en el eje Y
+   (perspective + rotateY + translateZ), como si se alejaran hacia el
+   fondo. carousel.js calcula el transform de cada una según su distancia a
+   la activa. El h1 de la página va acá arriba, visible, en vez del hero de
+   texto que había antes. */
+/* En tablet (~600-800px) las cards de los costados del coverflow giran en 3D
+   y se pasan del ancho de la pantalla (hasta 28px), y la Home se podía
+   arrastrar de costado. overflow-x: clip recorta ese sobrante sin crear un
+   contenedor de scroll y deja visible el eje vertical (con hidden, el otro eje
+   también se recortaría). El margin negativo + padding hacen que el recorte
+   sea en el borde de main y no en el del banner: si no, las cards se
+   cortarían 24px adentro del ancho de la página. Ver AUDITORIA.md (T06,
+   "Sigue abierto"). */
+#banner {
+  margin-inline: calc(-1 * var(--espaciado-6));
+  padding-inline: var(--espaciado-6);
+  overflow-x: clip;
+}
+
+/* El h1 de la página. */
+.banner__titulo {
+  margin-bottom: var(--espaciado-4);
+}
+
+.banner__viewport {
+  position: relative;
+  /* Sin overflow:hidden: las cards de los costados se ven completas, no
+     recortadas por los bordes del viewport. Como todas miden el 100% de
+     su alto, tampoco hay nada que recortar arriba/abajo. */
+  aspect-ratio: 16 / 9;
+  max-height: 420px;
+  /* Con max-height, el ancho se achica para mantener la proporción 16:9;
+     sin esto quedaría pegado a la izquierda en vez de centrado. */
+  margin-inline: auto;
+  background: var(--fondo);
+}
+
+/* Sin perspective ni preserve-3d acá: cada slide lleva su propio
+   perspective() dentro del transform (ver DECISIONES.md, "Carrusel
+   coverflow"), porque con la perspectiva en un ancestro los clicks no caían
+   donde se veía la card. */
+.banner__escena {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* El transform lo escribe carousel.js según la distancia a la activa. Acá
+   solo están la posición base (centrada) y la transición. */
+.banner__slide {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 62%;
+  height: 100%;
+  margin-left: -31%; /* centrado: la mitad de su propio ancho */
+  border-radius: var(--radio-md);
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+  cursor: pointer;
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.banner__slide--activo {
+  cursor: default;
+}
+
+/* Botón "Jugar" de Neon Circuit: solo existe en esa card (carousel.js). Con
+   visibility:hidden por default: cuando la card no es la activa (rotada al
+   costado, chica), no se ve ni es alcanzable con Tab. Recién cuando es la
+   activa pasa a visible, y ahí el hover/foco la muestra. */
+.banner__jugar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease;
+}
+
+.banner__slide--activo .banner__jugar {
+  visibility: visible;
+}
+
+.banner__slide--activo:hover .banner__jugar,
+.banner__jugar:focus-visible {
+  opacity: 1;
+}
+
+.banner__jugar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--sombra-elevacion);
+}
+
+/* Dispositivos sin hover (touch): el botón "Jugar" no puede depender del
+   hover porque ahí no existe, y era el único acceso a juego.html desde la
+   Home. Se muestra fijo en la card activa. Sin el velo oscuro de ::before,
+   que taparía la portada todo el tiempo: alcanza con el círculo de play. Con
+   mouse sigue igual: aparece solo con hover o foco (ver DECISIONES.md,
+   "Neon Circuit es clickeable"). */
+@media (hover: none) {
+  .banner__slide--activo .banner__jugar {
+    opacity: 1;
+  }
+
+  .banner__jugar::before {
+    display: none;
+  }
+}
+
+.banner__jugar .ph-play {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--acento);
+  color: var(--fondo);
+  font-size: 28px;
+}
+
+/* Etiquetas y nombre solo se ven en la card activa, para no mezclar el
+   texto con el de las cards giradas al costado. */
+.banner__etiquetas,
+.banner__nombre {
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.banner__slide--activo .banner__etiquetas,
+.banner__slide--activo .banner__nombre {
+  opacity: 1;
+}
+
+/* Agrupa "Destacado" con el badge de Gratis/precio/Nuevo (si el juego
+   tiene uno, ver carrito.js crearBadge) arriba a la izquierda. Arriba a la
+   derecha no hay nada (el botón de carrito del banner ya no existe) y el
+   nombre ocupa abajo de punta a punta.
+   right + flex-wrap: en mobile la card activa mide 107-162px y "Destacado" +
+   "Gratis"/precio no entran en una fila; sin esto la segunda etiqueta se
+   recortaba contra el borde (overflow: hidden de la card). Ver AUDITORIA.md,
+   T13. */
+.banner__etiquetas {
+  position: absolute;
+  left: var(--espaciado-4);
+  right: var(--espaciado-4);
+  top: var(--espaciado-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-2);
+}
+
+/* Mismo radio y line-height que .badge (components.css) para que las dos
+   etiquetas se vean como un par. Con inline-flex + align-items el texto
+   queda centrado en vertical aunque el flex padre (.banner__etiquetas) la
+   estire a la altura del badge de al lado. */
+.banner__etiqueta {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espaciado-1) var(--espaciado-3);
+  border-radius: var(--radio-sm);
+  background: var(--acento);
+  color: var(--fondo);
+  font: 700 12px/1.4 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Mobile first: 16px de base (a 22px el nombre ocupaba 3 líneas y casi
+   el 60 % de la card a 320px); 22px desde tablet, como antes.
+   La sombra usa --sombra-elevacion (un solo token, sin rgba escrito a mano)
+   en dos capas para no perder legibilidad sobre las imágenes claras. */
+.banner__nombre {
+  position: absolute;
+  left: var(--espaciado-4);
+  right: var(--espaciado-4);
+  bottom: var(--espaciado-4);
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+  text-shadow: 0 2px 8px var(--sombra-elevacion), 0 1px 3px var(--sombra-elevacion);
+}
+
+@media (min-width: 48rem) {
+  .banner__nombre {
+    font-size: 22px;
+  }
+}
+
+/* Link invisible que cubre TODA la card (inset: 0, como .banner__jugar):
+   clickear la card activa de cualquier juego que no sea Neon Circuit
+   lleva a su ficha (producto.html) — reemplaza al agregar-al-carrito
+   directo que tenía antes este banner (ver DECISIONES.md, "Ficha de
+   producto", etapa 3).
+   Por qué cubre toda la card y no queda como un link de tamaño normal:
+   dentro de un ancestro con perspective() en su transform (el propio
+   .banner__slide, ver "Carrusel coverflow" más arriba), un click en
+   coordenadas exactas no siempre resuelve al hijo esperado — mismo bug de
+   hit-testing ya documentado ahí. Con el link del tamaño de toda la card,
+   como ya hace "Jugar", el click cae adentro sin importar ese desvío.
+   Visibilidad: mismo criterio que .banner__jugar — invisible y no
+   alcanzable con Tab salvo que la card ya sea la activa. */
+.banner__ver {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+}
+
+.banner__slide--activo .banner__ver {
+  visibility: visible;
+}
+
+/* Dots de navegación: son el control por teclado del carrusel (las cards
+   de los costados solo se clickean con mouse, a propósito). */
+.banner__dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--espaciado-2);
+  margin-top: var(--espaciado-4);
+}
+
+/* Barritas finitas (estilo Steam) en vez de círculos grandes. El botón
+   mantiene los 24px de --control-target como área táctil; lo que se ve es
+   solo la barrita de adentro (::before), bien más chica. */
+.banner__dot {
+  width: 28px;
+  height: var(--control-target);
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.banner__dot::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  /* --primario sobre --fondo: 4,07:1 (antes --primario-o1, 2,39:1, y WCAG
+     1.4.11 pide 3:1 para componentes de interfaz; ver AUDITORIA.md, T08). */
+  background: var(--primario);
+  transition: background-color 0.2s ease;
+}
+
+.banner__dot:hover::before {
+  background: var(--primario-c1);
+}
+
+.banner__dot--activo::before {
+  background: var(--acento);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner__slide {
+    transition: none;
+  }
+
+  .banner__etiquetas,
+  .banner__nombre,
+  .banner__dot::before,
+  .banner__jugar {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   3. Filas de juegos
+   ========================================================= */
+/* Categorías (siempre), "Recomendados" y "Mis juegos" (home.js las arma).
+   Se navegan con scroll nativo, arrastrando con mouse o con las flechas
+   (carrusel-fila.js), sin transición animada: eso queda reservado para
+   el banner "Destacados". */
+#filas-juegos {
+  margin-top: var(--espaciado-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+/* Título a la izquierda y flechas a la derecha. */
+.carrusel__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-4);
+  margin-bottom: var(--espaciado-4);
+}
+
+.carrusel__titulo {
+  margin-bottom: 0;
+}
+
+/* "Basado en que jugaste ..." debajo del título de "Recomendados". El
+   nombre del juego va en <strong> para que se distinga del resto. */
+.carrusel__subtitulo {
+  margin: var(--espaciado-1) 0 0;
+  color: var(--primario-c1);
+  font: 400 14px/1.4 var(--font-ui);
+}
+
+.carrusel__subtitulo strong {
+  color: var(--primario-c3);
+  font-weight: 600;
+}
+
+/* Botones de ícono de 44px; carrusel-fila.js los deshabilita en las puntas. */
+.carrusel__flechas {
+  display: flex;
+  gap: var(--espaciado-1);
+  flex-shrink: 0;
+}
+
+.carrusel__flecha {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: var(--primario-o2);
+  color: var(--primario-c3);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+}
+
+.carrusel__flecha:hover:not(:disabled) {
+  background: var(--primario-o1);
+  color: var(--acento);
+}
+
+.carrusel__flecha:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.carrusel__pista {
+  display: flex;
+  gap: var(--espaciado-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  cursor: grab;
+  /* overflow-x: auto obliga a que overflow-y también recorte (así lo pide
+     la spec de CSS): sin este padding, el scale(1.06) del hover de .card
+     quedaba cortado contra el borde de la fila. El margin negativo
+     compensa para que el layout no se corra. */
+  padding: 12px 12px 32px;
+  margin: -12px -12px -32px;
+  /* (El padding de abajo es más grande: al hacer hover, el título completo
+     de una card puede salirse por debajo de ella — ver .game-card__texto.) */
+  /* La scrollbar nativa se saca: se navega con las flechas o arrastrando
+     con el mouse (carrusel-fila.js) — en mobile el scroll táctil ya anda. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.carrusel__pista::-webkit-scrollbar {
+  display: none;
+}
+
+/* La agrega carrusel-fila.js mientras se arrastra con el mouse. */
+.carrusel__pista--arrastrando {
+  cursor: grabbing;
+  user-select: none;
+}
+
+/* Card de juego. Se apoya en .card de components.css (fondo, borde y
+   hover con scale). flex: 0 0 auto la mantiene en 260px dentro de la pista. */
+.game-card {
+  flex: 0 0 auto;
+  width: 260px;
+  scroll-snap-align: start;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* El overflow: hidden se mudó de .game-card a la imagen: la card tiene que
+   dejar que el título expandido en hover se salga por abajo (ver
+   .game-card__texto), pero la imagen igual tiene que respetar las esquinas
+   redondeadas de arriba. */
+.game-card__media {
+  /* Ahora es un <a> (antes <div>): sin esto, al ser inline por defecto,
+     el layout de la card se rompía (la imagen no ocupaba todo el ancho). */
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radio-md) var(--radio-md) 0 0;
+}
+
+/* 16:9 horizontal (las cards verticales se descartaron). */
+.game-card__image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+/* Badge Gratis / precio / Nuevo sobre la esquina de la imagen. */
+.game-card__badge {
+  position: absolute;
+  left: var(--espaciado-2);
+  top: var(--espaciado-2);
+}
+
+/* Fila de abajo: nombre a la izquierda, botón de carrito a la derecha (si
+   el juego es "de pago") — ya no superpuesto a la imagen. El alto es fijo
+   (no min-height): así ninguna card de la fila cambia de alto según el
+   largo del título, y el título expandido en hover no empuja nada. */
+.game-card__cuerpo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: var(--control-alto);
+  padding: var(--espaciado-3);
+  box-sizing: content-box;
+}
+
+/* <a>, no <div>: clickear el nombre lleva a la ficha del juego (ver
+   home.js). text-decoration:none porque, si no, el subrayado que pone
+   base.css en hover se ve por debajo del título.
+   position: absolute a propósito, tapando todo el cuerpo: en reposo mide
+   justo lo mismo (min-height: 100%) y centra el título en vertical con
+   flex; en hover el título se muestra completo y la caja crece hacia abajo
+   por encima de lo que haya, sin cambiar el alto de la card ni de la fila
+   (que un elemento absoluto no cuenta para el layout). */
+.game-card__texto {
+  position: absolute;
+  top: 0;
+  /* -1px a los costados y +1px de alto: la caja cubre justo el borde de 1px
+     de la card (.card), así en hover su propio borde (ver más abajo) tapa
+     el de la card y, si el título se sale por abajo, el trazo sigue sin
+     cortarse. Sin borde arriba: ahí está la unión con la imagen. */
+  left: -1px;
+  right: -1px;
+  min-height: calc(100% + 1px);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: var(--espaciado-3);
+  border: 1px solid transparent;
+  border-top: 0;
+  border-radius: 0 0 var(--radio-md) var(--radio-md);
+  text-decoration: none;
+}
+
+/* Deja libre el lugar del botón de carrito (que va encima, a la derecha). */
+.game-card__cuerpo:has(.game-card__carrito) .game-card__texto {
+  padding-right: calc(var(--espaciado-3) + var(--control-alto) + var(--espaciado-2));
+}
+
+.game-card__texto:hover {
+  text-decoration: none;
+}
+
+/* Con hover o foco en la card, la caja del título se pinta del mismo color
+   que la card: así la parte que se sale por debajo (si el título es largo)
+   se ve como una continuación de la card, no como texto suelto. */
+.game-card:hover .game-card__texto,
+.game-card:focus-within .game-card__texto {
+  background: var(--superficie);
+  border-color: var(--primario-o1);
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+}
+
+.game-card__title {
+  margin: 0;
+  /* Ahora que .game-card__texto es un <a>, sin esto heredaría el celeste
+     de base.css en vez del blanco de siempre. */
+  color: var(--primario-c3);
+  font-size: 16px;
+  /* Máximo 2 líneas en reposo (con "…"): 2 × 19px entra en el alto fijo de
+     la fila, así todas las cards miden lo mismo. En hover se muestra completo. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.game-card:hover .game-card__title,
+.game-card:focus-within .game-card__title {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+}
+
+/* Cuadrado con esquinas redondeadas del botón "Agregar al carrito" (solo en cards "de pago",
+   simulado, ver carrito.js) de las filas de la Home: 44px de área táctil
+   (--control-alto) aunque se vea chico, mismo criterio que el resto de
+   los controles de ícono del proyecto. El banner "Destacados" ya no tiene
+   este botón — ver DECISIONES.md, "Ficha de producto" (etapa 3). */
+.game-card__carrito {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 2px solid var(--acento);
+  border-radius: var(--radio-md);
+  background: var(--fondo-o1);
+  color: var(--acento);
+  font-size: 18px;
+  flex-shrink: 0;
+  /* margin-left:auto lo manda a la derecha (ya no hay otro item en el flex
+     que lo empuje), y position+z-index lo dejan por encima de
+     .game-card__texto, que es absoluto y tapa todo el cuerpo. */
+  position: relative;
+  z-index: 1;
+  margin-left: auto;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.game-card__carrito:hover {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+/* Ya está en el carrito: queda "hundido" y relleno en vez de volver al
+   estado normal — así se nota de un vistazo cuál ya se agregó, sin
+   necesidad de leer texto. */
+.game-card__carrito[aria-pressed="true"] {
+  background: var(--acento);
+  color: var(--fondo);
+  transform: scale(0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card__carrito {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   4. Detalles de la página
+   ========================================================= */
+/* Con el header fijo (desde tablet, ver .header--fijo en header.css), un
+   link a un ancla como "Mis juegos" (index.html#fila-mis-juegos) dejaba el
+   título de la fila tapado por el header. scroll-margin-top le dice al
+   navegador cuánto espacio dejar arriba cuando scrollea hasta ese elemento:
+   alto del header (control + padding de arriba y de abajo) más un poco de aire.
+   Va en cada destino (títulos de fila, banner, mensaje de búsqueda) y no como
+   scroll-padding-top en html: ese margen marcaba toda la franja del header
+   como "tapada", y al escribir en el buscador (que vive ahí) el navegador
+   scrolleaba para arriba en cada tecla intentando sacar el cursor de esa zona. */
+@media (min-width: 48rem) {
+  .carrusel h2,
+  #banner,
+  .busqueda-estado {
+    scroll-margin-top: calc(var(--control-alto) + 2 * var(--espaciado-2) + var(--espaciado-4));
+  }
+}
+
+/* Resultado de la búsqueda del header (buscador.js). Vacío no ocupa lugar.
+   No hace falta una regla para [hidden]: base.css ya la tiene global. */
+.busqueda-estado {
+  margin: var(--espaciado-8) 0 0;
+  color: var(--primario-c3);
+}
+
+.busqueda-estado:empty {
+  display: none;
+}

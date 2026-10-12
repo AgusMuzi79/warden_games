@@ -1,0 +1,38 @@
+/*
+  producto.css: ficha de un juego del catálogo (producto.html)
+  Se carga al final, después de components.css. Es corto porque el resto
+  de la página (breadcrumb, layout de 2 columnas, ficha, Sobre el juego,
+  Galería, Compartir, Comunidad y Dejá tu reseña) viene de components.css.
+  Acá solo queda la portada. Usa tokens de variables.css.
+*/
+
+/* ---------- Portada ----------
+   La imagen real del juego, con el mismo botón violeta fijo que usa Neon
+   Circuit en su portada (.tablero__jugar, juego.css). Siempre visible, no
+   solo en hover, para que las dos páginas se sientan igual. */
+.producto__portada {
+  position: relative;
+  align-self: start;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radio-xl);
+  overflow: hidden;
+  background: var(--superficie);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Absoluta y a tamaño completo: llena la portada sin empujar al botón. */
+.producto__portada-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.producto__accion {
+  /* Por encima de la imagen (que también es position:absolute). El resto
+     del estilo (fondo violeta, hover, foco) ya lo trae .btn--primario. */
+  position: relative;
+}
