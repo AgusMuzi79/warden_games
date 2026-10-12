@@ -22,11 +22,11 @@ const DURACION_AUTOPLAY_MS = 6000;
 const CANTIDAD_DESTACADOS = 5;
 
 // Cuánto se corre cada card según su distancia (offset) a la activa.
-const PERSPECTIVE_PX = 1400;  // va en el transform de cada card, no en un ancestro (ver DECISIONES.md)
-const PASO_X_PORCENTAJE = 60; // desplazamiento horizontal por posición
-const PASO_Z_PX = 160;        // cuánto se manda para atrás en Z por posición
-const ROTACION_GRADOS = 35;   // cuánto gira en Y cada card corrida
-const ACHIQUE_POR_POSICION = 0.14; // cuánto se achica por cada posición de distancia
+const PERSPECTIVE_PX = 1400;
+const PASO_X_PORCENTAJE = 60;
+const PASO_Z_PX = 160;
+const ROTACION_GRADOS = 35;
+const ACHIQUE_POR_POSICION = 0.14;
 // Con 5 destacados, la distancia máxima posible es 2. Ahí es donde el lado
 // "más corto" puede cambiar de dirección en un solo paso (ver DECISIONES.md).
 // Si esa distancia se ve, el cambio de lado se nota como un salto brusco.
@@ -45,19 +45,27 @@ const puedePausarConHover = window.matchMedia('(hover: hover)').matches;
 
 // Nuestros propios juegos: no vienen de la API (esa trae juegos de terceros
 // para el catálogo), así que van hardcodeados y siempre primeros, sin pelear
-// por rating contra el resto. La propiedad href (la página donde se juega)
-// es lo que los distingue de un juego de la API (ver esJuegoPropio).
+// por rating contra el resto. Cada uno lleva el link de su página ("enlace").
+const BLOCKA = {
+  name: 'Blocka',
+  background_image: 'assets/img/portada-blocka.jpg',
+  enlace: 'blocka.html',
+};
+
 const NEON_CIRCUIT = {
   name: 'Neon Circuit',
   background_image: 'assets/img/portada-tronpeg-1616x1320.png',
-  href: 'juego.html',
+  enlace: 'juego.html',
 };
 
-const BLOCKA = {
-  name: 'Blocka',
-  background_image: 'assets/img/portada-blocka.svg',
-  href: 'blocka.html',
-};
+// Orden en el banner: Blocka primero (arranca como card activa) y Neon
+// Circuit segundo.
+const JUEGOS_PROPIOS = [BLOCKA, NEON_CIRCUIT];
+
+// Un juego propio es uno de la lista de arriba (los de la API no están).
+function esPropio(juego) {
+  return JUEGOS_PROPIOS.includes(juego);
+}
 
 // Si la API falla, destacamos estos juegos reales igual.
 const DESTACADOS_DE_RESPALDO = [
@@ -75,20 +83,14 @@ let dots = [];
 let indiceActivo = 0;
 let timerAutoplay = null;
 
-// Neon Circuit siempre primero (así arranca como card activa), Blocka
-// segundo y después los mejor puntuados de la API, hasta completar
-// CANTIDAD_DESTACADOS (los 2 propios + 3 de la API).
+// Los juegos propios siempre primeros (el primero arranca como card activa)
+// y después los mejor puntuados de la API, hasta completar
+// CANTIDAD_DESTACADOS cards en total.
 function elegirDestacados(juegos) {
   const otros = [...juegos]
     .sort((a, b) => b.rating - a.rating)
-    .slice(0, CANTIDAD_DESTACADOS - 2);
-  return [NEON_CIRCUIT, BLOCKA, ...otros];
-}
-
-// Un juego es nuestro si tiene página propia para jugarlo (href). Los de la
-// API no la tienen: esos llevan a su ficha (producto.html).
-function esJuegoPropio(juego) {
-  return Boolean(juego.href);
+    .slice(0, CANTIDAD_DESTACADOS - JUEGOS_PROPIOS.length);
+  return [...JUEGOS_PROPIOS, ...otros];
 }
 
 // Distancia más corta a la card activa, considerando el ciclo (si hay 5
@@ -121,6 +123,12 @@ function actualizarPosiciones() {
     slide.style.pointerEvents = 'auto';
 
     const escala = 1 - distancia * ACHIQUE_POR_POSICION;
+    // El transform es una lista de pasos que se aplican en orden: perspective
+    // (profundidad, va primero y en cada card, ver DECISIONES.md), translateX y
+    // translateZ (la corren al costado y para atrás), rotateY (la gira, con
+    // signo opuesto a cada lado) y scale (la achica). La animación
+    // NO está acá: acá solo se escribe el valor final; la transition de
+    // .banner__slide (home.css) hace que pase suave del valor anterior a este.
     slide.style.transform = `
       perspective(${PERSPECTIVE_PX}px)
       translateX(${offset * PASO_X_PORCENTAJE}%)
@@ -153,7 +161,7 @@ function crearSlide(juego, index) {
   // Los juegos propios no vienen de la API: no tienen id real para
   // esDePago() y esNuevo() ni pueden estar en "comprados", así que no llevan
   // badge de Gratis, precio o Nuevo. Ya tienen su propia acción ("Jugar").
-  if (!esJuegoPropio(juego)) {
+  if (!esPropio(juego)) {
     const badge = crearBadge(juego);
     if (badge) etiquetas.append(badge);
   }
@@ -164,13 +172,13 @@ function crearSlide(juego, index) {
 
   slide.append(etiquetas, nombre);
 
-  // Es un juego propio: además de poder saltar a esta card como al resto de
-  // los destacados, tiene una acción real (ir a jugar a su página). Solo se
-  // ve y recibe foco cuando la card está activa (ver home.css).
-  if (esJuegoPropio(juego)) {
+  // Es un juego nuestro: además de poder saltar a esta card como al resto de
+  // los destacados, tiene una acción real (ir a jugar, a su propia página).
+  // Solo se ve y recibe foco cuando la card está activa (ver home.css).
+  if (esPropio(juego)) {
     const jugar = document.createElement('a');
     jugar.className = 'banner__jugar';
-    jugar.href = juego.href;
+    jugar.href = juego.enlace;
     jugar.setAttribute('aria-label', `Jugar a ${juego.name}`);
     // Evita que el click también dispare el irA(index) del slide: no
     // cambiaría nada (ya está activa), pero no hace falta que compita.
@@ -184,11 +192,11 @@ function crearSlide(juego, index) {
     slide.append(jugar);
   }
 
-  // Cualquier juego de la API: clickear la card activa lleva a su ficha
-  // (producto.html). Reemplaza al agregar-al-carrito directo que tenía este
-  // banner antes (ver DECISIONES.md, "Ficha de producto", etapa 3). Los
-  // juegos propios tienen su propio link ("Jugar", arriba).
-  if (!esJuegoPropio(juego)) {
+  // Cualquier juego que no sea propio: clickear la card activa lleva a
+  // su ficha (producto.html). Reemplaza al agregar-al-carrito directo que
+  // tenía este banner antes (ver DECISIONES.md, "Ficha de producto", etapa 3).
+  // Los propios tienen su propio link ("Jugar", arriba).
+  if (!esPropio(juego)) {
     const ver = document.createElement('a');
     ver.className = 'banner__ver';
     ver.href = `producto.html?id=${juego.id}`;
@@ -241,6 +249,7 @@ function siguiente() {
 // punto del ciclo anterior había quedado).
 function programarSiguiente() {
   clearTimeout(timerAutoplay);
+  // No arranca si: no hay hover (touch), pidieron movimiento reducido o hay menos de 2 cards.
   if (!puedePausarConHover || prefiereMovimientoReducido || slides.length < 2) return;
 
   timerAutoplay = setTimeout(siguiente, DURACION_AUTOPLAY_MS);
@@ -266,7 +275,7 @@ function iniciarAutoplay() {
 
 // El autoplay arranca recién cuando termina el loading simulado de la Home.
 // Si arrancara apenas responde la API (que tarda menos de 5 segundos), el
-// primer destacado (Neon Circuit, nuestro juego) pasaría detrás del overlay y
+// primer destacado (Blocka, nuestro juego) pasaría detrás del overlay y
 // el usuario lo vería menos de un segundo. No se toca loading.js: acá solo se
 // observa el atributo hidden del overlay (ver DECISIONES.md, "Neon Circuit
 // accesible en touch y visible después del loading (T04)").
