@@ -9,7 +9,8 @@ defensa tenemos que poder explicar cada línea**. Eso define cómo trabajamos co
 
 Entrega: 30/09/2026 23:59, desde el branch `gh-pages`.
 
-Decisiones ya tomadas y su justificación: @DECISIONES.md
+Decisiones ya tomadas y su justificación (un archivo por entrega, en su carpeta):
+@tp2/DECISIONES.md (TPE1 y TPE2) y @tp3/DECISIONES.md (TPE3, Blocka)
 Etapas de la corrección en curso (qué está hecho, qué falta, quién puede tomarlo): @ETAPAS.md
 
 ---
@@ -143,8 +144,8 @@ Lo general va primero y lo específico al final. No agregues estilos de una pág
 3. **Al terminar, explicá lo que hiciste** bloque por bloque, en lenguaje simple.
    Estamos retomando HTML/CSS después de un tiempo: no des por sabido cascada,
    especificidad, grid/flex ni eventos de JS.
-4. **Si tomás una decisión de diseño o arquitectura, sumala a `DECISIONES.md`**
-   con el formato del archivo (qué, por qué, alternativa descartada).
+4. **Si tomás una decisión de diseño o arquitectura, sumala al `DECISIONES.md`
+   de la carpeta de la entrega** (`tp2/`, `tp3/`...) con el formato del archivo (qué, por qué, alternativa descartada).
 5. Si algo del diseño de Figma rompe estas reglas (ej: Orbitron chico, poco contraste),
    avisá y proponé la corrección en lugar de copiarlo tal cual.
 

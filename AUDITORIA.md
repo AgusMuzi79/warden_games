@@ -2,7 +2,7 @@
 
 Este archivo es el hilo conductor para la defensa: por cada hallazgo de la
 auditoría, cómo estaba el sitio **antes**, qué hicimos, en qué commit, y en qué
-parte de `DECISIONES.md` está el razonamiento.
+parte de `tp2/DECISIONES.md` está el razonamiento.
 
 - **Informe original (sin tocar):** [`docs/auditoria-ux-original.md`](docs/auditoria-ux-original.md).
   Tiene las mediciones, los pasos para reproducir cada problema y el código
@@ -78,7 +78,7 @@ propuesta) está en el informe original.
   - `buscador.js` se carga antes que `home.js` para evitar una carrera si la API
     responde desde caché.
 - **Commits:** `769186e` (filtro en la Home), `cee6a59` (búsqueda desde la ficha).
-- **Justificación completa:** `DECISIONES.md`, "El buscador filtra en el lugar
+- **Justificación completa:** `tp2/DECISIONES.md`, "El buscador filtra en el lugar
   (Home) o lleva a la Home con `?q=` (T03)".
 - **Cómo se verificó:** en el navegador, con "portal", "zzz", borrando con la "x"
   y buscando "witcher" desde la ficha de producto; sin errores de consola. No se
@@ -99,14 +99,14 @@ propuesta) está en el informe original.
 - **Después:** `.footer__bottom` usa `minmax(0, 1fr)` (una columna en mobile,
   `repeat(2, minmax(0, 1fr))` desde tablet). A 320 px newsletter y empresa quedan
   en x=290; a 768 px son dos columnas iguales (343 px cada una).
-- **Commit:** `a055720`. **Justificación:** `DECISIONES.md`, "Franja de abajo del
+- **Commit:** `a055720`. **Justificación:** `tp2/DECISIONES.md`, "Franja de abajo del
   footer con `minmax(0, 1fr)` (T06)".
 - **T06b — el header a 320 px (se encontró al medir con fuentes reales):**
   después de arreglar el footer, `.header__actions` seguía llegando a x=324 con
   310 disponibles. El header de una fila con la lupa (cambio nuestro, anterior a
   la auditoría) necesita unos 324 px de contenido y a 320 px hay 288. Se achicó
   el gap horizontal y se oculta el texto "Warden" bajo 360 px (queda el ícono).
-  Commit: `git log --grep T06b`. Justificación: `DECISIONES.md`, "Header de
+  Commit: `git log --grep T06b`. Justificación: `tp2/DECISIONES.md`, "Header de
   mobile a 320px: gap chico y sin el texto del logo bajo 360px (T06b)".
   El informe original no lo vio porque midió con fuentes de respaldo más
   angostas que Orbitron.
@@ -115,7 +115,7 @@ propuesta) está en el informe original.
 - **El banner a 768 px (cerrado después):** entre unos 600 y 800 px las cards de
   los costados del coverflow se pasaban del ancho (8 a 28 px) y la Home se podía
   arrastrar de costado en tablet. No estaba en el informe. Se resolvió con
-  `overflow-x: clip` en `#banner` (ver `DECISIONES.md`, actualización en "Carrusel
+  `overflow-x: clip` en `#banner` (ver `tp2/DECISIONES.md`, actualización en "Carrusel
   coverflow"). Commit: `git log --grep "banner a tablet"`.
 - **Lo que sigue sin resolver y no es del footer:** `producto.html` y `juego.html`
   a 360 px se pasan 18 px por el panel lateral fijo de 320 px. Son páginas solo
@@ -135,8 +135,8 @@ propuesta) está en el informe original.
   0 etiquetas cortadas, nombres de 2 líneas como máximo. A 1440 px queda igual
   (22 px, etiquetas en una fila).
 - **Diferencia con el informe:** la sombra del nombre usa `--sombra-elevacion`
-  en dos capas, no una sola, para no perder legibilidad (ver `DECISIONES.md`).
-- **Justificación:** `DECISIONES.md`, "Etiquetas y nombre del banner en mobile:
+  en dos capas, no una sola, para no perder legibilidad (ver `tp2/DECISIONES.md`).
+- **Justificación:** `tp2/DECISIONES.md`, "Etiquetas y nombre del banner en mobile:
   wrap y 16px (T13)". **Commit:** `git log --grep T13`.
 
 ### T02 — Contraste del texto de los botones primarios (S3) · hecha
@@ -151,7 +151,7 @@ propuesta) está en el informe original.
 - **Diferencia con el informe:** se corrigió también la pestaña activa de login
   (`.auth-switch__btn.active`), que tenía el mismo par de colores y el informe
   no incluyó.
-- **Justificación:** `DECISIONES.md`, "Botón primario y pestaña activa de login
+- **Justificación:** `tp2/DECISIONES.md`, "Botón primario y pestaña activa de login
   en `--primario-o1` (T02)". **Commit:** `git log --grep T02`.
 
 ### T08 — Contraste del buscador y de los dots inactivos (S3) · hecha
@@ -163,13 +163,13 @@ propuesta) está en el informe original.
 - **Después:** borde del buscador `--primario` (**3,59:1** contra el header;
   `--primario-c1` en hover) y dots inactivos `--primario` (**4,07:1** contra el
   fondo). Medido en el navegador con `getComputedStyle`.
-- **Justificación:** `DECISIONES.md`, "Borde visible en el buscador y dots
+- **Justificación:** `tp2/DECISIONES.md`, "Borde visible en el buscador y dots
   inactivos más claros (T08)". **Commit:** `git log --grep T08`.
 - **T08b — el mismo problema en los otros campos (no estaba en el informe):**
   al terminar, se revisaron todas las reglas con borde `--primario-o1`. Cinco son
   controles con ese borde como único límite (login, checkboxes, newsletter, link de
   compartir y textarea de reseña) y daban **2,11:1**. Ahora usan `--primario`:
-  **3,59:1** medido. Commit: `git log --grep T08b`. Justificación: `DECISIONES.md`,
+  **3,59:1** medido. Commit: `git log --grep T08b`. Justificación: `tp2/DECISIONES.md`,
   "Bordes de todos los campos en `--primario`, no solo el del buscador (T08b)".
 
 ### T01 — Solo 2 de las 4 animaciones hover se usaban en las páginas (Enunciado) · hecha
@@ -178,7 +178,7 @@ propuesta) está en el informe original.
   definidos en `components.css` pero tenían 0 usos en `index.html`, `login.html`,
   `juego.html`, `producto.html` y en `js/`. Quien corrige veía dos animaciones de
   hover distintas (primario se eleva, secundario rellena), y el enunciado pide al
-  menos 3. `DECISIONES.md` afirmaba que había 4.
+  menos 3. `tp2/DECISIONES.md` afirmaba que había 4.
 - **Después:** "Seguir comprando" del carrito (`index.html` y `producto.html`) usa
   `.btn--terciario`: el subrayado crece de izquierda a derecha. Ahora se ven 3
   animaciones distintas. La destructiva sigue sin usarse: no hay acciones
@@ -190,7 +190,7 @@ propuesta) está en el informe original.
 - **Para la defensa:** el terciario está dentro del desplegable del carrito, hay
   que abrirlo con el ícono del carrito para verlo. Conviene tenerlo presente al
   mostrar las tres animaciones.
-- **Justificación:** `DECISIONES.md`, "Dónde se ve cada animación de hover:
+- **Justificación:** `tp2/DECISIONES.md`, "Dónde se ve cada animación de hover:
   'Seguir comprando' pasa a terciario (T01)". **Commit:** `git log --grep T01`.
 - **Sigue abierto:** no conocemos el criterio exacto de la cátedra (slide 14) sobre
   qué cuenta como "animación" de hover; si aceptan cambios de color, ya cumplíamos.
@@ -214,7 +214,7 @@ propuesta) está en el informe original.
   mail vacío y "hola" quedan bloqueados por la validación; con
   `test@ejemplo.com` el form se oculta, aparece el mensaje, la URL no cambia y no
   hay recarga. Sin errores de consola. No se probó en el sitio publicado.
-- **Justificación:** `DECISIONES.md`, "Newsletter simulado: valida el mail y
+- **Justificación:** `tp2/DECISIONES.md`, "Newsletter simulado: valida el mail y
   confirma en el lugar (T05)". **Commit:** `git log --grep T05`.
 
 ### T04 — El acceso al juego se ve menos de 1 s y en touch nunca (S3) · hecha
@@ -236,7 +236,7 @@ propuesta) está en el informe original.
   celular o con la emulación táctil de DevTools.
 - **Decisión que toca:** "Neon Circuit es clickeable: botón Jugar en hover" y
   "Autoplay que se pausa con hover o foco" (se agregó una actualización a cada
-  una). **Justificación:** `DECISIONES.md`, "Neon Circuit accesible en touch y
+  una). **Justificación:** `tp2/DECISIONES.md`, "Neon Circuit accesible en touch y
   visible después del loading (T04)". **Commit:** `git log --grep T04`.
 
 ### T07 — En touch el banner avanza solo y no se puede pausar (S3) · hecha
@@ -258,7 +258,7 @@ propuesta) está en el informe original.
 - **Relación con T04:** en touch el autoplay ya no corre, así que la parte de
   timing de T04 (esperar al loading) solo aplica en dispositivos con hover; la
   parte del botón "Jugar" fijo sin hover sigue siendo necesaria.
-- **Justificación:** `DECISIONES.md`, "Autoplay que se pausa con hover o foco,
+- **Justificación:** `tp2/DECISIONES.md`, "Autoplay que se pausa con hover o foco,
   sin botón de pausa" (actualización T07). **Commit:** `git log --grep T07`.
 
 ### T09 — "Pagar carrito" vacío no hace nada ni avisa (S2) · hecha
@@ -275,7 +275,7 @@ propuesta) está en el informe original.
 - **Bug encontrado al probarlo (no estaba en el informe):** el botón
   deshabilitado seguía elevándose 3px con sombra en hover. Se agregó
   `.btn:disabled:hover` para anularlo; aplica a cualquier botón deshabilitado.
-- **Justificación:** `DECISIONES.md`, "'Pagar carrito' se deshabilita con el
+- **Justificación:** `tp2/DECISIONES.md`, "'Pagar carrito' se deshabilita con el
   carrito vacío (T09)". **Commit:** `git log --grep T09`.
 
 ### T10 — Links del hamburguesa que no hacen nada (S2) · hecha
@@ -293,7 +293,7 @@ propuesta) está en el informe original.
   `producto.html`, "Puzzle" abre la Home ya scrolleada a esa fila.
 - **Quedan en `#`:** Últimos, Recientes, Top 100 y Actualizados (sin datos
   reales para esas vistas), como propone el informe.
-- **Justificación:** `DECISIONES.md`, "Los links del hamburguesa llevan a las
+- **Justificación:** `tp2/DECISIONES.md`, "Los links del hamburguesa llevan a las
   filas de la Home (T10)". **Commit:** `git log --grep T10`.
 
 ### T14 — El loading dura más de 5 s con la pestaña en segundo plano (S1) · hecha
@@ -309,7 +309,7 @@ propuesta) está en el informe original.
   script. **Medido** en las mismas condiciones: terminó en **5,7 s**. Con la
   pestaña al frente se comporta como antes. Solo se cambiaron tres líneas de
   `loading.js`, no el archivo entero.
-- **Justificación:** `DECISIONES.md`, "Contador real de 0 a 100% en 5 segundos"
+- **Justificación:** `tp2/DECISIONES.md`, "Contador real de 0 a 100% en 5 segundos"
   (actualización T14). **Commit:** `git log --grep T14`.
 
 ## Pendientes que aparecieron durante las tareas (no eran del informe)
@@ -339,7 +339,7 @@ propuesta) está en el informe original.
   contador y el `aria-hidden` del mensaje cambiando en cada paso; en `juego.html`
   sigue "Foto 1 de 6" a "Foto 6 de 6" y de vuelta. Sin errores de consola.
 - **Pendiente:** avisarle a Fran del cambio (toca su decisión, aunque no la revierte).
-- **Justificación:** `DECISIONES.md`, actualización (T12) dentro de "Galería
+- **Justificación:** `tp2/DECISIONES.md`, actualización (T12) dentro de "Galería
   animada en `producto.html`". **Commit:** `git log --grep T12`.
 
 ### T11 — Cada card tiene dos paradas de Tab al mismo destino (S2) · hecha
@@ -349,7 +349,7 @@ propuesta) está en el informe original.
   igual que el del nombre. Con los datos de respaldo (10 cards): 2 paradas por
   card; con la API real, hasta 80 en total.
 - **Criterio que rompía:** Nielsen #7 (flexibilidad y eficiencia de uso).
-- **Qué decía `DECISIONES.md`:** aceptaba las 2 paradas como "costo asumido", por
+- **Qué decía `tp2/DECISIONES.md`:** aceptaba las 2 paradas como "costo asumido", por
   mantener el HTML simple.
 - **Después:** el link de la imagen pasa a `tabIndex = -1` y `aria-hidden="true"`.
   El del nombre no cambia. El HTML sigue simple, así que no contradice el motivo
@@ -357,13 +357,13 @@ propuesta) está en el informe original.
 - **Verificado:** 71 cards en la Home (API real), 0 links de imagen alcanzables
   con Tab, y un clic en la imagen sigue llevando a la ficha del juego.
 - **Pendiente:** avisarle a Fran (toca la nota "costo asumido" que él escribió).
-- **Justificación:** `DECISIONES.md`, actualización (T11) dentro de "Etapa 2: las
+- **Justificación:** `tp2/DECISIONES.md`, actualización (T11) dentro de "Etapa 2: las
   cards de las filas de la Home enlazan a la ficha". **Commit:** `git log --grep T11`.
 
 ## Tareas que tocan decisiones ya tomadas
 
 Estas cuatro no se aplican a ciegas. Cada una cambia o matiza una decisión que
-está documentada en `DECISIONES.md`:
+está documentada en `tp2/DECISIONES.md`:
 
 - **T04:** el botón "Jugar" del banner aparece solo con hover, a propósito. La
   propuesta lo respeta en desktop y solo lo deja fijo en dispositivos sin hover

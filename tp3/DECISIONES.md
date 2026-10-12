@@ -1,7 +1,9 @@
 # Decisiones de diseño e implementación — Warden (TPE3: Blocka)
 
 Acá se documenta todo lo de la entrega TPE3 (`tp3/`). Las decisiones de las
-entregas anteriores (TPE1 y TPE2) siguen en `DECISIONES.md`.
+entregas anteriores (TPE1 y TPE2) siguen en `../tp2/DECISIONES.md`: como
+`tp3/` es una copia de `tp2/`, los comentarios del código que dicen "ver
+DECISIONES.md" sin nombrar Blocka remiten a ese archivo.
 Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartamos.
 
 ---

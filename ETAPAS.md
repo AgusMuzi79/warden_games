@@ -7,7 +7,7 @@ necesita el componente `.link` de la etapa 1).
 
 Cualquiera de los dos puede tomar la siguiente etapa disponible. Antes de
 arrancar una, avisar en el grupo para no pisarse, y una vez terminada sumar las
-decisiones tomadas a `DECISIONES.md` (formato: qué, por qué, alternativa
+decisiones tomadas a `tp2/DECISIONES.md` (formato: qué, por qué, alternativa
 descartada) como se explica en `CLAUDE.md`.
 
 ---
@@ -32,7 +32,7 @@ Archivos: `components.css`, `variables.css`, `footer.css` + las 3 páginas.
 - El botón "Suscribirse" del footer se unificó a `.btn .btn--secundario` (estaba
   con estilo propio hardcodeado).
 
-Detalle completo de las decisiones en `DECISIONES.md`.
+Detalle completo de las decisiones en `tp2/DECISIONES.md`.
 
 ---
 
@@ -51,7 +51,7 @@ Archivos: `login.html`, `login.css`, `js/login.js`.
 - ✅ Animación al registrarse correctamente (bloque `.auth-success` con
   fade + scale).
 
-Detalle completo de las decisiones en `DECISIONES.md`.
+Detalle completo de las decisiones en `tp2/DECISIONES.md`.
 
 ---
 
@@ -76,9 +76,9 @@ Archivos: `js/api.js`, `js/home.js`, `home.css`, `index.html`,
   eso es solo del banner. Datos de respaldo hardcodeados si la API falla.
 - `<h2>` propio por cada fila para no saltear niveles de título.
 - (La primera versión de la 3a era una única grilla "Recomendados" para
-  todos, con cards verticales — se descartó, ver `DECISIONES.md`.)
+  todos, con cards verticales — se descartó, ver `tp2/DECISIONES.md`.)
 
-Detalle en `DECISIONES.md`.
+Detalle en `tp2/DECISIONES.md`.
 
 ### ✅ 3b. Banner "Destacados": carrusel coverflow (perspective + rotateY)
 Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
@@ -100,9 +100,9 @@ Archivos: `index.html` (reemplazó al `#hero`), `home.css`, `js/carousel.js`.
 - (Hubo dos versiones anteriores que no se parecían a la referencia: un wipe
   de `clip-path` en un solo slide, y después slides en paralelogramo plano
   con `clip-path` diagonal — ninguna de las dos es en realidad "3D". Se
-  rehizo con la técnica correcta, ver `DECISIONES.md`.)
+  rehizo con la técnica correcta, ver `tp2/DECISIONES.md`.)
 
-Detalle en `DECISIONES.md`.
+Detalle en `tp2/DECISIONES.md`.
 
 ### ✅ 3c. Unificar menú hamburguesa y menú de usuario
 Archivos: `index.html`, `components.css` (el componente `.menu-dropdown`
@@ -123,7 +123,7 @@ compartido), `header.css` (posicionamiento), `js/menu.js` (nuevo).
   por las cards del banner coverflow (z-index hasta 100) donde se
   superponían. Se subió a z-index 200.
 
-Detalle en `DECISIONES.md`.
+Detalle en `tp2/DECISIONES.md`.
 
 ---
 
@@ -161,10 +161,10 @@ bastante más que la grilla y la galería. Se dividió en partes.
   - Comunidad y "Dejá tu reseña" pasaron a ir uno al lado del otro (reusan
     el mismo `.juego-layout` de 2 columnas).
 
-Detalle de las decisiones de la 4a en `DECISIONES.md`.
+Detalle de las decisiones de la 4a en `tp2/DECISIONES.md`.
 
 **Para discutir entre los tres:** la página se queda sin `<h1>` (decisión
-de Fran, documentada como excepción puntual en `DECISIONES.md`). Rompe la
+de Fran, documentada como excepción puntual en `tp2/DECISIONES.md`). Rompe la
 regla del proyecto "un solo h1 por página" (`CLAUDE.md`, accesibilidad) —
 no es un requisito de la cátedra, es algo que nos autoimpusimos, así que
 vale la pena que lo veamos los tres antes de aceptar la excepción de hecho
@@ -192,20 +192,20 @@ general (no se diseñó en el TPE1): esas decisiones son nuestras. Fran sí
 pasó después una captura de los badges "Gratis"/precio/"Nuevo" (parte 4).
 
 - ✅ Parte 1: agregar/quitar del carrito, ícono en el header con desplegable
-  (ver "Carrito de compras" en `DECISIONES.md`, partes 1 y 2).
+  (ver "Carrito de compras" en `tp2/DECISIONES.md`, partes 1 y 2).
 - ✅ Parte 2: modal de pago simulado (`<dialog>` nativo) — "Pagar carrito"
   abre un form falso, al confirmar mueve los juegos del carrito a una lista
-  de "comprados" y vacía el carrito. Detalle en `DECISIONES.md`,
+  de "comprados" y vacía el carrito. Detalle en `tp2/DECISIONES.md`,
   "Sistema de compras (parte 1: modal de pago simulado)".
 - ✅ Parte 3: sección "Mis juegos" en la Home, debajo de "Recomendados"
   (la página prioriza vender antes que mostrar lo ya comprado) — pero
   independiente de la sesión simulada, aparece igual como invitado. Lee
   `obtenerComprados()` de `carrito.js`. El link "Mis juegos" del menú de
-  cuenta ya apunta ahí. Detalle en `DECISIONES.md`.
+  cuenta ya apunta ahí. Detalle en `tp2/DECISIONES.md`.
 - ✅ Parte 4: badges "Gratis"/precio/"Nuevo" en las cards de la Home y junto
   a "Destacado" en el banner (no en Neon Circuit ni en juegos ya comprados).
   Precio simulado fijo (`$9.99`) para todo lo "de pago" — decisión final,
-  no va a haber precios reales por juego. Detalle en `DECISIONES.md`,
+  no va a haber precios reales por juego. Detalle en `tp2/DECISIONES.md`,
   "Sistema de compras (parte 3)".
 
 ## ✅ Ficha de producto para juegos del catálogo
@@ -223,13 +223,13 @@ contenido son decisiones nuestras.
   Se probó navegando directo con `?id=`, todavía sin ningún link real
   apuntando ahí. Ficha/Galería/Compartir/Comunidad/Dejá tu reseña se
   movieron de `juego.css` a `components.css` (ahora las usan dos páginas).
-  Detalle en `DECISIONES.md`, "Ficha de producto para juegos del catálogo".
+  Detalle en `tp2/DECISIONES.md`, "Ficha de producto para juegos del catálogo".
 - ✅ Etapa 2: las cards de las filas de la Home enlazan a esta página
   (nombre y puntaje, no toda la card — el botón de carrito ya ocupa ese
   espacio y un `<a>` no puede contener un `<button>`). Detalle en
-  `DECISIONES.md`.
+  `tp2/DECISIONES.md`.
 - ✅ Etapa 3: el banner "Destacados" enlaza a esta página — reemplaza el
   agregar-al-carrito directo que tenía (`.banner__carrito` → `.banner__ver`),
   confirmado con Agus: las dos acciones competían por el mismo click en la
   card activa. Neon Circuit no cambia, sigue yendo a `juego.html`. Detalle
-  en `DECISIONES.md`.
+  en `tp2/DECISIONES.md`.
