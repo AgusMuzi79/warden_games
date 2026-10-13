@@ -204,6 +204,13 @@ function eliminarRecord(cantidad, indice) {
 let inicioMs = 0;
 let intervaloReloj = null;
 
+// Aviso de que se acaba el tiempo: en los niveles con tiempo máximo, cuando
+// quedan 10 segundos o menos el tiempo del HUD se pinta de rojo y se avisa una
+// sola vez con el texto de estado. avisoDado recuerda si ya se avisó en este
+// nivel, para no repetir el mensaje en cada tick.
+const AVISO_TIEMPO_MS = 10000;
+let avisoDado = false;
+
 // ---------- Portada ----------
 
 const cabecera = document.getElementById('tablero-cabecera');
@@ -582,6 +589,9 @@ function quitarFiltros() {
 function iniciarReloj() {
   detenerReloj();
   inicioMs = performance.now();
+  // Cada nivel arranca sin aviso de tiempo.
+  avisoDado = false;
+  datoTiempo.parentElement.classList.remove('blocka__dato--alerta');
   intervaloReloj = setInterval(actualizarReloj, 100);
 }
 
@@ -614,7 +624,24 @@ function actualizarReloj() {
     perderNivel();
     return;
   }
+  avisarTiempo();
   actualizarAyudita();
+}
+
+// Si el nivel tiene tiempo máximo y quedan 10 s o menos, marca el tiempo del
+// HUD (la clase pinta el número de rojo, ver blocka.css) y avisa una vez en el
+// texto de estado, que es role="status": el lector de pantalla también lo
+// anuncia. La clase va en el <p> del dato; datoTiempo es el <strong> de adentro.
+function avisarTiempo() {
+  const limite = limiteDelNivel();
+  if (limite === undefined) return;
+  const restanteMs = limite * 1000 - (performance.now() - inicioMs);
+  if (restanteMs > AVISO_TIEMPO_MS) return;
+  datoTiempo.parentElement.classList.add('blocka__dato--alerta');
+  if (!avisoDado) {
+    avisoDado = true;
+    estado.textContent = '¡Quedan 10 segundos!';
+  }
 }
 
 // Habilita o deshabilita "Ayudita". Se deshabilita si no quedan partes mal
@@ -661,6 +688,9 @@ function iniciarNivel() {
   ocultarAcciones();
   datoNivel.textContent = `${indiceNivel + 1} de ${NIVELES.length} · ${cantidadPiezas} piezas`;
   datoTiempo.textContent = textoTiempo(0, limiteDelNivel());
+  // Si el nivel anterior terminó con el aviso de tiempo, se saca ya: si no,
+  // el 00:00 del nivel nuevo se vería en rojo hasta que arranque el reloj.
+  datoTiempo.parentElement.classList.remove('blocka__dato--alerta');
   mostrarRecord();
 
   // Se repite el sorteo hasta que toque una imagen distinta a la última.

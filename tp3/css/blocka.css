@@ -380,6 +380,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Quedan 10 segundos o menos del tiempo máximo: el tiempo pasa a rojo
+   (--error). Lo pone js/blocka.js (avisarTiempo()); el aviso también va en
+   texto, así no depende solo del color. */
+.blocka__dato--alerta strong {
+  color: var(--error);
+}
+
 /* Canvas donde se arma la imagen. El tamaño real (width/height, que pone
    js/blocka.js según la dificultad) es la resolución en píxeles; el CSS fija
    cuánto ocupa en pantalla. height:auto hace que el alto salga de la
