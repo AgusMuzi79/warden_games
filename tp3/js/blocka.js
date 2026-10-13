@@ -100,7 +100,7 @@ const NIVELES = [
 // cada una es más chica. Las piezas tienen que ser cuadradas para girar de a
 // 90° y seguir encajando en su casillero, y un cuadrado solo se divide en
 // cuadrados iguales cuando la cantidad es un cuadrado perfecto: por eso son
-// 4, 9 y 16 y no 4, 6 y 8 (ver DECISIONES-TP3.md). "lado" es cuántas piezas
+// 4, 9 y 16 y no 4, 6 y 8 (ver DECISIONES.md, "Extra: dificultades de 4, 9 y 16 piezas"). "lado" es cuántas piezas
 // entran por fila y por columna.
 const DIFICULTADES = {
   4: { lado: 2, nombre: 'Fácil' },
@@ -1276,7 +1276,9 @@ canvas.addEventListener('blur', () => { if (nivelActivo) dibujar(); });
 
 // Capturas reales del juego, en el orden en que se vive una partida. El motor
 // del flip es genérico y vive en js/galeria.js: acá solo se le pasa la lista
-// de fotos. Cada una lleva su propio alt. Son de 16:9, igual que las del Peg.
+// de fotos. Cada una lleva su propio alt. Tienen la proporción de la
+// card del juego (770:630), no 16:9 como las del Peg: blocka.css ajusta la
+// galería a esa proporción.
 const FOTOS_GALERIA_BLOCKA = [
   { src: 'assets/img/blocka-inicio.jpg', alt: 'Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver cada dificultad.' },
   { src: 'assets/img/blocka-dificultad.jpg', alt: 'Pantalla para elegir la dificultad: 4, 9 o 16 piezas.' },
