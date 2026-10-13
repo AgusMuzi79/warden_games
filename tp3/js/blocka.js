@@ -15,7 +15,8 @@
 //      récord por nivel guardado en localStorage y paso entre niveles
 //      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
 //   5. Extras: "Ayudita" (deja una parte bien puesta y fija, suma 5 segundos),
-//      "Trampa" (resuelve el nivel, sin récord) y tiempo máximo en los
+//      "Trampa" (resuelve el nivel, sin récord; oculta, solo con el atajo
+//      Ctrl + Mayús + T para la demo) y tiempo máximo en los
 //      niveles avanzados (si se acaba, se pierde el nivel).
 //   6. Le pasa a la galería animada las capturas del juego.
 //
@@ -716,7 +717,8 @@ function arrancarNivel(indiceImagen) {
     nivelActivo = true;
     dibujar();
     btnAyudita.hidden = false;
-    btnTrampa.hidden = false;
+    // "Trampa" no se muestra: queda oculta para la demo (ver el atajo
+    // Ctrl + Mayús + T, más abajo).
     estado.textContent = 'Girá cada parte hasta armar la imagen.';
     iniciarReloj();
     // Ayudita arranca habilitada en cada nivel nuevo (si hay partes mal puestas).
@@ -1084,6 +1086,19 @@ btnTrampa.addEventListener('click', () => {
   if (!nivelActivo) return;
   piezas.forEach((p) => { p.giros = 0; });
   terminarNivel(true);
+});
+
+// Atajos de teclado de toda la página.
+// Ctrl + Mayús + T: "Trampa", para la demo. El botón queda oculto (un jugador
+// no debería ver un botón que le resuelve el juego), pero sigue en el HTML con
+// su listener: click() en un botón oculto igual dispara su evento, y el
+// listener ya revisa que haya un nivel en juego. Se compara evento.code
+// ("KeyT", la tecla física) y no evento.key, que con Mayús vale "T".
+document.addEventListener('keydown', (evento) => {
+  if (evento.ctrlKey && evento.shiftKey && evento.code === 'KeyT') {
+    evento.preventDefault();
+    btnTrampa.click();
+  }
 });
 
 // "Siguiente nivel": arranca el próximo nivel al instante. Solo se muestra si
