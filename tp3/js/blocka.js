@@ -1089,17 +1089,34 @@ btnTrampa.addEventListener('click', () => {
 });
 
 // Atajos de teclado de toda la página.
+// F1: abre la Ayuda. Despliega el primer ítem ("Cómo se juega") y pasa el
+// foco al título del panel; preventDefault() evita que el navegador abra su
+// propia ayuda.
 // Ctrl + Mayús + T: "Trampa", para la demo. El botón queda oculto (un jugador
 // no debería ver un botón que le resuelve el juego), pero sigue en el HTML con
 // su listener: click() en un botón oculto igual dispara su evento, y el
 // listener ya revisa que haya un nivel en juego. Se compara evento.code
 // ("KeyT", la tecla física) y no evento.key, que con Mayús vale "T".
 document.addEventListener('keydown', (evento) => {
-  if (evento.ctrlKey && evento.shiftKey && evento.code === 'KeyT') {
+  if (evento.key === 'F1') {
+    evento.preventDefault();
+    abrirAyuda();
+  } else if (evento.ctrlKey && evento.shiftKey && evento.code === 'KeyT') {
     evento.preventDefault();
     btnTrampa.click();
   }
 });
+
+// El título de la Ayuda (un <h2>) no recibe foco solo: tabIndex = -1 deja
+// darle el foco por código sin sumarlo al recorrido de Tab. Al enfocarlo, el
+// navegador lo trae a la vista y el lector de pantalla lo anuncia.
+function abrirAyuda() {
+  const primerItem = document.querySelector('.ayuda details');
+  if (primerItem) primerItem.open = true;
+  const tituloAyuda = document.getElementById('ayuda-titulo');
+  tituloAyuda.tabIndex = -1;
+  tituloAyuda.focus();
+}
 
 // "Siguiente nivel": arranca el próximo nivel al instante. Solo se muestra si
 // hay un nivel siguiente.
