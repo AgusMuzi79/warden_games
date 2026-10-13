@@ -26,10 +26,6 @@
     </a>
   </div>
  
-  <p class="header__status" role="status">
-    Partida guardada • <time datetime="12:04">12:04</time>
-  </p>
- 
   <div class="header__actions">
     <a class="btn btn--secundario" href="index.html">Volver al menú</a>
     <a class="header__avatar" href="#" aria-label="Mi cuenta">
@@ -164,8 +160,8 @@
                 <p class="blocka__dato">Récord <strong id="blocka-record">—</strong></p>
               </div>
 
-              <canvas class="blocka__canvas" id="blocka-canvas" width="480" height="480" tabindex="-1"
-                      aria-label="Imagen dividida en partes giradas. Clic izquierdo gira una parte a la izquierda y clic derecho, a la derecha.">
+              <canvas class="blocka__canvas" id="blocka-canvas" width="480" height="480" tabindex="0"
+                      aria-label="Imagen dividida en partes giradas. Clic izquierdo gira una parte a la izquierda y clic derecho (o Mayús + clic), a la derecha. Con el teclado: las flechas eligen una parte, Q la gira a la izquierda y E, Enter o Espacio, a la derecha.">
                 <p>Tu navegador no soporta canvas, necesario para jugar a Blocka.</p>
               </canvas>
 
@@ -174,8 +170,8 @@
               <div class="blocka__acciones">
                 <button type="button" class="btn btn--secundario" id="btn-ayudita" hidden>Ayudita (+5 s)</button>
                 <button type="button" class="btn btn--terciario" id="btn-trampa" hidden>Trampa</button>
-                <button type="button" class="btn btn--destructivo" id="btn-reintentar" hidden>Reintentar nivel</button>
-                <button type="button" class="btn btn--secundario" id="btn-inicio" hidden>Volver al inicio</button>
+                <button type="button" class="btn btn--secundario" id="btn-reintentar" hidden>Reintentar nivel</button>
+                <button type="button" class="btn btn--terciario" id="btn-inicio" hidden>Volver al inicio</button>
                 <button type="button" class="btn btn--primario" id="btn-siguiente" hidden>Siguiente nivel</button>
               </div>
             </div>
@@ -222,12 +218,13 @@
 
           <details class="ayuda__item" open>
             <summary>Cómo se juega</summary>
-            <p>La imagen aparece cortada en partes (4, 9 o 16, según la dificultad que elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen.</p>
+            <p>La imagen aparece cortada en partes (4, 9 o 16, según la dificultad que elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen. Con un trackpad, Mayús + clic también gira hacia la derecha.</p>
+            <p>También podés jugar con el teclado: con las flechas elegís una parte (queda marcada con un borde punteado), con Q la girás hacia la izquierda y con E, Enter o Espacio, hacia la derecha.</p>
           </details>
 
           <details class="ayuda__item">
             <summary>Objetivo</summary>
-            <p>Armar la imagen en el menor tiempo posible. El reloj arranca cuando elegís "Comenzar" y se frena al completarla: ese tiempo queda como tu récord del nivel.</p>
+            <p>Armar la imagen en el menor tiempo posible. El reloj arranca cuando aparece la imagen, después del sorteo, y se frena al completarla: ese tiempo queda como tu récord del nivel.</p>
           </details>
 
           <details class="ayuda__item">
@@ -236,8 +233,8 @@
           </details>
 
           <details class="ayuda__item">
-            <summary>Ayudita, Trampa y tiempo</summary>
-            <p>"Ayudita" deja una parte en su lugar y la bloquea, pero suma 5 segundos a tu tiempo. Se desactiva cuando ya no quedan partes mal puestas o cuando quedan menos de 5 segundos del tiempo máximo. "Trampa" resuelve el nivel de golpe, aunque no cuenta para el récord. En los niveles avanzados hay un tiempo máximo, que es mayor cuantas más piezas elijas: si se acaba, perdés el nivel y podés reintentarlo.</p>
+            <summary>Ayudita y tiempo</summary>
+            <p>"Ayudita" deja una parte en su lugar y la bloquea, pero suma 5 segundos a tu tiempo. Se desactiva cuando ya no quedan partes mal puestas o cuando quedan menos de 5 segundos del tiempo máximo. En los niveles avanzados hay un tiempo máximo, que es mayor cuantas más piezas elijas: si se acaba, perdés el nivel y podés reintentarlo.</p>
           </details>
 
           <details class="ayuda__item">
@@ -248,6 +245,10 @@
           <ul class="ayuda__atajos">
             <li><kbd>Clic izq.</kbd> Girar a la izquierda</li>
             <li><kbd>Clic der.</kbd> Girar a la derecha</li>
+            <li><kbd>Mayús + clic</kbd> Girar a la derecha</li>
+            <li><kbd>Flechas</kbd> Elegir una parte</li>
+            <li><kbd>Q</kbd> Girar a la izquierda</li>
+            <li><kbd>E</kbd> <kbd>Enter</kbd> <kbd>Espacio</kbd> Girar a la derecha</li>
           </ul>
         </section>
 

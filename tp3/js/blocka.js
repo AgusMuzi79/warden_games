@@ -9,13 +9,14 @@
 //      tras otro, en la imagen elegida para el nivel (extra del enunciado).
 //   3. Motor del nivel: carga la imagen sorteada, la corta en piezas, les
 //      aplica los filtros del nivel, las gira al azar y deja girarlas con el
-//      mouse (clic izquierdo a la izquierda, clic derecho a la derecha) hasta
-//      armar la imagen. Al armarla se quitan los filtros con un fundido.
+//      mouse (clic izquierdo a la izquierda, clic derecho a la derecha) o con
+//      el teclado (flechas para elegir, Q / E para girar) hasta armar la imagen. Al armarla se quitan los filtros con un fundido.
 //   4. Temporizador (arranca al terminar el sorteo, se frena al armar la imagen),
 //      récord por nivel guardado en localStorage y paso entre niveles
 //      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
 //   5. Extras: "Ayudita" (deja una parte bien puesta y fija, suma 5 segundos),
-//      "Trampa" (resuelve el nivel, sin récord) y tiempo máximo en los
+//      "Trampa" (resuelve el nivel, sin récord; oculta, solo con el atajo
+//      Alt + T para la demo) y tiempo máximo en los
 //      niveles avanzados (si se acaba, se pierde el nivel).
 //   6. Le pasa a la galería animada las capturas del juego.
 //
@@ -99,7 +100,7 @@ const NIVELES = [
 // cada una es más chica. Las piezas tienen que ser cuadradas para girar de a
 // 90° y seguir encajando en su casillero, y un cuadrado solo se divide en
 // cuadrados iguales cuando la cantidad es un cuadrado perfecto: por eso son
-// 4, 9 y 16 y no 4, 6 y 8 (ver DECISIONES-TP3.md). "lado" es cuántas piezas
+// 4, 9 y 16 y no 4, 6 y 8 (ver DECISIONES.md, "Extra: dificultades de 4, 9 y 16 piezas"). "lado" es cuántas piezas
 // entran por fila y por columna.
 const DIFICULTADES = {
   4: { lado: 2, nombre: 'Fácil' },
@@ -203,6 +204,13 @@ function eliminarRecord(cantidad, indice) {
 let inicioMs = 0;
 let intervaloReloj = null;
 
+// Aviso de que se acaba el tiempo: en los niveles con tiempo máximo, cuando
+// quedan 10 segundos o menos el tiempo del HUD se pinta de rojo y se avisa una
+// sola vez con el texto de estado. avisoDado recuerda si ya se avisó en este
+// nivel, para no repetir el mensaje en cada tick.
+const AVISO_TIEMPO_MS = 10000;
+let avisoDado = false;
+
 // ---------- Portada ----------
 
 const cabecera = document.getElementById('tablero-cabecera');
@@ -265,6 +273,11 @@ let imagenEstricta = false;
 let piezas = [];
 let nivelActivo = false;
 let ultimaImagen = -1;
+
+// Pieza elegida con el teclado: es un índice de "piezas", que está ordenada
+// fila por fila (de izquierda a derecha y de arriba hacia abajo). Las flechas
+// la mueven y Q / E / Enter / Espacio la giran (ver el keydown del canvas).
+let piezaFoco = 0;
 
 // Cuántas piezas entran por fila y por columna con la dificultad actual (2, 3 o 4).
 function piezasPorLado() {
@@ -480,12 +493,38 @@ function dibujar() {
       );
     }
   });
+
+  // La pieza elegida con el teclado lleva un anillo punteado del color de foco
+  // (el mismo amarillo del :focus-visible del sitio). Solo se dibuja si el
+  // canvas tiene el foco y hay un nivel en juego: con el mouse en otro lado no
+  // hace falta. Es punteado y va más adentro que el borde de Ayudita (que es
+  // liso), para que no se confundan.
+  const piezaElegida = piezas[piezaFoco];
+  if (nivelActivo && piezaElegida && document.activeElement === canvas) {
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = colorFoco();
+    // setLineDash([trazo, espacio]) hace la línea punteada. Se vuelve a una
+    // línea lisa ([]) después, porque el contexto recuerda el patrón y el
+    // borde de Ayudita del próximo dibujo saldría punteado.
+    ctx.setLineDash([10, 6]);
+    ctx.strokeRect(
+      piezaElegida.columna * tamano + 8, piezaElegida.fila * tamano + 8,
+      tamano - 16, tamano - 16
+    );
+    ctx.setLineDash([]);
+  }
 }
 
 // Color del borde de las partes fijas: el token --acento del sitio, leído de
 // variables.css (en JS no se puede usar var() directo, pero sí leer su valor).
 function colorMarca() {
   return getComputedStyle(document.documentElement).getPropertyValue('--acento').trim();
+}
+
+// Color del anillo de la pieza elegida con el teclado: el token --foco, leído
+// igual que --acento.
+function colorFoco() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--foco').trim();
 }
 
 // ---------- Fundido al ganar ----------
@@ -550,6 +589,9 @@ function quitarFiltros() {
 function iniciarReloj() {
   detenerReloj();
   inicioMs = performance.now();
+  // Cada nivel arranca sin aviso de tiempo.
+  avisoDado = false;
+  datoTiempo.parentElement.classList.remove('blocka__dato--alerta');
   intervaloReloj = setInterval(actualizarReloj, 100);
 }
 
@@ -582,7 +624,24 @@ function actualizarReloj() {
     perderNivel();
     return;
   }
+  avisarTiempo();
   actualizarAyudita();
+}
+
+// Si el nivel tiene tiempo máximo y quedan 10 s o menos, marca el tiempo del
+// HUD (la clase pinta el número de rojo, ver blocka.css) y avisa una vez en el
+// texto de estado, que es role="status": el lector de pantalla también lo
+// anuncia. La clase va en el <p> del dato; datoTiempo es el <strong> de adentro.
+function avisarTiempo() {
+  const limite = limiteDelNivel();
+  if (limite === undefined) return;
+  const restanteMs = limite * 1000 - (performance.now() - inicioMs);
+  if (restanteMs > AVISO_TIEMPO_MS) return;
+  datoTiempo.parentElement.classList.add('blocka__dato--alerta');
+  if (!avisoDado) {
+    avisoDado = true;
+    estado.textContent = '¡Quedan 10 segundos!';
+  }
 }
 
 // Habilita o deshabilita "Ayudita". Se deshabilita si no quedan partes mal
@@ -629,6 +688,9 @@ function iniciarNivel() {
   ocultarAcciones();
   datoNivel.textContent = `${indiceNivel + 1} de ${NIVELES.length} · ${cantidadPiezas} piezas`;
   datoTiempo.textContent = textoTiempo(0, limiteDelNivel());
+  // Si el nivel anterior terminó con el aviso de tiempo, se saca ya: si no,
+  // el 00:00 del nivel nuevo se vería en rojo hasta que arranque el reloj.
+  datoTiempo.parentElement.classList.remove('blocka__dato--alerta');
   mostrarRecord();
 
   // Se repite el sorteo hasta que toque una imagen distinta a la última.
@@ -677,11 +739,16 @@ function arrancarNivel(indiceImagen) {
       mostrarErrorDeCarga('Los filtros necesitan un servidor: abrí la página desde http://localhost, no con doble clic.');
       return;
     }
+    // El teclado arranca en la primera pieza (arriba a la izquierda).
+    piezaFoco = 0;
     mezclar();
-    dibujar();
+    // nivelActivo va antes de dibujar(): así, si el canvas ya tiene el foco,
+    // el primer dibujo ya muestra el anillo de la pieza elegida.
     nivelActivo = true;
+    dibujar();
     btnAyudita.hidden = false;
-    btnTrampa.hidden = false;
+    // "Trampa" no se muestra: queda oculta para la demo (ver el atajo
+    // Alt + T, más abajo).
     estado.textContent = 'Girá cada parte hasta armar la imagen.';
     iniciarReloj();
     // Ayudita arranca habilitada en cada nivel nuevo (si hay partes mal puestas).
@@ -888,15 +955,45 @@ function mostrarRecordsInicio() {
 
 // Click en un tachito: borra el récord de ese nivel (de la dificultad que se
 // ve), actualiza la tabla y la ficha, y lo avisa con el texto de estado
-// (role="status").
+// (role="status"). Al lado del aviso aparece "Deshacer", que lo vuelve a
+// guardar: borrar es inmediato (sin confirmación), así que un clic sin querer
+// tiene que poder revertirse.
 function borrarRecordDelInicio(indice) {
-  eliminarRecord(vistaRecords, indice);
+  // Se guarda qué se borra (dificultad, nivel y tiempo) antes de borrarlo,
+  // para poder restaurarlo después.
+  const cantidad = vistaRecords;
+  const ms = leerRecord(cantidad, indice);
+  eliminarRecord(cantidad, indice);
   mostrarRecordsInicio();
   mostrarRecord(vistaRecords);
-  recordsEstado.textContent = `Récord del nivel ${indice + 1} con ${vistaRecords} piezas borrado.`;
+
+  const deshacer = document.createElement('button');
+  deshacer.type = 'button';
+  deshacer.className = 'btn btn--terciario';
+  deshacer.textContent = 'Deshacer';
+  deshacer.addEventListener('click', () => {
+    // guardarRecord escribe el tiempo tal cual: como el récord se había
+    // borrado, no hay otro con el que compararlo.
+    guardarRecord(cantidad, indice, ms);
+    mostrarRecordsInicio();
+    mostrarRecord(vistaRecords);
+    recordsEstado.textContent = 'Récord restaurado.';
+    // El botón "Deshacer" desaparece con el texto nuevo: el foco vuelve a
+    // "Comenzar" para no caer al <body>.
+    btnComenzar.focus();
+  });
+
+  // El aviso y el botón van juntos en el mismo párrafo. Si después otra
+  // acción cambia el texto (otro borrado, cambiar de dificultad, volver al
+  // inicio), el botón desaparece solo: ya no hay nada que deshacer.
+  recordsEstado.replaceChildren(
+    `Récord del nivel ${indice + 1} con ${cantidad} piezas borrado.`,
+    deshacer
+  );
   // El tachito que tenía el foco se vuelve invisible al borrarse su récord:
-  // el foco pasa a "Comenzar" para no caer al <body>.
-  btnComenzar.focus();
+  // el foco pasa a "Deshacer", que es la acción que más probablemente se
+  // quiera hacer justo después.
+  deshacer.focus();
 }
 
 // ---------- Elección de dificultad ----------
@@ -975,6 +1072,8 @@ function perderNivel() {
   ocultarAcciones();
   datoTiempo.textContent = textoTiempo(limiteDelNivel() * 1000, limiteDelNivel());
   estado.textContent = '¡Se acabó el tiempo! Perdiste el nivel.';
+  // Se redibuja sin el anillo del teclado (nivelActivo ya es false).
+  dibujar();
   btnReintentar.hidden = false;
   btnInicio.hidden = false;
   btnReintentar.focus();
@@ -1019,6 +1118,39 @@ btnTrampa.addEventListener('click', () => {
   terminarNivel(true);
 });
 
+// Atajos de teclado de toda la página.
+// F1: abre la Ayuda. Despliega el primer ítem ("Cómo se juega") y pasa el
+// foco al título del panel; preventDefault() evita que el navegador abra su
+// propia ayuda.
+// Alt + T: "Trampa", para la demo. El botón queda oculto (un jugador no
+// debería ver un botón que le resuelve el juego), pero sigue en el HTML con
+// su listener: click() en un botón oculto igual dispara su evento, y el
+// listener ya revisa que haya un nivel en juego. No es Ctrl + Mayús + T
+// porque Chrome y Edge se reservan esa combinación (reabrir la última
+// pestaña) y no se la pasan a la página. Se compara evento.code ("KeyT", la
+// tecla física) y no evento.key, que con Alt puede dar otro carácter según
+// la distribución del teclado.
+document.addEventListener('keydown', (evento) => {
+  if (evento.key === 'F1') {
+    evento.preventDefault();
+    abrirAyuda();
+  } else if (evento.altKey && !evento.ctrlKey && !evento.shiftKey && evento.code === 'KeyT') {
+    evento.preventDefault();
+    btnTrampa.click();
+  }
+});
+
+// El título de la Ayuda (un <h2>) no recibe foco solo: tabIndex = -1 deja
+// darle el foco por código sin sumarlo al recorrido de Tab. Al enfocarlo, el
+// navegador lo trae a la vista y el lector de pantalla lo anuncia.
+function abrirAyuda() {
+  const primerItem = document.querySelector('.ayuda details');
+  if (primerItem) primerItem.open = true;
+  const tituloAyuda = document.getElementById('ayuda-titulo');
+  tituloAyuda.tabIndex = -1;
+  tituloAyuda.focus();
+}
+
 // "Siguiente nivel": arranca el próximo nivel al instante. Solo se muestra si
 // hay un nivel siguiente.
 btnSiguiente.addEventListener('click', () => {
@@ -1048,17 +1180,18 @@ function piezaEnPunto(evento) {
   return piezas.find((pieza) => pieza.columna === columna && pieza.fila === fila);
 }
 
-// Gira la pieza clickeada. sentido = +1 (derecha) o -1 (izquierda).
+// Gira una pieza. sentido = +1 (derecha) o -1 (izquierda). La usan el mouse
+// (girarPieza) y el teclado (keydown del canvas), así las reglas son las
+// mismas venga de donde venga el giro.
 // Sumar 4 antes del módulo evita números negativos: (0 - 1 + 4) % 4 = 3.
-function girarPieza(evento, sentido) {
+function girar(pieza, sentido) {
   if (!nivelActivo) return;
-  // Si el clic llega con el tiempo ya agotado (entre dos ticks del reloj), se
+  // Si el giro llega con el tiempo ya agotado (entre dos ticks del reloj), se
   // pierde el nivel en vez de girar: así nunca se gana pasado el límite.
   if (tiempoAgotado()) {
     perderNivel();
     return;
   }
-  const pieza = piezaEnPunto(evento);
   // Las partes fijadas por Ayudita y las lisas (fijas desde el inicio) no giran.
   if (!pieza || pieza.fija || esLisa(pieza)) return;
 
@@ -1072,8 +1205,18 @@ function girarPieza(evento, sentido) {
   }
 }
 
-// Clic izquierdo: gira hacia la izquierda.
-canvas.addEventListener('click', (evento) => girarPieza(evento, -1));
+// Gira la pieza clickeada. Además, la pieza clickeada pasa a ser la elegida
+// para el teclado: al hacer clic el canvas recibe el foco, y si el anillo
+// quedara en otra pieza confundiría.
+function girarPieza(evento, sentido) {
+  const pieza = piezaEnPunto(evento);
+  if (pieza) piezaFoco = piezas.indexOf(pieza);
+  girar(pieza, sentido);
+}
+
+// Clic izquierdo: gira hacia la izquierda. Con Mayús apretada gira hacia la
+// derecha: es la alternativa al clic derecho para quien usa un trackpad.
+canvas.addEventListener('click', (evento) => girarPieza(evento, evento.shiftKey ? +1 : -1));
 
 // Clic derecho: gira hacia la derecha. preventDefault() evita que se abra el
 // menú contextual del navegador (el que sale con el botón derecho).
@@ -1082,17 +1225,66 @@ canvas.addEventListener('contextmenu', (evento) => {
   girarPieza(evento, +1);
 });
 
+// Teclado: las flechas mueven la pieza elegida dentro de la grilla (al pasar
+// el borde aparece del otro lado de la misma fila o columna), Q la gira hacia
+// la izquierda y E, Enter o Espacio hacia la derecha. preventDefault() solo
+// en esas teclas: evita que las flechas y el Espacio scrolleen la página, y no
+// toca el resto (Tab, por ejemplo, sigue sacando el foco del canvas).
+canvas.addEventListener('keydown', (evento) => {
+  // Con Ctrl, Alt o Cmd es un atajo de otra cosa (del navegador o de la página).
+  if (evento.ctrlKey || evento.altKey || evento.metaKey) return;
+  if (!nivelActivo) return;
+
+  const lado = piezasPorLado();
+  let columna = piezaFoco % lado;
+  let fila = Math.floor(piezaFoco / lado);
+  const tecla = evento.key.toLowerCase();
+
+  if (tecla === 'arrowleft') {
+    columna = (columna - 1 + lado) % lado;
+  } else if (tecla === 'arrowright') {
+    columna = (columna + 1) % lado;
+  } else if (tecla === 'arrowup') {
+    fila = (fila - 1 + lado) % lado;
+  } else if (tecla === 'arrowdown') {
+    fila = (fila + 1) % lado;
+  } else if (tecla === 'q') {
+    evento.preventDefault();
+    girar(piezas[piezaFoco], -1);
+    return;
+  } else if (tecla === 'e' || tecla === 'enter' || tecla === ' ') {
+    evento.preventDefault();
+    girar(piezas[piezaFoco], +1);
+    return;
+  } else {
+    return;
+  }
+
+  // Llegó acá con una flecha: se mueve la pieza elegida y se redibuja el anillo.
+  evento.preventDefault();
+  piezaFoco = fila * lado + columna;
+  dibujar();
+});
+
+// El anillo del teclado solo se ve con el canvas enfocado: al entrar o salir
+// el foco se redibuja. Solo durante un nivel en juego: fuera de él no hay
+// anillo que mostrar, y así tampoco se pisa el fundido del final.
+canvas.addEventListener('focus', () => { if (nivelActivo) dibujar(); });
+canvas.addEventListener('blur', () => { if (nivelActivo) dibujar(); });
+
 // ---------- Galería ----------
 
 // Capturas reales del juego, en el orden en que se vive una partida. El motor
 // del flip es genérico y vive en js/galeria.js: acá solo se le pasa la lista
-// de fotos. Cada una lleva su propio alt. Son de 16:9, igual que las del Peg.
+// de fotos. Cada una lleva su propio alt. Tienen la proporción de la
+// card del juego (770:630), no 16:9 como las del Peg: blocka.css ajusta la
+// galería a esa proporción.
 const FOTOS_GALERIA_BLOCKA = [
   { src: 'assets/img/blocka-inicio.jpg', alt: 'Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver cada dificultad.' },
   { src: 'assets/img/blocka-dificultad.jpg', alt: 'Pantalla para elegir la dificultad: 4, 9 o 16 piezas.' },
   { src: 'assets/img/blocka-sorteo.jpg', alt: 'La tragamonedas del sorteo, con tres rodillos que frenan en la misma imagen, la de Capitana Marvel.' },
-  { src: 'assets/img/blocka-4-piezas.jpg', alt: 'Nivel 1 con 4 piezas y filtro de brillo: una imagen de Capitana Marvel cortada en cuatro partes giradas.' },
-  { src: 'assets/img/blocka-9-piezas.jpg', alt: 'Nivel 2 con 9 piezas en escala de grises (Spider-Man), con una parte fijada por Ayudita y el reloj corriendo contra el tiempo límite.' },
+  { src: 'assets/img/blocka-4-piezas.jpg', alt: 'Nivel 1 con 4 piezas en escala de grises: una imagen de Capitana Marvel cortada en cuatro partes giradas.' },
+  { src: 'assets/img/blocka-9-piezas.jpg', alt: 'Nivel 2 con 9 piezas en negativo (Spider-Man), con una parte fijada por Ayudita y el reloj corriendo contra el tiempo límite.' },
   { src: 'assets/img/blocka-16-piezas.jpg', alt: 'Nivel 3 con 16 piezas y filtros mixtos (Hydra): negativo, brillo y escala de grises en distintas partes.' },
   { src: 'assets/img/blocka-derrota.jpg', alt: 'Pantalla de derrota al agotarse el tiempo límite, con los botones Reintentar nivel y Volver al inicio.' },
   { src: 'assets/img/blocka-victoria.jpg', alt: 'Pantalla de victoria: la imagen de Thor armada y sin filtros, con el tiempo y el aviso de nuevo récord.' },

@@ -134,9 +134,16 @@
   visibility: hidden;
 }
 
-/* Aviso "Récord del nivel N borrado." debajo de la tabla. */
+/* Aviso "Récord del nivel N borrado." debajo de la tabla, con el botón
+   "Deshacer" al lado. Flex para alinear el texto y el botón; el alto mínimo es
+   el del botón (--control-alto), así "Comenzar" no salta cuando el botón
+   aparece o desaparece. */
 .blocka__records-estado {
-  min-height: var(--espaciado-6);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-2);
+  min-height: var(--control-alto);
   margin: var(--espaciado-2) 0 0;
   color: var(--primario-c2);
   font: 400 14px/1.5 var(--font-ui);
@@ -371,6 +378,13 @@
   /* Cifras del mismo ancho: el tiempo cambia 10 veces por segundo y, sin
      esto, el texto se movería de a poco al cambiar de un 1 a un 8. */
   font-variant-numeric: tabular-nums;
+}
+
+/* Quedan 10 segundos o menos del tiempo máximo: el tiempo pasa a rojo
+   (--error). Lo pone js/blocka.js (avisarTiempo()); el aviso también va en
+   texto, así no depende solo del color. */
+.blocka__dato--alerta strong {
+  color: var(--error);
 }
 
 /* Canvas donde se arma la imagen. El tamaño real (width/height, que pone
