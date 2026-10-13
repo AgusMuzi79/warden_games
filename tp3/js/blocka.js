@@ -923,15 +923,45 @@ function mostrarRecordsInicio() {
 
 // Click en un tachito: borra el récord de ese nivel (de la dificultad que se
 // ve), actualiza la tabla y la ficha, y lo avisa con el texto de estado
-// (role="status").
+// (role="status"). Al lado del aviso aparece "Deshacer", que lo vuelve a
+// guardar: borrar es inmediato (sin confirmación), así que un clic sin querer
+// tiene que poder revertirse.
 function borrarRecordDelInicio(indice) {
-  eliminarRecord(vistaRecords, indice);
+  // Se guarda qué se borra (dificultad, nivel y tiempo) antes de borrarlo,
+  // para poder restaurarlo después.
+  const cantidad = vistaRecords;
+  const ms = leerRecord(cantidad, indice);
+  eliminarRecord(cantidad, indice);
   mostrarRecordsInicio();
   mostrarRecord(vistaRecords);
-  recordsEstado.textContent = `Récord del nivel ${indice + 1} con ${vistaRecords} piezas borrado.`;
+
+  const deshacer = document.createElement('button');
+  deshacer.type = 'button';
+  deshacer.className = 'btn btn--terciario';
+  deshacer.textContent = 'Deshacer';
+  deshacer.addEventListener('click', () => {
+    // guardarRecord escribe el tiempo tal cual: como el récord se había
+    // borrado, no hay otro con el que compararlo.
+    guardarRecord(cantidad, indice, ms);
+    mostrarRecordsInicio();
+    mostrarRecord(vistaRecords);
+    recordsEstado.textContent = 'Récord restaurado.';
+    // El botón "Deshacer" desaparece con el texto nuevo: el foco vuelve a
+    // "Comenzar" para no caer al <body>.
+    btnComenzar.focus();
+  });
+
+  // El aviso y el botón van juntos en el mismo párrafo. Si después otra
+  // acción cambia el texto (otro borrado, cambiar de dificultad, volver al
+  // inicio), el botón desaparece solo: ya no hay nada que deshacer.
+  recordsEstado.replaceChildren(
+    `Récord del nivel ${indice + 1} con ${cantidad} piezas borrado.`,
+    deshacer
+  );
   // El tachito que tenía el foco se vuelve invisible al borrarse su récord:
-  // el foco pasa a "Comenzar" para no caer al <body>.
-  btnComenzar.focus();
+  // el foco pasa a "Deshacer", que es la acción que más probablemente se
+  // quiera hacer justo después.
+  deshacer.focus();
 }
 
 // ---------- Elección de dificultad ----------
