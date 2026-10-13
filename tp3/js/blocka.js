@@ -16,7 +16,7 @@
 //      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
 //   5. Extras: "Ayudita" (deja una parte bien puesta y fija, suma 5 segundos),
 //      "Trampa" (resuelve el nivel, sin récord; oculta, solo con el atajo
-//      Ctrl + Mayús + T para la demo) y tiempo máximo en los
+//      Alt + T para la demo) y tiempo máximo en los
 //      niveles avanzados (si se acaba, se pierde el nivel).
 //   6. Le pasa a la galería animada las capturas del juego.
 //
@@ -748,7 +748,7 @@ function arrancarNivel(indiceImagen) {
     dibujar();
     btnAyudita.hidden = false;
     // "Trampa" no se muestra: queda oculta para la demo (ver el atajo
-    // Ctrl + Mayús + T, más abajo).
+    // Alt + T, más abajo).
     estado.textContent = 'Girá cada parte hasta armar la imagen.';
     iniciarReloj();
     // Ayudita arranca habilitada en cada nivel nuevo (si hay partes mal puestas).
@@ -1122,16 +1122,19 @@ btnTrampa.addEventListener('click', () => {
 // F1: abre la Ayuda. Despliega el primer ítem ("Cómo se juega") y pasa el
 // foco al título del panel; preventDefault() evita que el navegador abra su
 // propia ayuda.
-// Ctrl + Mayús + T: "Trampa", para la demo. El botón queda oculto (un jugador
-// no debería ver un botón que le resuelve el juego), pero sigue en el HTML con
+// Alt + T: "Trampa", para la demo. El botón queda oculto (un jugador no
+// debería ver un botón que le resuelve el juego), pero sigue en el HTML con
 // su listener: click() en un botón oculto igual dispara su evento, y el
-// listener ya revisa que haya un nivel en juego. Se compara evento.code
-// ("KeyT", la tecla física) y no evento.key, que con Mayús vale "T".
+// listener ya revisa que haya un nivel en juego. No es Ctrl + Mayús + T
+// porque Chrome y Edge se reservan esa combinación (reabrir la última
+// pestaña) y no se la pasan a la página. Se compara evento.code ("KeyT", la
+// tecla física) y no evento.key, que con Alt puede dar otro carácter según
+// la distribución del teclado.
 document.addEventListener('keydown', (evento) => {
   if (evento.key === 'F1') {
     evento.preventDefault();
     abrirAyuda();
-  } else if (evento.ctrlKey && evento.shiftKey && evento.code === 'KeyT') {
+  } else if (evento.altKey && !evento.ctrlKey && !evento.shiftKey && evento.code === 'KeyT') {
     evento.preventDefault();
     btnTrampa.click();
   }
