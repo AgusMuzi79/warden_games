@@ -9,8 +9,8 @@
 //      tras otro, en la imagen elegida para el nivel (extra del enunciado).
 //   3. Motor del nivel: carga la imagen sorteada, la corta en piezas, les
 //      aplica los filtros del nivel, las gira al azar y deja girarlas con el
-//      mouse (clic izquierdo a la izquierda, clic derecho a la derecha) hasta
-//      armar la imagen. Al armarla se quitan los filtros con un fundido.
+//      mouse (clic izquierdo a la izquierda, clic derecho a la derecha) o con
+//      el teclado (flechas para elegir, Q / E para girar) hasta armar la imagen. Al armarla se quitan los filtros con un fundido.
 //   4. Temporizador (arranca al terminar el sorteo, se frena al armar la imagen),
 //      récord por nivel guardado en localStorage y paso entre niveles
 //      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
@@ -266,6 +266,11 @@ let piezas = [];
 let nivelActivo = false;
 let ultimaImagen = -1;
 
+// Pieza elegida con el teclado: es un índice de "piezas", que está ordenada
+// fila por fila (de izquierda a derecha y de arriba hacia abajo). Las flechas
+// la mueven y Q / E / Enter / Espacio la giran (ver el keydown del canvas).
+let piezaFoco = 0;
+
 // Cuántas piezas entran por fila y por columna con la dificultad actual (2, 3 o 4).
 function piezasPorLado() {
   return DIFICULTADES[cantidadPiezas].lado;
@@ -480,12 +485,38 @@ function dibujar() {
       );
     }
   });
+
+  // La pieza elegida con el teclado lleva un anillo punteado del color de foco
+  // (el mismo amarillo del :focus-visible del sitio). Solo se dibuja si el
+  // canvas tiene el foco y hay un nivel en juego: con el mouse en otro lado no
+  // hace falta. Es punteado y va más adentro que el borde de Ayudita (que es
+  // liso), para que no se confundan.
+  const piezaElegida = piezas[piezaFoco];
+  if (nivelActivo && piezaElegida && document.activeElement === canvas) {
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = colorFoco();
+    // setLineDash([trazo, espacio]) hace la línea punteada. Se vuelve a una
+    // línea lisa ([]) después, porque el contexto recuerda el patrón y el
+    // borde de Ayudita del próximo dibujo saldría punteado.
+    ctx.setLineDash([10, 6]);
+    ctx.strokeRect(
+      piezaElegida.columna * tamano + 8, piezaElegida.fila * tamano + 8,
+      tamano - 16, tamano - 16
+    );
+    ctx.setLineDash([]);
+  }
 }
 
 // Color del borde de las partes fijas: el token --acento del sitio, leído de
 // variables.css (en JS no se puede usar var() directo, pero sí leer su valor).
 function colorMarca() {
   return getComputedStyle(document.documentElement).getPropertyValue('--acento').trim();
+}
+
+// Color del anillo de la pieza elegida con el teclado: el token --foco, leído
+// igual que --acento.
+function colorFoco() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--foco').trim();
 }
 
 // ---------- Fundido al ganar ----------
@@ -677,9 +708,13 @@ function arrancarNivel(indiceImagen) {
       mostrarErrorDeCarga('Los filtros necesitan un servidor: abrí la página desde http://localhost, no con doble clic.');
       return;
     }
+    // El teclado arranca en la primera pieza (arriba a la izquierda).
+    piezaFoco = 0;
     mezclar();
-    dibujar();
+    // nivelActivo va antes de dibujar(): así, si el canvas ya tiene el foco,
+    // el primer dibujo ya muestra el anillo de la pieza elegida.
     nivelActivo = true;
+    dibujar();
     btnAyudita.hidden = false;
     btnTrampa.hidden = false;
     estado.textContent = 'Girá cada parte hasta armar la imagen.';
@@ -975,6 +1010,8 @@ function perderNivel() {
   ocultarAcciones();
   datoTiempo.textContent = textoTiempo(limiteDelNivel() * 1000, limiteDelNivel());
   estado.textContent = '¡Se acabó el tiempo! Perdiste el nivel.';
+  // Se redibuja sin el anillo del teclado (nivelActivo ya es false).
+  dibujar();
   btnReintentar.hidden = false;
   btnInicio.hidden = false;
   btnReintentar.focus();
@@ -1048,17 +1085,18 @@ function piezaEnPunto(evento) {
   return piezas.find((pieza) => pieza.columna === columna && pieza.fila === fila);
 }
 
-// Gira la pieza clickeada. sentido = +1 (derecha) o -1 (izquierda).
+// Gira una pieza. sentido = +1 (derecha) o -1 (izquierda). La usan el mouse
+// (girarPieza) y el teclado (keydown del canvas), así las reglas son las
+// mismas venga de donde venga el giro.
 // Sumar 4 antes del módulo evita números negativos: (0 - 1 + 4) % 4 = 3.
-function girarPieza(evento, sentido) {
+function girar(pieza, sentido) {
   if (!nivelActivo) return;
-  // Si el clic llega con el tiempo ya agotado (entre dos ticks del reloj), se
+  // Si el giro llega con el tiempo ya agotado (entre dos ticks del reloj), se
   // pierde el nivel en vez de girar: así nunca se gana pasado el límite.
   if (tiempoAgotado()) {
     perderNivel();
     return;
   }
-  const pieza = piezaEnPunto(evento);
   // Las partes fijadas por Ayudita y las lisas (fijas desde el inicio) no giran.
   if (!pieza || pieza.fija || esLisa(pieza)) return;
 
@@ -1072,8 +1110,18 @@ function girarPieza(evento, sentido) {
   }
 }
 
-// Clic izquierdo: gira hacia la izquierda.
-canvas.addEventListener('click', (evento) => girarPieza(evento, -1));
+// Gira la pieza clickeada. Además, la pieza clickeada pasa a ser la elegida
+// para el teclado: al hacer clic el canvas recibe el foco, y si el anillo
+// quedara en otra pieza confundiría.
+function girarPieza(evento, sentido) {
+  const pieza = piezaEnPunto(evento);
+  if (pieza) piezaFoco = piezas.indexOf(pieza);
+  girar(pieza, sentido);
+}
+
+// Clic izquierdo: gira hacia la izquierda. Con Mayús apretada gira hacia la
+// derecha: es la alternativa al clic derecho para quien usa un trackpad.
+canvas.addEventListener('click', (evento) => girarPieza(evento, evento.shiftKey ? +1 : -1));
 
 // Clic derecho: gira hacia la derecha. preventDefault() evita que se abra el
 // menú contextual del navegador (el que sale con el botón derecho).
@@ -1081,6 +1129,53 @@ canvas.addEventListener('contextmenu', (evento) => {
   evento.preventDefault();
   girarPieza(evento, +1);
 });
+
+// Teclado: las flechas mueven la pieza elegida dentro de la grilla (al pasar
+// el borde aparece del otro lado de la misma fila o columna), Q la gira hacia
+// la izquierda y E, Enter o Espacio hacia la derecha. preventDefault() solo
+// en esas teclas: evita que las flechas y el Espacio scrolleen la página, y no
+// toca el resto (Tab, por ejemplo, sigue sacando el foco del canvas).
+canvas.addEventListener('keydown', (evento) => {
+  // Con Ctrl, Alt o Cmd es un atajo de otra cosa (del navegador o de la página).
+  if (evento.ctrlKey || evento.altKey || evento.metaKey) return;
+  if (!nivelActivo) return;
+
+  const lado = piezasPorLado();
+  let columna = piezaFoco % lado;
+  let fila = Math.floor(piezaFoco / lado);
+  const tecla = evento.key.toLowerCase();
+
+  if (tecla === 'arrowleft') {
+    columna = (columna - 1 + lado) % lado;
+  } else if (tecla === 'arrowright') {
+    columna = (columna + 1) % lado;
+  } else if (tecla === 'arrowup') {
+    fila = (fila - 1 + lado) % lado;
+  } else if (tecla === 'arrowdown') {
+    fila = (fila + 1) % lado;
+  } else if (tecla === 'q') {
+    evento.preventDefault();
+    girar(piezas[piezaFoco], -1);
+    return;
+  } else if (tecla === 'e' || tecla === 'enter' || tecla === ' ') {
+    evento.preventDefault();
+    girar(piezas[piezaFoco], +1);
+    return;
+  } else {
+    return;
+  }
+
+  // Llegó acá con una flecha: se mueve la pieza elegida y se redibuja el anillo.
+  evento.preventDefault();
+  piezaFoco = fila * lado + columna;
+  dibujar();
+});
+
+// El anillo del teclado solo se ve con el canvas enfocado: al entrar o salir
+// el foco se redibuja. Solo durante un nivel en juego: fuera de él no hay
+// anillo que mostrar, y así tampoco se pisa el fundido del final.
+canvas.addEventListener('focus', () => { if (nivelActivo) dibujar(); });
+canvas.addEventListener('blur', () => { if (nivelActivo) dibujar(); });
 
 // ---------- Galería ----------
 

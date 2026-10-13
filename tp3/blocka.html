@@ -164,8 +164,8 @@
                 <p class="blocka__dato">Récord <strong id="blocka-record">—</strong></p>
               </div>
 
-              <canvas class="blocka__canvas" id="blocka-canvas" width="480" height="480" tabindex="-1"
-                      aria-label="Imagen dividida en partes giradas. Clic izquierdo gira una parte a la izquierda y clic derecho, a la derecha.">
+              <canvas class="blocka__canvas" id="blocka-canvas" width="480" height="480" tabindex="0"
+                      aria-label="Imagen dividida en partes giradas. Clic izquierdo gira una parte a la izquierda y clic derecho (o Mayús + clic), a la derecha. Con el teclado: las flechas eligen una parte, Q la gira a la izquierda y E, Enter o Espacio, a la derecha.">
                 <p>Tu navegador no soporta canvas, necesario para jugar a Blocka.</p>
               </canvas>
 
@@ -222,7 +222,8 @@
 
           <details class="ayuda__item" open>
             <summary>Cómo se juega</summary>
-            <p>La imagen aparece cortada en partes (4, 9 o 16, según la dificultad que elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen.</p>
+            <p>La imagen aparece cortada en partes (4, 9 o 16, según la dificultad que elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen. Con un trackpad, Mayús + clic también gira hacia la derecha.</p>
+            <p>También podés jugar con el teclado: con las flechas elegís una parte (queda marcada con un borde punteado), con Q la girás hacia la izquierda y con E, Enter o Espacio, hacia la derecha.</p>
           </details>
 
           <details class="ayuda__item">
@@ -248,6 +249,10 @@
           <ul class="ayuda__atajos">
             <li><kbd>Clic izq.</kbd> Girar a la izquierda</li>
             <li><kbd>Clic der.</kbd> Girar a la derecha</li>
+            <li><kbd>Mayús + clic</kbd> Girar a la derecha</li>
+            <li><kbd>Flechas</kbd> Elegir una parte</li>
+            <li><kbd>Q</kbd> Girar a la izquierda</li>
+            <li><kbd>E</kbd> <kbd>Enter</kbd> <kbd>Espacio</kbd> Girar a la derecha</li>
           </ul>
         </section>
 
