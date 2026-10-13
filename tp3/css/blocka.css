@@ -425,7 +425,7 @@
    usamos la portada de Blocka; va después de juego.css para pisar la de
    Neon Circuit (misma especificidad, gana la última cargada). */
 .ficha-juego__miniatura {
-  background-image: url("../assets/img/portada-blocka.jpg");
+  background-image: url("../assets/img/blocka-comic-rojo.png");
 }
 
 /* ---------- Galería ----------

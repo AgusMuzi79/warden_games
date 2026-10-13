@@ -48,7 +48,7 @@ const puedePausarConHover = window.matchMedia('(hover: hover)').matches;
 // por rating contra el resto. Cada uno lleva el link de su página ("enlace").
 const BLOCKA = {
   name: 'Blocka',
-  background_image: 'assets/img/portada-blocka.jpg',
+  background_image: 'assets/img/blocka-comic-rojo.png',
   enlace: 'blocka.html',
 };
 
