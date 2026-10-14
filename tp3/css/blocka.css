@@ -64,6 +64,16 @@
   margin-bottom: var(--espaciado-3);
 }
 
+/* Los dos grupos de píldoras (piezas y modo), uno debajo del otro y pegados
+   a la derecha. Uno al lado del otro no entran junto al título en los 480 px
+   del panel. */
+.blocka__selectores {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--espaciado-1);
+}
+
 .blocka__vistas {
   display: flex;
   gap: var(--espaciado-1);
@@ -156,8 +166,9 @@
   text-align: right;
 }
 
-/* ---------- Elección de dificultad ----------
-   Tres tarjetas-botón (4, 9 y 16 piezas) con el número bien grande. */
+/* ---------- Elección de piezas y de modo ----------
+   Tres tarjetas-botón (4, 9 y 16 piezas) con el número bien grande. La
+   pantalla de modo (#blocka-modo) usa el mismo bloque con dos tarjetas. */
 .blocka__dificultad {
   display: flex;
   flex-direction: column;
@@ -205,6 +216,27 @@
 .blocka__opcion-numero {
   color: var(--acento);
   font: 700 48px/1 var(--font-ui);
+}
+
+/* Pantalla de modo: dos tarjetas en vez de tres. Mismo ancho máximo que la
+   de piezas, así las tarjetas quedan más anchas y entra el texto de abajo. */
+.blocka__opciones--dos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Nombre del modo ("Normal", "Difícil"): ocupa el lugar del número grande de
+   las tarjetas de piezas, un poco más chico porque es una palabra. */
+.blocka__opcion-titulo {
+  color: var(--acento);
+  font: 700 28px/1.2 var(--font-ui);
+}
+
+/* Explicación corta de cada modo, debajo del nombre. */
+.blocka__opcion-detalle {
+  color: var(--primario-c2);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
 }
 
 .blocka__opcion-nombre {

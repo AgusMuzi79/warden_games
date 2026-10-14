@@ -94,11 +94,19 @@
               <section class="blocka__panel" aria-labelledby="inicio-records">
                 <div class="blocka__panel-cabecera">
                   <h2 id="inicio-records">Récords</h2>
-                  <!-- Ver los récords de cada dificultad. aria-pressed marca la activa. -->
-                  <div class="blocka__vistas" role="group" aria-label="Ver récords según la cantidad de piezas">
-                    <button type="button" class="blocka__vista" data-piezas="4" aria-pressed="true">4 piezas</button>
-                    <button type="button" class="blocka__vista" data-piezas="9" aria-pressed="false">9 piezas</button>
-                    <button type="button" class="blocka__vista" data-piezas="16" aria-pressed="false">16 piezas</button>
+                  <!-- Ver los récords de cada cantidad de piezas y de cada
+                       modo: dos grupos de píldoras, uno debajo del otro.
+                       aria-pressed marca la activa de cada grupo. -->
+                  <div class="blocka__selectores">
+                    <div class="blocka__vistas" role="group" aria-label="Ver récords según la cantidad de piezas">
+                      <button type="button" class="blocka__vista" data-piezas="4" aria-pressed="true">4 piezas</button>
+                      <button type="button" class="blocka__vista" data-piezas="9" aria-pressed="false">9 piezas</button>
+                      <button type="button" class="blocka__vista" data-piezas="16" aria-pressed="false">16 piezas</button>
+                    </div>
+                    <div class="blocka__vistas" role="group" aria-label="Ver récords según el modo">
+                      <button type="button" class="blocka__vista" data-modo="normal" aria-pressed="true">Normal</button>
+                      <button type="button" class="blocka__vista" data-modo="dificil" aria-pressed="false">Difícil</button>
+                    </div>
                   </div>
                 </div>
                 <ul class="blocka__records" id="blocka-lista-records"></ul>
@@ -108,30 +116,51 @@
               <button type="button" class="btn btn--primario" id="btn-comenzar">Comenzar</button>
             </div>
 
-            <!-- Elección de dificultad: se ve después de "Comenzar" y antes del
-                 sorteo. Cada opción fija cuántas piezas tendrá la imagen y
-                 arranca el nivel 1 (js/blocka.js). -->
+            <!-- Elección de piezas: se ve después de "Comenzar". Cada opción
+                 fija cuántas piezas tendrá la imagen y pasa a elegir el modo
+                 (js/blocka.js). La etiqueta de abajo es la grilla (2 × 2...),
+                 no Fácil/Medio/Difícil: "Difícil" es un modo. -->
             <div class="blocka__dificultad" id="blocka-dificultad" hidden>
-              <h2 id="dificultad-titulo">Elegí la dificultad</h2>
+              <h2 id="dificultad-titulo">Elegí la cantidad de piezas</h2>
               <div class="blocka__opciones" role="group" aria-labelledby="dificultad-titulo">
                 <button type="button" class="blocka__opcion" data-piezas="4">
                   <span class="blocka__opcion-numero">4</span>
                   <span>piezas</span>
-                  <span class="blocka__opcion-nombre">Fácil</span>
+                  <span class="blocka__opcion-nombre">2 × 2</span>
                 </button>
                 <button type="button" class="blocka__opcion" data-piezas="9">
                   <span class="blocka__opcion-numero">9</span>
                   <span>piezas</span>
-                  <span class="blocka__opcion-nombre">Medio</span>
+                  <span class="blocka__opcion-nombre">3 × 3</span>
                 </button>
                 <button type="button" class="blocka__opcion" data-piezas="16">
                   <span class="blocka__opcion-numero">16</span>
                   <span>piezas</span>
-                  <span class="blocka__opcion-nombre">Difícil</span>
+                  <span class="blocka__opcion-nombre">4 × 4</span>
                 </button>
               </div>
               <p class="blocka__dificultad-nota">Con más piezas, el tiempo límite de los niveles avanzados es mayor.</p>
               <button type="button" class="btn btn--terciario" id="btn-dificultad-volver">Volver</button>
+            </div>
+
+            <!-- Elección de modo: se ve después de elegir las piezas y antes
+                 del sorteo. Reusa el mismo bloque y las mismas tarjetas que la
+                 pantalla de piezas, con dos opciones. Cada una fija el modo y
+                 arranca el nivel 1 (js/blocka.js). -->
+            <div class="blocka__dificultad" id="blocka-modo" hidden>
+              <h2 id="modo-titulo">Elegí el modo</h2>
+              <div class="blocka__opciones blocka__opciones--dos" role="group" aria-labelledby="modo-titulo">
+                <button type="button" class="blocka__opcion" data-modo="normal">
+                  <span class="blocka__opcion-titulo">Normal</span>
+                  <span class="blocka__opcion-detalle">Cada nivel con su filtro: grises, negativo y mixtos.</span>
+                </button>
+                <button type="button" class="blocka__opcion" data-modo="dificil">
+                  <span class="blocka__opcion-titulo">Difícil</span>
+                  <span class="blocka__opcion-detalle">Filtro sorpresa: cada nivel sortea uno, sin repetir el anterior.</span>
+                </button>
+              </div>
+              <p class="blocka__dificultad-nota">Cada modo tiene sus propios récords.</p>
+              <button type="button" class="btn btn--terciario" id="btn-modo-volver">Volver</button>
             </div>
 
             <!-- Sorteo de la imagen: una tragamonedas de 3 rodillos que se ve
@@ -218,7 +247,7 @@
 
           <details class="ayuda__item" open>
             <summary>Cómo se juega</summary>
-            <p>La imagen aparece cortada en partes (4, 9 o 16, según la dificultad que elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen. Con un trackpad, Mayús + clic también gira hacia la derecha.</p>
+            <p>La imagen aparece cortada en partes (4, 9 o 16, según cuántas elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen. Con un trackpad, Mayús + clic también gira hacia la derecha.</p>
             <p>También podés jugar con el teclado: con las flechas elegís una parte (queda marcada con un borde punteado), con Q la girás hacia la izquierda y con E, Enter o Espacio, hacia la derecha.</p>
           </details>
 
@@ -229,7 +258,7 @@
 
           <details class="ayuda__item">
             <summary>Filtros</summary>
-            <p>Para complicarlo, la imagen aparece con un filtro: escala de grises, menos brillo (más oscura) o negativo. En el último nivel cada parte puede tener un filtro distinto. Al terminar se quitan todos y ves la imagen original.</p>
+            <p>Para complicarlo, la imagen aparece con un filtro: escala de grises, menos brillo (más oscura) o negativo. En el último nivel cada parte puede tener un filtro distinto. En el modo Difícil, en cambio, cada nivel sortea un solo filtro sorpresa para toda la imagen (nunca el mismo que el nivel anterior) y no te dice cuál es. Al terminar se quitan todos y ves la imagen original.</p>
           </details>
 
           <details class="ayuda__item">
@@ -239,7 +268,7 @@
 
           <details class="ayuda__item">
             <summary>Niveles</summary>
-            <p>Hay tres niveles, cada uno con una imagen distinta: el 1 en escala de grises y sin tiempo máximo, el 2 en negativo y el 3 con filtros mezclados (estos dos, con tiempo máximo). Y hay tres dificultades: 4, 9 o 16 piezas. Cada dificultad tiene sus propios récords. Al completar un nivel podés repetirlo o pasar al siguiente.</p>
+            <p>Hay tres niveles, cada uno con una imagen distinta: el 1 en escala de grises y sin tiempo máximo, el 2 en negativo y el 3 con filtros mezclados (estos dos, con tiempo máximo). Eso es el modo Normal; en el Difícil el filtro de cada nivel es sorpresa. Además elegís cuántas piezas: 4, 9 o 16. Cada combinación de piezas y modo tiene sus propios récords. Al completar un nivel podés repetirlo o pasar al siguiente.</p>
           </details>
 
           <ul class="ayuda__atajos">
