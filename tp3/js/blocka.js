@@ -93,9 +93,9 @@ const BANCO_IMAGENES = [
 // "nombre": cada nivel sortea un filtro (ver filtrosDelNivel()). tiempoMax
 // vale igual en los dos modos.
 const NIVELES = [
-  { nombre: 'Escala de grises', filtros: ['grises'], tiempoMax: { 4: 45, 9: 101, 16: 180 } },
-  { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: { 4: 35, 9: 79, 16: 105 } },
-  { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'negativo'], tiempoMax: { 4: 25, 9: 56, 16: 75 } },
+  { nombre: 'Escala de grises', filtros: ['grises'], tiempoMax: { 4: 30, 9: 40, 16: 50 } },
+  { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: { 4: 20, 9: 30, 16: 40 } },
+  { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'negativo'], tiempoMax: { 4: 10, 9: 20, 16: 30 } },
 ];
 
 // ---------- Dificultad: cantidad de piezas ----------

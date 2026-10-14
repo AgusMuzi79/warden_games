@@ -526,20 +526,24 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
   | Nivel | 4 piezas | 9 piezas | 16 piezas |
   |---|---|---|---|
-  | 1 · Escala de grises | 0:45 | 1:41 | 3:00 |
-  | 2 · Negativo | 0:35 | 1:19 | 1:45 |
-  | 3 · Filtros mixtos | 0:25 | 0:56 | 1:15 |
+  | 1 · Escala de grises | 0:30 | 0:40 | 0:50 |
+  | 2 · Negativo | 0:20 | 0:30 | 0:40 |
+  | 3 · Filtros mixtos | 0:10 | 0:20 | 0:30 |
 
 - **Por qué:** pedido de Agus. Con 60 s en los niveles 2 y 3 sobraba tiempo, y
   que el límite baje suma presión a medida que se avanza, junto con filtros más
-  difíciles. Con 4 piezas cada parte necesita como mucho 2 clics, así que 25 s
-  alcanzan.
+  difíciles. La regla es simple de recordar: con 4 piezas, 30, 20 y 10 s, y
+  cada cantidad de piezas suma 10 s a la anterior.
 - **Por qué una tabla y no el factor `piezas / 4`:** el factor llevaba los
   niveles 2 y 3 con 16 piezas a 2:20 y 1:40, demasiado generoso. Con la tabla
-  cada combinación se ajusta por separado. 4 y 9 piezas mantienen los valores
-  que daba el factor (45 × 9 / 4 ≈ 101 s, etc.); 16 piezas se bajó a mano.
-- **Ayudita pesa más:** sus 5 s son un 20 % de los 25 s del nivel 3 con 4
-  piezas. Se acepta: es el nivel más difícil.
+  cada combinación se ajusta por separado.
+- **Tiempos muy ajustados, a propósito:** con 16 piezas en 30 s (nivel 3)
+  queda menos de 2 s por pieza a girar, y con 4 piezas en 10 s apenas alcanza.
+  Ayudita (se deshabilita con menos de 5 s) solo se puede usar en la primera
+  mitad de los niveles más cortos. Se avisó y el equipo lo eligió como
+  desafío.
+- **Antes:** 45 / 35 / 25 s con 4 piezas, 1:41 / 1:19 / 0:56 con 9 y
+  3:00 / 1:45 / 1:15 con 16. Se descartó por demasiado generoso.
 - **Descartado:** dejar el nivel 1 sin límite (el tiempo no podría "bajar"
   desde el primer nivel) y mantener el factor con números base más chicos (no
   arregla la proporción de 16 piezas).
