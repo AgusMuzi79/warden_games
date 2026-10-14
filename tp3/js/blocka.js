@@ -3,16 +3,18 @@
 // Qué hace hoy:
 //   1. Maneja la portada y la pantalla de inicio: "Jugar" (portada) lleva al
 //      inicio (tabla de récords, con un tachito para borrar cada uno) y
-//      "Comenzar" lleva a elegir la dificultad: 4, 9 o 16 piezas. Los récords
-//      y el tiempo límite dependen de la cantidad de piezas.
+//      "Comenzar" lleva a elegir la cantidad de piezas (4, 9 o 16) y después
+//      el modo: Normal (cada nivel con su filtro fijo) o Difícil (cada nivel
+//      sortea un filtro sorpresa). El tiempo límite depende de la cantidad de
+//      piezas, y los récords, de la cantidad de piezas y del modo.
 //   2. Sorteo de la imagen: una tragamonedas de 3 rodillos que frena, uno
 //      tras otro, en la imagen elegida para el nivel (extra del enunciado).
 //   3. Motor del nivel: carga la imagen sorteada, la corta en piezas, les
-//      aplica los filtros del nivel, las gira al azar y deja girarlas con el
+//      aplica los filtros del nivel (ver filtrosDelNivel()), las gira al azar y deja girarlas con el
 //      mouse (clic izquierdo a la izquierda, clic derecho a la derecha) o con
 //      el teclado (flechas para elegir, Q / E para girar) hasta armar la imagen. Al armarla se quitan los filtros con un fundido.
 //   4. Temporizador (arranca al terminar el sorteo, se frena al armar la imagen),
-//      récord por nivel guardado en localStorage y paso entre niveles
+//      récord por piezas, modo y nivel guardado en localStorage y paso entre niveles
 //      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
 //   5. Extras: "Ayudita" (deja una parte bien puesta y fija, suma 5 segundos),
 //      "Trampa" (resuelve el nivel, sin récord; oculta, solo con el atajo
@@ -23,9 +25,10 @@
 // Depende de blocka.html: #tablero-cabecera, #tablero-portada,
 // #tablero-juego, #btn-jugar, #blocka-canvas, #blocka-estado, los datos del
 // pantalla de inicio (#blocka-inicio, #blocka-lista-records,
-// #blocka-records-estado, .blocka__vista, #btn-comenzar), la elección de
-// dificultad (#blocka-dificultad, .blocka__opcion, #btn-dificultad-volver),
-// el sorteo (#blocka-sorteo, #blocka-sorteo-titulo, #blocka-sorteo-estado,
+// #blocka-records-estado, .blocka__vista[data-piezas], .blocka__vista[data-modo],
+// #btn-comenzar), la elección de piezas (#blocka-dificultad,
+// .blocka__opcion[data-piezas], #btn-dificultad-volver), la elección de modo
+// (#blocka-modo, .blocka__opcion[data-modo], #btn-modo-volver), el sorteo (#blocka-sorteo, #blocka-sorteo-titulo, #blocka-sorteo-estado,
 // .blocka__slot y las 3 .blocka__tira), la partida (#blocka-partida), el HUD (#blocka-nivel, #blocka-tiempo,
 // #blocka-record, #ficha-record) y los botones (#btn-ayudita, #btn-trampa,
 // #btn-siguiente, #btn-reintentar, #btn-inicio). También de
@@ -87,6 +90,9 @@ const BANCO_IMAGENES = [
 // veces); con 9, la pieza i usa el filtro i % 4; con 16 (4 por fila), cada
 // columna repite el mismo filtro.
 // "nombre" es el texto que se muestra en la pantalla de inicio.
+// Esta lista es la del modo Normal. En el modo Difícil se ignoran "filtros" y
+// "nombre": cada nivel sortea un filtro (ver filtrosDelNivel()). tiempoMax
+// vale igual en los dos modos.
 const NIVELES = [
   { nombre: 'Escala de grises', filtros: ['grises'] },
   { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: 60 },
@@ -102,11 +108,79 @@ const NIVELES = [
 // cuadrados iguales cuando la cantidad es un cuadrado perfecto: por eso son
 // 4, 9 y 16 y no 4, 6 y 8 (ver DECISIONES.md, "Extra: dificultades de 4, 9 y 16 piezas"). "lado" es cuántas piezas
 // entran por fila y por columna.
+// Ya no llevan nombre (Fácil, Medio, Difícil): "Difícil" pasó a ser un modo
+// (ver MODOS), y con el mismo nombre en dos lugares no se entendía cuál era cuál.
 const DIFICULTADES = {
-  4: { lado: 2, nombre: 'Fácil' },
-  9: { lado: 3, nombre: 'Medio' },
-  16: { lado: 4, nombre: 'Difícil' },
+  4: { lado: 2 },
+  9: { lado: 3 },
+  16: { lado: 4 },
 };
+
+// ---------- Modo: Normal o Difícil ----------
+
+// El modo es independiente de la cantidad de piezas: se puede jugar con 4
+// piezas en Difícil o con 16 en Normal. Normal usa los filtros fijos de
+// NIVELES; Difícil sortea, al empezar cada nivel, un solo filtro para toda la
+// imagen y no dice cuál es ("Filtro sorpresa"). Las claves ("normal",
+// "dificil") van en la clave del récord y en el data-modo de los botones;
+// "nombre" es lo que se muestra.
+const MODOS = {
+  normal: { nombre: 'Normal' },
+  dificil: { nombre: 'Difícil' },
+};
+
+// Lo que se muestra en lugar del nombre del filtro en el modo Difícil: decirlo
+// le quitaría la sorpresa.
+const NOMBRE_SORPRESA = 'Filtro sorpresa';
+
+// Nombre para mostrar de cada filtro de FILTROS. En Difícil se revela al
+// terminar el nivel (ganado, con trampa o perdido), cuando ya no le quita la
+// sorpresa a nadie.
+const NOMBRES_FILTRO = {
+  grises: 'escala de grises',
+  brillo: 'brillo al 30 %',
+  negativo: 'negativo',
+};
+
+// Texto que se suma al mensaje de fin de nivel: en Difícil dice qué filtro
+// tocó; en Normal no suma nada (el filtro ya se conocía).
+function textoFiltroRevelado() {
+  return modo === 'dificil' ? ` El filtro era: ${NOMBRES_FILTRO[ultimoFiltro]}.` : '';
+}
+
+// Modo que se está jugando, y el que se está viendo en la tabla de récords.
+let modo = 'normal';
+let vistaModo = 'normal';
+
+// Filtro sorteado para el nivel en juego del modo Difícil (una clave de
+// FILTROS). Se guarda para no repetirlo en el nivel siguiente, mismo criterio
+// que ultimaImagen con las imágenes. null hasta el primer sorteo.
+let ultimoFiltro = null;
+
+// Sortea el filtro del modo Difícil: uno de los de FILTROS (js/filtros.js:
+// grises, brillo y negativo), distinto al del nivel anterior. Se llama al
+// empezar cada nivel, también al reintentarlo o al pasar al siguiente.
+function sortearFiltro() {
+  const nombres = Object.keys(FILTROS);
+  let elegido;
+  do {
+    elegido = nombres[Math.floor(Math.random() * nombres.length)];
+  } while (nombres.length > 1 && elegido === ultimoFiltro);
+  ultimoFiltro = elegido;
+}
+
+// Lista de filtros que usa crearPiezas() para el nivel: en Normal, la del
+// nivel (NIVELES); en Difícil, una lista con el único filtro sorteado, que así
+// vale para todas las piezas (también en el nivel 3, que en Normal mezcla).
+function filtrosDelNivel(nivel) {
+  return modo === 'dificil' ? [ultimoFiltro] : nivel.filtros;
+}
+
+// Nombre del nivel "indice" que se muestra en el sorteo y en la tabla de
+// récords: el de NIVELES en Normal, "Filtro sorpresa" en Difícil.
+function nombreNivel(indice, modoNivel) {
+  return modoNivel === 'dificil' ? NOMBRE_SORPRESA : NIVELES[indice].nombre;
+}
 
 // Los tiempos máximos de NIVELES están pensados para 4 piezas. Con más piezas
 // hay más clics que dar, así que el límite crece en proporción.
@@ -151,15 +225,17 @@ function textoTiempo(ms, limiteSeg) {
   return `${formatearTiempo(ms)} / ${formatearTiempo(limiteSeg * 1000).slice(0, 5)}`;
 }
 
-// El récord se guarda por dificultad Y por nivel, porque un tiempo con 4
-// piezas no se puede comparar con uno de 8. En localStorage va un objeto
-// { "4-0": milisegundos, "6-2": milisegundos, ... }: la clave es
-// "<piezas>-<índice del nivel>". Si el navegador no deja usar el storage
-// (bloqueado, lleno), se ignora y el juego sigue sin récords.
+// El récord se guarda por cantidad de piezas, por modo Y por nivel: un tiempo
+// con 4 piezas no se puede comparar con uno de 16, ni uno con el filtro fijo
+// con uno con filtro sorpresa. En localStorage va un objeto
+// { "4-normal-0": milisegundos, "16-dificil-2": milisegundos, ... }: la clave
+// es "<piezas>-<modo>-<índice del nivel>". Las claves viejas, sin modo
+// ("4-0"), quedan en el objeto pero ya no se leen. Si el navegador no deja
+// usar el storage (bloqueado, lleno), se ignora y el juego sigue sin récords.
 const CLAVE_RECORDS = 'warden-blocka-records';
 
-function claveRecord(cantidad, indice) {
-  return `${cantidad}-${indice}`;
+function claveRecord(cantidad, modoRecord, indice) {
+  return `${cantidad}-${modoRecord}-${indice}`;
 }
 
 function leerRecords() {
@@ -170,14 +246,15 @@ function leerRecords() {
   }
 }
 
-// Récord guardado de un nivel y una dificultad (undefined si no hay).
-function leerRecord(cantidad, indice) {
-  return leerRecords()[claveRecord(cantidad, indice)];
+// Récord guardado de un nivel, con una cantidad de piezas y un modo
+// (undefined si no hay).
+function leerRecord(cantidad, modoRecord, indice) {
+  return leerRecords()[claveRecord(cantidad, modoRecord, indice)];
 }
 
-function guardarRecord(cantidad, indice, ms) {
+function guardarRecord(cantidad, modoRecord, indice, ms) {
   const records = leerRecords();
-  records[claveRecord(cantidad, indice)] = ms;
+  records[claveRecord(cantidad, modoRecord, indice)] = ms;
   try {
     localStorage.setItem(CLAVE_RECORDS, JSON.stringify(records));
   } catch (error) {
@@ -185,11 +262,11 @@ function guardarRecord(cantidad, indice, ms) {
   }
 }
 
-// Borra el récord de un nivel y una dificultad. Mismo criterio que
-// guardarRecord: si el storage falla, el récord queda y no se avisa.
-function eliminarRecord(cantidad, indice) {
+// Borra el récord de un nivel, con una cantidad de piezas y un modo. Mismo
+// criterio que guardarRecord: si el storage falla, el récord queda y no se avisa.
+function eliminarRecord(cantidad, modoRecord, indice) {
   const records = leerRecords();
-  delete records[claveRecord(cantidad, indice)];
+  delete records[claveRecord(cantidad, modoRecord, indice)];
   try {
     localStorage.setItem(CLAVE_RECORDS, JSON.stringify(records));
   } catch (error) {
@@ -255,9 +332,16 @@ const tirasRodillos = document.querySelectorAll('.blocka__tira');
 const listaRecords = document.getElementById('blocka-lista-records');
 const recordsEstado = document.getElementById('blocka-records-estado');
 const dificultad = document.getElementById('blocka-dificultad');
-const opcionesDificultad = document.querySelectorAll('.blocka__opcion');
+// Las tarjetas de piezas y las de modo comparten la clase .blocka__opcion (se
+// ven igual); se distinguen por su atributo data-piezas o data-modo. Lo mismo
+// con los dos grupos de píldoras de la tabla de récords (.blocka__vista).
+const opcionesDificultad = document.querySelectorAll('.blocka__opcion[data-piezas]');
 const btnDificultadVolver = document.getElementById('btn-dificultad-volver');
-const botonesVista = document.querySelectorAll('.blocka__vista');
+const pantallaModo = document.getElementById('blocka-modo');
+const opcionesModo = document.querySelectorAll('.blocka__opcion[data-modo]');
+const btnModoVolver = document.getElementById('btn-modo-volver');
+const botonesVista = document.querySelectorAll('.blocka__vista[data-piezas]');
+const botonesVistaModo = document.querySelectorAll('.blocka__vista[data-modo]');
 const btnComenzar = document.getElementById('btn-comenzar');
 const btnAyudita = document.getElementById('btn-ayudita');
 const btnTrampa = document.getElementById('btn-trampa');
@@ -410,6 +494,8 @@ function esLisa(pieza) {
 // "fija" es true si Ayudita la puso en su lugar y la bloqueó.
 function crearPiezas(nivel) {
   const lado = piezasPorLado();
+  // Los filtros dependen del modo: los del nivel (Normal) o el sorteado (Difícil).
+  const filtros = filtrosDelNivel(nivel);
   const lista = [];
   for (let fila = 0; fila < lado; fila++) {
     for (let columna = 0; columna < lado; columna++) {
@@ -417,7 +503,7 @@ function crearPiezas(nivel) {
       // Un solo filtro en la lista vale para todas; con varios, cada pieza
       // lleva el suyo y el patrón se repite si hay más piezas que filtros
       // (lista.length es el número de piezas creadas hasta ahora).
-      const nombreFiltro = nivel.filtros[lista.length % nivel.filtros.length];
+      const nombreFiltro = filtros[lista.length % filtros.length];
       lista.push({
         columna,
         fila,
@@ -660,10 +746,10 @@ function actualizarAyudita() {
 }
 
 // Muestra el récord del nivel actual en el HUD y en la ficha del juego. Por
-// defecto es el de la dificultad que se juega; en el inicio, el de la que se
-// está viendo en la tabla.
-function mostrarRecord(cantidad = cantidadPiezas) {
-  const record = leerRecord(cantidad, indiceNivel);
+// defecto es el de las piezas y el modo que se juegan; en el inicio, el de los
+// que se están viendo en la tabla.
+function mostrarRecord(cantidad = cantidadPiezas, modoRecord = modo) {
+  const record = leerRecord(cantidad, modoRecord, indiceNivel);
   datoRecord.textContent = record === undefined ? '—' : formatearTiempo(record);
   fichaRecord.textContent = record === undefined ? 'Sin récord' : formatearTiempo(record);
 }
@@ -693,6 +779,10 @@ function iniciarNivel() {
   datoTiempo.parentElement.classList.remove('blocka__dato--alerta');
   mostrarRecord();
 
+  // En el modo Difícil, cada vez que empieza un nivel (también al reintentarlo)
+  // se sortea su filtro, antes de crear las piezas (ver filtrosDelNivel()).
+  if (modo === 'dificil') sortearFiltro();
+
   // Se repite el sorteo hasta que toque una imagen distinta a la última.
   let indiceImagen;
   do {
@@ -703,9 +793,12 @@ function iniciarNivel() {
   // Se muestra la tragamonedas en lugar del inicio o de la partida anterior.
   inicio.hidden = true;
   dificultad.hidden = true;
+  pantallaModo.hidden = true;
   partida.hidden = true;
   sorteo.hidden = false;
-  sorteoTitulo.textContent = `Nivel ${indiceNivel + 1} de ${NIVELES.length} · ${NIVELES[indiceNivel].nombre} · ${cantidadPiezas} piezas`;
+  // En Difícil el nombre del nivel es "Filtro sorpresa": no se adelanta cuál
+  // filtro tocó.
+  sorteoTitulo.textContent = `Nivel ${indiceNivel + 1} de ${NIVELES.length} · ${nombreNivel(indiceNivel, modo)} · ${cantidadPiezas} piezas · ${MODOS[modo].nombre}`;
   // El botón que se apretó desaparece: el foco pasa al bloque del sorteo
   // (tiene tabindex="-1" en el HTML), para no caer al <body>.
   sorteo.focus();
@@ -876,8 +969,8 @@ function sortear(indiceGanadora) {
 }
 
 // Pantalla de inicio: se ve después de la portada y al volver de un nivel.
-// Muestra la tabla de récords (de la dificultad que se esté viendo). Todavía
-// no hay partida: se elige la dificultad con "Comenzar".
+// Muestra la tabla de récords (de las piezas y el modo que se estén viendo).
+// Todavía no hay partida: se eligen piezas y modo con "Comenzar".
 function mostrarInicio() {
   detenerReloj();
   cancelarFundido();
@@ -886,42 +979,61 @@ function mostrarInicio() {
   partida.hidden = true;
   sorteo.hidden = true;
   dificultad.hidden = true;
+  pantallaModo.hidden = true;
   inicio.hidden = false;
   recordsEstado.textContent = '';
-  marcarVista();
-  mostrarRecordsInicio();
-  mostrarRecord(vistaRecords);
+  actualizarVistaRecords();
 }
 
-// Marca cuál de los tres botones de la tabla (4, 9 o 16 piezas) está activo.
+// Marca qué píldoras de la tabla están activas: una del grupo de piezas (4, 9
+// o 16) y una del grupo de modo (Normal o Difícil).
 function marcarVista() {
   botonesVista.forEach((boton) => {
     boton.setAttribute('aria-pressed', String(Number(boton.dataset.piezas) === vistaRecords));
   });
+  botonesVistaModo.forEach((boton) => {
+    boton.setAttribute('aria-pressed', String(boton.dataset.modo === vistaModo));
+  });
+}
+
+// Rearma todo lo que depende de qué récords se están viendo: las píldoras, la
+// tabla y "Tu récord" de la ficha.
+function actualizarVistaRecords() {
+  marcarVista();
+  mostrarRecordsInicio();
+  mostrarRecord(vistaRecords, vistaModo);
 }
 
 botonesVista.forEach((boton) => {
   boton.addEventListener('click', () => {
     vistaRecords = Number(boton.dataset.piezas);
     recordsEstado.textContent = '';
-    marcarVista();
-    mostrarRecordsInicio();
-    mostrarRecord(vistaRecords);
+    actualizarVistaRecords();
   });
 });
 
-// Arma la lista de récords de la dificultad que se está viendo: una fila por
-// nivel, con su nombre, su tiempo máximo (o "Sin límite", que depende de la
-// dificultad), el mejor tiempo guardado ("—" si no hay) y un tachito para
-// borrar ese récord. En los niveles sin récord el tachito no se ve (pero
-// ocupa su lugar, así las filas no se corren).
+// Mismo funcionamiento que las píldoras de piezas, para el modo.
+botonesVistaModo.forEach((boton) => {
+  boton.addEventListener('click', () => {
+    vistaModo = boton.dataset.modo;
+    recordsEstado.textContent = '';
+    actualizarVistaRecords();
+  });
+});
+
+// Arma la lista de récords de las piezas y el modo que se están viendo: una
+// fila por nivel, con su nombre ("Filtro sorpresa" en Difícil), su tiempo
+// máximo (o "Sin límite", que depende de la cantidad de piezas), el mejor
+// tiempo guardado ("—" si no hay) y un tachito para borrar ese récord. En los
+// niveles sin récord el tachito no se ve (pero ocupa su lugar, así las filas
+// no se corren).
 function mostrarRecordsInicio() {
-  listaRecords.replaceChildren(...NIVELES.map((nivel, indice) => {
+  listaRecords.replaceChildren(...NIVELES.map((_nivel, indice) => {
     const fila = document.createElement('li');
     fila.className = 'blocka__fila-record';
 
     const nombre = document.createElement('span');
-    nombre.textContent = `Nivel ${indice + 1} · ${nivel.nombre}`;
+    nombre.textContent = `Nivel ${indice + 1} · ${nombreNivel(indice, vistaModo)}`;
 
     const limiteSeg = limiteSegundos(indice, vistaRecords);
     const limite = document.createElement('span');
@@ -930,7 +1042,7 @@ function mostrarRecordsInicio() {
       ? 'Sin límite'
       : `Límite ${formatearTiempo(limiteSeg * 1000).slice(0, 5)}`;
 
-    const record = leerRecord(vistaRecords, indice);
+    const record = leerRecord(vistaRecords, vistaModo, indice);
     const hayRecord = record !== undefined;
     const tiempo = document.createElement('strong');
     tiempo.textContent = hayRecord ? formatearTiempo(record) : '—';
@@ -941,7 +1053,7 @@ function mostrarRecordsInicio() {
     const borrar = document.createElement('button');
     borrar.type = 'button';
     borrar.className = 'btn btn--destructivo blocka__borrar' + (hayRecord ? '' : ' blocka__borrar--oculto');
-    borrar.setAttribute('aria-label', `Borrar el récord del nivel ${indice + 1} con ${vistaRecords} piezas`);
+    borrar.setAttribute('aria-label', `Borrar el récord del nivel ${indice + 1} con ${vistaRecords} piezas en modo ${MODOS[vistaModo].nombre}`);
     const icono = document.createElement('i');
     icono.className = 'ph ph-trash';
     icono.setAttribute('aria-hidden', 'true');
@@ -959,13 +1071,14 @@ function mostrarRecordsInicio() {
 // guardar: borrar es inmediato (sin confirmación), así que un clic sin querer
 // tiene que poder revertirse.
 function borrarRecordDelInicio(indice) {
-  // Se guarda qué se borra (dificultad, nivel y tiempo) antes de borrarlo,
-  // para poder restaurarlo después.
+  // Se guarda qué se borra (piezas, modo, nivel y tiempo) antes de borrarlo,
+  // para poder restaurarlo después aunque mientras tanto se cambie de vista.
   const cantidad = vistaRecords;
-  const ms = leerRecord(cantidad, indice);
-  eliminarRecord(cantidad, indice);
+  const modoBorrado = vistaModo;
+  const ms = leerRecord(cantidad, modoBorrado, indice);
+  eliminarRecord(cantidad, modoBorrado, indice);
   mostrarRecordsInicio();
-  mostrarRecord(vistaRecords);
+  mostrarRecord(vistaRecords, vistaModo);
 
   const deshacer = document.createElement('button');
   deshacer.type = 'button';
@@ -974,9 +1087,9 @@ function borrarRecordDelInicio(indice) {
   deshacer.addEventListener('click', () => {
     // guardarRecord escribe el tiempo tal cual: como el récord se había
     // borrado, no hay otro con el que compararlo.
-    guardarRecord(cantidad, indice, ms);
+    guardarRecord(cantidad, modoBorrado, indice, ms);
     mostrarRecordsInicio();
-    mostrarRecord(vistaRecords);
+    mostrarRecord(vistaRecords, vistaModo);
     recordsEstado.textContent = 'Récord restaurado.';
     // El botón "Deshacer" desaparece con el texto nuevo: el foco vuelve a
     // "Comenzar" para no caer al <body>.
@@ -987,7 +1100,7 @@ function borrarRecordDelInicio(indice) {
   // acción cambia el texto (otro borrado, cambiar de dificultad, volver al
   // inicio), el botón desaparece solo: ya no hay nada que deshacer.
   recordsEstado.replaceChildren(
-    `Récord del nivel ${indice + 1} con ${cantidad} piezas borrado.`,
+    `Récord del nivel ${indice + 1} con ${cantidad} piezas (${MODOS[modoBorrado].nombre}) borrado.`,
     deshacer
   );
   // El tachito que tenía el foco se vuelve invisible al borrarse su récord:
@@ -996,7 +1109,7 @@ function borrarRecordDelInicio(indice) {
   deshacer.focus();
 }
 
-// ---------- Elección de dificultad ----------
+// ---------- Elección de piezas y de modo ----------
 
 // "Comenzar" (inicio): lleva a elegir cuántas piezas tendrá la imagen.
 btnComenzar.addEventListener('click', () => {
@@ -1006,22 +1119,45 @@ btnComenzar.addEventListener('click', () => {
   opcionesDificultad[0].focus();
 });
 
-// Cada opción (4, 9 o 16 piezas) fija la dificultad y arranca el nivel 1, que
-// empieza por el sorteo de la imagen. La tabla del inicio pasa a mostrar los
-// récords de esa dificultad, así al volver se ve la que se acaba de jugar.
+// Cada opción (4, 9 o 16 piezas) fija la cantidad de piezas y pasa a elegir
+// el modo. Todavía no arranca nada: falta el modo.
 opcionesDificultad.forEach((opcion) => {
   opcion.addEventListener('click', () => {
     cantidadPiezas = Number(opcion.dataset.piezas);
+    dificultad.hidden = true;
+    pantallaModo.hidden = false;
+    // Mismo criterio que con "Comenzar": la tarjeta apretada desaparece y el
+    // foco pasa a la primera opción de la pantalla nueva.
+    opcionesModo[0].focus();
+  });
+});
+
+// "Volver" (elección de piezas): de nuevo al inicio.
+btnDificultadVolver.addEventListener('click', () => {
+  mostrarInicio();
+  btnComenzar.focus();
+});
+
+// Cada modo (Normal o Difícil) lo fija y arranca el nivel 1, que empieza por
+// el sorteo de la imagen. La tabla del inicio pasa a mostrar los récords de
+// esas piezas y ese modo, así al volver se ve lo que se acaba de jugar.
+opcionesModo.forEach((opcion) => {
+  opcion.addEventListener('click', () => {
+    modo = opcion.dataset.modo;
     vistaRecords = cantidadPiezas;
+    vistaModo = modo;
     indiceNivel = 0;
     iniciarNivel();
   });
 });
 
-// "Volver" (elección de dificultad): de nuevo al inicio.
-btnDificultadVolver.addEventListener('click', () => {
-  mostrarInicio();
-  btnComenzar.focus();
+// "Volver" (elección de modo): de nuevo a elegir las piezas. El foco vuelve a
+// la tarjeta que se había elegido, para que quien usa teclado siga donde estaba.
+btnModoVolver.addEventListener('click', () => {
+  pantallaModo.hidden = true;
+  dificultad.hidden = false;
+  const elegida = [...opcionesDificultad].find((opcion) => Number(opcion.dataset.piezas) === cantidadPiezas);
+  (elegida || opcionesDificultad[0]).focus();
 });
 
 // Termina el nivel porque se armó la imagen (o porque se hizo trampa): frena
@@ -1044,14 +1180,14 @@ function terminarNivel(conTrampa = false) {
   quitarFiltros();
 
   const hayOtroNivel = indiceNivel < NIVELES.length - 1;
-  const mensajeFinal = hayOtroNivel ? '' : ' Completaste todos los niveles.';
+  const mensajeFinal = textoFiltroRevelado() + (hayOtroNivel ? '' : ' Completaste todos los niveles.');
 
   if (conTrampa) {
     estado.textContent = 'Nivel resuelto con trampa: no cuenta para el récord.' + mensajeFinal;
   } else {
-    const recordAnterior = leerRecord(cantidadPiezas, indiceNivel);
+    const recordAnterior = leerRecord(cantidadPiezas, modo, indiceNivel);
     const esRecord = recordAnterior === undefined || tiempo < recordAnterior;
-    if (esRecord) guardarRecord(cantidadPiezas, indiceNivel, tiempo);
+    if (esRecord) guardarRecord(cantidadPiezas, modo, indiceNivel, tiempo);
     mostrarRecord();
     estado.textContent = `¡Listo! Armaste la imagen en ${formatearTiempo(tiempo)}.` +
       (esRecord ? ' ¡Nuevo récord!' : '') + mensajeFinal;
@@ -1071,7 +1207,7 @@ function perderNivel() {
   nivelActivo = false;
   ocultarAcciones();
   datoTiempo.textContent = textoTiempo(limiteDelNivel() * 1000, limiteDelNivel());
-  estado.textContent = '¡Se acabó el tiempo! Perdiste el nivel.';
+  estado.textContent = '¡Se acabó el tiempo! Perdiste el nivel.' + textoFiltroRevelado();
   // Se redibuja sin el anillo del teclado (nivelActivo ya es false).
   dibujar();
   btnReintentar.hidden = false;
@@ -1280,8 +1416,9 @@ canvas.addEventListener('blur', () => { if (nivelActivo) dibujar(); });
 // card del juego (770:630), no 16:9 como las del Peg: blocka.css ajusta la
 // galería a esa proporción.
 const FOTOS_GALERIA_BLOCKA = [
-  { src: 'assets/img/blocka-inicio.jpg', alt: 'Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver cada dificultad.' },
-  { src: 'assets/img/blocka-dificultad.jpg', alt: 'Pantalla para elegir la dificultad: 4, 9 o 16 piezas.' },
+  { src: 'assets/img/blocka-inicio.jpg', alt: 'Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver los de cada cantidad de piezas y cada modo.' },
+  { src: 'assets/img/blocka-dificultad.jpg', alt: 'Pantalla para elegir la cantidad de piezas: 4, 9 o 16.' },
+  { src: 'assets/img/blocka-modo.jpg', alt: 'Pantalla para elegir el modo: Normal, con el filtro fijo de cada nivel, o Difícil, con un filtro sorpresa.' },
   { src: 'assets/img/blocka-sorteo.jpg', alt: 'La tragamonedas del sorteo, con tres rodillos que frenan en la misma imagen, la de Capitana Marvel.' },
   { src: 'assets/img/blocka-4-piezas.jpg', alt: 'Nivel 1 con 4 piezas en escala de grises: una imagen de Capitana Marvel cortada en cuatro partes giradas.' },
   { src: 'assets/img/blocka-9-piezas.jpg', alt: 'Nivel 2 con 9 piezas en negativo (Spider-Man), con una parte fijada por Ayudita y el reloj corriendo contra el tiempo límite.' },

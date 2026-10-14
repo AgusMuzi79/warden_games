@@ -478,6 +478,10 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Por qué antes del sorteo y no dentro del nivel:** la cantidad de piezas
   cambia casi todo (récords, límite de tiempo, tamaño de las piezas), así que
   se decide una vez por partida, al empezar, y no nivel por nivel.
+- **Actualización:** las tarjetas ya no dicen Fácil/Medio/Difícil sino la
+  grilla (2 × 2, 3 × 3, 4 × 4), la pantalla se llama "Elegí la cantidad de
+  piezas" y, al elegir, no arranca el nivel: pasa a elegir el modo (ver "Extra:
+  modo Normal y Difícil").
 
 ### Un solo tablero de 480x480 píxeles
 - **Qué:** `LADO_TABLERO = 480`. `DIFICULTADES` guarda cuántas piezas entran por
@@ -521,6 +525,85 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   para un caso que existe en un solo navegador.
 - **Descartado:** una tabla con las tres dificultades como columnas (no entra en
   la card junto con el límite y el tachito de cada fila).
+- **Actualización:** con el modo Difícil la clave pasó a ser
+  `"<piezas>-<modo>-<nivel>"` (ver "Extra: modo Normal y Difícil").
+
+## Extra: modo Normal y Difícil (filtro sorpresa)
+
+### Dos ejes independientes: piezas y modo
+- **Qué:** después de elegir la cantidad de piezas aparece "Elegí el modo", con
+  dos tarjetas (Normal y Difícil) y un "Volver" que lleva de nuevo a las
+  piezas. Al elegir el modo arranca el nivel 1 con el sorteo, como antes.
+  "Siguiente nivel" y "Reintentar nivel" conservan piezas y modo.
+- **Por qué:** la cantidad de piezas y el filtro complican cosas distintas
+  (cuántas partes hay que girar y cuánto cuesta reconocer la imagen). Separarlos
+  deja jugar, por ejemplo, 4 piezas en Difícil o 16 en Normal.
+- **Las tarjetas de piezas dejaron de decir Fácil/Medio/Difícil:** ahora dicen
+  la grilla (2 × 2, 3 × 3, 4 × 4). Con "Difícil" en las dos pantallas no se
+  entendía si se hablaba de las piezas o del modo.
+- **Reusa las tarjetas:** la pantalla de modo usa el mismo bloque y la misma
+  `.blocka__opcion` que la de piezas (con `.blocka__opciones--dos` para dos
+  columnas). En el JS se distinguen por `data-piezas` o `data-modo`.
+- **Foco:** al mostrar la pantalla de modo pasa a "Normal"; "Volver" lo
+  devuelve a la tarjeta de piezas que se había elegido.
+- **Descartado:** dejar Fácil/Medio/Difícil en las tarjetas de piezas (ambiguo
+  con el modo) y elegir piezas y modo en una sola pantalla (seis tarjetas no
+  entran bien en la card y mezclan las dos decisiones).
+
+### Difícil: un filtro al azar para toda la imagen, sin repetir el anterior
+- **Qué:** Normal es lo de siempre (los filtros fijos de `NIVELES`). En Difícil,
+  cada vez que empieza un nivel (también al reintentarlo o al pasar al
+  siguiente) `sortearFiltro()` elige uno de los filtros de `FILTROS` (grises,
+  brillo o negativo) y `filtrosDelNivel()` lo devuelve como lista de un solo
+  filtro, que vale para todas las piezas. El nivel 3 también: en Difícil no
+  mezcla. `crearPiezas()` solo cambió para pedirle la lista a
+  `filtrosDelNivel()`. Los tiempos límite no cambian.
+- **Por qué un solo filtro para toda la imagen:** decisión del equipo ("por
+  pieza no"). La dificultad está en no saber de antemano qué filtro va a tocar,
+  no en mezclar.
+- **Por qué nunca el mismo que el nivel anterior:** `ultimoFiltro` guarda el
+  último sorteado y se vuelve a sortear si sale igual, el mismo criterio que
+  `ultimaImagen` con las imágenes. Con solo tres filtros, repetir seguido se
+  sentiría como que no hubo sorteo.
+- **Por qué de `FILTROS` y no de `NIVELES`:** `FILTROS` son los tres filtros
+  que existen; tomarlos de `NIVELES` mezclaría la lista del nivel 3 y el
+  negativo saldría el doble de veces.
+- **Descartado:** un filtro al azar por pieza (lo descartó el equipo) y sortear
+  entre las listas de `NIVELES`.
+
+### "Filtro sorpresa": no se dice cuál tocó
+- **Qué:** en Difícil, donde se mostraría el nombre del filtro (título del
+  sorteo y filas de la tabla de récords) dice "Filtro sorpresa"
+  (`nombreNivel()`). El título del sorteo suma el modo ("· Difícil").
+- **Por qué:** decir el filtro antes de jugar le quita la sorpresa, que es la
+  gracia del modo. Al ganar se quitan los filtros como siempre.
+- **Se revela al terminar:** al ganar, al resolver con Trampa o al perder por
+  tiempo, el mensaje de estado suma "El filtro era: negativo." (u otro), con
+  los nombres de `NOMBRES_FILTRO` y `textoFiltroRevelado()`. En ese momento ya
+  no le quita la sorpresa a nadie, y el jugador se entera de qué le tocó. En
+  Normal no se agrega nada (el filtro ya se conocía). Pedido de Agus.
+- **El HUD no muestra el modo:** "Nivel 1 de 3 · 16 piezas · Difícil" junto
+  al tiempo con límite y el récord no entra en los 440 px del canvas. El modo
+  ya se ve en el título del sorteo, justo antes de jugar.
+
+### Récords por piezas, modo y nivel
+- **Qué:** la clave pasa a ser `"<piezas>-<modo>-<nivel>"` (por ejemplo
+  `"16-dificil-2"`), con modo `normal` o `dificil`, en todos los lugares que
+  leen, guardan o borran un récord. La tabla del inicio suma un segundo grupo
+  de píldoras (Normal / Difícil, con `aria-pressed`, mismo estilo que las de
+  piezas) debajo del primero. Los tachitos borran el récord de las piezas y el
+  modo que se ven, y su `aria-label` nombra el modo. "Tu récord" de la ficha y
+  la tabla, al volver de una partida, quedan en las piezas y el modo jugados.
+- **Por qué:** un tiempo con el filtro fijo (que se conoce de antemano) no se
+  puede comparar con uno con filtro sorpresa.
+- **Los récords viejos (claves `"4-0"`, `"16-2"`...) dejan de verse:** mismo
+  criterio que en "Los récords son por dificultad y por nivel": no se migran.
+  Eran del modo Normal, pero migrarlos suma código para unos pocos récords de
+  prueba.
+- **Las dos píldoras van una debajo de la otra:** las dos filas juntas no
+  entran al lado del título en los 480 px del panel.
+- **Descartado:** dejar el modo afuera de la clave (un récord de Normal
+  bloquearía mejorar en Difícil y al revés).
 
 ## Imágenes con esquinas vacías
 
@@ -665,6 +748,14 @@ Se corrió el código real del juego en el navegador sobre cada imagen con 4, 9 
   `blocka-derrota.jpg` y `blocka-victoria.jpg`, en `tp3/assets/img/`, de 60 a
   93 KB cada una. Cada una lleva su propio `alt` descriptivo. La lista está en
   `FOTOS_GALERIA_BLOCKA` (`js/blocka.js`).
+- **Actualización (modo Normal y Difícil):** se rehicieron `blocka-inicio.jpg`
+  (la tabla de récords suma las píldoras Normal / Difícil) y
+  `blocka-dificultad.jpg` (las tarjetas muestran la grilla en vez de
+  Fácil/Medio/Difícil), y se sumó `blocka-modo.jpg` (la pantalla para elegir el
+  modo), después de la de piezas: la galería pasa a 9 capturas. Mismo método
+  (card recortada a 770x630, sin el recuadro de foco, récords de ejemplo que
+  después se borraron), pero tomadas al 100 % de zoom y achicadas al recortar,
+  porque ahora la card entra entera en la ventana.
 
 ### Solo la card del juego, sin el panel de Ayuda
 - **Qué:** la primera versión recortaba en 16:9 e incluía el panel lateral
