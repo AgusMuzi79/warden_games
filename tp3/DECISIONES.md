@@ -321,6 +321,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   el nivel: el reloj se frena, las partes dejan de girar y quedan
   "Reintentar nivel" (mismo nivel, imagen nueva, arranca al instante) y
   "Volver al inicio".
+  **Actualización:** ahora los tres niveles tienen límite y baja de nivel en
+  nivel (ver "Tiempos límite que bajan con cada nivel").
 - **Por qué:** lo pide el extra del enunciado ("al menos los más avanzados").
   Poner el límite en la configuración del nivel permite cambiarlo en una línea.
 - **Ayudita se deshabilita** (`actualizarAyudita()`, atributo `disabled`)
@@ -511,6 +513,36 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   cambian.
 - **Descartado:** un límite fijo por dificultad escrito a mano en cada nivel
   (seis números más para mantener en `NIVELES`).
+- **Actualización: se reemplazó por una tabla escrita a mano** (ver "Tiempos
+  límite que bajan con cada nivel", más abajo). Lo descartado acá terminó
+  siendo la solución: con el factor `piezas / 4`, las 16 piezas tenían tiempo
+  de sobra.
+
+### Tiempos límite que bajan con cada nivel
+- **Qué:** todos los niveles tienen tiempo máximo (el nivel 1 también), y baja
+  de un nivel al siguiente. `tiempoMax` pasa a ser un objeto con un valor por
+  cantidad de piezas, y `limiteSegundos()` solo lo lee (`tiempos[cantidad]`);
+  se borró `PIEZAS_BASE`.
+
+  | Nivel | 4 piezas | 9 piezas | 16 piezas |
+  |---|---|---|---|
+  | 1 · Escala de grises | 0:45 | 1:41 | 3:00 |
+  | 2 · Negativo | 0:35 | 1:19 | 1:45 |
+  | 3 · Filtros mixtos | 0:25 | 0:56 | 1:15 |
+
+- **Por qué:** pedido de Agus. Con 60 s en los niveles 2 y 3 sobraba tiempo, y
+  que el límite baje suma presión a medida que se avanza, junto con filtros más
+  difíciles. Con 4 piezas cada parte necesita como mucho 2 clics, así que 25 s
+  alcanzan.
+- **Por qué una tabla y no el factor `piezas / 4`:** el factor llevaba los
+  niveles 2 y 3 con 16 piezas a 2:20 y 1:40, demasiado generoso. Con la tabla
+  cada combinación se ajusta por separado. 4 y 9 piezas mantienen los valores
+  que daba el factor (45 × 9 / 4 ≈ 101 s, etc.); 16 piezas se bajó a mano.
+- **Ayudita pesa más:** sus 5 s son un 20 % de los 25 s del nivel 3 con 4
+  piezas. Se acepta: es el nivel más difícil.
+- **Descartado:** dejar el nivel 1 sin límite (el tiempo no podría "bajar"
+  desde el primer nivel) y mantener el factor con números base más chicos (no
+  arregla la proporción de 16 piezas).
 
 ### Los récords son por dificultad y por nivel
 - **Qué:** la clave es `"<piezas>-<nivel>"` (por ejemplo `"16-1"`). La tabla de

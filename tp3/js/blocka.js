@@ -75,16 +75,15 @@ const BANCO_IMAGENES = [
 
 // ---------- Niveles ----------
 
-// Configuración de cada nivel: qué filtro lleva cada pieza y, opcionalmente,
-// el tiempo máximo en segundos (tiempoMax). Si la lista de filtros tiene un
+// Configuración de cada nivel: qué filtro lleva cada pieza y el tiempo máximo
+// en segundos para cada cantidad de piezas (tiempoMax). Si la lista de filtros tiene un
 // solo filtro, se aplica a todas las piezas; si tiene 4, cada pieza lleva el
 // suyo (en el orden de lectura: de izquierda a derecha y de arriba hacia
 // abajo; con 9 o 16 piezas el patrón se repite). Los nombres son las claves de
-// FILTROS (js/filtros.js). Los niveles van de menos a más difíciles: el
-// primero (escala de grises) no tiene límite de tiempo; el segundo (negativo)
-// y el tercero (filtros mezclados) sí. Si se acaba el tiempo, se pierde el
-// nivel. tiempoMax está pensado para 4 piezas y crece con la dificultad (ver
-// limiteSegundos()).
+// FILTROS (js/filtros.js). Los niveles van de menos a más difíciles: el filtro
+// cuesta más de reconocer y, a la vez, el tiempo máximo baja de un nivel al
+// siguiente. Si se acaba el tiempo, se pierde el nivel. tiempoMax tiene un
+// valor por cantidad de piezas, escrito a mano (ver limiteSegundos()).
 // En el nivel 3, la lista de 4 filtros hace que aparezcan los tres en
 // cualquier dificultad: con 4 piezas, una por filtro (y el negativo dos
 // veces); con 9, la pieza i usa el filtro i % 4; con 16 (4 por fila), cada
@@ -94,9 +93,9 @@ const BANCO_IMAGENES = [
 // "nombre": cada nivel sortea un filtro (ver filtrosDelNivel()). tiempoMax
 // vale igual en los dos modos.
 const NIVELES = [
-  { nombre: 'Escala de grises', filtros: ['grises'] },
-  { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: 60 },
-  { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'negativo'], tiempoMax: 60 },
+  { nombre: 'Escala de grises', filtros: ['grises'], tiempoMax: { 4: 45, 9: 101, 16: 180 } },
+  { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: { 4: 35, 9: 79, 16: 105 } },
+  { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'negativo'], tiempoMax: { 4: 25, 9: 56, 16: 75 } },
 ];
 
 // ---------- Dificultad: cantidad de piezas ----------
@@ -182,20 +181,18 @@ function nombreNivel(indice, modoNivel) {
   return modoNivel === 'dificil' ? NOMBRE_SORPRESA : NIVELES[indice].nombre;
 }
 
-// Los tiempos máximos de NIVELES están pensados para 4 piezas. Con más piezas
-// hay más clics que dar, así que el límite crece en proporción.
-const PIEZAS_BASE = 4;
-
 // Dificultad que se está jugando, y la que se está viendo en la tabla de
 // récords del inicio (la tabla se puede mirar de las tres).
 let cantidadPiezas = 4;
 let vistaRecords = 4;
 
 // Tiempo máximo en segundos del nivel "indice" con "cantidad" piezas
-// (undefined si el nivel no tiene límite): 60 s a 4 piezas, 135 s a 9 y 240 s a 16.
+// (undefined si el nivel no tiene límite). Se lee directo de la tabla de
+// NIVELES: con más piezas hay más clics que dar, pero un factor fijo (antes,
+// piezas / 4) dejaba a las 16 piezas con tiempo de sobra en los niveles 2 y 3.
 function limiteSegundos(indice, cantidad) {
-  const base = NIVELES[indice].tiempoMax;
-  return base === undefined ? undefined : Math.round(base * cantidad / PIEZAS_BASE);
+  const tiempos = NIVELES[indice].tiempoMax;
+  return tiempos === undefined ? undefined : tiempos[cantidad];
 }
 
 // Lo que suma "Ayudita" al contador cada vez que se usa (enunciado: 5 s).
