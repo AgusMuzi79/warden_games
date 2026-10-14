@@ -1416,8 +1416,9 @@ canvas.addEventListener('blur', () => { if (nivelActivo) dibujar(); });
 // card del juego (770:630), no 16:9 como las del Peg: blocka.css ajusta la
 // galería a esa proporción.
 const FOTOS_GALERIA_BLOCKA = [
-  { src: 'assets/img/blocka-inicio.jpg', alt: 'Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver cada dificultad.' },
-  { src: 'assets/img/blocka-dificultad.jpg', alt: 'Pantalla para elegir la dificultad: 4, 9 o 16 piezas.' },
+  { src: 'assets/img/blocka-inicio.jpg', alt: 'Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver los de cada cantidad de piezas y cada modo.' },
+  { src: 'assets/img/blocka-dificultad.jpg', alt: 'Pantalla para elegir la cantidad de piezas: 4, 9 o 16.' },
+  { src: 'assets/img/blocka-modo.jpg', alt: 'Pantalla para elegir el modo: Normal, con el filtro fijo de cada nivel, o Difícil, con un filtro sorpresa.' },
   { src: 'assets/img/blocka-sorteo.jpg', alt: 'La tragamonedas del sorteo, con tres rodillos que frenan en la misma imagen, la de Capitana Marvel.' },
   { src: 'assets/img/blocka-4-piezas.jpg', alt: 'Nivel 1 con 4 piezas en escala de grises: una imagen de Capitana Marvel cortada en cuatro partes giradas.' },
   { src: 'assets/img/blocka-9-piezas.jpg', alt: 'Nivel 2 con 9 piezas en negativo (Spider-Man), con una parte fijada por Ayudita y el reloj corriendo contra el tiempo límite.' },

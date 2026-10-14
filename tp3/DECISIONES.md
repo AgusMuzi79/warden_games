@@ -748,6 +748,14 @@ Se corrió el código real del juego en el navegador sobre cada imagen con 4, 9 
   `blocka-derrota.jpg` y `blocka-victoria.jpg`, en `tp3/assets/img/`, de 60 a
   93 KB cada una. Cada una lleva su propio `alt` descriptivo. La lista está en
   `FOTOS_GALERIA_BLOCKA` (`js/blocka.js`).
+- **Actualización (modo Normal y Difícil):** se rehicieron `blocka-inicio.jpg`
+  (la tabla de récords suma las píldoras Normal / Difícil) y
+  `blocka-dificultad.jpg` (las tarjetas muestran la grilla en vez de
+  Fácil/Medio/Difícil), y se sumó `blocka-modo.jpg` (la pantalla para elegir el
+  modo), después de la de piezas: la galería pasa a 9 capturas. Mismo método
+  (card recortada a 770x630, sin el recuadro de foco, récords de ejemplo que
+  después se borraron), pero tomadas al 100 % de zoom y achicadas al recortar,
+  porque ahora la card entra entera en la ventana.
 
 ### Solo la card del juego, sin el panel de Ayuda
 - **Qué:** la primera versión recortaba en 16:9 e incluía el panel lateral
