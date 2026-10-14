@@ -577,6 +577,11 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   (`nombreNivel()`). El título del sorteo suma el modo ("· Difícil").
 - **Por qué:** decir el filtro antes de jugar le quita la sorpresa, que es la
   gracia del modo. Al ganar se quitan los filtros como siempre.
+- **Se revela al terminar:** al ganar, al resolver con Trampa o al perder por
+  tiempo, el mensaje de estado suma "El filtro era: negativo." (u otro), con
+  los nombres de `NOMBRES_FILTRO` y `textoFiltroRevelado()`. En ese momento ya
+  no le quita la sorpresa a nadie, y el jugador se entera de qué le tocó. En
+  Normal no se agrega nada (el filtro ya se conocía). Pedido de Agus.
 - **El HUD no muestra el modo:** "Nivel 1 de 3 · 16 piezas · Difícil" junto
   al tiempo con límite y el récord no entra en los 440 px del canvas. El modo
   ya se ve en el título del sorteo, justo antes de jugar.

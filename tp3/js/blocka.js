@@ -133,6 +133,21 @@ const MODOS = {
 // le quitaría la sorpresa.
 const NOMBRE_SORPRESA = 'Filtro sorpresa';
 
+// Nombre para mostrar de cada filtro de FILTROS. En Difícil se revela al
+// terminar el nivel (ganado, con trampa o perdido), cuando ya no le quita la
+// sorpresa a nadie.
+const NOMBRES_FILTRO = {
+  grises: 'escala de grises',
+  brillo: 'brillo al 30 %',
+  negativo: 'negativo',
+};
+
+// Texto que se suma al mensaje de fin de nivel: en Difícil dice qué filtro
+// tocó; en Normal no suma nada (el filtro ya se conocía).
+function textoFiltroRevelado() {
+  return modo === 'dificil' ? ` El filtro era: ${NOMBRES_FILTRO[ultimoFiltro]}.` : '';
+}
+
 // Modo que se está jugando, y el que se está viendo en la tabla de récords.
 let modo = 'normal';
 let vistaModo = 'normal';
@@ -1013,7 +1028,7 @@ botonesVistaModo.forEach((boton) => {
 // niveles sin récord el tachito no se ve (pero ocupa su lugar, así las filas
 // no se corren).
 function mostrarRecordsInicio() {
-  listaRecords.replaceChildren(...NIVELES.map((nivel, indice) => {
+  listaRecords.replaceChildren(...NIVELES.map((_nivel, indice) => {
     const fila = document.createElement('li');
     fila.className = 'blocka__fila-record';
 
@@ -1165,7 +1180,7 @@ function terminarNivel(conTrampa = false) {
   quitarFiltros();
 
   const hayOtroNivel = indiceNivel < NIVELES.length - 1;
-  const mensajeFinal = hayOtroNivel ? '' : ' Completaste todos los niveles.';
+  const mensajeFinal = textoFiltroRevelado() + (hayOtroNivel ? '' : ' Completaste todos los niveles.');
 
   if (conTrampa) {
     estado.textContent = 'Nivel resuelto con trampa: no cuenta para el récord.' + mensajeFinal;
@@ -1192,7 +1207,7 @@ function perderNivel() {
   nivelActivo = false;
   ocultarAcciones();
   datoTiempo.textContent = textoTiempo(limiteDelNivel() * 1000, limiteDelNivel());
-  estado.textContent = '¡Se acabó el tiempo! Perdiste el nivel.';
+  estado.textContent = '¡Se acabó el tiempo! Perdiste el nivel.' + textoFiltroRevelado();
   // Se redibuja sin el anillo del teclado (nivelActivo ya es false).
   dibujar();
   btnReintentar.hidden = false;
