@@ -1,7 +1,7 @@
 // galeria.js — Motor de la galería animada (carrusel de flip 3D)
 //
-// Es genérico y no trae fotos propias. Lo usan juego.html (6 capturas de
-// Neon Circuit, desde juego.js) y producto.html (1 sola foto, la portada,
+// Es genérico y no trae fotos propias. Lo usan juego.html (4 capturas de
+// Neon Circuit, desde js/peg/pagina.js) y producto.html (1 sola foto, la portada,
 // desde producto.js). Cada página llama a iniciarGaleria(fotos) cuando ya
 // tiene su lista.
 //

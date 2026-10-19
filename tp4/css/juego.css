@@ -1,18 +1,18 @@
 /*
-  juego.css: página del juego (juego.html, Peg Solitaire / "Neon Circuit"
-  en la interfaz)
+  juego.css: páginas de juego (juego.html, Peg Solitaire / "Neon Circuit"
+  en la interfaz, y blocka.html, que carga este archivo y después blocka.css)
   Se carga al final. Usa tokens de variables.css, sobre todo los
   --tablero-* (paleta propia del tablero, separada de la del sitio).
-  Acá vive solo lo de este juego: el tablero (portada, grilla de 33 fichas,
-  leyenda) y la Ayuda. El breadcrumb, el layout de 2 columnas, la ficha,
-  "Sobre el juego", la Galería, Compartir, Comunidad y "Dejá tu reseña"
-  viven en components.css porque producto.html también los usa.
-  Solo desktop (regla del proyecto), por eso no hay @media.
+  Acá viven: la card .tablero (con portada) que usa Blocka, la zona de
+  juego del Peg en canvas (.peg, solo juego.html) y la Ayuda. El
+  breadcrumb, el layout de 2 columnas, la ficha, "Sobre el juego", la
+  Galería, Compartir, Comunidad y "Dejá tu reseña" viven en components.css
+  porque producto.html también los usa.
+  Solo desktop (regla del proyecto), por eso no hay @media de ancho.
 */
 
 /* ============================================================
-   Tablero: marco de la card
-   Las fichas las arma js/juego.js dentro de #tablero-grid.
+   Tablero: marco de la card (hoy lo usa Blocka; el Peg pasó a canvas)
    ============================================================ */
 /* Alto "base" de la fila de arriba (tablero + panel lateral). Una sola
    variable para las dos cosas que tienen que medir lo mismo: el tablero
@@ -119,193 +119,108 @@
   box-shadow: 0 0 8px var(--acento);
 }
 
-/* ---------- Grid de posiciones ----------
-   7x7 con forma de cruz clásica (33 posiciones válidas + huecos invisibles
-   en las esquinas). js/juego.js arma un <div class="tablero__hueco ..."> por
-   celda; acá solo el tamaño/color de cada estado. */
-.tablero__grid {
-  display: grid;
-  grid-template-columns: repeat(7, 60px);
-  grid-template-rows: repeat(7, 60px);
-  /* Mismo gap horizontal y vertical (antes eran distintos: 12px/32px).
-     Al subir el vertical, el grid se hace más alto — se achicó la ficha
-     (68px → 60px) para compensar y no romper el alto de la card. */
-  row-gap: var(--espaciado-5);
-  column-gap: var(--espaciado-5);
-  justify-content: center;
-  /* Menos margen arriba que abajo: acerca el grid a la cabecera. */
-  margin: var(--espaciado-2) 0 var(--espaciado-6);
+/* ============================================================
+   Peg en canvas (solo juego.html)
+   Todo va colgado de .juego-layout--peg o de .peg, así Blocka (que
+   también carga este archivo y usa .juego-layout) no cambia en nada.
+   ============================================================ */
+/* Fila 1: la zona de juego ocupa todo el ancho; fila 2: Sobre el juego +
+   Galería a la izquierda y el panel lateral (ficha, Ayuda, Compartir) a
+   la derecha. Sin margin-top: el breadcrumb ya deja 24px de aire arriba,
+   y cada píxel cuenta para que el canvas entre sin scroll. */
+.juego-layout--peg {
+  margin-top: 0;
 }
 
-/* Cada celda del grid. El tamaño (60px) tiene que coincidir con las
-   columnas y filas de .tablero__grid. Los estados van en modificadores. */
-.tablero__hueco {
-  position: relative;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-}
-
-/* Esquinas fuera de la cruz: ocupan su lugar en el grid pero no se ven. */
-.tablero__hueco--vacio {
-  visibility: hidden;
-}
-
-/* 3 anillos concéntricos (sólido afuera, punteado en el medio, sólido
-   adentro) sobre un fondo negro (el mismo que "descargado"): así se ve en
-   Figma, no transparente mostrando la grilla de atrás. --color-ficha evita
-   repetir el color de cada estado en los 3 anillos y el resplandor. */
-.tablero__hueco--activo,
-.tablero__hueco--seleccionado {
-  background: var(--tablero-descargado);
-  border: 2px solid var(--color-ficha);
-  box-shadow: 0 0 8px var(--color-ficha);
-}
-
-/* Anillo punteado, en el medio de la banda entre el aro de afuera y el de adentro. */
-.tablero__hueco--activo::before,
-.tablero__hueco--seleccionado::before {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  border: 2px dashed var(--color-ficha);
-  border-radius: 50%;
-}
-
-/* Anillo sólido interno, chico: deja un hueco negro bien visible en el centro. */
-.tablero__hueco--activo::after,
-.tablero__hueco--seleccionado::after {
-  content: "";
-  position: absolute;
-  inset: 18px;
-  border: 2px solid var(--color-ficha);
-  border-radius: 50%;
-}
-
-.tablero__hueco--activo { --color-ficha: var(--tablero-activo); }
-.tablero__hueco--seleccionado { --color-ficha: var(--tablero-seleccionado); }
-
-.tablero__hueco--descargado {
-  background: var(--tablero-descargado);
-}
-
-/* Destino usa el mismo dibujo de 3 anillos que activo/seleccionado, pero con
-   la banda del medio rellena de blanco (no negra): el ::after de acá no es
-   solo una línea, también tapa el centro de negro para recortar el "agujero"
-   sobre el blanco. El blanco (#FFFFFF) es un valor escrito a mano porque
-   no hay token para él (tampoco en .tablero__muestra--destino). */
-.tablero__hueco--destino {
-  background: #FFFFFF;
-  border: 2px solid var(--tablero-destino);
-  box-shadow: 0 0 8px var(--tablero-destino);
-}
-
-.tablero__hueco--destino::before {
-  content: "";
-  position: absolute;
-  inset: 9px;
-  border: 2px dashed var(--tablero-destino);
-  border-radius: 50%;
-}
-
-.tablero__hueco--destino::after {
-  content: "";
-  position: absolute;
-  inset: 18px;
-  border: 2px solid var(--tablero-destino);
-  border-radius: 50%;
-  background: var(--tablero-descargado);
-}
-
-/* ---------- Leyenda ----------
-   Las muestras (.tablero__muestra) repiten a escala las fichas del grid. */
-.tablero__leyenda {
+/* Zona de juego: ocupa las dos columnas del grid (1 / -1 = de la primera
+   línea a la última). */
+.peg {
+  grid-column: 1 / -1;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: var(--espaciado-3);
-  padding-top: var(--espaciado-2);
-  border-top: 1px solid var(--primario-o1);
-  color: var(--primario-c1);
-  font: 600 12px/1 var(--font-ui);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.tablero__leyenda li {
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--espaciado-2);
 }
 
-.tablero__muestra {
-  position: relative;
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+/* Barra chica arriba del canvas: nombre del juego a la izquierda y el
+   botón "?" a la derecha. Mide lo que el botón (44px) más 4px arriba y
+   abajo: unos 52px. */
+.peg__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--espaciado-1) 0;
 }
 
-/* Mismos 3 anillos que las fichas del tablero (parte 2, arriba), sobre el
-   mismo fondo negro: son el mismo dibujo, no uno simplificado. */
-.tablero__muestra--activo,
-.tablero__muestra--seleccionado {
-  background: var(--tablero-descargado);
-  border: 1.5px solid var(--color-ficha);
-}
-
-.tablero__muestra--activo::before,
-.tablero__muestra--seleccionado::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border: 1px dashed var(--color-ficha);
-  border-radius: 50%;
-}
-
-.tablero__muestra--activo::after,
-.tablero__muestra--seleccionado::after {
-  content: "";
-  position: absolute;
-  inset: 4.5px;
-  border: 1px solid var(--color-ficha);
-  border-radius: 50%;
-}
-
-.tablero__muestra--activo { --color-ficha: var(--tablero-activo); }
-.tablero__muestra--seleccionado { --color-ficha: var(--tablero-seleccionado); }
-
-.tablero__muestra--descargado {
-  background: var(--tablero-descargado);
+/* Botón "?" de la ayuda. Mismas medidas que .modal__cerrar (44px de área,
+   ícono solo), con clase propia porque aquel va posicionado adentro del
+   modal. */
+.peg__ayuda-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
   border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  color: var(--primario-c3);
+  font-size: 22px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
 }
 
-.tablero__muestra--destino {
-  background: #FFFFFF;
-  border: 1.5px solid var(--tablero-destino);
+.peg__ayuda-btn:hover {
+  background: var(--primario-o1);
+  color: var(--acento);
 }
 
-.tablero__muestra--destino::before {
-  content: "";
-  position: absolute;
-  inset: 2px;
-  border: 1px dashed var(--tablero-destino);
-  border-radius: 50%;
+/* El canvas dibuja a 1200x760 (atributos del HTML) y el CSS lo muestra
+   más chico, sin deformarlo (aspect-ratio fija la proporción).
+   El ancho es el menor entre:
+   - 100%: todo el ancho de main (1152px en una pantalla Full HD), y
+   - el ancho que hace que el alto entre en la ventana sin scroll. Antes de
+     la zona hay unos 122px (header 60 + padding de main 24 + breadcrumb
+     14 + su margen 24) y la barra del "?" suma unos 60px más (52 + el gap
+     de 8). Con un poco de aire abajo, se le restan 200px al alto de la
+     ventana, y ese alto se pasa a ancho multiplicando por 1200 / 760.
+   En 1920x1080 gana el 100%: 1152px de ancho, unos 730px de alto.
+   touch-action:none evita que el navegador use el arrastre del dedo para
+   scrollear la página (en la Fase 2 el arrastre mueve los nodos). */
+.peg__canvas {
+  display: block;
+  width: min(100%, calc((100vh - 200px) * 1200 / 760));
+  height: auto;
+  aspect-ratio: 1200 / 760;
+  margin-inline: auto;
+  border-radius: var(--radio-xl);
+  /* Fondo provisorio hasta que la Fase 2 dibuje el tablero: el mismo casi
+     negro de los huecos, con la grilla tenue del tablero encima. */
+  background-color: var(--tablero-descargado);
+  background-image:
+    linear-gradient(var(--tablero-grilla) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tablero-grilla) 1px, transparent 1px);
+  background-size: 28px 28px;
+  touch-action: none;
 }
 
-.tablero__muestra--destino::after {
-  content: "";
-  position: absolute;
-  inset: 4.5px;
-  border: 1px solid var(--tablero-destino);
-  border-radius: 50%;
-  background: var(--tablero-descargado);
+/* Diálogo de ayuda: reusa .modal (components.css), un poco más ancho
+   porque lleva el texto de todo el acordeón. Este archivo se carga después
+   de components.css, así que a igual especificidad gana este ancho. */
+.peg-ayuda {
+  width: min(34rem, 90vw);
 }
 
-/* Ícono de flecha del ítem "salto" de la leyenda. */
-.tablero__leyenda-salto i {
-  font-size: 14px;
+/* En el diálogo el contenido clonado no está adentro de .ayuda, así que
+   el título necesita su propio aire con la X de cerrar. */
+.peg-ayuda .modal__titulo {
+  padding-right: var(--control-alto);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peg__ayuda-btn {
+    transition: none;
+  }
 }
 
 /* ============================================================
@@ -323,6 +238,16 @@
    mantiene su alto y Ayuda hace scroll adentro (overflow-y: auto). */
 .juego-layout .panel-lateral {
   max-height: var(--alto-tablero);
+}
+
+/* En el Peg el panel lateral ya no está al lado del tablero (que pasó a
+   ocupar todo el ancho), así que no hay un alto que respetar: se saca el
+   tope de arriba. Los dos selectores tienen la misma especificidad (dos
+   clases); gana este porque está después. align-self:start evita que el
+   panel se estire hasta el alto de la galería. */
+.juego-layout--peg .panel-lateral {
+  max-height: none;
+  align-self: start;
 }
 
 .juego-layout .ficha-juego {
@@ -391,7 +316,7 @@
   font-size: 14px;
 }
 
-/* Lista de atajos de teclado (Z, R, Esc) con <kbd>. */
+/* Lista de atajos de teclado con <kbd> (en el Peg: R, F1, Esc). */
 .ayuda__atajos {
   display: flex;
   flex-direction: column;

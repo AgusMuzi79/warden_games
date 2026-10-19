@@ -24,11 +24,7 @@
       <span>Warden</span>
     </a>
   </div>
- 
-  <p class="header__status" role="status">
-    Partida guardada • <time datetime="12:04">12:04</time>
-  </p>
- 
+
   <div class="header__actions">
     <a class="btn btn--secundario" href="index.html">Volver al menú</a>
     <a class="header__avatar" href="#" aria-label="Mi cuenta">
@@ -49,66 +45,75 @@
       </ol>
     </nav>
 
-    <!-- Columna de contenido + panel lateral, una al lado de la otra
-         (solo desktop). Grid de 2 filas: la de arriba (tablero + ficha/Ayuda)
-         y la de abajo (Sobre el juego/Galería + Compartir) miden lo mismo
-         que su vecino de fila gracias a align-items:stretch — así el
-         tablero llega exactamente hasta el borde de Ayuda, sin importar
-         cuánto texto tenga. -->
-    <div class="juego-layout">
+    <!-- Layout de 2 columnas (components.css) con el modificador del Peg
+         (juego.css): la fila 1 es la zona de juego a todo el ancho; la
+         fila 2, "Sobre el juego" + Galería a la izquierda y el panel
+         lateral (ficha, Ayuda y Compartir) a la derecha. -->
+    <div class="juego-layout juego-layout--peg">
 
-      <!-- Tablero (Etapa 4). Parte 1: marco de la card y la etiqueta
-           placeholder de Figma ("Botón", sin función definida todavía).
-           Parte 2: grid de 33 fichas (js/juego.js) + leyenda. -->
-      <section id="board" class="tablero" aria-label="Tablero de Neon Circuit">
-
-        <!-- Cabecera de la card: franja de otro color con el placeholder
-             "Botón" de Figma (sin función definida todavía, ver DECISIONES.md).
-             Oculta mientras se ve la portada (la imagen ya trae el nombre del
-             juego) — js/juego.js la muestra al clickear "Jugar". -->
-        <div class="tablero__cabecera" id="tablero-cabecera" tabindex="-1" hidden>
+      <!-- Zona de juego. El tablero se dibuja en el <canvas> (Fase 2,
+           js/peg/). Arriba, una barra chica con el nombre y el botón "?",
+           que abre la ayuda en un diálogo (js/peg/pagina.js). -->
+      <section class="peg" aria-label="Zona de juego de Neon Circuit">
+        <div class="peg__barra">
           <p class="tablero__etiqueta">Neon Circuit</p>
+          <button type="button" class="peg__ayuda-btn" id="btn-peg-ayuda" aria-label="Cómo se juega" aria-haspopup="dialog">
+            <i class="ph ph-question" aria-hidden="true"></i>
+          </button>
         </div>
 
-        <div class="tablero__cuerpo">
-          <!-- Portada: se ve primero, con el botón para arrancar la partida.
-               La imagen es decorativa (ya trae el nombre del juego dibujado
-               adentro), por eso alt="". -->
-          <div class="tablero__portada" id="tablero-portada">
-            <img class="tablero__portada-img" src="assets/img/portada-tronpeg-1616x1320.png" alt="">
-            <button type="button" class="btn btn--primario tablero__jugar" id="btn-jugar">Jugar</button>
-          </div>
+        <!-- 1200x760 es la resolución en la que se dibuja; el CSS lo muestra
+             más chico sin deformarlo. El texto de adentro solo se ve si el
+             navegador no soporta canvas. -->
+        <canvas id="peg-canvas" class="peg__canvas" width="1200" height="760" role="img" aria-label="Tablero de Neon Circuit: un circuito en forma de cruz con 33 nodos.">
+          Tu navegador no puede mostrar el tablero de Neon Circuit. Probá con una versión actualizada de Chrome, Firefox o Edge.
+        </canvas>
 
-          <!-- Tablero real: oculto hasta clickear "Jugar". Grid generado por
-               js/juego.js (33 posiciones). aria-hidden porque todavía no hay
-               lógica de movimientos ni navegación por teclado (parte 2 de la
-               Etapa 4, solo visual) — se saca cuando eso exista. -->
-          <div class="tablero__juego" id="tablero-juego" hidden>
-            <div class="tablero__grid" id="tablero-grid" aria-hidden="true"></div>
-
-            <!-- Leyenda de símbolos: las muestras de color son decorativas
-                 (aria-hidden), el texto de al lado ya describe cada estado. -->
-            <ul class="tablero__leyenda">
-              <li><span class="tablero__muestra tablero__muestra--activo" aria-hidden="true"></span>Nodo activo</li>
-              <li><span class="tablero__muestra tablero__muestra--descargado" aria-hidden="true"></span>Descargado</li>
-              <li><span class="tablero__muestra tablero__muestra--seleccionado" aria-hidden="true"></span>Seleccionado</li>
-              <li><span class="tablero__muestra tablero__muestra--destino" aria-hidden="true"></span>Destino</li>
-              <li class="tablero__leyenda-salto">
-                Salto válido:
-                <i class="ph ph-arrow-up" aria-hidden="true"></i>
-                <i class="ph ph-arrow-down" aria-hidden="true"></i>
-                <i class="ph ph-arrow-left" aria-hidden="true"></i>
-                <i class="ph ph-arrow-right" aria-hidden="true"></i>
-              </li>
-            </ul>
-          </div>
-        </div>
+        <!-- Avisos del juego para lectores de pantalla (Fase 2: nodo
+             seleccionado, salto hecho, fin de partida). Vacío por ahora. -->
+        <p class="sr-only" id="peg-estado" role="status"></p>
       </section>
 
-      <!-- Ficha del juego + Ayuda (Etapa 4, partes 3 y 6): misma fila que
-           el tablero, así miden exactamente lo mismo (align-items:stretch
-           en .juego-layout). Compartir queda en la fila de abajo, ver más
-           abajo — sigue viéndose debajo de Ayuda, en la misma columna. -->
+      <!-- Fila 2, columna izquierda: "Sobre el juego" + Galería. -->
+      <div class="juego-layout__secundario">
+
+        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
+          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
+          <p>Neon Circuit es un Peg Solitaire ambientado en el Grid de Tron: Legacy. El tablero es un circuito en forma de cruz con 33 posiciones, y cada ficha es un nodo. Saltar un nodo sobre otro lo "descarga": el nodo saltado se apaga y sale del circuito.</p>
+          <p>Antes de empezar elegís bando: los Usuarios (nodos cyan) o los Programas de Clu (nodos naranja). Tenés 5 minutos para dejar un único nodo activo, y si queda justo en el centro, la conexión es perfecta.</p>
+        </section>
+
+        <!-- Galería animada (flip 3D). El motor genérico vive en
+             js/galeria.js; la lista de las 4 capturas del Peg está en
+             js/peg/pagina.js, que la pasa con iniciarGaleria(). Los src/alt
+             de acá son solo el arranque (fotos 1 y 2). -->
+        <section class="galeria" aria-labelledby="galeria-titulo">
+          <div class="galeria__cabecera">
+            <h2 id="galeria-titulo">Galería</h2>
+            <p class="galeria__contador" id="galeria-contador" aria-live="polite">Foto 1 de 4</p>
+          </div>
+          <div class="galeria__visor">
+            <div class="galeria__carta" id="galeria-carta">
+              <div class="galeria__cara galeria__cara--a">
+                <img class="galeria__img" id="galeria-img-a" src="assets/img/peg-seleccion.jpg" alt="Pantalla para elegir bando: Usuarios, con nodos cyan, o Programas de Clu, con nodos naranja.">
+              </div>
+              <div class="galeria__cara galeria__cara--b">
+                <img class="galeria__img" id="galeria-img-b" src="assets/img/peg-partida.jpg" alt="Partida en curso, con un nodo levantado y los fantasmas de destino en los huecos donde se puede soltar.">
+              </div>
+            </div>
+            <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">
+              <i class="ph ph-caret-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="galeria__flecha galeria__flecha--next" id="galeria-next" aria-label="Foto siguiente de la galería">
+              <i class="ph ph-caret-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <!-- Fila 2, columna derecha: ficha, Ayuda y Compartir, uno debajo
+           del otro (el panel lateral es una columna flex). -->
       <aside class="panel-lateral" aria-label="Información del juego">
 
         <section class="ficha-juego">
@@ -129,13 +134,12 @@
               <dt>Jugando ahora</dt>
               <dd>8.412</dd>
             </div>
-            <div>
-              <dt>Tu récord</dt>
-              <dd>3 nodos</dd>
-            </div>
           </dl>
         </section>
 
+        <!-- Ayuda: la única fuente del texto de las instrucciones. El
+             diálogo del botón "?" copia estos desplegables y los atajos
+             (js/peg/pagina.js), así el texto se escribe una sola vez. -->
         <section class="ayuda" aria-labelledby="ayuda-titulo">
           <h2 id="ayuda-titulo">
             Ayuda
@@ -143,100 +147,79 @@
           </h2>
 
           <details class="ayuda__item" open>
-            <summary>Cómo se juega</summary>
-            <p>Tocá un nodo cargado y después un casillero vacío a dos posiciones de distancia, en línea recta. El nodo salta, y el que quedó en el medio se descarga.</p>
-          </details>
-
-          <details class="ayuda__item">
             <summary>Objetivo</summary>
-            <p>Terminar la partida con la menor cantidad de nodos posible. Si te queda uno solo, y justo en el centro, es la partida perfecta.</p>
+            <p>Dejar un solo nodo activo en el circuito. Ganás cuando queda uno solo, y si queda en el centro es una "conexión perfecta".</p>
           </details>
 
           <details class="ayuda__item">
-            <summary>Puentes (tablero 21+)</summary>
-            <p>En tableros más grandes, algunos casilleros están conectados por un "puente" que permite saltos más largos. Este tablero clásico de 33 nodos todavía no los usa.</p>
+            <summary>Cómo se mueve</summary>
+            <p>Elegí un nodo con un click, arrastralo y soltalo en un hueco vacío, saltando en línea recta (horizontal o vertical, nunca en diagonal) sobre un nodo vecino. El nodo saltado se descarga y sale del circuito. Si lo soltás en un lugar no válido, vuelve a su casilla. Un nodo que no tiene saltos posibles tiembla al tocarlo.</p>
           </details>
 
           <details class="ayuda__item">
-            <summary>Puntaje</summary>
-            <p>Tu puntaje es la cantidad de nodos que te quedan al terminar: cuantos menos, mejor.</p>
+            <summary>Cuándo termina</summary>
+            <p>Ganás cuando queda un solo nodo activo. Perdés si no quedan saltos válidos o si se termina el tiempo. Se revisa después de cada movimiento.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Tiempo límite</summary>
+            <p>Tenés 5 minutos, marcados con una barra. En los últimos 30 segundos la barra se pone naranja y titila.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Bandos</summary>
+            <p>Al empezar elegís bando: Usuarios (nodos cyan) o Programas de Clu (nodos naranja). El bando queda fijo durante la partida; para cambiarlo, tenés que reiniciar.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Indicadores</summary>
+            <p>Nodo seleccionado: se levanta con una sombra y cambia de color (blanco si jugás con Usuarios, cyan si jugás con Clu). Fantasma de destino: un nodo translúcido que respira en cada hueco donde se puede soltar, y se enciende cuando el nodo está encima. Al arrastrar, el nodo deja una estela de luz.</p>
           </details>
 
           <ul class="ayuda__atajos">
-            <li><kbd>Z</kbd> Deshacer último salto</li>
-            <li><kbd>R</kbd> Reiniciar tablero</li>
-            <li><kbd>Esc</kbd> Pausar la partida</li>
+            <li><kbd>R</kbd> Reiniciar (volvés a elegir bando)</li>
+            <li><kbd>F1</kbd> Abrir la ayuda (también con el botón "?")</li>
+            <li><kbd>Esc</kbd> Cerrar la ayuda</li>
           </ul>
+        </section>
+
+        <section class="compartir" aria-labelledby="compartir-titulo">
+          <h2 id="compartir-titulo">Compartir</h2>
+
+          <ul class="compartir__redes">
+            <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          </ul>
+
+          <div class="compartir__acciones">
+            <a class="btn btn--secundario" href="mailto:?subject=Jug%C3%A1%20Neon%20Circuit&body=Mir%C3%A1%20este%20juego%3A%20https%3A%2F%2Fwardengames.com%2Fneon-circuit">Enviar mail</a>
+            <button type="button" class="btn btn--secundario">Mensaje</button>
+          </div>
+
+          <div class="compartir__link">
+            <label class="sr-only" for="link-juego">Enlace para compartir</label>
+            <input type="text" id="link-juego" value="wardengames.com/neon-circuit" readonly>
+            <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
+          </div>
         </section>
 
       </aside>
 
-      <!-- Fila de abajo: "Sobre el juego" + Galería a la izquierda (debajo
-           del tablero), Compartir a la derecha (debajo de Ayuda — sigue en
-           la misma columna que antes, ver DECISIONES.md). -->
-      <div class="juego-layout__secundario">
-
-        <!-- "Sobre el juego" (Etapa 4, parte 4). -->
-        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
-          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
-          <p>Neon Circuit lleva el clásico solitario de tablero a una estética de circuito de neón. Cada nodo cargado puede saltar sobre un vecino directo hacia un casillero descargado, en línea recta, y el nodo del medio se apaga con cada salto. Empezás con 33 nodos activos y un único hueco en el centro: el objetivo es terminar la partida con la menor cantidad de nodos posible, hasta llegar, si podés, a uno solo justo en el medio.</p>
-        </section>
-
-        <!-- Galería (Etapa 4, parte 5; animada en la 2ª corrección del TPE2).
-             Ya no es una grilla estática: es un carrusel de "una foto a la
-             vez" con transición de flip 3D. El motor genérico del flip vive
-             en js/galeria.js (compartido con producto.html); la lista de
-             las 6 fotos reales de Neon Circuit está en js/juego.js, que la
-             pasa con iniciarGaleria(). Los src/alt de acá abajo son solo el
-             arranque (foto 1 y 2); el resto entra por JS al navegar. -->
-        <section class="galeria" aria-labelledby="galeria-titulo">
-          <div class="galeria__cabecera">
-            <h2 id="galeria-titulo">Galería</h2>
-            <p class="galeria__contador" id="galeria-contador" aria-live="polite">Foto 1 de 6</p>
-          </div>
-          <div class="galeria__visor">
-            <div class="galeria__carta" id="galeria-carta">
-              <div class="galeria__cara galeria__cara--a">
-                <img class="galeria__img" id="galeria-img-a" src="assets/img/inicio-juego.png" alt="Tablero de Neon Circuit al arrancar la partida, con los 33 nodos activos y el hueco central.">
-              </div>
-              <div class="galeria__cara galeria__cara--b">
-                <img class="galeria__img" id="galeria-img-b" src="assets/img/ficha-seleccionada.png" alt="Un nodo seleccionado en el tablero, listo para saltar.">
-              </div>
-            </div>
-            <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">
-              <i class="ph ph-caret-left" aria-hidden="true"></i>
-            </button>
-            <button type="button" class="galeria__flecha galeria__flecha--next" id="galeria-next" aria-label="Foto siguiente de la galería">
-              <i class="ph ph-caret-right" aria-hidden="true"></i>
-            </button>
-          </div>
-        </section>
-
-      </div>
-
-      <section class="compartir" aria-labelledby="compartir-titulo">
-        <h2 id="compartir-titulo">Compartir</h2>
-
-        <ul class="compartir__redes">
-          <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
-          <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
-          <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
-          <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
-        </ul>
-
-        <div class="compartir__acciones">
-          <a class="btn btn--secundario" href="mailto:?subject=Jug%C3%A1%20Neon%20Circuit&body=Mir%C3%A1%20este%20juego%3A%20https%3A%2F%2Fwardengames.com%2Fneon-circuit">Enviar mail</a>
-          <button type="button" class="btn btn--secundario">Mensaje</button>
-        </div>
-
-        <div class="compartir__link">
-          <label class="sr-only" for="link-juego">Enlace para compartir</label>
-          <input type="text" id="link-juego" value="wardengames.com/neon-circuit" readonly>
-          <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
-        </div>
-      </section>
-
     </div>
+
+    <!-- Diálogo de ayuda (botón "?" o F1). Reusa el componente .modal
+         (components.css). El cuerpo está vacío a propósito: js/peg/pagina.js
+         lo llena copiando los desplegables y los atajos de la sección Ayuda
+         de la página, así el texto vive en un solo lugar. -->
+    <dialog class="modal peg-ayuda" id="peg-ayuda" aria-labelledby="peg-ayuda-titulo">
+      <button type="button" class="modal__cerrar" id="peg-ayuda-cerrar" aria-label="Cerrar la ayuda">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+      <h2 class="modal__titulo" id="peg-ayuda-titulo">Cómo se juega</h2>
+      <div id="peg-ayuda-cuerpo"></div>
+    </dialog>
 
     <!-- Comunidad + "Dejá tu reseña", uno al lado del otro (mismo layout de
          2 columnas de más arriba: reusa .juego-layout). -->
@@ -475,7 +458,8 @@
 
   <script src="./js/api.js" defer></script>
   <script src="./js/galeria.js" defer></script>
-  <script src="./js/juego.js" defer></script>
+  <!-- Módulo del Peg: va después de galeria.js (usa su iniciarGaleria). -->
+  <script type="module" src="./js/peg/pagina.js"></script>
   <script src="./js/compartir.js" defer></script>
   <script src="./js/resena.js" defer></script>
   <script src="./js/footer.js" defer></script>
