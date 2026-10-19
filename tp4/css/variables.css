@@ -54,6 +54,10 @@
   --tablero-seleccionado:  #3FE8E4;
   --tablero-destino:       #4C7DFF;
   --tablero-grilla:        rgba(155, 75, 221, 0.15);
+  /* Canvas del Peg (TPE4): textos chicos del HUD y la placa en cruz. */
+  --texto-tenue:           #A99BC2;
+  --placa:                 #0E0822;
+  --placa-borde:           #120A24;
 
   /* ---- Espaciado ----
      Son múltiplos de 4px. Se saltea el 7 a propósito, y el 5 se sumó
