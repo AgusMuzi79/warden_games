@@ -34,6 +34,10 @@ const FLECHAS = {
 // En la selección de bando: hacia dónde mueve cada flecha (-1 izquierda, 1 derecha).
 const FLECHAS_BANDO = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
 
+/**
+ * Mouse y teclado del juego: traduce los eventos del canvas a acciones
+ * del Juego (elegir bando, arrastrar y soltar fichas, cursor de teclado).
+ */
 export class Entrada {
   /**
    * @param {import('./juego.js').Juego} juego la partida que controla

@@ -10,6 +10,10 @@
 // La función que da la hora se recibe por parámetro (por defecto
 // performance.now). Así las pruebas pueden usar un reloj falso.
 
+/**
+ * Reloj de la partida: mide el tiempo contra un instante de inicio, se
+ * puede pausar y avisa cuando se pasa el límite.
+ */
 export class Reloj {
   /**
    * @param {number} limiteMs tiempo máximo de la partida

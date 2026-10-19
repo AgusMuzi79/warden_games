@@ -43,6 +43,10 @@ function aclarar(hex, cantidad) {
   return resultado;
 }
 
+/**
+ * Efectos visuales pasajeros del Peg (explosión, onda, estela y temblor):
+ * los guarda, los dibuja y los borra cuando terminan.
+ */
 export class Efectos {
   /**
    * Arranca sin ningún efecto activo.

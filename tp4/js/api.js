@@ -11,9 +11,12 @@ const BASE_URL = 'https://vj.interfaces.jima.com.ar/api';
 // Clave del caché del catálogo en sessionStorage (dura lo que la pestaña).
 const CLAVE_CACHE_JUEGOS = 'warden-juegos';
 
-// La API no tiene endpoint por id: solo existe la lista completa. Para no
-// repetir ese fetch en cada página (Home, ficha de producto), se guarda en
-// sessionStorage. Si el storage falla o está vacío, se pide a la API igual.
+/**
+ * La API no tiene endpoint por id: solo existe la lista completa. Para no
+ * repetir ese fetch en cada página (Home, ficha de producto), se guarda en
+ * sessionStorage. Si el storage falla o está vacío, se pide a la API igual.
+ * @returns {Array|null} la lista guardada, o null si no hay
+ */
 function leerCacheJuegos() {
   try {
     const guardado = sessionStorage.getItem(CLAVE_CACHE_JUEGOS);
@@ -23,6 +26,10 @@ function leerCacheJuegos() {
   }
 }
 
+/**
+ * Guarda la lista de juegos en sessionStorage. Si el storage falla, se sigue sin caché.
+ * @param {Array} juegos lista que devolvió la API
+ */
 function guardarCacheJuegos(juegos) {
   try {
     sessionStorage.setItem(CLAVE_CACHE_JUEGOS, JSON.stringify(juegos));
@@ -31,8 +38,11 @@ function guardarCacheJuegos(juegos) {
   }
 }
 
-// Devuelve la lista de juegos, del caché si está. Si la API falla tira un
-// error: quien la llama (home.js, producto.js) decide qué mostrar en ese caso.
+/**
+ * Devuelve la lista de juegos, del caché si está. Si la API falla tira un
+ * error: quien la llama (home.js, producto.js) decide qué mostrar en ese caso.
+ * @returns {Promise<Array>} la lista de juegos
+ */
 async function obtenerJuegos() {
   const enCache = leerCacheJuegos();
   if (enCache) return enCache;
@@ -64,7 +74,12 @@ const CATEGORIAS = [
   { titulo: 'Estrategia', genero: 'Strategy' },
 ];
 
-// Un juego puede tener varios géneros, por eso se busca en toda la lista.
+/**
+ * Un juego puede tener varios géneros, por eso se busca en toda la lista.
+ * @param {object} juego juego de la API
+ * @param {string} genero nombre del género en la API (genres[].name)
+ * @returns {boolean}
+ */
 function esDeGenero(juego, genero) {
   return juego.genres.some((g) => g.name === genero);
 }

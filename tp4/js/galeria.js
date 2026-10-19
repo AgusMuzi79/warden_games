@@ -15,11 +15,14 @@
 // decide, en cada click, qué foto va en la cara escondida y cuántos grados
 // se le suman al ángulo para que esa cara pase al frente.
 
-// fotos: array de { src, alt }, con al menos 1 elemento.
-// Caso de una sola foto: si la página tiene la cara "sin más capturas"
-// (#galeria-vacio), esa cara hace de 2ª diapositiva. Las flechas giran igual,
-// pero en vez de repetir la foto se ve un mensaje. Sin esa cara, las 2 caras
-// muestran la misma foto.
+/**
+ * Arma la galería con las fotos de la página.
+ * Caso de una sola foto: si la página tiene la cara "sin más capturas"
+ * (#galeria-vacio), esa cara hace de 2ª diapositiva. Las flechas giran igual,
+ * pero en vez de repetir la foto se ve un mensaje. Sin esa cara, las 2 caras
+ * muestran la misma foto.
+ * @param {{src: string, alt: string}[]} fotos con al menos 1 elemento
+ */
 function iniciarGaleria(fotos) {
   const carta = document.getElementById('galeria-carta');
 
@@ -40,9 +43,13 @@ function iniciarGaleria(fotos) {
   const hayUnaSolaFoto = fotos.length === 1 && vacio !== null;
   const diapositivas = hayUnaSolaFoto ? [fotos[0], { vacio: true }] : fotos;
 
-  // Pone una diapositiva en una cara (img es imgA o imgB). Si es el vacío,
-  // esconde la <img> y muestra el mensaje. Si es una foto, se asegura de que
-  // la cara B muestre su <img> y no el mensaje.
+  /**
+   * Pone una diapositiva en una cara (img es imgA o imgB). Si es el vacío,
+   * esconde la <img> y muestra el mensaje. Si es una foto, se asegura de que
+   * la cara B muestre su <img> y no el mensaje.
+   * @param {HTMLImageElement} img cara donde va la diapositiva
+   * @param {{src?: string, alt?: string, vacio?: boolean}} diapositiva
+   */
   function ponerEnCara(img, diapositiva) {
     if (diapositiva.vacio) {
       img.hidden = true;
@@ -86,10 +93,12 @@ function iniciarGaleria(fotos) {
   // una vuelta entera en vez de seguir.
   let angulo = 0;
 
-  // El contador cuenta solo fotos reales (fotos.length): con el mensaje a la
-  // vista dice "Sin más capturas" y no "Foto 2 de 1". El mensaje queda
-  // aria-hidden mientras está en la cara de atrás, así el lector de pantalla
-  // lo lee solo cuando se ve.
+  /**
+   * El contador cuenta solo fotos reales (fotos.length): con el mensaje a la
+   * vista dice "Sin más capturas" y no "Foto 2 de 1". El mensaje queda
+   * aria-hidden mientras está en la cara de atrás, así el lector de pantalla
+   * lo lee solo cuando se ve.
+   */
   function actualizarContador() {
     const seVeElVacio = diapositivas[indiceVisible].vacio === true;
     contador.textContent = seVeElVacio
@@ -99,8 +108,11 @@ function iniciarGaleria(fotos) {
   }
   actualizarContador();
 
-  // direccion: 1 para "siguiente", -1 para "anterior".
-  // Es async porque espera a que la foto nueva esté lista antes de girar.
+  /**
+   * Gira la tarjeta para mostrar la diapositiva siguiente o la anterior.
+   * Es async porque espera a que la foto nueva esté lista antes de girar.
+   * @param {number} direccion 1 para "siguiente", -1 para "anterior"
+   */
   async function girar(direccion) {
     if (esperando) return;
     const total = diapositivas.length;

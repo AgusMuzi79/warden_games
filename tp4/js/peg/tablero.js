@@ -14,6 +14,10 @@
 // Las cuatro direcciones en las que se puede saltar: arriba, abajo, izquierda, derecha.
 const DIRECCIONES = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
+/**
+ * Reglas del Peg Solitaire sobre la grilla de 7x7: saltos válidos, mover
+ * fichas, victoria y fin por falta de saltos. No dibuja nada.
+ */
 export class Tablero {
   /**
    * Crea el tablero ya listo para jugar (cruz llena, centro vacío).

@@ -29,6 +29,10 @@ import { Efectos } from './efectos.js';
 import { dibujarHud } from './hud.js';
 import { dibujarSeleccion, dibujarFin, avisoDeFin } from './pantallas.js';
 
+/**
+ * Estado de la partida (tablero, reloj, movimientos y fase) y loop de
+ * dibujo que redibuja todo el canvas en cada cuadro.
+ */
 export class Juego {
   /**
    * @param {HTMLCanvasElement} canvas el canvas de la página
