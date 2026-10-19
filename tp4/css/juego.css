@@ -271,6 +271,13 @@
   align-self: start;
 }
 
+/* Galería del Peg con la proporción del canvas (1200x760), no 16:9: las
+   capturas son el canvas entero y con 16:9 object-fit: cover les cortaría
+   arriba y abajo. Mismo criterio que la galería de Blocka (blocka.css). */
+.juego-layout--peg .galeria__carta {
+  aspect-ratio: 1200 / 760;
+}
+
 .juego-layout .ficha-juego {
   flex-shrink: 0;
 }

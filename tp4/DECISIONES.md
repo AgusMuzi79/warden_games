@@ -108,9 +108,17 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   partida, cada una con su `alt`.
 - **Por qué:** el enunciado pide imágenes del juego; las capturas del canvas
   muestran lo que se juega ahora (las del TPE2 eran de la versión estática).
-- **Las capturas todavía no existen:** las agrega el equipo en `assets/img/` con
-  esos nombres (ver "Pendientes"). Mientras falten, la galería sigue girando
-  (`galeria.js` gira igual si una foto no carga).
+- **Cómo se sacaron:** son píxeles del canvas real (`canvas.toDataURL`), no
+  capturas de pantalla, así que no tienen cursor ni anillo de foco. Cada escena
+  se armó con el código real del juego (elegir bando, saltos, arrastre); para
+  las de fin se dejó el tablero a un salto del final. Los tiempos y movimientos
+  de esas dos son de ejemplo, como en las capturas de Blocka. 1200×760, JPG.
+- **Proporción del canvas en la galería:** `juego.css` cambia `aspect-ratio` de
+  `.galeria__carta` a `1200 / 760` solo en la página del Peg
+  (`.juego-layout--peg`), así las capturas no se recortan. Las galerías de las
+  otras páginas siguen en 16:9.
+- **Descartado:** dejar el 16:9 general, que con `object-fit: cover` cortaba
+  arriba y abajo el HUD y los títulos de fin.
 
 ### El juego no se ejecuta dos veces: un solo `<script type="module">`
 - **Qué:** `juego.html` carga solo `js/peg/pagina.js` como módulo, después de
@@ -492,16 +500,24 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ---
 
+## Punto 1 del enunciado: la placa vacía es una imagen generada al cargar
+
+- **Qué:** el "tablero vacío (imagen de fondo)" se genera una sola vez al cargar
+  la página: `crearFondo` y `crearPlaca` (`dibujo.js`) lo dibujan en un canvas
+  fuera de pantalla, y en cada cuadro se pega con `drawImage`, igual que una
+  imagen cargada de un archivo.
+- **Por qué:** es una imagen de verdad (un canvas se dibuja con `drawImage` como
+  un `<img>`), pero sus colores salen de los tokens de `variables.css`. Si cambia
+  la paleta, la placa cambia sola. Decisión de Agus.
+- **Descartado:** exportar la placa a un PNG en `assets/img/` y cargarla con
+  `cargarImagen`. Cumpliría el punto al pie de la letra, pero cada cambio de
+  color obligaría a volver a exportar la imagen, y los colores quedarían fijos
+  fuera del sistema de tokens.
+
+---
+
 ## Pendientes
 
-- **Capturas de la galería:** faltan `peg-seleccion.jpg`, `peg-partida.jpg`,
-  `peg-victoria.jpg` y `peg-derrota.jpg` en `tp4/assets/img/`. Sin ellas, la
-  galería muestra imágenes rotas y el punto 8 del enunciado (imágenes del juego)
-  queda incompleto.
-- **"Tablero vacío (imagen de fondo)", punto 1 del enunciado:** la placa vacía
-  se dibuja por código en un canvas fuera de pantalla y se usa como una imagen
-  (`drawImage`). Falta confirmar con el equipo si eso cuenta o si hace falta un
-  archivo de imagen.
 - **Hints animados con movimiento reducido:** el enunciado pide hints animados,
   y con `prefers-reduced-motion` el fantasma queda quieto. Se justifica por la
   regla de accesibilidad del proyecto; sin esa preferencia, siempre está animado.
