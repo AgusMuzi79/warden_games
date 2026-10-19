@@ -1,24 +1,23 @@
-// dibujo.js — Dibujo estático del Peg: fondo, placa del tablero y fichas
+// dibujo.js — Dibujo estático del Peg: tablero vacío, scanlines y fichas
 //
-// Qué hace: arma una sola vez, en canvas fuera de pantalla, el fondo y la
-// placa en forma de cruz (con su grilla, las trazas de circuito y los
-// huecos), prepara las imágenes de las fichas con su brillo, y después
-// ofrece funciones para pintar todo eso en el canvas del juego.
-// Por qué pre-renderizar: la placa tiene muchas líneas y sombras; dibujarla
-// en cada cuadro sería lento. Se dibuja una vez y en cada cuadro solo se
-// copia la imagen ya armada con drawImage.
+// Qué hace: carga la imagen del tablero vacío (fondo + placa en cruz con
+// sus 33 huecos, assets/img/tablero-peg.jpg), prepara las imágenes de las
+// fichas con su brillo y las scanlines, y después ofrece funciones para
+// pintar todo eso en el canvas del juego.
+// Por qué una imagen: el enunciado pide mostrar un tablero vacío como
+// imagen de fondo. En cada cuadro solo se copia con drawImage, debajo de
+// las fichas.
 //
-// Los colores salen de obtenerColores() (variables.css); las
-// transparencias se arman con conAlfa(). No hay colores escritos acá.
+// Los colores de las fichas y las scanlines salen de obtenerColores()
+// (variables.css); las transparencias se arman con conAlfa(). Los del
+// tablero vienen fijos en la imagen.
 
-import { crearCanvas, cargarImagen, mulberry32, conAlfa, prefiereMenosMovimiento } from './utiles.js';
+import { crearCanvas, cargarImagen, conAlfa, prefiereMenosMovimiento } from './utiles.js';
 import {
   ANCHO, ALTO, TAMANO_TABLERO, TABLERO_X, CELDA, OFFSET,
-  RADIO_FICHA, RADIO_HUECO, PADDING_FICHA, FICHAS, SEPARACION_SCANLINES, obtenerDpr,
+  RADIO_FICHA, PADDING_FICHA, FICHAS, IMAGEN_TABLERO, SEPARACION_SCANLINES, obtenerDpr,
 } from './config.js';
-import { Tablero } from './tablero.js';
 
-const VUELTA = Math.PI * 2;
 // Lado de la imagen de una ficha, con el espacio extra para el brillo.
 const LADO_FICHA = (RADIO_FICHA + PADDING_FICHA) * 2;
 
@@ -69,205 +68,6 @@ export function texto(ctx, cadena, x, y, { fuente, color, alinear = 'left', espa
 }
 
 /**
- * Vértices del contorno de la cruz, agrandado `margen` píxeles hacia afuera.
- * @param {number} margen
- * @returns {{x: number, y: number}[]}
- */
-function puntosCruz(margen) {
-  const a = OFFSET + 2 * CELDA - margen;
-  const b = OFFSET + 5 * CELDA + margen;
-  const min = OFFSET - margen;
-  const max = OFFSET + 7 * CELDA + margen;
-  const pares = [[a, min], [b, min], [b, a], [max, a], [max, b], [b, b],
-    [b, max], [a, max], [a, b], [min, b], [min, a], [a, a]];
-  return pares.map(([x, y]) => ({ x, y }));
-}
-
-/**
- * Traza un polígono con las esquinas cortadas en diagonal (chaflán de k px).
- * @param {CanvasRenderingContext2D} ctx
- * @param {{x: number, y: number}[]} puntos
- * @param {number} k
- */
-function trazarChaflan(ctx, puntos, k) {
-  const n = puntos.length;
-  // Punto que está a k píxeles de p, yendo hacia q.
-  const haciaQ = (p, q) => {
-    const largo = Math.hypot(q.x - p.x, q.y - p.y);
-    return { x: p.x + ((q.x - p.x) / largo) * k, y: p.y + ((q.y - p.y) / largo) * k };
-  };
-  ctx.beginPath();
-  puntos.forEach((p, i) => {
-    const desde = haciaQ(p, puntos[(i - 1 + n) % n]);
-    const hasta = haciaQ(p, puntos[(i + 1) % n]);
-    if (i === 0) ctx.moveTo(desde.x, desde.y);
-    else ctx.lineTo(desde.x, desde.y);
-    ctx.lineTo(hasta.x, hasta.y);
-  });
-  ctx.closePath();
-}
-
-/**
- * Grilla tenue de fondo dentro de la placa (cada cuarto de celda).
- * @param {CanvasRenderingContext2D} ctx
- * @param {Record<string, string>} colores
- */
-function dibujarGrilla(ctx, colores) {
-  ctx.strokeStyle = conAlfa(colores.acento, 0.05);
-  ctx.lineWidth = 1;
-  for (let v = OFFSET; v <= OFFSET + 7 * CELDA; v += CELDA / 4) {
-    ctx.beginPath(); ctx.moveTo(v, 0); ctx.lineTo(v, TAMANO_TABLERO); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(TAMANO_TABLERO, v); ctx.stroke();
-  }
-}
-
-/**
- * Trazas de circuito: caminos que giran de a 45° con un círculo en cada punta.
- * Usan mulberry32 con semilla fija, así salen iguales en cada carga.
- * @param {CanvasRenderingContext2D} ctx
- * @param {Record<string, string>} colores
- */
-function dibujarTrazas(ctx, colores) {
-  const azar = mulberry32(24);
-  // Las 8 direcciones, en orden horario empezando por la derecha.
-  const DIRECCIONES = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
-  ctx.save();
-  ctx.strokeStyle = conAlfa(colores.acento, 0.32);
-  ctx.lineWidth = 1.4;
-  ctx.lineJoin = 'round';
-  ctx.shadowColor = conAlfa(colores.acento, 0.6);
-  ctx.shadowBlur = 6;
-  for (let i = 0; i < 60; i++) {
-    let x = OFFSET + Math.round(azar() * 7) * CELDA;
-    let y = OFFSET + Math.round(azar() * 14) * (CELDA / 2);
-    const inicioX = x;
-    const inicioY = y;
-    let dir = Math.floor(azar() * 4) * 2; // arranca horizontal o vertical
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    const tramos = 2 + Math.floor(azar() * 3);
-    for (let t = 0; t < tramos; t++) {
-      const largo = (0.3 + azar() * 0.9) * CELDA;
-      const [dx, dy] = DIRECCIONES[dir];
-      // En diagonal se divide por raíz de 2 para que el tramo mida lo mismo.
-      const ajuste = dx && dy ? Math.SQRT1_2 : 1;
-      x += dx * largo * ajuste;
-      y += dy * largo * ajuste;
-      ctx.lineTo(x, y);
-      dir = (dir + (azar() < 0.5 ? 1 : 7)) % 8; // gira 45° a un lado o al otro
-    }
-    ctx.stroke();
-    for (const [px, py] of [[inicioX, inicioY], [x, y]]) {
-      ctx.beginPath(); ctx.arc(px, py, 3, 0, VUELTA); ctx.stroke();
-    }
-  }
-  ctx.restore();
-}
-
-/**
- * Hueco del tablero: un halo oscuro que tapa las trazas, el fondo hundido
- * (degradé) y un aro con brillo.
- * @param {CanvasRenderingContext2D} ctx
- * @param {{x: number, y: number}} centro
- * @param {Record<string, string>} colores
- */
-function dibujarHueco(ctx, { x, y }, colores) {
-  ctx.save();
-  ctx.beginPath(); ctx.arc(x, y, RADIO_HUECO + 7, 0, VUELTA);
-  ctx.fillStyle = colores.descargado;
-  ctx.fill();
-  ctx.strokeStyle = conAlfa(colores.acento, 0.15);
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  const degrade = ctx.createRadialGradient(x, y - 4, 2, x, y, RADIO_HUECO);
-  degrade.addColorStop(0, colores.descargado);
-  degrade.addColorStop(1, colores.placaBorde);
-  ctx.beginPath(); ctx.arc(x, y, RADIO_HUECO, 0, VUELTA);
-  ctx.fillStyle = degrade;
-  ctx.fill();
-  ctx.strokeStyle = conAlfa(colores.acento, 0.5);
-  ctx.lineWidth = 1.5;
-  ctx.shadowColor = colores.acento;
-  ctx.shadowBlur = 8;
-  ctx.stroke();
-  ctx.restore();
-}
-
-/**
- * Arma la placa completa (vacía, sin fichas) en un canvas fuera de pantalla.
- * @param {Record<string, string>} colores
- * @param {number} dpr
- * @returns {HTMLCanvasElement}
- */
-function crearPlaca(colores, dpr) {
-  const { canvas, ctx } = crearCanvas(TAMANO_TABLERO, TAMANO_TABLERO, dpr);
-  const exterior = puntosCruz(16);
-  const interior = puntosCruz(6);
-
-  // Placa base con brillo alrededor.
-  trazarChaflan(ctx, exterior, 18);
-  const degrade = ctx.createLinearGradient(0, 0, 0, TAMANO_TABLERO);
-  degrade.addColorStop(0, colores.placa);
-  degrade.addColorStop(1, colores.descargado);
-  ctx.fillStyle = degrade;
-  ctx.shadowColor = conAlfa(colores.acento, 0.35);
-  ctx.shadowBlur = 40;
-  ctx.fill();
-  ctx.shadowBlur = 0;
-
-  // Grilla y trazas, recortadas al borde interior de la placa.
-  ctx.save();
-  trazarChaflan(ctx, interior, 12);
-  ctx.clip();
-  dibujarGrilla(ctx, colores);
-  dibujarTrazas(ctx, colores);
-  ctx.restore();
-
-  // Borde exterior con brillo y bisel interior más fino.
-  ctx.save();
-  trazarChaflan(ctx, exterior, 18);
-  ctx.strokeStyle = colores.acento;
-  ctx.lineWidth = 2.5;
-  ctx.shadowColor = colores.acento;
-  ctx.shadowBlur = 16;
-  ctx.stroke();
-  ctx.restore();
-  ctx.save();
-  trazarChaflan(ctx, interior, 12);
-  ctx.strokeStyle = conAlfa(colores.acento, 0.45);
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.restore();
-
-  for (let fila = 0; fila < 7; fila++) {
-    for (let col = 0; col < 7; col++) {
-      if (Tablero.esCeldaValida(fila, col)) dibujarHueco(ctx, centroLocal(fila, col), colores);
-    }
-  }
-  return canvas;
-}
-
-/**
- * Arma el fondo del canvas completo: el violeta del sitio con una luz
- * suave en el centro.
- * @param {Record<string, string>} colores
- * @param {number} dpr
- * @returns {HTMLCanvasElement}
- */
-function crearFondo(colores, dpr) {
-  const { canvas, ctx } = crearCanvas(ANCHO, ALTO, dpr);
-  ctx.fillStyle = colores.fondo;
-  ctx.fillRect(0, 0, ANCHO, ALTO);
-  const luz = ctx.createRadialGradient(ANCHO / 2, ALTO / 2, 100, ANCHO / 2, ALTO / 2, ANCHO * 0.6);
-  luz.addColorStop(0, conAlfa(colores.textoTenue, 0.08));
-  luz.addColorStop(1, conAlfa(colores.textoTenue, 0));
-  ctx.fillStyle = luz;
-  ctx.fillRect(0, 0, ANCHO, ALTO);
-  return canvas;
-}
-
-/**
  * Arma las scanlines: líneas horizontales finas y oscuras sobre todo el
  * canvas, como una pantalla vieja. Son quietas, así que no molestan a
  * quien prefiere menos movimiento.
@@ -302,20 +102,21 @@ async function crearImagenFicha(ruta, colorBrillo, dpr) {
 }
 
 /**
- * Arma todo lo que se dibuja una sola vez: fondo, placa, scanlines y las tres fichas.
+ * Carga y arma todo lo que se prepara una sola vez: la imagen del tablero
+ * vacío, las scanlines y las tres fichas.
  * @param {Record<string, string>} colores lo que devuelve obtenerColores()
- * @returns {Promise<{fondo: HTMLCanvasElement, placa: HTMLCanvasElement, scanlines: HTMLCanvasElement, fichas: Record<string, HTMLCanvasElement>}>}
+ * @returns {Promise<{tablero: HTMLImageElement, scanlines: HTMLCanvasElement, fichas: Record<string, HTMLCanvasElement>}>}
  */
 export async function prepararRecursos(colores) {
   const dpr = obtenerDpr();
-  const [naranja, cyan, blanca] = await Promise.all([
+  const [tablero, naranja, cyan, blanca] = await Promise.all([
+    cargarImagen(IMAGEN_TABLERO),
     crearImagenFicha(FICHAS.naranja, colores.activo, dpr),
     crearImagenFicha(FICHAS.cyan, colores.acento, dpr),
     crearImagenFicha(FICHAS.blanca, colores.destino, dpr),
   ]);
   return {
-    fondo: crearFondo(colores, dpr),
-    placa: crearPlaca(colores, dpr),
+    tablero,
     scanlines: crearScanlines(colores, dpr),
     fichas: { naranja, cyan, blanca },
   };
@@ -331,21 +132,31 @@ export function dibujarScanlines(ctx, recursos) {
 }
 
 /**
- * Pinta el fondo ya armado sobre todo el canvas.
+ * Pinta la imagen del tablero vacío entera, quieta, sobre todo el canvas.
+ * Es el fondo: queda debajo de todo lo demás.
  * @param {CanvasRenderingContext2D} ctx
- * @param {{fondo: HTMLCanvasElement}} recursos
+ * @param {{tablero: HTMLImageElement}} recursos
  */
 export function dibujarFondo(ctx, recursos) {
-  ctx.drawImage(recursos.fondo, 0, 0, ANCHO, ALTO);
+  ctx.drawImage(recursos.tablero, 0, 0, ANCHO, ALTO);
 }
 
 /**
- * Pinta la placa ya armada, centrada entre los dos paneles del HUD.
+ * Vuelve a pintar solo el cuadrado de la placa, recortado de la misma
+ * imagen. Sin temblor cae justo encima del fondo y no cambia nada; con
+ * temblor (ctx corrido unos px) se mueve la placa y el resto queda quieto.
  * @param {CanvasRenderingContext2D} ctx
- * @param {{placa: HTMLCanvasElement}} recursos
+ * @param {{tablero: HTMLImageElement}} recursos
  */
 export function dibujarTablero(ctx, recursos) {
-  ctx.drawImage(recursos.placa, TABLERO_X, 0, TAMANO_TABLERO, TAMANO_TABLERO);
+  const imagen = recursos.tablero;
+  // La imagen puede tener más píxeles que el canvas lógico (está al doble).
+  const escala = imagen.naturalWidth / ANCHO;
+  ctx.drawImage(
+    imagen,
+    TABLERO_X * escala, 0, TAMANO_TABLERO * escala, TAMANO_TABLERO * escala,
+    TABLERO_X, 0, TAMANO_TABLERO, TAMANO_TABLERO,
+  );
 }
 
 /**

@@ -42,6 +42,10 @@ export const CHISPAS_POR_EXPLOSION = 38;
 export const FUERZA_TEMBLOR = 8;         // cuántos px se corre el tablero, como máximo
 export const SEPARACION_SCANLINES = 3;   // una línea oscura cada 3 px
 
+// Tablero vacío (fondo + placa con los 33 huecos), 2400x1520: el doble de
+// 1200x760 para que se vea nítido. Relativa al documento, como las fichas.
+export const IMAGEN_TABLERO = 'assets/img/tablero-peg.jpg';
+
 // Imágenes de las fichas. Son relativas al documento (juego.html).
 export const FICHAS = {
   naranja: 'assets/img/ficha-naranja.png',

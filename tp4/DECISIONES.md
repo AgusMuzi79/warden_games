@@ -165,11 +165,11 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ### Un módulo por responsabilidad
 | Archivo | Qué hace |
 |---|---|
-| `utiles.js` | Funciones chicas: `clamp`, `easeOut`, `formatearTiempo`, `crearCanvas`, `cargarImagen`, `mulberry32`, `leerToken`, `conAlfa`, `prefiereMenosMovimiento`. |
-| `config.js` | Medidas, tiempos, rutas de las fichas, `BANDOS`; lee colores y fuentes de `variables.css` (`obtenerColores()`, `obtenerFuentes()`). |
+| `utiles.js` | Funciones chicas: `clamp`, `easeOut`, `formatearTiempo`, `crearCanvas`, `cargarImagen`, `mulberry32` (sin uso desde que el tablero es una imagen), `leerToken`, `conAlfa`, `prefiereMenosMovimiento`. |
+| `config.js` | Medidas, tiempos, rutas de las fichas y del tablero, `BANDOS`; lee colores y fuentes de `variables.css` (`obtenerColores()`, `obtenerFuentes()`). |
 | `tablero.js` | Clase `Tablero`: las reglas, sin canvas ni DOM. |
 | `reloj.js` | Clase `Reloj`: tiempo de la partida con pausa y límite. |
-| `dibujo.js` | Fondo, placa y fichas: los arma una vez fuera de pantalla y los pinta. |
+| `dibujo.js` | Tablero vacío (imagen), fichas y scanlines: los carga o arma una vez y los pinta. |
 | `hud.js` | Paneles de datos a los costados del tablero. |
 | `efectos.js` | Clase `Efectos`: explosión, onda, estela y temblor. |
 | `pantallas.js` | Selección de bando y pantallas de fin, dibujadas encima del tablero. |
@@ -282,19 +282,25 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ## Dibujo
 
-### La placa se dibuja una vez, fuera de pantalla
-- **Qué:** `prepararRecursos()` arma en canvas fuera de pantalla (`crearCanvas()`)
-  el fondo, la placa en cruz vacía (con grilla, trazas de circuito y los 33
-  huecos), las scanlines y las tres fichas con su brillo. En cada cuadro se
-  copian con `drawImage`.
-- **Por qué:** la placa tiene muchas líneas y sombras; redibujarla 60 veces por
-  segundo sería lento. Las trazas usan `mulberry32` con semilla fija, así salen
-  iguales en cada carga.
+### Todo lo estático se prepara una vez, al cargar
+- **Qué:** `prepararRecursos()` carga la imagen del tablero vacío
+  (`tablero-peg.jpg`, ver "Punto 1 del enunciado") y arma en canvas fuera de
+  pantalla (`crearCanvas()`) las scanlines y las tres fichas con su brillo. En
+  cada cuadro se copian con `drawImage`.
+- **Por qué:** el tablero tiene muchas líneas y sombras, y las fichas un brillo
+  difuso; calcularlos 60 veces por segundo sería lento. Copiar una imagen ya
+  hecha es barato.
+- **El temblor sigue moviendo solo la placa:** `dibujarFondo()` pinta la imagen
+  entera, quieta, y `dibujarTablero()` vuelve a pintar encima solo el cuadrado
+  de la placa, recortado de la misma imagen, después del `translate` del
+  temblor. Sin temblor cae justo encima y no se nota; con temblor se corre la
+  placa y el fondo de los costados no se mueve, como antes.
 
 ### Nítido en pantallas de alta densidad (DPR)
 - **Qué:** los canvas (el de la página y los de fuera de pantalla) miden
   `ANCHO * dpr` píxeles reales y se dibuja con el contexto escalado, en medidas
-  lógicas de 1200×760. `obtenerDpr()` pone un tope de 2.
+  lógicas de 1200×760. `obtenerDpr()` pone un tope de 2. La imagen del tablero
+  ya viene al doble (2400×1520) por el mismo motivo.
 - **Por qué:** sin esto, en una pantalla retina el canvas se ve borroso. Más de 2
   no se nota y gasta memoria.
 
@@ -305,7 +311,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Tokens nuevos en `variables.css`:**
   - `--texto-tenue` (#A99BC2): etiquetas chicas del HUD y textos secundarios.
   - `--placa` (#0E0822): fondo de la placa en cruz y de las tarjetas de bando.
-  - `--placa-borde` (#120A24): borde del degradé de los huecos.
+  - `--placa-borde` (#120A24): borde del degradé de los huecos. Hoy ese degradé
+    está dentro de la imagen del tablero (ver "Punto 1 del enunciado").
 - **Por qué tokens nuevos:** son los tonos del prototipo y ninguno de los
   existentes se acercaba. Siguen la regla del proyecto: ningún color a mano.
 - **Se reusaron los existentes donde se podía:** el cyan es `--acento` (el mismo
@@ -500,19 +507,30 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ---
 
-## Punto 1 del enunciado: la placa vacía es una imagen generada al cargar
+## Punto 1 del enunciado: el tablero vacío es una imagen de fondo
 
-- **Qué:** el "tablero vacío (imagen de fondo)" se genera una sola vez al cargar
-  la página: `crearFondo` y `crearPlaca` (`dibujo.js`) lo dibujan en un canvas
-  fuera de pantalla, y en cada cuadro se pega con `drawImage`, igual que una
-  imagen cargada de un archivo.
-- **Por qué:** es una imagen de verdad (un canvas se dibuja con `drawImage` como
-  un `<img>`), pero sus colores salen de los tokens de `variables.css`. Si cambia
-  la paleta, la placa cambia sola. Decisión de Agus.
-- **Descartado:** exportar la placa a un PNG en `assets/img/` y cargarla con
-  `cargarImagen`. Cumpliría el punto al pie de la letra, pero cada cambio de
-  color obligaría a volver a exportar la imagen, y los colores quedarían fijos
-  fuera del sistema de tokens.
+- **Qué:** el tablero vacío (fondo violeta con su luz, placa en cruz con grilla,
+  trazas de circuito y los 33 huecos, sin fichas) es el archivo
+  `assets/img/tablero-peg.jpg`, de 2400×1520 (el doble de 1200×760, para que se
+  vea nítido) y 235 KB. La ruta está en `IMAGEN_TABLERO` (`config.js`);
+  `prepararRecursos()` (`dibujo.js`) la carga con `cargarImagen` y en cada cuadro
+  se pinta con `drawImage`, debajo de las fichas.
+- **Por qué:** el enunciado pide "mostrar un tablero vacío (imagen de fondo)". Al
+  principio el tablero se dibujaba por código al cargar la página (en canvas
+  fuera de pantalla). Se veía igual, pero no era una imagen de fondo como pide
+  el punto; Agus eligió pasarlo a un archivo para cumplirlo al pie de la letra.
+- **Cómo se generó:** se renderizó una sola vez con el código de dibujo anterior
+  (`crearFondo` y `crearPlaca`), en un canvas de 1200×760 con densidad 2, y se
+  guardó en JPG calidad 0,9 (el PNG pesaba 2,3 MB y la imagen no tiene
+  transparencias). Ese código queda en el historial de git, en el commit
+  `4e0bffa` (`git show 4e0bffa:tp4/js/peg/dibujo.js`). Comparada contra la
+  versión anterior en el navegador, la partida da una diferencia media de 1,4
+  sobre 255 por píxel (compresión y escalado).
+- **Costo:** los colores del tablero quedan fijos en la imagen, fuera del sistema
+  de tokens. Si cambia la paleta (`--acento`, `--placa`, `--placa-borde`...), hay
+  que volver a generar la imagen con ese código.
+- **Descartado:** dejarlo dibujado por código. Se ve igual y sigue los tokens,
+  pero el punto, leído literal, pide una imagen.
 
 ---
 
