@@ -55,7 +55,7 @@ export const BANDOS = {
     nombre: 'Usuarios',
     lema: 'Luchá por los usuarios',
     ficha: 'cyan',
-    fichaLevantada: 'naranja',
+    fichaLevantada: 'blanca',
     color: 'acento',
     tarjeta: { x: ANCHO / 2 - 330, y: 210, w: 300, h: 360 },
   },
