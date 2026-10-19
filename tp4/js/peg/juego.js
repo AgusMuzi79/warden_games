@@ -2,10 +2,10 @@
 //
 // Qué hace: junta las piezas de los otros módulos. Tiene el Tablero (las
 // reglas), el Reloj (tiempo con pausa), cuenta los movimientos, sabe en qué
-// fase está la partida (eligiendo bando, jugando o terminada) y maneja el
+// fase está la partida (eligiendo bando, jugando, terminando o terminada) y maneja el
 // arrastre con el mouse y el cursor de teclado. En cada cuadro (requestAnimationFrame) redibuja todo el canvas.
-// Los efectos (explosión, estela, temblor) viven en efectos.js; acá solo se
-// avisa cuándo pasan.
+// Los efectos (explosión, estela, temblor) viven en efectos.js y las
+// pantallas (bandos y fin) en pantallas.js; acá solo se avisa cuándo pasan.
 // Por qué una clase: el estado vive en un solo objeto (this) y cada método
 // hace una cosa; principal.js solo tiene que crear el Juego y conectarle
 // los eventos del canvas.
@@ -17,18 +17,17 @@
 import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from './utiles.js';
 import {
   ANCHO, ALTO, TABLERO_X, CELDA, OFFSET, RADIO_FICHA, TIEMPO_LIMITE_MS,
-  DURACION_VUELTA_MS, DURACION_RECHAZO_MS, obtenerDpr,
+  DURACION_VUELTA_MS, DURACION_RECHAZO_MS, DEMORA_FIN_MS, obtenerDpr,
   BANDOS, ORDEN_BANDOS,
 } from './config.js';
 import { Tablero } from './tablero.js';
 import { Reloj } from './reloj.js';
 import {
-  dibujarFondo, dibujarTablero, dibujarFichas, dibujarFicha, dibujarFantasma,
-  dibujarScanlines, centroDeCelda, texto,
+  dibujarFondo, dibujarTablero, dibujarFichas, dibujarFicha, dibujarFantasma, centroDeCelda,
 } from './dibujo.js';
 import { Efectos } from './efectos.js';
 import { dibujarHud } from './hud.js';
-import { dibujarSeleccion, bandoEn } from './pantallas.js';
+import { dibujarSeleccion, bandoEn, dibujarFin, botonFinEn, avisoDeFin } from './pantallas.js';
 
 // Hacia dónde mueve el cursor cada flecha: [filas, columnas].
 const FLECHAS = {
@@ -40,9 +39,6 @@ const FLECHAS = {
 
 // En la selección de bando: hacia dónde mueve cada flecha (-1 izquierda, 1 derecha).
 const FLECHAS_BANDO = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
-
-// Textos del final provisorio (la Fase 3 trae las pantallas definitivas).
-const TITULOS_FIN = { ganado: 'SISTEMA RESTAURADO', perdido: 'SISTEMA CORRUPTO' };
 
 export class Juego {
   /**
@@ -80,8 +76,10 @@ export class Juego {
   limpiarPartida() {
     this.tablero.reiniciar();
     this.movimientos = 0;
-    this.fase = 'eligiendo';        // 'eligiendo' | 'jugando' | 'ganado' | 'perdido'
-    this.subtitulo = '';
+    this.fase = 'eligiendo';        // 'eligiendo' | 'jugando' | 'terminando' | 'ganado' | 'perdido'
+    this.fin = null;                // datos de la pantalla de fin (ver terminar)
+    this.finEn = 0;                 // instante en que se muestra la pantalla de fin
+    this.botonEncendido = false;    // mouse sobre "JUGAR DE NUEVO"
     this.arrastre = null;           // { fila, col, movimientos, px, py, difX, difY }
     this.vuelta = null;             // { fila, col, x, y, inicio }: ficha que vuelve a su casilla
     this.rechazo = null;            // { fila, col, inicio }: ficha sin saltos que tiembla
@@ -124,6 +122,15 @@ export class Juego {
     this.detenerReloj();
     this.elegido = this.bando || ORDEN_BANDOS[0];
     this.canvas.style.cursor = 'default';
+  }
+
+  /**
+   * "JUGAR DE NUEVO" (botón del canvas, Enter o Espacio en la pantalla de
+   * fin): vuelve a la selección de bando, igual que Reiniciar.
+   */
+  jugarDeNuevo() {
+    this.mostrarSeleccion();
+    this.avisar('Nueva partida. Elegí tu bando: Usuarios o Programas de Clu.');
   }
 
   /**
@@ -190,6 +197,14 @@ export class Juego {
     return this.fase === 'jugando' && !this.pausado;
   }
 
+  /**
+   * Indica si se está mostrando una pantalla de fin (victoria o derrota).
+   * @returns {boolean}
+   */
+  get terminado() {
+    return this.fase === 'ganado' || this.fase === 'perdido';
+  }
+
   // ---------------------------------------------------------------
   // Dibujo
   // ---------------------------------------------------------------
@@ -201,9 +216,10 @@ export class Juego {
   cuadro(t) {
     if (this.fase === 'jugando' && this.reloj.agotado()) {
       this.cancelarArrastre(t);
-      this.seleccion = null;
-      this.terminar('perdido', 'Se terminó el tiempo.');
+      this.terminar('perdido', 'tiempo', t);
     }
+    // Pasada la demora, se muestra la pantalla de fin.
+    if (this.fase === 'terminando' && t >= this.finEn) this.mostrarFin(t);
 
     const ctx = this.ctx;
     // El backing store mide ANCHO*dpr; con esta escala se dibuja en medidas lógicas.
@@ -248,8 +264,11 @@ export class Juego {
       dibujarSeleccion(ctx, this.recursos, this.colores, this.fuentes, {
         elegido: this.elegido, t, conFoco: this.conFoco,
       });
-    } else if (this.fase !== 'jugando') {
-      this.dibujarFin();
+    } else if (this.terminado) {
+      dibujarFin(ctx, this.recursos, this.colores, this.fuentes, this.fin, {
+        t, dpr: this.dpr, imagen: this.fichasBando.levantada,
+        encendido: this.botonEncendido, conFoco: this.conFoco,
+      });
     }
     requestAnimationFrame(this.cuadro);
   }
@@ -330,27 +349,6 @@ export class Juego {
     ctx.restore();
   }
 
-  /**
-   * Final provisorio: un velo oscuro con título y subtítulo. La Fase 3 lo
-   * reemplaza por las pantallas de victoria y derrota.
-   */
-  dibujarFin() {
-    const ctx = this.ctx;
-    const color = this.fase === 'ganado' ? this.colores.acento : this.colores.activo;
-    ctx.fillStyle = conAlfa(this.colores.fondo, 0.8);
-    ctx.fillRect(0, 0, ANCHO, ALTO);
-    texto(ctx, TITULOS_FIN[this.fase], ANCHO / 2, ALTO / 2 - 10, {
-      fuente: '700 52px ' + this.fuentes.titulo, color, alinear: 'center', espaciado: 4, brillo: color, desenfoque: 20,
-    });
-    texto(ctx, this.subtitulo, ANCHO / 2, ALTO / 2 + 40, {
-      fuente: '600 22px ' + this.fuentes.ui, color: this.colores.textoClaro, alinear: 'center',
-    });
-    texto(ctx, 'Apretá Reiniciar (o R) para elegir bando y jugar de nuevo.', ANCHO / 2, ALTO / 2 + 80, {
-      fuente: '600 16px ' + this.fuentes.ui, color: this.colores.textoTenue, alinear: 'center',
-    });
-    dibujarScanlines(ctx, this.recursos);
-  }
-
   // ---------------------------------------------------------------
   // Reglas de la partida
   // ---------------------------------------------------------------
@@ -371,25 +369,55 @@ export class Juego {
     this.cursor = { fila: destino.fila, col: destino.col };
 
     const estado = this.tablero.estado();
-    if (estado === 'ganado') this.terminar('ganado', 'Quedó un solo nodo.');
-    else if (estado === 'sin-saltos') this.terminar('perdido', 'No quedan saltos válidos.');
-    else {
+    if (estado === 'ganado') {
+      // Conexión perfecta si el último nodo quedó en el centro (3, 3).
+      const ultima = this.tablero.ultimaFicha();
+      const central = ultima.fila === 3 && ultima.col === 3;
+      this.terminar('ganado', central ? 'central' : 'un-nodo', t);
+    } else if (estado === 'sin-saltos') {
+      this.terminar('perdido', 'sin-saltos', t);
+    } else {
       this.avisar('Salto hecho. Quedan ' + this.tablero.contarFichas() + ' nodos y '
         + this.tablero.contarSaltos() + ' saltos posibles.');
     }
   }
 
   /**
-   * Termina la partida: congela el reloj, guarda el resultado y lo avisa.
-   * @param {'ganado' | 'perdido'} fase
-   * @param {string} subtitulo el motivo, en una frase
+   * Termina la partida: congela el reloj, guarda los datos de la pantalla
+   * de fin y la programa para dentro de DEMORA_FIN_MS (fase 'terminando'),
+   * así se alcanza a ver la última explosión. Con movimiento reducido no
+   * hay demora.
+   * @param {'ganado' | 'perdido'} resultado
+   * @param {'central' | 'un-nodo' | 'sin-saltos' | 'tiempo'} motivo
+   * @param {number} t tiempo actual en ms
    */
-  terminar(fase, subtitulo) {
+  terminar(resultado, motivo, t) {
+    if (this.fase !== 'jugando') return;
     this.reloj.congelar();
-    this.fase = fase;
-    this.subtitulo = subtitulo;
-    const titulo = fase === 'ganado' ? 'Sistema restaurado' : 'Sistema corrupto';
-    this.avisar(titulo + '. ' + subtitulo);
+    this.seleccion = null;
+    this.fase = 'terminando';
+    this.fin = {
+      resultado,
+      motivo,
+      // Tope en el límite: si se agotó, el último cuadro pudo pasarse unos ms.
+      tiempoMs: Math.min(this.reloj.transcurrido(), this.reloj.limiteMs),
+      movimientos: this.movimientos,
+      nodos: this.tablero.contarFichas(),
+      ultima: resultado === 'ganado' ? this.tablero.ultimaFicha() : null,
+      mostradoEn: 0,
+    };
+    this.finEn = t + (prefiereMenosMovimiento() ? 0 : DEMORA_FIN_MS);
+  }
+
+  /**
+   * Muestra la pantalla de fin y avisa el resultado con las estadísticas.
+   * @param {number} t tiempo actual en ms
+   */
+  mostrarFin(t) {
+    this.fase = this.fin.resultado;
+    this.fin.mostradoEn = t;
+    this.botonEncendido = false;
+    this.avisar(avisoDeFin(this.fin));
   }
 
   // ---------------------------------------------------------------
@@ -462,7 +490,8 @@ export class Juego {
 
   /**
    * Botón del mouse apretado. En la selección elige el bando de la tarjeta
-   * tocada; jugando, agarra la ficha si tiene saltos (si no, tiembla).
+   * tocada; en el fin, "JUGAR DE NUEVO" vuelve a la selección; jugando,
+   * agarra la ficha si tiene saltos (si no, tiembla).
    * @param {PointerEvent} evento
    */
   alPresionar(evento) {
@@ -471,6 +500,10 @@ export class Juego {
     if (this.fase === 'eligiendo') {
       const clave = this.pausado ? null : bandoEn(x, y);
       if (clave) this.elegirBando(clave);
+      return;
+    }
+    if (this.terminado) {
+      if (!this.pausado && botonFinEn(x, y, this.fin)) this.jugarDeNuevo();
       return;
     }
     if (!this.activo) return;
@@ -495,7 +528,7 @@ export class Juego {
 
   /**
    * Puntero en movimiento: en la selección enciende la tarjeta de abajo;
-   * jugando, mueve la ficha arrastrada o cambia el cursor del mouse.
+   * en el fin, el botón "JUGAR DE NUEVO"; jugando, mueve la ficha arrastrada o cambia el cursor del mouse.
    * @param {PointerEvent} evento
    */
   alMover(evento) {
@@ -504,6 +537,11 @@ export class Juego {
       const clave = bandoEn(x, y);
       if (clave) this.elegido = clave;
       this.canvas.style.cursor = clave ? 'pointer' : 'default';
+      return;
+    }
+    if (this.terminado) {
+      this.botonEncendido = botonFinEn(x, y, this.fin);
+      this.canvas.style.cursor = this.botonEncendido ? 'pointer' : 'default';
       return;
     }
     if (this.arrastre) {
@@ -586,6 +624,14 @@ export class Juego {
     }
     if (this.fase === 'eligiendo') {
       if (!this.pausado) this.teclearSeleccion(evento);
+      return;
+    }
+    if (this.terminado) {
+      // En la pantalla de fin, Enter o Espacio equivalen a "JUGAR DE NUEVO".
+      if ((tecla === 'Enter' || tecla === ' ') && !this.pausado) {
+        evento.preventDefault();
+        this.jugarDeNuevo();
+      }
       return;
     }
     if (!this.activo) return;
