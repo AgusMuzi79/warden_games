@@ -151,6 +151,14 @@
   padding: var(--espaciado-1) 0;
 }
 
+/* Grupo de la derecha de la barra: Reiniciar (un .btn--secundario común)
+   y el botón "?". Los dos miden 44px de alto, así quedan alineados. */
+.peg__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+}
+
 /* Botón "?" de la ayuda. Mismas medidas que .modal__cerrar (44px de área,
    ícono solo), con clase propia porque aquel va posicionado adentro del
    modal. */
@@ -194,14 +202,27 @@
   aspect-ratio: 1200 / 760;
   margin-inline: auto;
   border-radius: var(--radio-xl);
-  /* Fondo provisorio hasta que la Fase 2 dibuje el tablero: el mismo casi
-     negro de los huecos, con la grilla tenue del tablero encima. */
+  /* Fondo mientras cargan las fuentes y las imágenes (hasta 1,5 s): el
+     mismo casi negro de los huecos, con la grilla tenue del tablero
+     encima. Después el juego pinta todo el canvas y lo tapa. */
   background-color: var(--tablero-descargado);
   background-image:
     linear-gradient(var(--tablero-grilla) 1px, transparent 1px),
     linear-gradient(90deg, var(--tablero-grilla) 1px, transparent 1px);
   background-size: 28px 28px;
   touch-action: none;
+}
+
+/* El foco de teclado del canvas usa el anillo global (--foco, en
+   variables.css), que ya incluye [tabindex]: no hace falta nada acá.
+
+   Aviso de error si el tablero no carga: principal.js le saca .sr-only al
+   <p id="peg-estado"> y le pone esta clase, así se ve en la página. */
+.peg__error {
+  margin: 0;
+  color: var(--error);
+  font: 600 16px/1.4 var(--font-ui);
+  text-align: center;
 }
 
 /* Diálogo de ayuda: reusa .modal (components.css), un poco más ancho

@@ -2,9 +2,10 @@
 //
 // Qué hace:
 //   1. Le pasa las 4 capturas del Peg a la galería animada.
-//   2. Abre y cierra el diálogo de ayuda (botón "?" o tecla F1).
-// El juego en sí (tablero, nodos, reglas, reloj) llega en la Fase 2, en
-// otros módulos de esta misma carpeta.
+//   2. Abre y cierra el diálogo de ayuda (botón "?" o tecla F1), y pausa
+//      la partida mientras está abierto.
+// El juego en sí (tablero, nodos, reglas, reloj) vive en otros módulos de
+// esta misma carpeta; el punto de entrada es principal.js.
 //
 // Es un módulo (type="module" en el HTML). Los módulos se ejecutan diferidos,
 // como un script con defer, y en el orden en que aparecen en el documento.
@@ -12,6 +13,12 @@
 // este archivo corre ya existe iniciarGaleria(), que es global porque
 // galeria.js la declara con function fuera de todo bloque.
 // Un módulo trae 'use strict' de forma implícita y no expone nada global.
+//
+// juego.html carga solo este archivo. Al importar principal.js, el
+// navegador lo carga y lo ejecuta antes que este, una sola vez, y arranca
+// el juego. De ahí se traen las funciones para pausar y reanudar.
+
+import { pausarJuego, reanudarJuego } from './principal.js';
 
 // ---------------------------------------------------------------
 // Galería
@@ -63,7 +70,10 @@ function abrirAyuda() {
   if (dialogoAyuda.open) return;
   llenarAyuda();
   dialogoAyuda.showModal();
-  // Fase 2: acá se va a pausar el reloj de la partida mientras se lee la ayuda.
+  // Mientras se lee la ayuda, el reloj no corre. Con el modal abierto el
+  // resto de la página queda inerte: el canvas no recibe foco ni teclas,
+  // así que las teclas del juego no hacen nada hasta cerrarla.
+  pausarJuego();
 }
 
 /**
@@ -100,8 +110,8 @@ dialogoAyuda.addEventListener('click', (evento) => {
 
 // 'close' salta siempre que el diálogo se cierra (X, fondo o Esc). El foco
 // vuelve al botón "?", también si se abrió con F1 desde otro lugar: así
-// quien usa teclado sabe dónde quedó.
-// Fase 2: acá se va a reanudar el reloj de la partida.
+// quien usa teclado sabe dónde quedó. También se reanuda la partida.
 dialogoAyuda.addEventListener('close', () => {
+  reanudarJuego();
   botonAyuda.focus();
 });

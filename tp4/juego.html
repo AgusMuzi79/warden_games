@@ -51,26 +51,37 @@
          lateral (ficha, Ayuda y Compartir) a la derecha. -->
     <div class="juego-layout juego-layout--peg">
 
-      <!-- Zona de juego. El tablero se dibuja en el <canvas> (Fase 2,
-           js/peg/). Arriba, una barra chica con el nombre y el botón "?",
-           que abre la ayuda en un diálogo (js/peg/pagina.js). -->
+      <!-- Zona de juego. El tablero se dibuja en el <canvas> (js/peg/).
+           Arriba, una barra chica con el nombre, el botón Reiniciar y el
+           botón "?", que abre la ayuda en un diálogo (js/peg/pagina.js). -->
       <section class="peg" aria-label="Zona de juego de Neon Circuit">
         <div class="peg__barra">
           <p class="tablero__etiqueta">Neon Circuit</p>
-          <button type="button" class="peg__ayuda-btn" id="btn-peg-ayuda" aria-label="Cómo se juega" aria-haspopup="dialog">
-            <i class="ph ph-question" aria-hidden="true"></i>
-          </button>
+          <div class="peg__acciones">
+            <button type="button" class="btn btn--secundario" id="btn-peg-reiniciar">Reiniciar</button>
+            <button type="button" class="peg__ayuda-btn" id="btn-peg-ayuda" aria-label="Cómo se juega" aria-haspopup="dialog">
+              <i class="ph ph-question" aria-hidden="true"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- 1200x760 es la resolución en la que se dibuja; el CSS lo muestra
-             más chico sin deformarlo. El texto de adentro solo se ve si el
-             navegador no soporta canvas. -->
-        <canvas id="peg-canvas" class="peg__canvas" width="1200" height="760" role="img" aria-label="Tablero de Neon Circuit: un circuito en forma de cruz con 33 nodos.">
+        <!-- 1200x760 es la resolución lógica en la que se dibuja
+             (principal.js la multiplica por la densidad de la pantalla); el
+             CSS lo muestra más chico sin deformarlo. El texto de adentro
+             solo se ve si el navegador no soporta canvas.
+             tabindex="0" lo hace enfocable para jugar con el teclado.
+             role="application" le avisa al lector de pantalla que las
+             flechas las maneja la página (si no, las usaría para leer). -->
+        <canvas id="peg-canvas" class="peg__canvas" width="1200" height="760" tabindex="0" role="application" aria-label="Tablero de Neon Circuit: un circuito en forma de cruz con 33 nodos." aria-describedby="peg-instrucciones">
           Tu navegador no puede mostrar el tablero de Neon Circuit. Probá con una versión actualizada de Chrome, Firefox o Edge.
         </canvas>
 
-        <!-- Avisos del juego para lectores de pantalla (Fase 2: nodo
-             seleccionado, salto hecho, fin de partida). Vacío por ahora. -->
+        <!-- Cómo se juega con el teclado (lo lee el lector de pantalla al
+             enfocar el canvas, por el aria-describedby). -->
+        <p class="sr-only" id="peg-instrucciones">Usá las flechas para moverte entre los nodos. Con Enter o Espacio levantás un nodo; después, las flechas eligen el destino y Enter o Espacio lo suelta. Escape deja el nodo en su lugar y R reinicia la partida.</p>
+
+        <!-- Avisos del juego para lectores de pantalla (nodo levantado,
+             salto hecho, fin de partida). Lo escribe principal.js. -->
         <p class="sr-only" id="peg-estado" role="status"></p>
       </section>
 
@@ -177,7 +188,9 @@
           </details>
 
           <ul class="ayuda__atajos">
-            <li><kbd>R</kbd> Reiniciar (volvés a elegir bando)</li>
+            <li><kbd>R</kbd> Reiniciar</li>
+            <li><kbd>Flechas</kbd> Moverte entre los nodos, con el tablero enfocado</li>
+            <li><kbd>Enter</kbd> Levantar un nodo y soltarlo en el destino elegido</li>
             <li><kbd>F1</kbd> Abrir la ayuda (también con el botón "?")</li>
             <li><kbd>Esc</kbd> Cerrar la ayuda</li>
           </ul>
@@ -458,7 +471,9 @@
 
   <script src="./js/api.js" defer></script>
   <script src="./js/galeria.js" defer></script>
-  <!-- Módulo del Peg: va después de galeria.js (usa su iniciarGaleria). -->
+  <!-- Módulo del Peg: va después de galeria.js (usa su iniciarGaleria).
+       pagina.js importa principal.js, que arranca el juego: por eso se
+       carga un solo <script> y el juego no se ejecuta dos veces. -->
   <script type="module" src="./js/peg/pagina.js"></script>
   <script src="./js/compartir.js" defer></script>
   <script src="./js/resena.js" defer></script>
