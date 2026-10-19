@@ -1,22 +1,22 @@
-// juego.js — Estado de la partida, loop de dibujo y entrada (mouse y teclado)
+// juego.js — Estado de la partida y loop de dibujo
 //
 // Qué hace: junta las piezas de los otros módulos. Tiene el Tablero (las
-// reglas), el Reloj (tiempo con pausa), cuenta los movimientos, sabe en qué
-// fase está la partida (eligiendo bando, jugando, terminando o terminada) y maneja el
-// arrastre con el mouse y el cursor de teclado. En cada cuadro (requestAnimationFrame) redibuja todo el canvas.
-// Los efectos (explosión, estela, temblor) viven en efectos.js y las
-// pantallas (bandos y fin) en pantallas.js; acá solo se avisa cuándo pasan.
+// reglas), el Reloj (tiempo con pausa), cuenta los movimientos y sabe en qué
+// fase está la partida (eligiendo bando, jugando, terminando o terminada).
+// En cada cuadro (requestAnimationFrame) redibuja todo el canvas.
+// Los efectos (explosión, estela, temblor) viven en efectos.js, las
+// pantallas (bandos y fin) en pantallas.js y el mouse y el teclado en
+// entrada.js, que cambia el estado de este objeto (arrastre, seleccion,
+// cursor...) y llama a sus métodos (elegirBando, jugar, reiniciar...).
 // Por qué una clase: el estado vive en un solo objeto (this) y cada método
-// hace una cosa; principal.js solo tiene que crear el Juego y conectarle
-// los eventos del canvas.
+// hace una cosa; principal.js crea el Juego y le conecta una Entrada.
 //
 // Coordenadas "lógicas": se dibuja siempre en 1200x760 (ANCHO x ALTO),
-// aunque el CSS muestre el canvas más chico. El mouse se pasa a esas
-// coordenadas antes de usarlo.
+// aunque el CSS muestre el canvas más chico.
 
 import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from './utiles.js';
 import {
-  ANCHO, ALTO, TABLERO_X, CELDA, OFFSET, RADIO_FICHA, TIEMPO_LIMITE_MS,
+  CELDA, RADIO_FICHA, TIEMPO_LIMITE_MS,
   DURACION_VUELTA_MS, DURACION_RECHAZO_MS, DEMORA_FIN_MS, obtenerDpr,
   BANDOS, ORDEN_BANDOS,
 } from './config.js';
@@ -27,18 +27,7 @@ import {
 } from './dibujo.js';
 import { Efectos } from './efectos.js';
 import { dibujarHud } from './hud.js';
-import { dibujarSeleccion, bandoEn, dibujarFin, botonFinEn, avisoDeFin } from './pantallas.js';
-
-// Hacia dónde mueve el cursor cada flecha: [filas, columnas].
-const FLECHAS = {
-  ArrowUp: [-1, 0],
-  ArrowDown: [1, 0],
-  ArrowLeft: [0, -1],
-  ArrowRight: [0, 1],
-};
-
-// En la selección de bando: hacia dónde mueve cada flecha (-1 izquierda, 1 derecha).
-const FLECHAS_BANDO = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
+import { dibujarSeleccion, dibujarFin, avisoDeFin } from './pantallas.js';
 
 export class Juego {
   /**
@@ -421,35 +410,8 @@ export class Juego {
   }
 
   // ---------------------------------------------------------------
-  // Mouse (pointer events)
+  // Arrastre (lo usan el dibujo, la pausa y entrada.js)
   // ---------------------------------------------------------------
-
-  /**
-   * Pasa la posición del puntero a coordenadas lógicas del canvas (1200x760).
-   * @param {PointerEvent} evento
-   * @returns {{x: number, y: number}}
-   */
-  aLogico(evento) {
-    const caja = this.canvas.getBoundingClientRect();
-    return {
-      x: ((evento.clientX - caja.left) * ANCHO) / caja.width,
-      y: ((evento.clientY - caja.top) * ALTO) / caja.height,
-    };
-  }
-
-  /**
-   * Casilla de la cruz bajo el punto (x, y), o null si no hay ninguna cerca.
-   * @param {number} x
-   * @param {number} y
-   * @returns {{fila: number, col: number} | null}
-   */
-  celdaEn(x, y) {
-    const col = Math.floor((x - TABLERO_X - OFFSET) / CELDA);
-    const fila = Math.floor((y - OFFSET) / CELDA);
-    if (!Tablero.esCeldaValida(fila, col)) return null;
-    const centro = centroDeCelda(fila, col);
-    return Math.hypot(x - centro.x, y - centro.y) <= RADIO_FICHA + 6 ? { fila, col } : null;
-  }
 
   /**
    * Posición actual de la ficha arrastrada: el puntero menos el punto donde se la agarró.
@@ -486,256 +448,5 @@ export class Juego {
     this.efectos.cortarEstela();
     this.arrastre = null;
     this.canvas.style.cursor = 'default';
-  }
-
-  /**
-   * Botón del mouse apretado. En la selección elige el bando de la tarjeta
-   * tocada; en el fin, "JUGAR DE NUEVO" vuelve a la selección; jugando,
-   * agarra la ficha si tiene saltos (si no, tiembla).
-   * @param {PointerEvent} evento
-   */
-  alPresionar(evento) {
-    if (evento.button !== 0) return;
-    const { x, y } = this.aLogico(evento);
-    if (this.fase === 'eligiendo') {
-      const clave = this.pausado ? null : bandoEn(x, y);
-      if (clave) this.elegirBando(clave);
-      return;
-    }
-    if (this.terminado) {
-      if (!this.pausado && botonFinEn(x, y, this.fin)) this.jugarDeNuevo();
-      return;
-    }
-    if (!this.activo) return;
-    const celda = this.celdaEn(x, y);
-    if (!celda || this.tablero.grilla[celda.fila][celda.col] !== true) return;
-    const t = performance.now();
-    const movimientos = this.tablero.movimientosDesde(celda.fila, celda.col);
-    this.seleccion = null;  // el mouse le gana a una selección hecha con el teclado
-    this.vuelta = null;
-    if (movimientos.length === 0) {
-      this.rechazar(celda, t);
-      return;
-    }
-    this.rechazo = null;
-    const centro = centroDeCelda(celda.fila, celda.col);
-    this.arrastre = { ...celda, movimientos, px: x, py: y, difX: x - centro.x, difY: y - centro.y };
-    this.efectos.agregarEstela(centro.x, centro.y, this.colorBando, t);
-    // Con la captura, los eventos siguen llegando al canvas aunque el puntero salga de él.
-    this.canvas.setPointerCapture(evento.pointerId);
-    this.canvas.style.cursor = 'grabbing';
-  }
-
-  /**
-   * Puntero en movimiento: en la selección enciende la tarjeta de abajo;
-   * en el fin, el botón "JUGAR DE NUEVO"; jugando, mueve la ficha arrastrada o cambia el cursor del mouse.
-   * @param {PointerEvent} evento
-   */
-  alMover(evento) {
-    const { x, y } = this.aLogico(evento);
-    if (this.fase === 'eligiendo') {
-      const clave = bandoEn(x, y);
-      if (clave) this.elegido = clave;
-      this.canvas.style.cursor = clave ? 'pointer' : 'default';
-      return;
-    }
-    if (this.terminado) {
-      this.botonEncendido = botonFinEn(x, y, this.fin);
-      this.canvas.style.cursor = this.botonEncendido ? 'pointer' : 'default';
-      return;
-    }
-    if (this.arrastre) {
-      this.arrastre.px = x;
-      this.arrastre.py = y;
-      const ficha = this.posicionArrastre();
-      this.efectos.agregarEstela(ficha.x, ficha.y, this.colorBando, performance.now());
-      return;
-    }
-    const celda = this.activo ? this.celdaEn(x, y) : null;
-    const movible = celda && this.tablero.puedeMover(celda.fila, celda.col);
-    this.canvas.style.cursor = movible ? 'grab' : 'default';
-  }
-
-  /**
-   * Botón del mouse soltado: si la ficha está sobre un destino válido, salta;
-   * si no, vuelve a su lugar.
-   */
-  alSoltar() {
-    if (!this.arrastre) return;
-    const t = performance.now();
-    const destino = this.destinoBajoFicha();
-    if (!destino) {
-      this.cancelarArrastre(t);
-      return;
-    }
-    const origen = { fila: this.arrastre.fila, col: this.arrastre.col };
-    // La estela termina justo en el centro de la casilla de destino.
-    const centro = centroDeCelda(destino.fila, destino.col);
-    this.efectos.agregarEstela(centro.x, centro.y, this.colorBando, t);
-    this.efectos.cortarEstela();
-    this.arrastre = null;
-    this.canvas.style.cursor = 'default';
-    this.jugar(origen, destino, t);
-  }
-
-  /**
-   * El navegador canceló el puntero (por ejemplo, otra app tomó el foco):
-   * la ficha vuelve a su casilla.
-   */
-  alCancelar() {
-    this.cancelarArrastre(performance.now());
-  }
-
-  /**
-   * Hace temblar una ficha que no tiene saltos y lo avisa.
-   * @param {{fila: number, col: number}} celda
-   * @param {number} t
-   */
-  rechazar(celda, t) {
-    this.vuelta = null;  // una sola ficha animada por vez (ver cuadro)
-    if (!prefiereMenosMovimiento()) this.rechazo = { ...celda, inicio: t };
-    this.avisar('Ese nodo no tiene saltos posibles.');
-  }
-
-  // ---------------------------------------------------------------
-  // Teclado
-  // ---------------------------------------------------------------
-
-  /**
-   * El canvas ganó o perdió el foco. El cursor se muestra solo con foco de
-   * teclado (:focus-visible), no al hacer click con el mouse.
-   * @param {boolean} enfocado
-   */
-  alEnfocar(enfocado) {
-    this.conFoco = enfocado && this.canvas.matches(':focus-visible');
-    if (!enfocado) this.cancelarSeleccion(false);
-  }
-
-  /**
-   * Tecla apretada con el canvas enfocado. Solo se cancela la acción del
-   * navegador (scrollear) para las teclas que usa el juego.
-   * @param {KeyboardEvent} evento
-   */
-  alTeclear(evento) {
-    const tecla = evento.key;
-    if (tecla === 'r' || tecla === 'R') {
-      if (this.fase !== 'eligiendo') this.reiniciar();
-      return;
-    }
-    if (this.fase === 'eligiendo') {
-      if (!this.pausado) this.teclearSeleccion(evento);
-      return;
-    }
-    if (this.terminado) {
-      // En la pantalla de fin, Enter o Espacio equivalen a "JUGAR DE NUEVO".
-      if ((tecla === 'Enter' || tecla === ' ') && !this.pausado) {
-        evento.preventDefault();
-        this.jugarDeNuevo();
-      }
-      return;
-    }
-    if (!this.activo) return;
-    if (FLECHAS[tecla]) {
-      evento.preventDefault();
-      this.conFoco = true;
-      this.moverCursor(FLECHAS[tecla]);
-    } else if (tecla === 'Enter' || tecla === ' ') {
-      evento.preventDefault();
-      this.conFoco = true;
-      if (this.seleccion) this.soltarSeleccion();
-      else this.levantarConTeclado();
-    } else if (tecla === 'Escape' && this.seleccion) {
-      evento.preventDefault();
-      this.cancelarSeleccion(true);
-    }
-  }
-
-  /**
-   * Teclas de la selección de bando: las flechas cambian de tarjeta y
-   * Enter o Espacio eligen la encendida.
-   * @param {KeyboardEvent} evento
-   */
-  teclearSeleccion(evento) {
-    const tecla = evento.key;
-    if (tecla in FLECHAS_BANDO) {
-      evento.preventDefault();
-      this.conFoco = true;
-      const actual = ORDEN_BANDOS.indexOf(this.elegido);
-      const indice = clamp(actual + FLECHAS_BANDO[tecla], 0, ORDEN_BANDOS.length - 1);
-      if (indice !== actual) {
-        this.elegido = ORDEN_BANDOS[indice];
-        const bando = BANDOS[this.elegido];
-        this.avisar(bando.nombre + '. ' + bando.lema + '.');
-      }
-    } else if (tecla === 'Enter' || tecla === ' ') {
-      evento.preventDefault();
-      this.elegirBando(this.elegido);
-    }
-  }
-
-  /**
-   * Mueve el cursor una casilla en la dirección dada. Sin ficha levantada,
-   * saltea lo que está fuera de la cruz; con una levantada, solo va a sus destinos.
-   * @param {number[]} direccion [filas, columnas]
-   */
-  moverCursor([df, dc]) {
-    if (this.seleccion) {
-      const { fila, col, movimientos } = this.seleccion;
-      const destino = movimientos.find((m) => m.fila === fila + 2 * df && m.col === col + 2 * dc);
-      if (destino) this.cursor = { fila: destino.fila, col: destino.col };
-      return;
-    }
-    let fila = this.cursor.fila + df;
-    let col = this.cursor.col + dc;
-    while (fila >= 0 && fila < 7 && col >= 0 && col < 7) {
-      if (Tablero.esCeldaValida(fila, col)) {
-        this.cursor = { fila, col };
-        return;
-      }
-      fila += df;
-      col += dc;
-    }
-  }
-
-  /**
-   * Levanta la ficha que está bajo el cursor, si tiene saltos, y pone el
-   * cursor en su primer destino.
-   */
-  levantarConTeclado() {
-    const { fila, col } = this.cursor;
-    if (this.tablero.grilla[fila][col] !== true) {
-      this.avisar('En esa casilla no hay un nodo.');
-      return;
-    }
-    const movimientos = this.tablero.movimientosDesde(fila, col);
-    if (movimientos.length === 0) {
-      this.rechazar({ fila, col }, performance.now());
-      return;
-    }
-    this.seleccion = { fila, col, movimientos };
-    this.cursor = { fila: movimientos[0].fila, col: movimientos[0].col };
-    const plural = movimientos.length === 1 ? ' destino posible.' : ' destinos posibles.';
-    this.avisar('Nodo fila ' + (fila + 1) + ', columna ' + (col + 1) + ' levantado. '
-      + movimientos.length + plural);
-  }
-
-  /**
-   * Suelta la ficha levantada con el teclado en el destino del cursor.
-   */
-  soltarSeleccion() {
-    const origen = { fila: this.seleccion.fila, col: this.seleccion.col };
-    this.seleccion = null;
-    this.jugar(origen, this.cursor, performance.now());
-  }
-
-  /**
-   * Deja la ficha levantada con el teclado en su lugar y vuelve el cursor a ella.
-   * @param {boolean} anunciar si se avisa a la región en vivo
-   */
-  cancelarSeleccion(anunciar) {
-    if (!this.seleccion) return;
-    this.cursor = { fila: this.seleccion.fila, col: this.seleccion.col };
-    this.seleccion = null;
-    if (anunciar) this.avisar('Nodo soltado sin moverlo.');
   }
 }

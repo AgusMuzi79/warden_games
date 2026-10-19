@@ -2,9 +2,10 @@
 //
 // Qué hace: espera las fuentes, lee los colores de variables.css, arma las
 // imágenes (fondo, placa, fichas), ajusta la resolución del canvas a la
-// pantalla, crea el Juego y le conecta los eventos del canvas y del botón
-// Reiniciar. El juego arranca en la selección de bando: el reloj recién
-// corre cuando se elige uno.
+// pantalla, crea el Juego (estado y dibujo, juego.js) y la Entrada (mouse y
+// teclado, entrada.js), que engancha los eventos del canvas, y conecta el
+// botón Reiniciar. El juego arranca en la selección de bando: el reloj
+// recién corre cuando se elige uno.
 // Lo importa pagina.js (así se carga una sola vez) y usa pausarJuego() y
 // reanudarJuego() al abrir y cerrar la ayuda.
 
@@ -12,6 +13,7 @@ import { ANCHO, ALTO, obtenerDpr, obtenerColores, obtenerFuentes } from './confi
 import { prepararRecursos } from './dibujo.js';
 import { cargarFuentes } from './hud.js';
 import { Juego } from './juego.js';
+import { Entrada } from './entrada.js';
 
 const canvas = document.getElementById('peg-canvas');
 const estado = document.getElementById('peg-estado');
@@ -73,13 +75,8 @@ async function arrancar() {
   canvas.height = ALTO * dpr;
 
   juego = new Juego(canvas, recursos, colores, fuentes, { avisar });
-  canvas.addEventListener('pointerdown', (evento) => juego.alPresionar(evento));
-  canvas.addEventListener('pointermove', (evento) => juego.alMover(evento));
-  canvas.addEventListener('pointerup', () => juego.alSoltar());
-  canvas.addEventListener('pointercancel', () => juego.alCancelar());
-  canvas.addEventListener('keydown', (evento) => juego.alTeclear(evento));
-  canvas.addEventListener('focus', () => juego.alEnfocar(true));
-  canvas.addEventListener('blur', () => juego.alEnfocar(false));
+  // La Entrada traduce clicks y teclas del canvas a acciones del juego.
+  new Entrada(juego).conectar();
   botonReiniciar.addEventListener('click', () => juego.reiniciar());
 
   juego.iniciar();
