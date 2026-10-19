@@ -43,6 +43,36 @@ export const FICHAS = {
   blanca: 'assets/img/ficha-blanca.png',
 };
 
+// Bandos (como en Tron: Legacy, cyan son los Usuarios y naranja el ejército
+// de Clu). Cada bando dice qué imagen usan sus fichas normales, cuál la
+// ficha levantada (y los fantasmas de destino), con qué color de
+// obtenerColores() se dibuja su tarjeta y dónde va esa tarjeta en la
+// pantalla de selección (coordenadas lógicas de 1200x760).
+// titulo se escribe en el canvas; nombre es el que se lee en los avisos.
+export const BANDOS = {
+  usuarios: {
+    titulo: 'USUARIOS',
+    nombre: 'Usuarios',
+    lema: 'Luchá por los usuarios',
+    ficha: 'cyan',
+    fichaLevantada: 'naranja',
+    color: 'acento',
+    tarjeta: { x: ANCHO / 2 - 330, y: 210, w: 300, h: 360 },
+  },
+  clu: {
+    titulo: 'PROGRAMAS DE CLU',
+    nombre: 'Programas de Clu',
+    lema: 'La perfección del sistema',
+    ficha: 'naranja',
+    fichaLevantada: 'cyan',
+    color: 'activo',
+    tarjeta: { x: ANCHO / 2 + 30, y: 210, w: 300, h: 360 },
+  },
+};
+
+// Orden de las tarjetas de izquierda a derecha (lo usan las flechas del teclado).
+export const ORDEN_BANDOS = ['usuarios', 'clu'];
+
 /**
  * Densidad de píxeles de la pantalla, con un tope de 2 (más no se nota y
  * gasta memoria). Se calcula al llamarla, así el módulo carga sin navegador.

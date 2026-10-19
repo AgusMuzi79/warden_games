@@ -2,8 +2,8 @@
 //
 // Qué hace: junta las piezas de los otros módulos. Tiene el Tablero (las
 // reglas), el Reloj (tiempo con pausa), cuenta los movimientos, sabe en qué
-// fase está la partida y maneja el arrastre con el mouse y el cursor de
-// teclado. En cada cuadro (requestAnimationFrame) redibuja todo el canvas.
+// fase está la partida (eligiendo bando, jugando o terminada) y maneja el
+// arrastre con el mouse y el cursor de teclado. En cada cuadro (requestAnimationFrame) redibuja todo el canvas.
 // Por qué una clase: el estado vive en un solo objeto (this) y cada método
 // hace una cosa; principal.js solo tiene que crear el Juego y conectarle
 // los eventos del canvas.
@@ -16,6 +16,7 @@ import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from './utiles.js';
 import {
   ANCHO, ALTO, TABLERO_X, CELDA, OFFSET, RADIO_FICHA, TIEMPO_LIMITE_MS,
   DURACION_VUELTA_MS, DURACION_RECHAZO_MS, DURACION_TEMBLOR_MS, obtenerDpr,
+  BANDOS, ORDEN_BANDOS,
 } from './config.js';
 import { Tablero } from './tablero.js';
 import { Reloj } from './reloj.js';
@@ -24,6 +25,7 @@ import {
   centroDeCelda, texto,
 } from './dibujo.js';
 import { dibujarHud } from './hud.js';
+import { dibujarSeleccion, bandoEn } from './pantallas.js';
 
 // Hacia dónde mueve el cursor cada flecha: [filas, columnas].
 const FLECHAS = {
@@ -32,6 +34,9 @@ const FLECHAS = {
   ArrowLeft: [0, -1],
   ArrowRight: [0, 1],
 };
+
+// En la selección de bando: hacia dónde mueve cada flecha (-1 izquierda, 1 derecha).
+const FLECHAS_BANDO = { ArrowLeft: -1, ArrowUp: -1, ArrowRight: 1, ArrowDown: 1 };
 
 // Textos del final provisorio (la Fase 3 trae las pantallas definitivas).
 const TITULOS_FIN = { ganado: 'SISTEMA RESTAURADO', perdido: 'SISTEMA CORRUPTO' };
@@ -57,9 +62,12 @@ export class Juego {
     this.pausado = false;
     this.conFoco = false;               // el cursor de teclado se ve solo con foco de teclado
     this.cursor = { fila: 3, col: 3 };  // casilla marcada por el teclado
+    this.bando = null;                  // 'usuarios' | 'clu', se elige al empezar
+    this.elegido = ORDEN_BANDOS[0];     // tarjeta encendida en la selección de bando
     // bind: requestAnimationFrame llama a la función suelta, sin this.
     this.cuadro = this.cuadro.bind(this);
     this.limpiarPartida();
+    this.detenerReloj();
   }
 
   /**
@@ -68,7 +76,7 @@ export class Juego {
   limpiarPartida() {
     this.tablero.reiniciar();
     this.movimientos = 0;
-    this.fase = 'jugando';          // 'jugando' | 'ganado' | 'perdido'
+    this.fase = 'eligiendo';        // 'eligiendo' | 'jugando' | 'ganado' | 'perdido'
     this.subtitulo = '';
     this.arrastre = null;           // { fila, col, movimientos, px, py, difX, difY }
     this.vuelta = null;             // { fila, col, x, y, inicio }: ficha que vuelve a su casilla
@@ -78,21 +86,69 @@ export class Juego {
   }
 
   /**
-   * Arranca el reloj y el loop de dibujo. Se llama una sola vez.
+   * Arranca el loop de dibujo en la selección de bando. Se llama una sola
+   * vez. El reloj recién corre al elegir bando.
    */
   iniciar() {
-    this.reloj.iniciar();
     requestAnimationFrame(this.cuadro);
+    this.avisar('Elegí tu bando: Usuarios o Programas de Clu.');
   }
 
   /**
-   * Vuelve a la posición inicial y arranca el reloj de cero.
+   * Deja el reloj quieto en el tiempo completo: lo arranca y lo congela en
+   * el mismo instante, así marca 0 ms jugados hasta que se elija bando.
+   */
+  detenerReloj() {
+    this.reloj.iniciar();
+    this.reloj.congelar();
+  }
+
+  /**
+   * Reiniciar (tecla R o botón de la página): vuelve a la selección de bando.
    */
   reiniciar() {
+    this.mostrarSeleccion();
+    this.avisar('Partida reiniciada. Elegí tu bando: Usuarios o Programas de Clu.');
+  }
+
+  /**
+   * Deja el tablero como al principio, frena el reloj y muestra la
+   * selección de bando, con la tarjeta del último bando encendida.
+   */
+  mostrarSeleccion() {
     this.limpiarPartida();
+    this.detenerReloj();
+    this.elegido = this.bando || ORDEN_BANDOS[0];
+    this.canvas.style.cursor = 'default';
+  }
+
+  /**
+   * Elige un bando y arranca la partida: tablero inicial y reloj desde cero.
+   * @param {string} clave 'usuarios' o 'clu'
+   */
+  elegirBando(clave) {
+    this.bando = clave;
+    this.elegido = clave;
+    this.limpiarPartida();
+    this.fase = 'jugando';
+    this.cursor = { fila: 3, col: 3 };
     this.reloj.iniciar();
     if (this.pausado) this.reloj.pausar();
-    this.avisar('Partida reiniciada. Hay 32 nodos activos.');
+    this.canvas.style.cursor = 'default';
+    this.avisar('Jugás con ' + BANDOS[clave].nombre + '. ¡Empezá! Hay 32 nodos activos.');
+  }
+
+  /**
+   * Imágenes de las fichas del bando: la normal y la levantada (también
+   * usada en los fantasmas). Mientras se elige, usa la tarjeta encendida.
+   * @returns {{normal: HTMLCanvasElement, levantada: HTMLCanvasElement}}
+   */
+  get fichasBando() {
+    const bando = BANDOS[this.bando || this.elegido];
+    return {
+      normal: this.recursos.fichas[bando.ficha],
+      levantada: this.recursos.fichas[bando.fichaLevantada],
+    };
   }
 
   /**
@@ -156,7 +212,10 @@ export class Juego {
     // Solo una ficha se dibuja aparte por vez: la arrastrada, la que vuelve o la que tiembla.
     const aparte = this.arrastre || this.vuelta || this.rechazo;
     const resaltada = this.seleccion ? { fila: this.seleccion.fila, col: this.seleccion.col } : null;
-    dibujarFichas(ctx, this.tablero, this.recursos, { levantada: aparte, resaltada });
+    const fichas = this.fichasBando;
+    dibujarFichas(ctx, this.tablero, this.recursos, {
+      levantada: aparte, resaltada, imagen: fichas.normal, imagenResaltada: fichas.levantada,
+    });
     this.dibujarRechazo(t);
     this.dibujarVuelta(t);
     this.dibujarArrastre();
@@ -172,7 +231,13 @@ export class Juego {
       t,
     }, this.colores, this.fuentes);
 
-    if (this.fase !== 'jugando') this.dibujarFin();
+    if (this.fase === 'eligiendo') {
+      dibujarSeleccion(ctx, this.recursos, this.colores, this.fuentes, {
+        elegido: this.elegido, t, conFoco: this.conFoco,
+      });
+    } else if (this.fase !== 'jugando') {
+      this.dibujarFin();
+    }
     requestAnimationFrame(this.cuadro);
   }
 
@@ -187,7 +252,7 @@ export class Juego {
     const encendido = this.arrastre ? this.destinoBajoFicha() : this.cursor;
     levantada.movimientos.forEach((m) => {
       const prendido = Boolean(encendido) && encendido.fila === m.fila && encendido.col === m.col;
-      dibujarFantasma(this.ctx, m.fila, m.col, this.recursos, t, prendido);
+      dibujarFantasma(this.ctx, m.fila, m.col, this.recursos, t, prendido, this.fichasBando.levantada);
     });
   }
 
@@ -200,7 +265,7 @@ export class Juego {
     const avance = (t - this.rechazo.inicio) / DURACION_RECHAZO_MS;
     const { x, y } = centroDeCelda(this.rechazo.fila, this.rechazo.col);
     const corrimiento = Math.sin(avance * Math.PI * 6) * 5 * (1 - avance);
-    dibujarFicha(this.ctx, this.recursos.fichas.naranja, x + corrimiento, y);
+    dibujarFicha(this.ctx, this.fichasBando.normal, x + corrimiento, y);
   }
 
   /**
@@ -214,7 +279,7 @@ export class Juego {
     const suave = easeOut(avance);
     const x = this.vuelta.x + (destino.x - this.vuelta.x) * suave;
     const y = this.vuelta.y + (destino.y - this.vuelta.y) * suave;
-    dibujarFicha(this.ctx, this.recursos.fichas.naranja, x, y);
+    dibujarFicha(this.ctx, this.fichasBando.normal, x, y);
     if (avance >= 1) this.vuelta = null;
   }
 
@@ -231,7 +296,7 @@ export class Juego {
     ctx.fillStyle = conAlfa(this.colores.descargado, 0.6);
     ctx.fill();
     ctx.restore();
-    dibujarFicha(ctx, this.recursos.fichas.cyan, x, y - 6, 1.1);
+    dibujarFicha(ctx, this.fichasBando.levantada, x, y - 6, 1.1);
   }
 
   /**
@@ -267,7 +332,7 @@ export class Juego {
     texto(ctx, this.subtitulo, ANCHO / 2, ALTO / 2 + 40, {
       fuente: '600 22px ' + this.fuentes.ui, color: this.colores.textoClaro, alinear: 'center',
     });
-    texto(ctx, 'Apretá Reiniciar para jugar de nuevo.', ANCHO / 2, ALTO / 2 + 80, {
+    texto(ctx, 'Apretá Reiniciar (o R) para elegir bando y jugar de nuevo.', ANCHO / 2, ALTO / 2 + 80, {
       fuente: '600 16px ' + this.fuentes.ui, color: this.colores.textoTenue, alinear: 'center',
     });
   }
@@ -379,12 +444,19 @@ export class Juego {
   }
 
   /**
-   * Botón del mouse apretado: agarra la ficha si tiene saltos; si no, tiembla.
+   * Botón del mouse apretado. En la selección elige el bando de la tarjeta
+   * tocada; jugando, agarra la ficha si tiene saltos (si no, tiembla).
    * @param {PointerEvent} evento
    */
   alPresionar(evento) {
-    if (!this.activo || evento.button !== 0) return;
+    if (evento.button !== 0) return;
     const { x, y } = this.aLogico(evento);
+    if (this.fase === 'eligiendo') {
+      const clave = this.pausado ? null : bandoEn(x, y);
+      if (clave) this.elegirBando(clave);
+      return;
+    }
+    if (!this.activo) return;
     const celda = this.celdaEn(x, y);
     if (!celda || this.tablero.grilla[celda.fila][celda.col] !== true) return;
     const t = performance.now();
@@ -404,11 +476,18 @@ export class Juego {
   }
 
   /**
-   * Puntero en movimiento: mueve la ficha arrastrada o cambia el cursor del mouse.
+   * Puntero en movimiento: en la selección enciende la tarjeta de abajo;
+   * jugando, mueve la ficha arrastrada o cambia el cursor del mouse.
    * @param {PointerEvent} evento
    */
   alMover(evento) {
     const { x, y } = this.aLogico(evento);
+    if (this.fase === 'eligiendo') {
+      const clave = bandoEn(x, y);
+      if (clave) this.elegido = clave;
+      this.canvas.style.cursor = clave ? 'pointer' : 'default';
+      return;
+    }
     if (this.arrastre) {
       this.arrastre.px = x;
       this.arrastre.py = y;
@@ -478,7 +557,11 @@ export class Juego {
   alTeclear(evento) {
     const tecla = evento.key;
     if (tecla === 'r' || tecla === 'R') {
-      this.reiniciar();
+      if (this.fase !== 'eligiendo') this.reiniciar();
+      return;
+    }
+    if (this.fase === 'eligiendo') {
+      if (!this.pausado) this.teclearSeleccion(evento);
       return;
     }
     if (!this.activo) return;
@@ -494,6 +577,29 @@ export class Juego {
     } else if (tecla === 'Escape' && this.seleccion) {
       evento.preventDefault();
       this.cancelarSeleccion(true);
+    }
+  }
+
+  /**
+   * Teclas de la selección de bando: las flechas cambian de tarjeta y
+   * Enter o Espacio eligen la encendida.
+   * @param {KeyboardEvent} evento
+   */
+  teclearSeleccion(evento) {
+    const tecla = evento.key;
+    if (tecla in FLECHAS_BANDO) {
+      evento.preventDefault();
+      this.conFoco = true;
+      const actual = ORDEN_BANDOS.indexOf(this.elegido);
+      const indice = clamp(actual + FLECHAS_BANDO[tecla], 0, ORDEN_BANDOS.length - 1);
+      if (indice !== actual) {
+        this.elegido = ORDEN_BANDOS[indice];
+        const bando = BANDOS[this.elegido];
+        this.avisar(bando.nombre + '. ' + bando.lema + '.');
+      }
+    } else if (tecla === 'Enter' || tecla === ' ') {
+      evento.preventDefault();
+      this.elegirBando(this.elegido);
     }
   }
 

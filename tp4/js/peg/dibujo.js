@@ -341,40 +341,46 @@ export function dibujarFicha(ctx, imagen, x, y, escala = 1, opacidad = 1) {
 }
 
 /**
- * Dibuja todas las fichas del tablero. En F2 el bando es fijo: las fichas
- * son naranjas y la resaltada (la elegida) va en cyan.
+ * Dibuja todas las fichas del tablero. Las imágenes dependen del bando:
+ * imagen para las fichas normales e imagenResaltada para la elegida. Si no
+ * se pasan, quedan las de F2 (naranja y cyan).
  * @param {CanvasRenderingContext2D} ctx
  * @param {import('./tablero.js').Tablero} tablero
  * @param {{fichas: Record<string, HTMLCanvasElement>}} recursos
- * @param {{levantada?: {fila: number, col: number}|null, resaltada?: {fila: number, col: number}|null}} [opciones]
+ * @param {{levantada?: {fila: number, col: number}|null, resaltada?: {fila: number, col: number}|null, imagen?: HTMLCanvasElement, imagenResaltada?: HTMLCanvasElement}} [opciones]
  */
-export function dibujarFichas(ctx, tablero, recursos, { levantada = null, resaltada = null } = {}) {
+export function dibujarFichas(ctx, tablero, recursos, {
+  levantada = null, resaltada = null,
+  imagen = recursos.fichas.naranja, imagenResaltada = recursos.fichas.cyan,
+} = {}) {
   const esCelda = (celda, fila, col) => celda && celda.fila === fila && celda.col === col;
   tablero.recorrer((fila, col) => {
     if (tablero.grilla[fila][col] !== true) return;
     if (esCelda(levantada, fila, col)) return; // la dibuja quien la arrastra
-    const imagen = esCelda(resaltada, fila, col) ? recursos.fichas.cyan : recursos.fichas.naranja;
+    const imagenFicha = esCelda(resaltada, fila, col) ? imagenResaltada : imagen;
     const { x, y } = centroDeCelda(fila, col);
-    dibujarFicha(ctx, imagen, x, y);
+    dibujarFicha(ctx, imagenFicha, x, y);
   });
 }
 
 /**
- * Fantasma de destino: la ficha cyan, transparente, en una casilla donde se
- * puede soltar. "Respira" (late suave) salvo que se prefiera menos
- * movimiento; encendido = la ficha arrastrada está encima.
+ * Fantasma de destino: la ficha levantada del bando (por defecto, la cyan),
+ * transparente, en una casilla donde se puede soltar. "Respira" (late
+ * suave) salvo que se prefiera menos movimiento; encendido = la ficha
+ * arrastrada está encima.
  * @param {CanvasRenderingContext2D} ctx
  * @param {number} fila
  * @param {number} col
  * @param {{fichas: Record<string, HTMLCanvasElement>}} recursos
  * @param {number} t tiempo actual en ms (por ejemplo, el de requestAnimationFrame)
  * @param {boolean} [encendido=false]
+ * @param {HTMLCanvasElement} [imagen] imagen de la ficha; por defecto, la cyan
  */
-export function dibujarFantasma(ctx, fila, col, recursos, t, encendido = false) {
+export function dibujarFantasma(ctx, fila, col, recursos, t, encendido = false, imagen = recursos.fichas.cyan) {
   // pulso va de 0 a 1 y vuelve; quieto en el medio si no se quiere movimiento.
   const pulso = prefiereMenosMovimiento() ? 0.5 : (Math.sin(t * 0.005) + 1) / 2;
   const opacidad = encendido ? 0.85 : 0.3 + 0.25 * pulso;
   const escala = encendido ? 1.08 : 0.94 + 0.08 * pulso;
   const { x, y } = centroDeCelda(fila, col);
-  dibujarFicha(ctx, recursos.fichas.cyan, x, y, escala, opacidad);
+  dibujarFicha(ctx, imagen, x, y, escala, opacidad);
 }

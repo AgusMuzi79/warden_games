@@ -78,7 +78,7 @@
 
         <!-- Cómo se juega con el teclado (lo lee el lector de pantalla al
              enfocar el canvas, por el aria-describedby). -->
-        <p class="sr-only" id="peg-instrucciones">Usá las flechas para moverte entre los nodos. Con Enter o Espacio levantás un nodo; después, las flechas eligen el destino y Enter o Espacio lo suelta. Escape deja el nodo en su lugar y R reinicia la partida.</p>
+        <p class="sr-only" id="peg-instrucciones">Primero elegís bando: con las flechas izquierda y derecha pasás de Usuarios a Programas de Clu, y con Enter o Espacio elegís. Ya en la partida, usá las flechas para moverte entre los nodos. Con Enter o Espacio levantás un nodo; después, las flechas eligen el destino y Enter o Espacio lo suelta. Escape deja el nodo en su lugar y R reinicia la partida (volvés a elegir bando).</p>
 
         <!-- Avisos del juego para lectores de pantalla (nodo levantado,
              salto hecho, fin de partida). Lo escribe principal.js. -->
@@ -179,18 +179,18 @@
 
           <details class="ayuda__item">
             <summary>Bandos</summary>
-            <p>Al empezar elegís bando: Usuarios (nodos cyan) o Programas de Clu (nodos naranja). El bando queda fijo durante la partida; para cambiarlo, tenés que reiniciar.</p>
+            <p>Al empezar elegís bando con un click en su tarjeta, o con las flechas y Enter: Usuarios (nodos cyan) o Programas de Clu (nodos naranja). El reloj arranca recién cuando elegís. El bando queda fijo durante la partida; para cambiarlo, tenés que reiniciar.</p>
           </details>
 
           <details class="ayuda__item">
             <summary>Indicadores</summary>
-            <p>Nodo seleccionado: se levanta con una sombra y cambia de color (blanco si jugás con Usuarios, cyan si jugás con Clu). Fantasma de destino: un nodo translúcido que respira en cada hueco donde se puede soltar, y se enciende cuando el nodo está encima. Al arrastrar, el nodo deja una estela de luz.</p>
+            <p>Nodo seleccionado: se levanta con una sombra y cambia de color (naranja si jugás con Usuarios, cyan si jugás con Clu). Fantasma de destino: un nodo translúcido que respira en cada hueco donde se puede soltar, y se enciende cuando el nodo está encima. Al arrastrar, el nodo deja una estela de luz.</p>
           </details>
 
           <ul class="ayuda__atajos">
-            <li><kbd>R</kbd> Reiniciar</li>
-            <li><kbd>Flechas</kbd> Moverte entre los nodos, con el tablero enfocado</li>
-            <li><kbd>Enter</kbd> Levantar un nodo y soltarlo en el destino elegido</li>
+            <li><kbd>R</kbd> Reiniciar (volvés a elegir bando)</li>
+            <li><kbd>Flechas</kbd> Elegir bando o moverte entre los nodos, con el tablero enfocado</li>
+            <li><kbd>Enter</kbd> Confirmar el bando, o levantar un nodo y soltarlo en el destino elegido</li>
             <li><kbd>F1</kbd> Abrir la ayuda (también con el botón "?")</li>
             <li><kbd>Esc</kbd> Cerrar la ayuda</li>
           </ul>

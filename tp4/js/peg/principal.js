@@ -3,7 +3,8 @@
 // Qué hace: espera las fuentes, lee los colores de variables.css, arma las
 // imágenes (fondo, placa, fichas), ajusta la resolución del canvas a la
 // pantalla, crea el Juego y le conecta los eventos del canvas y del botón
-// Reiniciar.
+// Reiniciar. El juego arranca en la selección de bando: el reloj recién
+// corre cuando se elige uno.
 // Lo importa pagina.js (así se carga una sola vez) y usa pausarJuego() y
 // reanudarJuego() al abrir y cerrar la ayuda.
 
