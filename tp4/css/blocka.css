@@ -1,0 +1,481 @@
+/* ============================================================
+   blocka.css — Lo específico de la página de Blocka.
+   El layout, la card (.tablero), la portada, el panel lateral y la Ayuda
+   salen de juego.css (se carga antes) y de components.css: Blocka usa
+   exactamente la misma estructura que el Peg Solitaire. Acá solo va lo que
+   cambia: la zona de juego (canvas) y la miniatura de la ficha.
+   ============================================================ */
+
+/* Zona de juego. En juego.css .tablero__juego reparte grid y leyenda con
+   space-between; acá tiene dos bloques, la pantalla de inicio y la partida,
+   y se ve uno solo a la vez (el otro está con [hidden]). */
+.tablero__juego {
+  align-items: center;
+  justify-content: center;
+}
+
+/* Para centrar el contenido en vertical, la zona de juego tiene que ocupar
+   todo el alto del cuerpo de la card. Un height:100% (el de juego.css) no
+   alcanza porque el cuerpo no tiene alto fijo: se lo da flex:1 desde .tablero.
+   Con el cuerpo como columna flex, la zona de juego lo llena con flex:1. */
+.tablero__cuerpo {
+  display: flex;
+  flex-direction: column;
+}
+
+.tablero__juego {
+  flex: 1;
+  height: auto;
+}
+
+/* ---------- Pantalla de inicio ----------
+   La tabla de récords y, abajo, el botón Comenzar. */
+.blocka__inicio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-6);
+  width: 100%;
+}
+
+.blocka__panel {
+  /* Un solo panel centrado: con 100% de ancho y un máximo, no se estira de
+     más en la card de 808 px. */
+  width: 100%;
+  max-width: 480px;
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-md);
+  background: var(--fondo);
+}
+
+.blocka__panel h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+/* Título y botones de dificultad en la misma fila. */
+.blocka__panel-cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--espaciado-2);
+  margin-bottom: var(--espaciado-3);
+}
+
+/* Los dos grupos de píldoras (piezas y modo), uno debajo del otro y pegados
+   a la derecha. Uno al lado del otro no entran junto al título en los 480 px
+   del panel. */
+.blocka__selectores {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--espaciado-1);
+}
+
+.blocka__vistas {
+  display: flex;
+  gap: var(--espaciado-1);
+}
+
+/* Botón de la dificultad que se mira: una "píldora". La activa se rellena. */
+.blocka__vista {
+  appearance: none;
+  min-height: var(--espaciado-8);
+  padding: 0 var(--espaciado-3);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--primario-c3);
+  font: 500 14px/1 var(--font-ui);
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease, border-color var(--duracion-rapida) ease;
+}
+
+.blocka__vista:hover {
+  border-color: var(--acento);
+}
+
+.blocka__vista[aria-pressed="true"] {
+  border-color: var(--acento);
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+.blocka__records {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--primario-c3);
+  font: 400 16px/1.5 var(--font-ui);
+}
+
+/* Una fila por nivel: nombre, límite de tiempo y mejor tiempo. */
+.blocka__fila-record {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: var(--espaciado-3);
+  align-items: center;
+  padding: var(--espaciado-2) 0;
+  border-bottom: 1px solid var(--primario-o1);
+}
+
+.blocka__fila-record:last-child {
+  border-bottom: 0;
+}
+
+.blocka__limite {
+  color: var(--primario-c2);
+  font-size: 12px;
+}
+
+/* Tachito de borrar: botón cuadrado de solo ícono. Usa .btn--destructivo
+   (components.css), así que hereda el rojo y el pulso al pasar el mouse. */
+.blocka__borrar {
+  width: var(--control-alto);
+  padding: 0;
+  font-size: 20px;
+}
+
+/* Sin récord que borrar: el tachito no se ve ni recibe foco, pero sigue
+   ocupando su lugar para que las filas queden alineadas. */
+.blocka__borrar--oculto {
+  visibility: hidden;
+}
+
+/* Aviso "Récord del nivel N borrado." debajo de la tabla, con el botón
+   "Deshacer" al lado. Flex para alinear el texto y el botón; el alto mínimo es
+   el del botón (--control-alto), así "Comenzar" no salta cuando el botón
+   aparece o desaparece. */
+.blocka__records-estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--espaciado-2);
+  min-height: var(--control-alto);
+  margin: var(--espaciado-2) 0 0;
+  color: var(--primario-c2);
+  font: 400 14px/1.5 var(--font-ui);
+}
+
+.blocka__fila-record strong {
+  min-width: 4.5em;
+  color: var(--acento);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ---------- Elección de piezas y de modo ----------
+   Tres tarjetas-botón (4, 9 y 16 piezas) con el número bien grande. La
+   pantalla de modo (#blocka-modo) usa el mismo bloque con dos tarjetas. */
+.blocka__dificultad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-4);
+  width: 100%;
+}
+
+.blocka__dificultad h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.blocka__opciones {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--espaciado-4);
+  width: 100%;
+  max-width: 560px;
+}
+
+.blocka__opcion {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-1);
+  padding: var(--espaciado-6) var(--espaciado-3);
+  border: 2px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--fondo);
+  color: var(--primario-c3);
+  font: 500 16px/1.2 var(--font-ui);
+  cursor: pointer;
+  transition: border-color var(--duracion-rapida) ease, transform var(--duracion-rapida) ease;
+}
+
+/* Con teclado (:focus-visible) se eleva igual que con el mouse. */
+.blocka__opcion:hover,
+.blocka__opcion:focus-visible {
+  border-color: var(--acento);
+  transform: translateY(-4px);
+}
+
+.blocka__opcion-numero {
+  color: var(--acento);
+  font: 700 48px/1 var(--font-ui);
+}
+
+/* Pantalla de modo: dos tarjetas en vez de tres. Mismo ancho máximo que la
+   de piezas, así las tarjetas quedan más anchas y entra el texto de abajo. */
+.blocka__opciones--dos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Nombre del modo ("Normal", "Difícil"): ocupa el lugar del número grande de
+   las tarjetas de piezas, un poco más chico porque es una palabra. */
+.blocka__opcion-titulo {
+  color: var(--acento);
+  font: 700 28px/1.2 var(--font-ui);
+}
+
+/* Explicación corta de cada modo, debajo del nombre. */
+.blocka__opcion-detalle {
+  color: var(--primario-c2);
+  font-size: 14px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.blocka__opcion-nombre {
+  margin-top: var(--espaciado-2);
+  padding: var(--espaciado-1) var(--espaciado-3);
+  border-radius: var(--radio-sm);
+  background: var(--primario-o1);
+  font-size: 14px;
+}
+
+.blocka__dificultad-nota {
+  margin: 0;
+  color: var(--primario-c2);
+  font: 400 14px/1.5 var(--font-ui);
+  text-align: center;
+}
+
+/* ---------- Sorteo (tragamonedas) ----------
+   Tres rodillos, cada uno una ventana que muestra 3 imágenes de una tira
+   vertical. La tira se corre con transform desde js/blocka.js; acá está su
+   tamaño, el frenado de la transición y el aspecto de la máquina. */
+.blocka__sorteo {
+  --lado-casilla: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-3);
+  width: 100%;
+}
+
+.blocka__sorteo-titulo,
+.blocka__sorteo-estado {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 500 16px/1.5 var(--font-ui);
+  text-align: center;
+}
+
+.blocka__sorteo-estado {
+  /* Reserva el lugar: la máquina no salta al cambiar el texto. */
+  min-height: var(--espaciado-6);
+}
+
+/* La máquina: marco con los 3 rodillos y, encima, la línea de pago. */
+.blocka__slot {
+  position: relative;
+  display: flex;
+  gap: var(--espaciado-3);
+  padding: var(--espaciado-3);
+  border: 2px solid var(--acento);
+  border-radius: var(--radio-xl);
+  background: var(--fondo);
+  box-shadow: 0 0 12px var(--acento);
+}
+
+/* Ventana de un rodillo: 3 casillas de alto, lo que sobra de la tira queda
+   escondido. */
+.blocka__rodillo {
+  position: relative;
+  width: var(--lado-casilla);
+  height: calc(var(--lado-casilla) * 3);
+  overflow: hidden;
+  border-radius: var(--radio-md);
+  background: var(--superficie);
+}
+
+/* Sombra arriba y abajo de cada rodillo: da la sensación de un cilindro que
+   gira, como en las tragamonedas reales. */
+.blocka__rodillo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(var(--fondo), transparent 30%, transparent 70%, var(--fondo));
+}
+
+/* La tira es la que se mueve. El frenado (--easing-frenado, variables.css)
+   hace que arranque rápido y vaya aflojando hasta detenerse. La duración la pone el JS en cada
+   rodillo, para que frenen en momentos distintos. */
+.blocka__tira {
+  transition-property: transform;
+  transition-timing-function: var(--easing-frenado);
+  will-change: transform;
+}
+
+.blocka__casilla {
+  width: var(--lado-casilla);
+  height: var(--lado-casilla);
+}
+
+.blocka__casilla img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Línea de pago: un recuadro sobre la fila del medio (la que cuenta). Arriba
+   del padding del marco y de la primera casilla. */
+.blocka__linea {
+  position: absolute;
+  top: calc(var(--espaciado-3) + var(--lado-casilla));
+  right: var(--espaciado-1);
+  left: var(--espaciado-1);
+  height: var(--lado-casilla);
+  border: 2px solid var(--tablero-activo);
+  border-radius: var(--radio-md);
+  pointer-events: none;
+}
+
+/* Cuando frenan los tres rodillos: la línea de pago y el marco se encienden. */
+.blocka__slot--premio {
+  box-shadow: 0 0 24px var(--tablero-activo);
+}
+
+.blocka__slot--premio .blocka__linea {
+  border-width: 4px;
+  box-shadow: 0 0 16px var(--tablero-activo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blocka__opcion,
+  .blocka__vista {
+    transition: none;
+  }
+
+  .blocka__opcion:hover,
+  .blocka__opcion:focus-visible {
+    transform: none;
+  }
+
+  /* Los rodillos no giran: el JS ya los deja en el resultado. Esto cubre la
+     transición por si el estilo inline llegara a no pisarla. */
+  .blocka__tira {
+    transition: none;
+  }
+}
+
+/* ---------- Partida ----------
+   HUD, canvas, texto de estado y botones, uno debajo del otro y centrados.
+   El gap es chico porque la card mide 660 px de alto y todo tiene que entrar. */
+.blocka__partida {
+  /* Ancho con el que se muestra el canvas (y el HUD, que va a su ancho). Es
+     siempre el mismo: el tablero es un cuadrado fijo y, con más piezas, cada
+     una se ve más chica. */
+  --ancho-canvas: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-2);
+  width: 100%;
+}
+
+/* HUD: nivel, tiempo y récord en una fila, del mismo ancho que el canvas. */
+.blocka__hud {
+  display: flex;
+  justify-content: space-between;
+  width: var(--ancho-canvas);
+  max-width: 100%;
+}
+
+.blocka__dato {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 400 14px/1.5 var(--font-ui);
+}
+
+.blocka__dato strong {
+  color: var(--acento);
+  font-weight: 700;
+  /* Cifras del mismo ancho: el tiempo cambia 10 veces por segundo y, sin
+     esto, el texto se movería de a poco al cambiar de un 1 a un 8. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Quedan 10 segundos o menos del tiempo máximo: el tiempo pasa a rojo
+   (--error). Lo pone js/blocka.js (avisarTiempo()); el aviso también va en
+   texto, así no depende solo del color. */
+.blocka__dato--alerta strong {
+  color: var(--error);
+}
+
+/* Canvas donde se arma la imagen. El tamaño real (width/height, que pone
+   js/blocka.js según la dificultad) es la resolución en píxeles; el CSS fija
+   cuánto ocupa en pantalla. height:auto hace que el alto salga de la
+   proporción del canvas: si solo se limitara el alto, la imagen se
+   deformaría. */
+.blocka__canvas {
+  display: block;
+  width: var(--ancho-canvas);
+  max-width: 100%;
+  height: auto;
+  border: 2px solid var(--acento);
+  border-radius: var(--radio-md);
+  background: var(--fondo);
+  cursor: pointer;
+}
+
+/* Texto de estado debajo del canvas ("Girá cada parte...", "¡Listo!"). */
+.blocka__estado {
+  margin: 0;
+  /* Reserva el lugar: el canvas no salta al cambiar el texto. */
+  min-height: var(--espaciado-6);
+  color: var(--primario-c3);
+  font: 500 16px/1.5 var(--font-ui);
+  text-align: center;
+}
+
+/* Botones debajo del texto. Siempre hay lugar reservado para una fila de
+   botones, aunque no haya ninguno visible, así el canvas no salta. */
+.blocka__acciones {
+  display: flex;
+  gap: var(--espaciado-3);
+  min-height: var(--control-alto);
+}
+
+/* La miniatura de la ficha (components.css) no trae imagen propia. Acá
+   usamos la portada de Blocka; va después de juego.css para pisar la de
+   Neon Circuit (misma especificidad, gana la última cargada). */
+.ficha-juego__miniatura {
+  background-image: url("../assets/img/blocka-comic-rojo.png");
+}
+
+/* ---------- Galería ----------
+   Las capturas son solo de la card del juego (770x630 px), no 16:9 como en el
+   resto del sitio (components.css). Con la proporción de la captura cada foto
+   se ve entera, sin recortes ni deformación. */
+.galeria__carta {
+  aspect-ratio: 770 / 630;
+}
+
+/* Ancho máximo de toda la galería (título, contador y fotos), centrada en su
+   columna. A ancho completo (808 px) la galería medía 661 px de alto y alargaba
+   mucho la página; a 640 px mide unos 524 y la captura se achica apenas un 17 %
+   (de 770 a 640 px), así que el texto sigue siendo legible. */
+.galeria {
+  /* width: 100% hace falta: la columna es un contenedor flex y, con margin
+     auto, un elemento se encoge a lo que mide su contenido en vez de llenar. */
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+}

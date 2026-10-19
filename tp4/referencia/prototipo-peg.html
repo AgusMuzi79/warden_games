@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prototipo Peg Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=JetBrains+Mono:wght@700&family=Roboto+Flex:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #19042A; --muted: #A99BC2; }
+  body {
+    margin: 0; background: var(--bg); color: #E9E2F5;
+    font-family: "Roboto Flex", system-ui, sans-serif;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+    padding: 24px 16px;
+  }
+  canvas { max-width: 100%; height: auto; touch-action: none; }
+  p { color: var(--muted); margin: 0; font-size: 14px; text-align: center; }
+</style>
+</head>
+<body>
+<canvas id="peg"></canvas>
+<p>Elegí bando, agarrá una ficha que se pueda mover y soltala sobre un destino. R reinicia.</p>
+
+<script>
+'use strict';
+
+/* =========================================================
+ * Configuración general
+ * ========================================================= */
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const W = 1200, H = 760;           // tamaño lógico del canvas (entra en 1080 sin scroll)
+const SIZE = 760;                  // tamaño del tablero (cuadrado)
+const BX = (W - SIZE) / 2;         // x donde empieza el tablero; a los costados va el HUD
+const CELL = 92;                   // tamaño de cada celda de la grilla 7x7
+const OFF = (SIZE - 7 * CELL) / 2; // margen para centrar la grilla dentro del tablero
+const PIECE_R = 33;                // radio de la ficha
+const HOLE_R = 22;                 // radio del hueco
+const PIECE_PAD = 18;              // espacio extra en la imagen de la ficha para el glow
+const TAU = Math.PI * 2;
+const CYAN = '#52D1DC';
+const ORANGE = '#E98A15';
+const MUTED = '#A99BC2';
+
+const TIME_LIMIT = 5 * 60 * 1000;  // límite de la partida: 5 minutos
+const TRAIL_LIFE = 1400;           // ms que tarda en apagarse cada punto de la estela
+const END_DELAY = 700;             // espera antes de mostrar el fin, para ver la explosión
+
+const FONT_TITLE = 'Orbitron, sans-serif';
+const FONT_UI = '"Roboto Flex", system-ui, sans-serif';
+const FONT_NUM = '"JetBrains Mono", ui-monospace, monospace';
+
+/* Imágenes de fichas disponibles (cada una con el color de su glow). */
+const PIECE_SOURCES = {
+  naranja: { src: 'fichas/naranja.png', glow: ORANGE },
+  cyan:    { src: 'fichas/cyan.png',    glow: CYAN },
+  blanca:  { src: 'fichas/blanca.png',  glow: '#4F7BFF' },
+};
+
+/*
+ * Bandos (punto 9: distintos tipos de fichas según la temática).
+ * Como en Tron: Legacy, cyan son los Usuarios y naranja el ejército de Clu.
+ * Cada bando define su ficha, la ficha seleccionada (también usada como
+ * fantasma en los destinos) y los colores de la explosión y de la estela,
+ * que es siempre del color del bando, como las motos de luz de la película.
+ */
+const TEAMS = {
+  cyan: {
+    name: 'USUARIOS', tagline: 'Luchá por los usuarios',
+    piece: 'cyan', selected: 'blanca', color: CYAN,
+    trail: { halo: '82,209,220', core: '210,250,255' },
+    sparks: [CYAN, '#D2FAFF'], flash: '180,245,255', ring: CYAN,
+  },
+  naranja: {
+    name: 'PROGRAMAS DE CLU', tagline: 'La perfección del sistema',
+    piece: 'naranja', selected: 'cyan', color: ORANGE,
+    trail: { halo: '233,138,21', core: '255,222,175' },
+    sparks: [ORANGE, '#FFD08A'], flash: '255,200,120', ring: ORANGE,
+  },
+};
+
+/*
+ * Botón de reinicio en el panel izquierdo. El bando queda fijo durante
+ * la partida: solo se vuelve a elegir al reiniciar.
+ */
+const RESET_BTN = { x: 36, y: H - 96, w: 164, h: 46, label: 'REINICIAR' };
+
+/* Tarjetas de la pantalla de selección de bando. */
+const TEAM_CARDS = {
+  cyan:    { x: W / 2 - 330, y: 210, w: 300, h: 360 },
+  naranja: { x: W / 2 + 30,  y: 210, w: 300, h: 360 },
+};
+
+/* =========================================================
+ * Utilidades
+ * ========================================================= */
+
+/** Generador pseudoaleatorio con semilla, para que el tablero salga siempre igual. */
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** Crea un canvas offscreen escalado por DPR para que las imágenes queden nítidas. */
+function createCanvas(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w * DPR; c.height = h * DPR;
+  const ctx = c.getContext('2d');
+  ctx.scale(DPR, DPR);
+  return { c, ctx };
+}
+
+/** Convierte un canvas en un objeto Image (el tablero y las fichas terminan siendo imágenes). */
+function toImage(canvas) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.src = canvas.toDataURL('image/png');
+  });
+}
+
+/** Carga una imagen desde una ruta y resuelve cuando está lista. */
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('No se pudo cargar ' + src));
+    img.src = src;
+  });
+}
+
+/** Limita un valor al rango [a, b]. */
+function clamp(v, a = 0, b = 1) { return Math.max(a, Math.min(b, v)); }
+
+/** Curva de suavizado: arranca rápido y frena al final. */
+function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+/** Pasa milisegundos a texto mm:ss. */
+function formatTime(ms) {
+  const s = Math.max(0, Math.ceil(ms / 1000));
+  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+
+/** Indica si el punto cae dentro de un rectángulo { x, y, w, h }. */
+function inRect({ x, y }, b) {
+  return x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h;
+}
+
+/** Indica si la celda (r, c) pertenece a la cruz inglesa de 33 posiciones. */
+function isValidCell(r, c) {
+  const inMiddle = (v) => v >= 2 && v <= 4;
+  return r >= 0 && r < 7 && c >= 0 && c < 7 && (inMiddle(r) || inMiddle(c));
+}
+
+/** Recorre todas las celdas válidas del tablero. */
+function forEachCell(fn) {
+  for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) if (isValidCell(r, c)) fn(r, c);
+}
+
+/** Centro de una celda en coordenadas del tablero (sin el corrimiento del HUD). */
+function cellLocal(r, c) {
+  return { x: OFF + c * CELL + CELL / 2, y: OFF + r * CELL + CELL / 2 };
+}
+
+/** Centro de una celda en coordenadas del canvas completo. */
+function cellCenter(r, c) {
+  const p = cellLocal(r, c);
+  return { x: p.x + BX, y: p.y };
+}
+
+/**
+ * Escribe texto con fuente, color, alineación, espaciado entre letras y glow opcionales.
+ * Centraliza el estilo para no repetir la configuración del contexto en cada texto.
+ */
+function text(ctx, str, x, y, { font, color = '#fff', align = 'left', spacing = 0, glow = null, blur = 14, alpha = 1 } = {}) {
+  ctx.save();
+  ctx.font = font;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'alphabetic';
+  ctx.globalAlpha *= alpha;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = spacing + 'px';
+  if (glow) { ctx.shadowColor = glow; ctx.shadowBlur = blur; }
+  ctx.fillText(str, x, y);
+  ctx.restore();
+}
+
+/* =========================================================
+ * Tablero (se dibuja una vez y queda como imagen de fondo)
+ * ========================================================= */
+
+/** Vértices del contorno de la cruz, expandido `pad` píxeles hacia afuera. */
+function crossPoints(pad) {
+  const a = OFF + 2 * CELL - pad, b = OFF + 5 * CELL + pad;
+  const lo = OFF - pad, hi = OFF + 7 * CELL + pad;
+  return [[a, lo], [b, lo], [b, a], [hi, a], [hi, b], [b, b],
+          [b, hi], [a, hi], [a, b], [lo, b], [lo, a], [a, a]].map(([x, y]) => ({ x, y }));
+}
+
+/** Traza un polígono con las esquinas biseladas (chaflán de `k` píxeles). */
+function chamferPath(ctx, pts, k) {
+  const n = pts.length;
+  const towards = (p, q) => {
+    const dx = q.x - p.x, dy = q.y - p.y, len = Math.hypot(dx, dy);
+    return { x: p.x + (dx / len) * k, y: p.y + (dy / len) * k };
+  };
+  ctx.beginPath();
+  pts.forEach((p, i) => {
+    const a = towards(p, pts[(i - 1 + n) % n]);
+    const b = towards(p, pts[(i + 1) % n]);
+    if (i === 0) ctx.moveTo(a.x, a.y); else ctx.lineTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+  });
+  ctx.closePath();
+}
+
+/** Grilla sutil de fondo dentro de la placa. */
+function drawGridPattern(ctx) {
+  ctx.strokeStyle = 'rgba(82,209,220,.05)';
+  ctx.lineWidth = 1;
+  for (let v = OFF; v <= OFF + 7 * CELL; v += CELL / 4) {
+    ctx.beginPath(); ctx.moveTo(v, 0); ctx.lineTo(v, SIZE); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, v); ctx.lineTo(SIZE, v); ctx.stroke();
+  }
+}
+
+/** Trazas de circuito: caminos con giros de 45° y pads en los extremos. */
+function drawTraces(ctx) {
+  const rnd = mulberry32(24);
+  const DIRS = [[1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1], [0, -1], [1, -1]];
+  ctx.save();
+  ctx.strokeStyle = 'rgba(82,209,220,.32)';
+  ctx.lineWidth = 1.4;
+  ctx.lineJoin = 'round';
+  ctx.shadowColor = 'rgba(82,209,220,.6)';
+  ctx.shadowBlur = 6;
+  for (let i = 0; i < 60; i++) {
+    let x = OFF + Math.round(rnd() * 7) * CELL;
+    let y = OFF + Math.round(rnd() * 14) * (CELL / 2);
+    const sx = x, sy = y;
+    let d = Math.floor(rnd() * 4) * 2; // arranca en dirección ortogonal
+    ctx.beginPath(); ctx.moveTo(x, y);
+    const segs = 2 + Math.floor(rnd() * 3);
+    for (let s = 0; s < segs; s++) {
+      const len = (0.3 + rnd() * 0.9) * CELL;
+      const [dx, dy] = DIRS[d];
+      const norm = dx && dy ? Math.SQRT1_2 : 1;
+      x += dx * len * norm; y += dy * len * norm;
+      ctx.lineTo(x, y);
+      d = (d + (rnd() < 0.5 ? 1 : 7)) % 8; // gira 45° a un lado u otro
+    }
+    ctx.stroke();
+    for (const [px, py] of [[sx, sy], [x, y]]) {
+      ctx.beginPath(); ctx.arc(px, py, 3, 0, TAU); ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/** Hueco del tablero: halo oscuro que tapa las trazas, fondo hundido y aro cyan. */
+function drawSocket(ctx, { x, y }) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, HOLE_R + 7, 0, TAU);
+  ctx.fillStyle = '#07040F'; ctx.fill();
+  ctx.strokeStyle = 'rgba(82,209,220,.15)'; ctx.lineWidth = 1; ctx.stroke();
+
+  const g = ctx.createRadialGradient(x, y - 4, 2, x, y, HOLE_R);
+  g.addColorStop(0, '#000'); g.addColorStop(1, '#120A24');
+  ctx.beginPath(); ctx.arc(x, y, HOLE_R, 0, TAU);
+  ctx.fillStyle = g; ctx.fill();
+  ctx.strokeStyle = 'rgba(82,209,220,.5)'; ctx.lineWidth = 1.5;
+  ctx.shadowColor = CYAN; ctx.shadowBlur = 8; ctx.stroke();
+  ctx.restore();
+}
+
+/** Arma el tablero completo vacío y lo devuelve como canvas. */
+function drawBoard() {
+  const { c, ctx } = createCanvas(SIZE, SIZE);
+  const outer = crossPoints(16), inner = crossPoints(6);
+
+  // Placa base
+  chamferPath(ctx, outer, 18);
+  const g = ctx.createLinearGradient(0, 0, 0, SIZE);
+  g.addColorStop(0, '#0E0822'); g.addColorStop(1, '#060310');
+  ctx.fillStyle = g;
+  ctx.shadowColor = 'rgba(82,209,220,.35)'; ctx.shadowBlur = 40;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Patrón interno recortado a la placa
+  ctx.save(); chamferPath(ctx, inner, 12); ctx.clip();
+  drawGridPattern(ctx); drawTraces(ctx);
+  ctx.restore();
+
+  // Borde exterior con glow y bisel interno
+  ctx.save(); chamferPath(ctx, outer, 18);
+  ctx.strokeStyle = CYAN; ctx.lineWidth = 2.5;
+  ctx.shadowColor = CYAN; ctx.shadowBlur = 16; ctx.stroke();
+  ctx.restore();
+  ctx.save(); chamferPath(ctx, inner, 12);
+  ctx.strokeStyle = 'rgba(82,209,220,.45)'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.restore();
+
+  forEachCell((r, col) => drawSocket(ctx, cellLocal(r, col)));
+  return c;
+}
+
+/** Fondo del canvas completo: violeta oscuro con una viñeta suave al centro. */
+function drawBackground() {
+  const { c, ctx } = createCanvas(W, H);
+  ctx.fillStyle = '#19042A'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createRadialGradient(W / 2, H / 2, 100, W / 2, H / 2, W * 0.6);
+  g.addColorStop(0, 'rgba(60,20,100,.35)'); g.addColorStop(1, 'rgba(60,20,100,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  return c;
+}
+
+/** Patrón de scanlines (líneas horizontales finas) para las pantallas de fin. */
+function drawScanlines() {
+  const { c, ctx } = createCanvas(W, H);
+  ctx.fillStyle = 'rgba(0,0,0,.22)';
+  for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+  return c;
+}
+
+/**
+ * Prepara la imagen final de una ficha: carga el PNG y le suma un glow
+ * del color indicado (el glow original se perdió al recortar el fondo).
+ */
+async function makePieceImage({ src, glow }) {
+  const img = await loadImage(src);
+  const S = (PIECE_R + PIECE_PAD) * 2, cx = S / 2;
+  const { c, ctx } = createCanvas(S, S);
+  ctx.shadowColor = glow;
+  ctx.shadowBlur = 14;
+  ctx.drawImage(img, cx - PIECE_R, cx - PIECE_R, PIECE_R * 2, PIECE_R * 2);
+  // Se devuelve el canvas directo (drawImage lo acepta igual que una Image).
+  // Pasarlo por toDataURL fallaría al abrir el archivo local con file://.
+  return c;
+}
+
+/* =========================================================
+ * Estado del juego
+ * ========================================================= */
+
+const state = {
+  grid: [],          // true = ficha, false = hueco, null = fuera de la cruz
+  phase: 'select',   // 'select' | 'playing' | 'ending' | 'won' | 'lost'
+  team: 'naranja',   // bando elegido (clave de TEAMS)
+  hoverTeam: null,   // tarjeta de bando bajo el mouse en la pantalla de selección
+  hoverBtn: null,    // botón del HUD bajo el mouse
+  result: null,      // resultado pendiente mientras phase === 'ending'
+  reason: '',        // motivo de la derrota
+  endAt: 0,          // momento en que se muestra la pantalla de fin
+  shownAt: 0,        // momento en que se mostró la pantalla de fin
+  startTime: 0,      // inicio de la partida
+  frozenElapsed: 0,  // tiempo transcurrido al terminar (el timer se congela)
+  moves: 0,          // movimientos realizados
+  pieces: 0,         // fichas que quedan
+  available: 0,      // saltos posibles en el tablero
+  lastPiece: null,   // celda de la última ficha (para la victoria)
+  drag: null,        // ficha arrastrada: { r, c, moves, px, py, offX, offY, trail }
+  returning: null,   // ficha que vuelve a su lugar tras un soltado inválido
+  denied: null,      // ficha sin movimientos que "tiembla" al tocarla
+  trails: [],        // estelas de luz: listas de puntos { x, y, t }
+  particles: [],     // chispas de las explosiones
+  shocks: [],        // ondas expansivas y fichas que revientan
+  shakeUntil: 0,     // hasta cuándo tiembla el tablero
+  glitch: { bars: [], at: 0 }, // barras de color de la pantalla de derrota
+};
+
+/** Bando actual con todos sus datos. */
+function team() { return TEAMS[state.team]; }
+
+/** Imagen de ficha en reposo y seleccionada del bando actual. */
+function pieceImg() { return pieceImgs[team().piece]; }
+function selectedImg() { return pieceImgs[team().selected]; }
+
+/**
+ * Reinicio: vuelve a la pantalla de selección de bando con el tablero lleno
+ * de fondo. Es la única forma de cambiar de bando.
+ */
+function showTeamSelect() {
+  resetGame();
+  state.phase = 'select';
+}
+
+/** Deja el tablero en la posición inicial y reinicia contadores y efectos. */
+function resetGame() {
+  for (let r = 0; r < 7; r++) {
+    state.grid[r] = [];
+    for (let c = 0; c < 7; c++) state.grid[r][c] = isValidCell(r, c) ? true : null;
+  }
+  state.grid[3][3] = false; // el centro arranca vacío
+  Object.assign(state, {
+    phase: 'playing', result: null, reason: '', moves: 0, lastPiece: null,
+    drag: null, returning: null, denied: null,
+    trails: [], particles: [], shocks: [], shakeUntil: 0,
+    startTime: performance.now(), frozenElapsed: 0,
+  });
+  updateCounts();
+}
+
+/* =========================================================
+ * Lógica del juego
+ * ========================================================= */
+
+/** Movimientos válidos desde (r, c): saltar una ficha vecina hacia un hueco vacío. */
+function movesFrom(r, c) {
+  if (!state.grid[r]?.[c]) return [];
+  const out = [];
+  for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+    const tr = r + 2 * dr, tc = c + 2 * dc;
+    if (isValidCell(tr, tc) && state.grid[tr][tc] === false && state.grid[r + dr][c + dc] === true) {
+      out.push({ r: tr, c: tc });
+    }
+  }
+  return out;
+}
+
+/** Recalcula cuántas fichas quedan y cuántos saltos hay disponibles en todo el tablero. */
+function updateCounts() {
+  let pieces = 0, available = 0;
+  forEachCell((r, c) => {
+    if (!state.grid[r][c]) return;
+    pieces++;
+    available += movesFrom(r, c).length;
+    state.lastPiece = { r, c };
+  });
+  state.pieces = pieces;
+  state.available = available;
+}
+
+/** Ejecuta un salto: mueve la ficha al destino, elimina la saltada y devuelve su celda. */
+function applyMove(from, to) {
+  const mid = { r: (from.r + to.r) / 2, c: (from.c + to.c) / 2 };
+  state.grid[to.r][to.c] = true;
+  state.grid[mid.r][mid.c] = false;
+  state.grid[from.r][from.c] = false;
+  state.moves++;
+  updateCounts();
+  return mid;
+}
+
+/** Tiempo jugado: corre durante la partida y queda congelado al terminar. */
+function elapsed(now) {
+  return state.phase === 'playing' ? now - state.startTime : state.frozenElapsed;
+}
+
+/**
+ * Se llama después de cada movimiento: gana si queda una sola ficha
+ * y pierde si quedan varias pero ningún salto posible.
+ */
+function checkEnd(now) {
+  if (state.pieces === 1) endGame('won', '', now);
+  else if (state.available === 0) endGame('lost', 'SIN SALTOS VÁLIDOS', now);
+}
+
+/** Congela el timer y programa la pantalla de fin con una pequeña demora. */
+function endGame(result, reason, now) {
+  if (state.phase !== 'playing') return;
+  state.frozenElapsed = now - state.startTime;
+  state.phase = 'ending';
+  state.result = result;
+  state.reason = reason;
+  state.endAt = now + END_DELAY;
+}
+
+/* =========================================================
+ * Efectos
+ * ========================================================= */
+
+/** Explosión de la ficha comida: chispas, onda expansiva, la ficha que revienta y temblor. */
+function spawnExplosion({ x, y }, now) {
+  for (let i = 0; i < 38; i++) {
+    state.particles.push({
+      x, y, born: now,
+      angle: Math.random() * TAU,
+      speed: 0.25 + Math.random() * 0.5,       // px por ms
+      life: 450 + Math.random() * 400,
+      len: 8 + Math.random() * 16,
+      width: 1.5 + Math.random() * 1.5,
+      color: team().sparks[Math.random() < 0.75 ? 0 : 1],
+    });
+  }
+  state.shocks.push({ x, y, born: now });
+  state.shakeUntil = now + 200;
+}
+
+/** Dibuja y limpia las chispas: cada una se aleja frenando y se apaga. */
+function drawParticles(ctx, now) {
+  state.particles = state.particles.filter((p) => now - p.born < p.life);
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+  for (const p of state.particles) {
+    const age = now - p.born, k = age / p.life;
+    const d = p.speed * age * (1 - 0.5 * k); // desaceleración
+    const cos = Math.cos(p.angle), sin = Math.sin(p.angle);
+    ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = p.color;
+    ctx.lineWidth = p.width;
+    ctx.beginPath();
+    ctx.moveTo(p.x + cos * Math.max(0, d - p.len), p.y + sin * Math.max(0, d - p.len));
+    ctx.lineTo(p.x + cos * d, p.y + sin * d);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/** Onda expansiva + destello + la ficha comida inflándose y desvaneciéndose. */
+function drawShocks(ctx, now) {
+  state.shocks = state.shocks.filter((s) => now - s.born < 500);
+  for (const s of state.shocks) {
+    const k = (now - s.born) / 500;
+    ctx.save();
+    // La ficha comida se infla y desaparece en los primeros 200 ms
+    const pk = clamp(k / 0.4);
+    if (pk < 1) {
+      const S = (PIECE_R + PIECE_PAD) * 2 * (1 + 0.4 * pk);
+      ctx.globalAlpha = 1 - pk;
+      ctx.drawImage(pieceImg(), s.x - S / 2, s.y - S / 2, S, S);
+    }
+    ctx.globalCompositeOperation = 'lighter';
+    // Destello central
+    const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, 50);
+    g.addColorStop(0, `rgba(${team().flash},${0.9 * (1 - k)})`);
+    g.addColorStop(1, `rgba(${team().flash},0)`);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(s.x, s.y, 50, 0, TAU); ctx.fill();
+    // Anillo que se expande
+    ctx.globalAlpha = 1 - k;
+    ctx.strokeStyle = team().ring; ctx.lineWidth = 3 * (1 - k) + 0.5;
+    ctx.beginPath(); ctx.arc(s.x, s.y, 20 + easeOut(k) * 60, 0, TAU); ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/**
+ * Estela de luz estilo Tron: cada punto se apaga según su antigüedad,
+ * así la cola se va acortando detrás de la ficha.
+ * Se dibuja en dos pasadas: un halo ancho y un núcleo fino y brillante.
+ */
+function drawTrails(ctx, now) {
+  for (const trail of state.trails) {
+    while (trail.length && now - trail[0].t > TRAIL_LIFE) trail.shift();
+  }
+  state.trails = state.trails.filter((t) => t.length > 1 || (state.drag && t === state.drag.trail));
+  const { halo, core } = team().trail;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  ctx.lineCap = 'round';
+  for (const trail of state.trails) {
+    for (let i = 1; i < trail.length; i++) {
+      const a = trail[i - 1], b = trail[i];
+      const k = 1 - (now - b.t) / TRAIL_LIFE;
+      if (k <= 0) continue;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+      ctx.strokeStyle = `rgba(${halo},${0.3 * k})`; ctx.lineWidth = 16; ctx.stroke();
+      ctx.strokeStyle = `rgba(${core},${0.95 * k})`; ctx.lineWidth = 3.5; ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+/* =========================================================
+ * Render de fichas y hints
+ * ========================================================= */
+
+const canvas = document.getElementById('peg');
+canvas.width = W * DPR; canvas.height = H * DPR;
+canvas.style.width = W + 'px';
+const ctx = canvas.getContext('2d');
+
+let bgImg = null, boardImg = null, scanImg = null;
+let pieceImgs = {};
+
+/** Dibuja una ficha centrada en (x, y); `lift` la levanta con sombra para que parezca agarrada. */
+function drawPiece(img, x, y, { scale = 1, lift = false, alpha = 1 } = {}) {
+  const S = (PIECE_R + PIECE_PAD) * 2 * scale;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  if (lift) {
+    ctx.save();
+    ctx.beginPath(); ctx.ellipse(x, y + 10, PIECE_R, PIECE_R * 0.55, 0, 0, TAU);
+    ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.filter = 'blur(6px)'; ctx.fill();
+    ctx.restore();
+    y -= 6;
+  }
+  ctx.drawImage(img, x - S / 2, y - S / 2, S, S);
+  ctx.restore();
+}
+
+/**
+ * Hint animado de destino: la ficha seleccionada del bando aparece como fantasma con opacidad
+ * baja que "respira". Si la ficha arrastrada está encima, se enciende más
+ * para avisar que al soltar va a caer ahí.
+ */
+function drawGhost({ x, y }, now, hot) {
+  const p = (Math.sin(now * 0.005) + 1) / 2;
+  const alpha = hot ? 0.85 : 0.3 + 0.25 * p;
+  const scale = hot ? 1.08 : 0.94 + 0.08 * p;
+  drawPiece(selectedImg(), x, y, { scale, alpha });
+}
+
+/** Posición actual de la ficha arrastrada (el mouse menos el punto donde se la agarró). */
+function dragPos() {
+  const d = state.drag;
+  return { x: d.px - d.offX, y: d.py - d.offY };
+}
+
+/** Destino válido sobre el que está la ficha arrastrada, o null. */
+function dropTarget() {
+  if (!state.drag) return null;
+  const pos = dragPos();
+  return state.drag.moves.find((m) => {
+    const c = cellCenter(m.r, m.c);
+    return Math.hypot(pos.x - c.x, pos.y - c.y) < CELL * 0.55;
+  }) || null;
+}
+
+/** Dibuja todas las fichas del tablero, salteando la arrastrada y la que vuelve a su lugar. */
+function drawBoardPieces(now) {
+  const { drag, returning, denied } = state;
+  // En la selección de bando, el tablero de fondo anticipa las fichas del bando en hover
+  const img = state.phase === 'select' && state.hoverTeam ? pieceImgs[TEAMS[state.hoverTeam].piece] : pieceImg();
+  forEachCell((r, c) => {
+    if (!state.grid[r][c]) return;
+    if (drag && drag.r === r && drag.c === c) return;
+    if (returning && returning.r === r && returning.c === c) return;
+    let { x, y } = cellCenter(r, c);
+    // "No": la ficha sin movimientos tiembla de lado a lado
+    if (denied && denied.r === r && denied.c === c) {
+      const k = (now - denied.born) / 300;
+      if (k < 1) x += Math.sin(k * Math.PI * 6) * 5 * (1 - k);
+    }
+    drawPiece(img, x, y);
+  });
+}
+
+/** Ficha que vuelve a su casilla con un deslizamiento suave cuando el soltado no es válido. */
+function drawReturning(now) {
+  const rt = state.returning;
+  if (!rt) return;
+  const k = clamp((now - rt.born) / 220);
+  const to = cellCenter(rt.r, rt.c);
+  const e = easeOut(k);
+  drawPiece(pieceImg(), rt.x + (to.x - rt.x) * e, rt.y + (to.y - rt.y) * e);
+  if (k >= 1) state.returning = null;
+}
+
+/* =========================================================
+ * HUD (paneles laterales)
+ * ========================================================= */
+
+/** Dibuja un dato del HUD: etiqueta chica arriba y valor grande abajo. */
+function drawStat(label, value, x, y, align, color) {
+  text(ctx, label, x, y, { font: `600 13px ${FONT_UI}`, color: MUTED, align, spacing: 3 });
+  text(ctx, value, x, y + 50, { font: `700 42px ${FONT_NUM}`, color, align, glow: color, blur: 16 });
+}
+
+/** Paneles laterales: tiempo, movimientos, fichas activas, saltos disponibles y reinicio. */
+function drawHud(now) {
+  const left = 36, right = W - 36;
+  const remaining = TIME_LIMIT - elapsed(now);
+  const urgent = remaining < 30000;
+  const blink = urgent && state.phase === 'playing' ? 0.55 + 0.45 * Math.abs(Math.sin(now * 0.006)) : 1;
+
+  ctx.save(); ctx.globalAlpha = blink;
+  drawStat('TIEMPO', formatTime(remaining), left, 70, 'left', urgent ? ORANGE : CYAN);
+  ctx.restore();
+
+  // Barra del tiempo restante
+  const ratio = clamp(remaining / TIME_LIMIT);
+  ctx.fillStyle = 'rgba(169,155,194,.18)'; ctx.fillRect(left, 140, 148, 3);
+  ctx.save();
+  ctx.fillStyle = urgent ? ORANGE : CYAN;
+  ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
+  ctx.fillRect(left, 140, 148 * ratio, 3);
+  ctx.restore();
+
+  drawStat('MOVIMIENTOS', String(state.moves), left, 200, 'left', CYAN);
+  drawStat('NODOS ACTIVOS', String(state.pieces), right, 70, 'right', team().color);
+  drawStat('SALTOS DISPONIBLES', String(state.available), right, 200, 'right', CYAN);
+
+  drawButton(RESET_BTN);
+}
+
+/** Botón del HUD: borde cyan con glow, que se rellena al pasar el mouse. */
+function drawButton(b) {
+  const hover = state.hoverBtn === b;
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 6);
+  ctx.fillStyle = hover ? 'rgba(82,209,220,.18)' : 'rgba(82,209,220,.05)';
+  ctx.fill();
+  ctx.strokeStyle = CYAN; ctx.lineWidth = 1.5;
+  ctx.shadowColor = CYAN; ctx.shadowBlur = hover ? 14 : 6;
+  ctx.stroke();
+  ctx.restore();
+  text(ctx, b.label, b.x + b.w / 2, b.y + 29, { font: `600 13px ${FONT_UI}`, color: '#E6FDFF', align: 'center', spacing: 2.5 });
+}
+
+/* =========================================================
+ * Pantallas de fin
+ * ========================================================= */
+
+/** Título con aberración cromática: copias roja y cyan corridas, y la blanca encima. */
+function drawGlitchTitle(str, x, y, jitter) {
+  const font = `700 66px ${FONT_TITLE}`;
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  text(ctx, str, x - jitter, y + (Math.random() - 0.5) * jitter, { font, color: 'rgba(255,40,100,.85)', align: 'center', spacing: 6 });
+  text(ctx, str, x + jitter, y - (Math.random() - 0.5) * jitter, { font, color: 'rgba(40,240,255,.85)', align: 'center', spacing: 6 });
+  ctx.restore();
+  text(ctx, str, x, y, { font, color: '#FFF4EA', align: 'center', spacing: 6, glow: ORANGE, blur: 24 });
+}
+
+/**
+ * Derrota "SISTEMA CORRUPTO": el canvas se rompe en franjas corridas,
+ * aparecen barras de colores, el título tiembla con aberración cromática
+ * y todo queda bajo scanlines. Al principio es muy intenso y después
+ * vuelve en ráfagas cortas.
+ */
+function drawLose(now) {
+  const t = now - state.shownAt;
+  const heavy = t < 600 || (t % 1800) < 140;
+
+  // Franjas del frame desplazadas (copia el propio canvas sobre sí mismo)
+  const slices = heavy ? 9 : 2;
+  for (let i = 0; i < slices; i++) {
+    const y = Math.random() * H, h = 4 + Math.random() * (heavy ? 40 : 12);
+    const dx = (Math.random() - 0.5) * (heavy ? 90 : 24);
+    ctx.drawImage(canvas, 0, y * DPR, W * DPR, h * DPR, dx, y, W, h);
+  }
+
+  ctx.fillStyle = `rgba(12,3,22,${0.62 * clamp(t / 500)})`;
+  ctx.fillRect(0, 0, W, H);
+
+  // Barras de color: se regeneran cada ~90 ms
+  if (now - state.glitch.at > 90) {
+    state.glitch.at = now;
+    const colors = [ORANGE, CYAN, '#C2307A'];
+    state.glitch.bars = Array.from({ length: heavy ? 14 : 6 }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      w: 40 + Math.random() * (Math.random() < 0.15 ? W : 200), h: 2 + Math.random() * 10,
+      color: colors[Math.floor(Math.random() * colors.length)],
+    }));
+  }
+  ctx.save();
+  ctx.globalAlpha = 0.7;
+  for (const b of state.glitch.bars) { ctx.fillStyle = b.color; ctx.fillRect(b.x, b.y, b.w, b.h); }
+  ctx.restore();
+
+  const cx = W / 2;
+  drawGlitchTitle('SISTEMA CORRUPTO', cx, H / 2 - 40, heavy ? 9 : 2.5);
+
+  // Caja con el motivo
+  ctx.save();
+  ctx.font = `600 22px ${FONT_UI}`;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = '7px';
+  const tw = ctx.measureText(state.reason).width + 56;
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(cx - tw / 2, H / 2 + 6, tw, 50, 6);
+  ctx.fillStyle = 'rgba(12,3,22,.85)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(233,138,21,.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.restore();
+  text(ctx, state.reason, cx + 3, H / 2 + 39, { font: `600 22px ${FONT_UI}`, color: '#F5E9FF', align: 'center', spacing: 7 });
+
+  text(ctx, `NODOS RESTANTES ${state.pieces}  ·  MOVIMIENTOS ${state.moves}`, cx, H / 2 + 100,
+    { font: `700 16px ${FONT_NUM}`, color: MUTED, align: 'center', spacing: 2 });
+  text(ctx, 'Hacé click para volver a jugar', cx, H / 2 + 140,
+    { font: `400 15px ${FONT_UI}`, color: '#E9E2F5', align: 'center', alpha: 0.5 + 0.5 * Math.abs(Math.sin(now * 0.003)) });
+
+  ctx.drawImage(scanImg, 0, 0, W, H);
+}
+
+/**
+ * Victoria "SISTEMA RESTAURADO": contraparte limpia de la derrota.
+ * Ondas cyan salen de la última ficha, el título se revela con un barrido
+ * horizontal y la ficha ganadora queda brillando por encima del velo.
+ */
+function drawWin(now) {
+  const t = now - state.shownAt;
+  ctx.fillStyle = `rgba(8,4,20,${0.7 * clamp(t / 500)})`;
+  ctx.fillRect(0, 0, W, H);
+
+  // Ondas desde la última ficha
+  const lp = cellCenter(state.lastPiece.r, state.lastPiece.c);
+  ctx.save();
+  ctx.strokeStyle = CYAN; ctx.shadowColor = CYAN; ctx.shadowBlur = 12;
+  for (let i = 0; i < 3; i++) {
+    const k = ((t / 1600) + i / 3) % 1;
+    ctx.globalAlpha = (1 - k) * 0.6;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(lp.x, lp.y, 40 + k * 460, 0, TAU); ctx.stroke();
+  }
+  ctx.restore();
+  const pulse = (Math.sin(now * 0.004) + 1) / 2;
+  drawPiece(selectedImg(), lp.x, lp.y, { scale: 1.1 + 0.06 * pulse });
+
+  // El bloque de texto va debajo de la ficha ganadora, o arriba si quedó en la mitad de abajo
+  const cx = W / 2;
+  const top = state.lastPiece.r >= 4 ? 70 : 440;
+  const ty = top + 80;
+
+  // Título revelado con barrido desde el centro hacia los lados
+  const reveal = easeOut(clamp((t - 200) / 700));
+  const half = (W / 2) * reveal;
+  ctx.save();
+  ctx.beginPath(); ctx.rect(cx - half, ty - 80, half * 2, 110); ctx.clip();
+  text(ctx, 'SISTEMA RESTAURADO', cx, ty, { font: `700 62px ${FONT_TITLE}`, color: '#E6FDFF', align: 'center', spacing: 6, glow: CYAN, blur: 26 });
+  ctx.restore();
+  if (reveal < 1) {
+    ctx.save();
+    ctx.fillStyle = '#E6FDFF'; ctx.shadowColor = CYAN; ctx.shadowBlur = 18;
+    ctx.fillRect(cx - half - 1, ty - 80, 2, 110);
+    ctx.fillRect(cx + half - 1, ty - 80, 2, 110);
+    ctx.restore();
+  }
+
+  const k = clamp((t - 700) / 400);
+  const center = state.lastPiece.r === 3 && state.lastPiece.c === 3;
+  text(ctx, center ? 'NODO CENTRAL  ·  CONEXIÓN PERFECTA' : 'UN SOLO NODO ACTIVO', cx, ty + 54,
+    { font: `600 22px ${FONT_UI}`, color: CYAN, align: 'center', spacing: 7, alpha: k });
+  text(ctx, `TIEMPO ${formatTime(state.frozenElapsed)}  ·  MOVIMIENTOS ${state.moves}`, cx, ty + 100,
+    { font: `700 16px ${FONT_NUM}`, color: MUTED, align: 'center', spacing: 2, alpha: k });
+  text(ctx, 'Hacé click para jugar de nuevo', cx, ty + 138,
+    { font: `400 15px ${FONT_UI}`, color: '#E9E2F5', align: 'center', alpha: k * (0.5 + 0.5 * Math.abs(Math.sin(now * 0.003))) });
+}
+
+/* =========================================================
+ * Pantalla de selección de bando
+ * ========================================================= */
+
+/** Tarjeta de un bando: ficha grande girando, nombre y lema; se enciende al pasar el mouse. */
+function drawTeamCard(key, now) {
+  const t = TEAMS[key], b = TEAM_CARDS[key];
+  const hover = state.hoverTeam === key;
+  const cx = b.x + b.w / 2;
+
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 10);
+  ctx.fillStyle = hover ? 'rgba(20,10,40,.95)' : 'rgba(14,8,30,.85)';
+  ctx.fill();
+  ctx.strokeStyle = t.color; ctx.lineWidth = hover ? 2.5 : 1.2;
+  ctx.globalAlpha = hover ? 1 : 0.6;
+  ctx.shadowColor = t.color; ctx.shadowBlur = hover ? 30 : 8;
+  ctx.stroke();
+  ctx.restore();
+
+  // Ficha del bando girando lentamente (más rápido si está en hover)
+  const R = hover ? 82 : 74;
+  ctx.save();
+  ctx.translate(cx, b.y + 130);
+  ctx.rotate(now * (hover ? 0.0012 : 0.0004));
+  ctx.shadowColor = t.color; ctx.shadowBlur = hover ? 40 : 20;
+  const img = pieceImgs[t.piece];
+  const S = R * 2 * ((PIECE_R + PIECE_PAD) / PIECE_R);
+  ctx.drawImage(img, -S / 2, -S / 2, S, S);
+  ctx.restore();
+
+  text(ctx, t.name, cx, b.y + 270, { font: `700 22px ${FONT_TITLE}`, color: t.color, align: 'center', spacing: 2, glow: t.color, blur: hover ? 18 : 6 });
+  text(ctx, t.tagline, cx, b.y + 304, { font: `400 15px ${FONT_UI}`, color: MUTED, align: 'center' });
+  text(ctx, hover ? 'ENTRAR AL GRID' : '', cx, b.y + 338, { font: `600 12px ${FONT_UI}`, color: '#E9E2F5', align: 'center', spacing: 3, alpha: 0.6 + 0.4 * Math.abs(Math.sin(now * 0.004)) });
+}
+
+/** Pantalla inicial: velo sobre el tablero, título y las dos tarjetas de bando. */
+function drawTeamSelect(now) {
+  ctx.fillStyle = 'rgba(8,4,20,.78)';
+  ctx.fillRect(0, 0, W, H);
+  text(ctx, 'ELEGÍ TU BANDO', W / 2, 140, { font: `700 44px ${FONT_TITLE}`, color: '#F5E9FF', align: 'center', spacing: 6, glow: '#8A5CFF', blur: 20 });
+  text(ctx, 'Saltá una ficha sobre otra para descargarla. Ganás si queda un solo nodo activo.', W / 2, 176,
+    { font: `400 16px ${FONT_UI}`, color: MUTED, align: 'center' });
+  drawTeamCard('cyan', now);
+  drawTeamCard('naranja', now);
+}
+
+/* =========================================================
+ * Loop principal
+ * ========================================================= */
+
+/** Dibuja un frame completo y avanza los estados que dependen del tiempo. */
+function frame(now) {
+  // Fin por tiempo agotado
+  if (state.phase === 'playing' && elapsed(now) >= TIME_LIMIT) {
+    cancelDrag(now);
+    endGame('lost', 'TIEMPO AGOTADO', now);
+  }
+  // Pasado el delay, se muestra la pantalla de fin
+  if (state.phase === 'ending' && now >= state.endAt) {
+    state.phase = state.result;
+    state.shownAt = now;
+  }
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.drawImage(bgImg, 0, 0, W, H);
+
+  // Temblor del tablero al comer una ficha
+  ctx.save();
+  if (now < state.shakeUntil) {
+    const k = (state.shakeUntil - now) / 200;
+    ctx.translate((Math.random() - 0.5) * 8 * k, (Math.random() - 0.5) * 8 * k);
+  }
+  ctx.drawImage(boardImg, BX, 0, SIZE, SIZE);
+
+  const target = dropTarget();
+  if (state.drag) {
+    state.drag.moves.forEach((m) => drawGhost(cellCenter(m.r, m.c), now, target === m));
+  }
+  drawBoardPieces(now);
+  drawTrails(ctx, now);
+  drawShocks(ctx, now);
+  drawParticles(ctx, now);
+  drawReturning(now);
+  if (state.drag) {
+    const p = dragPos();
+    drawPiece(selectedImg(), p.x, p.y, { scale: 1.1, lift: true });
+  }
+  ctx.restore();
+
+  drawHud(now);
+  if (state.phase === 'select') drawTeamSelect(now);
+  if (state.phase === 'lost') drawLose(now);
+  if (state.phase === 'won') drawWin(now);
+
+  requestAnimationFrame(frame);
+}
+
+/* =========================================================
+ * Interacción (drag and drop)
+ * ========================================================= */
+
+/** Pasa la posición del puntero a coordenadas lógicas del canvas. */
+function toLogical(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: ((e.clientX - rect.left) * W) / rect.width, y: ((e.clientY - rect.top) * H) / rect.height };
+}
+
+/** Celda (con ficha o hueco) bajo el punto, o null si el punto no cae sobre ninguna. */
+function cellAt({ x, y }) {
+  const c = Math.floor((x - BX - OFF) / CELL), r = Math.floor((y - OFF) / CELL);
+  if (!isValidCell(r, c)) return null;
+  const ctr = cellCenter(r, c);
+  return Math.hypot(x - ctr.x, y - ctr.y) <= PIECE_R + 6 ? { r, c } : null;
+}
+
+/** Bando cuya tarjeta está bajo el punto (solo en la pantalla de selección), o null. */
+function teamAt(pt) {
+  if (state.phase !== 'select') return null;
+  return Object.keys(TEAM_CARDS).find((k) => inRect(pt, TEAM_CARDS[k])) || null;
+}
+
+/** Botón del HUD bajo el punto (no durante la selección de bando), o null. */
+function buttonAt(pt) {
+  if (state.phase === 'select') return null;
+  return inRect(pt, RESET_BTN) ? RESET_BTN : null;
+}
+
+/** Suelta la ficha arrastrada sin mover nada: vuelve deslizándose a su casilla. */
+function cancelDrag(now) {
+  const d = state.drag;
+  if (!d) return;
+  const p = dragPos();
+  state.returning = { r: d.r, c: d.c, x: p.x, y: p.y, born: now };
+  state.drag = null;
+}
+
+/**
+ * Click: en la selección elige bando y arranca; en las pantallas de fin
+ * o sobre el botón de reinicio, vuelve a la selección de bando;
+ * sobre una ficha que se puede mover la agarra (se pone cyan, aparecen
+ * los fantasmas en los destinos y arranca la estela); sobre una ficha
+ * sin movimientos, la hace temblar.
+ */
+canvas.addEventListener('pointerdown', (e) => {
+  const now = performance.now();
+  const pt = toLogical(e);
+  if (state.phase === 'select') {
+    const key = teamAt(pt);
+    if (key) { state.team = key; resetGame(); }
+    return;
+  }
+  if (state.phase === 'won' || state.phase === 'lost') { showTeamSelect(); return; }
+  if (buttonAt(pt)) { showTeamSelect(); return; }
+  if (state.phase !== 'playing') return;
+
+  const cell = cellAt(pt);
+  if (!cell || !state.grid[cell.r][cell.c]) return;
+  const moves = movesFrom(cell.r, cell.c);
+  if (!moves.length) { state.denied = { ...cell, born: now }; return; }
+
+  const ctr = cellCenter(cell.r, cell.c);
+  const trail = [{ x: ctr.x, y: ctr.y, t: now }];
+  state.drag = { ...cell, moves, px: pt.x, py: pt.y, offX: pt.x - ctr.x, offY: pt.y - ctr.y, trail };
+  state.trails.push(trail);
+  canvas.setPointerCapture(e.pointerId);
+  canvas.style.cursor = 'grabbing';
+});
+
+/** Movimiento: arrastra la ficha (sumando puntos a la estela) o actualiza el cursor. */
+canvas.addEventListener('pointermove', (e) => {
+  const pt = toLogical(e);
+  const d = state.drag;
+  if (d) {
+    d.px = pt.x; d.py = pt.y;
+    const p = dragPos(), last = d.trail[d.trail.length - 1];
+    if (!last || Math.hypot(p.x - last.x, p.y - last.y) > 3) d.trail.push({ x: p.x, y: p.y, t: performance.now() });
+    return;
+  }
+  state.hoverBtn = buttonAt(pt);
+  state.hoverTeam = teamAt(pt);
+  const cell = cellAt(pt);
+  const movable = state.phase === 'playing' && cell && movesFrom(cell.r, cell.c).length;
+  const ended = state.phase === 'won' || state.phase === 'lost';
+  canvas.style.cursor = ended || state.hoverBtn || state.hoverTeam ? 'pointer' : movable ? 'grab' : 'default';
+});
+
+/**
+ * Soltar: si la ficha está sobre un destino válido, se ejecuta el salto
+ * (explota la comida y se verifica si quedan jugadas). Si no, vuelve a su lugar.
+ */
+canvas.addEventListener('pointerup', () => {
+  const d = state.drag;
+  if (!d) return;
+  const now = performance.now();
+  const target = dropTarget();
+  canvas.style.cursor = 'default';
+  if (!target) { cancelDrag(now); return; }
+
+  const to = cellCenter(target.r, target.c);
+  d.trail.push({ x: to.x, y: to.y, t: now });
+  const mid = applyMove(d, target);
+  state.drag = null;
+  spawnExplosion(cellCenter(mid.r, mid.c), now);
+  checkEnd(now);
+});
+
+canvas.addEventListener('pointercancel', () => cancelDrag(performance.now()));
+
+/** Atajo de teclado: R reinicia la partida y vuelve a la selección de bando. */
+window.addEventListener('keydown', (e) => {
+  if ((e.key === 'r' || e.key === 'R') && state.phase !== 'select') showTeamSelect();
+});
+
+/** Espera las fuentes (con un tope por si no hay conexión), genera las imágenes y arranca. */
+(async function init() {
+  const fonts = Promise.all([
+    document.fonts.load(`700 40px ${FONT_TITLE}`),
+    document.fonts.load(`700 40px ${FONT_NUM}`),
+    document.fonts.load(`600 14px ${FONT_UI}`),
+  ]).catch(() => {});
+  await Promise.race([fonts, new Promise((r) => setTimeout(r, 1500))]);
+
+  bgImg = await toImage(drawBackground());
+  boardImg = await toImage(drawBoard());
+  scanImg = await toImage(drawScanlines());
+  const keys = Object.keys(PIECE_SOURCES);
+  const imgs = await Promise.all(keys.map((k) => makePieceImage(PIECE_SOURCES[k])));
+  keys.forEach((k, i) => { pieceImgs[k] = imgs[i]; });
+  showTeamSelect();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

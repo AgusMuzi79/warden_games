@@ -1,0 +1,1411 @@
+/*
+  components.css: componentes reutilizables
+  Se carga tercero, después de variables.css y base.css, en las 4 páginas.
+  Usa solo tokens. El header vive en header.css y el footer en footer.css;
+  el CSS de cada página se carga después y puede ajustar lo de acá.
+  Índice (buscá el título con los ====):
+    Botones (.btn y variantes)      Links (.link)
+    Cards y badges                  Menú desplegable (hamburguesa, cuenta)
+    Carrito (dentro del menú)       Modal (<dialog> de pago)
+    Campos (.field)                 Ficha de un juego (juego y producto):
+      breadcrumb, layout de 2 columnas, ficha, Sobre el juego, Galería,
+      Compartir, Comunidad, Dejá tu reseña
+  Regla de este archivo: acá van los componentes que usa más de una página.
+  Lo que es de una sola página va en su propio CSS.
+*/
+
+/* =========================================================
+   Botones
+   4 variantes, cada una con un hover distinto (pedido de la cátedra):
+   .btn--primario se eleva, .btn--secundario rellena deslizando y crece,
+   .btn--terciario subraya y .btn--destructivo pulsa en rojo.
+   Todas usan los tokens de "Movimiento" (variables.css): los colores cambian
+   rápido (--duracion-rapida) y el movimiento usa --duracion-hover con la
+   curva con rebote (--easing-rebote), más el resplandor celeste
+   (--glow-acento). Corrección del profesor: las animaciones eran muy sutiles.
+   ========================================================= */
+.btn {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  /* z-index: 0 vuelve a cada botón la raíz de su propio apilamiento. Así el
+     ::before con z-index: -1 de .btn--secundario queda detrás del texto pero
+     delante del fondo del botón, y no detrás del fondo de un ancestro (ver
+     DECISIONES.md, "Bug: la animación de .btn--secundario"). */
+  z-index: 0;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-6);
+  border: 2px solid transparent;
+  border-radius: var(--radio-sm);
+  font: 500 16px/1 var(--font-ui);
+  cursor: pointer;
+  text-decoration: none;
+  background: none;
+  transition:
+    background-color var(--duracion-rapida) ease,
+    border-color var(--duracion-rapida) ease,
+    color var(--duracion-rapida) ease,
+    transform var(--duracion-hover) var(--easing-rebote),
+    box-shadow var(--duracion-hover) ease,
+    text-shadow var(--duracion-hover) ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* base.css pone a:hover { text-decoration: underline } (0,1,1), que le gana a
+   el text-decoration: none de .btn (0,1,0): un botón que es <a> (ej. "Seguir
+   comprando") quedaba con el subrayado nativo del navegador además de su
+   propia animación de hover. */
+.btn:hover {
+  text-decoration: none;
+}
+
+/* Primario: se eleva 4px y tira sombra + resplandor celeste (animación 1).
+   Fondo --primario-o1 en reposo: con --primario-c3 da 6,17:1. El --primario
+   anterior daba 3,62:1 y no llegaba al 4,5:1 que pide WCAG 1.4.3 para texto
+   de 16px (ver AUDITORIA.md, T02). En :active el fondo sigue siendo el de
+   reposo, así que se oscurece con filter para que igual se note el clic. */
+.btn--primario            { background: var(--primario-o1); color: var(--primario-c3); }
+.btn--primario:hover      { background: var(--primario-c1); color: var(--fondo); transform: translateY(-4px); box-shadow: 0 8px 16px var(--sombra-elevacion), var(--glow-acento); }
+.btn--primario:active     { background: var(--primario-o1); filter: brightness(0.85); transform: translateY(0) scale(0.98); box-shadow: none; }
+
+/* Destructivo: pulso/resplandor rojo que crece y se desvanece (animación 4).
+   Cada pulso dura el doble de un cambio de estado (1s). Hoy no lo usa
+   ninguna pantalla (ver DECISIONES.md, T01). */
+.btn--destructivo         { border-color: var(--error); color: var(--error); }
+.btn--destructivo:hover   { background: var(--error); color: var(--fondo); animation: pulso-error calc(2 * var(--duracion-estado)) ease-out infinite; }
+.btn--destructivo:active  { background: var(--error); color: var(--fondo); animation: none; box-shadow: none; }
+
+/* Esta sí es una animación por pasos (@keyframes) y no una transition porque se
+   repite sola en loop: una transition solo va de un estado A a un estado B.
+   La sombra arranca pegada al botón (0 px) y crece a 10 px mientras se
+   vuelve transparente, así que se "desvanece". */
+@keyframes pulso-error {
+  0%   { box-shadow: 0 0 0 0 var(--resplandor-error); }
+  100% { box-shadow: 0 0 0 10px transparent; }
+}
+
+/* Secundario: el relleno entra deslizando de izquierda a derecha y el botón
+   crece un 6 % con resplandor celeste (animación 2) */
+.btn--secundario {
+  border-color: var(--acento);
+  color: var(--acento);
+}
+
+/* El relleno es un pseudo-elemento (una capa extra) que cubre todo el botón. */
+.btn--secundario::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--acento);
+  transform: scaleX(0);
+  transform-origin: left;
+  /* ease-out y no la curva con rebote: con rebote el relleno se pasaría del
+     ancho del botón y asomaría por fuera del borde. */
+  transition: transform var(--duracion-hover) ease-out;
+}
+
+/* .btn.btn--secundario (no solo .btn--secundario): necesita más especificidad
+   que ".menu-dropdown__seccion a:hover" (que resetea text-decoration a los
+   links normales del menú), porque "Contáctanos" vive ahí adentro y es
+   también un .btn--secundario. */
+.btn.btn--secundario:hover,
+.btn.btn--secundario:focus-visible {
+  color: var(--fondo);
+  /* Explícito acá (no alcanza con el "a:hover" genérico de base.css): ese
+     selector busca la etiqueta <a>, así que a los .btn--secundario que son
+     <button> (ej. "Mensaje", "Suscribirse") nunca les llegaba. */
+  text-decoration: underline;
+  transform: scale(1.06);
+  box-shadow: var(--glow-acento);
+}
+
+/* Misma especificidad que el hover y va después: si no, el hover (scale 1.06)
+   le ganaba a .btn:active y el clic no se notaba. */
+.btn.btn--secundario:active {
+  transform: scale(0.98);
+}
+
+/* En hover (o con foco de teclado) el relleno pasa de scaleX(0) a scaleX(1): la
+   transition de arriba hace que crezca de izquierda a derecha. */
+.btn--secundario:hover::before,
+.btn--secundario:focus-visible::before {
+  transform: scaleX(1);
+}
+
+/* Al hacer clic el relleno cambia de color (celeste → violeta oscuro). */
+.btn--secundario:active::before {
+  background: var(--primario-o1);
+}
+
+/* Terciario: el subrayado crece de izquierda a derecha y el texto toma un
+   resplandor celeste suave (animación 3). El texto no se mueve. */
+.btn--terciario {
+  color: var(--acento);
+}
+
+/* La raya que crece es un ::after, con el mismo ancho que el padding. */
+.btn--terciario::after {
+  content: "";
+  position: absolute;
+  left: var(--espaciado-6);
+  right: var(--espaciado-6);
+  bottom: 6px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duracion-hover) var(--easing-rebote);
+}
+
+.btn--terciario:hover,
+.btn--terciario:focus-visible {
+  text-shadow: var(--glow-acento);
+}
+
+.btn--terciario:hover::after,
+.btn--terciario:focus-visible::after {
+  transform: scaleX(1);
+  box-shadow: var(--glow-acento);
+}
+
+/* Estado deshabilitado, común a todas las variantes. */
+.btn:disabled {
+  background: var(--primario-o2);
+  color: var(--primario-c1);
+  border-color: transparent;
+  cursor: not-allowed;
+}
+
+/* Un botón deshabilitado no reacciona: sin esto, .btn--primario:hover lo
+   seguía elevando 3px con sombra (el background y el color sí los pisa
+   .btn:disabled, que va después), como si estuviera activo. */
+.btn:disabled:hover,
+.btn:disabled:active {
+  transform: none;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+/* Sin movimiento: no hay elevación, crecimiento ni relleno animado. El
+   resplandor celeste sí queda (fijo, aparece de golpe): no es movimiento y
+   sigue avisando el hover. El destructivo muestra el resplandor fijo. */
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn--secundario::before,
+  .btn--terciario::after {
+    transition: none;
+  }
+
+  .btn--primario:hover,
+  .btn--primario:active,
+  .btn:active,
+  .btn.btn--secundario:hover,
+  .btn.btn--secundario:focus-visible,
+  .btn.btn--secundario:active {
+    transform: none;
+  }
+
+  .btn--destructivo:hover {
+    animation: none;
+    box-shadow: 0 0 0 4px var(--resplandor-error);
+  }
+}
+
+/* =========================================================
+   Links
+   Dos variantes: .link (celeste, para resaltar dentro de una oración) y
+   .link--blanco (hereda el color, se marca recién en hover).
+   ========================================================= */
+/* Link de texto celeste, para resaltar una palabra suelta dentro de una
+   oración (ej. "Acepto los términos" del checkbox de login) — mismo
+   subrayado animado que .btn--terciario, pero no es un botón. */
+.link {
+  position: relative;
+  display: inline-block;
+  color: var(--acento);
+}
+
+.link,
+.link:hover {
+  text-decoration: none;
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -2px;
+  height: 2px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duracion-hover) var(--easing-rebote);
+}
+
+.link:hover::after,
+.link:focus-visible::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link::after { transition: none; }
+}
+
+/* Variante "blanco": el link en sí no destaca hasta el hover/foco (mismo
+   criterio que ya usan los links del footer, footer.css: color heredado
+   que pasa a celeste, con el subrayado nativo del navegador en vez del
+   subrayado animado de arriba). Para un link suelto que no necesita
+   llamar la atención de entrada, a diferencia de .link solo (siempre
+   celeste, pensado para resaltar dentro de una oración). */
+.link--blanco {
+  color: inherit;
+  transition: color var(--duracion-rapida) ease;
+}
+
+.link--blanco::after {
+  content: none;
+}
+
+.link--blanco:hover,
+.link--blanco:focus-visible {
+  color: var(--acento);
+  text-decoration: underline;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link--blanco { transition: none; }
+}
+
+/* =========================================================
+   Cards y badges
+   ========================================================= */
+/* Cards — el hover se levanta por encima de las vecinas.
+   En Figma esto no se puede mostrar porque el z-index es
+   estatico; aca si. */
+.card {
+  position: relative;
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-md);
+  padding: var(--espaciado-6);
+  background: var(--primario-o2);
+  transition: transform var(--duracion-hover) var(--easing-rebote);
+}
+
+/* z-index: 1 en hover para que la card agrandada tape a las vecinas. */
+.card:hover,
+.card:focus-within {
+  transform: scale(1.06);
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card { transition: none; }
+  .card:hover, .card:focus-within { transform: none; }
+}
+
+/* Etiqueta chica ("Gratis", precio, "Nuevo") sobre la imagen de un juego
+   (home.js, carousel.js). En Roboto Flex, no Orbitron: es un tag, no un
+   título — misma razón por la que se sacó Orbitron de .banner__nombre. */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--espaciado-1) var(--espaciado-3);
+  border-radius: var(--radio-sm);
+  font: 700 12px/1.4 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Dos variantes de color: precio (violeta, sirve también para "Gratis") y
+   nuevo (celeste, el mismo par de colores de "Destacado" en el banner). */
+.badge--precio {
+  background: var(--primario-o1);
+  border: 1px solid var(--primario-c1);
+  color: var(--primario-c3);
+}
+
+.badge--nuevo {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+/* =========================================================
+   Menú desplegable
+   Un solo componente para el menú hamburguesa, el de cuenta y el del
+   carrito. Quien lo posiciona respecto al botón que lo abre es header.css;
+   js/menu.js lo abre y lo cierra.
+   ========================================================= */
+/* Panel flotante. Sin top/left/right acá: los pone header.css por variante. */
+.menu-dropdown {
+  position: absolute;
+  /* Más alto que las cards del banner coverflow (llegan a z-index: 100),
+     si no quedaban tapados donde se superponen en pantalla. */
+  z-index: 200;
+  width: 280px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-md);
+  background: var(--superficie);
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+  /* Entrada: aparece, baja un poco y crece desde arriba (donde está el botón
+     que lo abre). menu.js lo abre sacándole hidden: al pasar de display none
+     a visible, el navegador vuelve a correr la animación cada vez. Al cerrar
+     desaparece de golpe (no hace falta animar la salida). */
+  transform-origin: top;
+  animation: menu-entrada var(--duracion-estado) var(--easing-rebote);
+}
+
+@keyframes menu-entrada {
+  from { opacity: 0; transform: translateY(calc(-1 * var(--espaciado-2))) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Título chico de cada sección del menú ("Jugar", "Categorías"). */
+.menu-dropdown__titulo {
+  margin: 0 0 var(--espaciado-2);
+  color: var(--primario-c1);
+  font: 600 12px/1.4 var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.menu-dropdown__seccion ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-1);
+}
+
+/* Los links de cada sección: ícono + texto, 44px de alto. Esta regla es más
+   específica que .btn, por eso "Contáctanos" (un .btn adentro) necesita los
+   ajustes de .menu-dropdown__seccion--contacto más abajo. */
+.menu-dropdown__seccion a {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-2);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font: 500 15px/1.4 var(--font-ui);
+  transition: background-color var(--duracion-rapida) ease;
+}
+
+/* Hover en --primario-o1 y no en --primario-o2: el menú entero es
+   --superficie, que vale --primario-o2, así que ese hover no se veía. Contra
+   el menú da 2,11:1; el texto queda en 6,97:1 y los íconos cian en 4,42:1. */
+.menu-dropdown__seccion a:hover,
+.menu-dropdown__seccion a:focus-visible {
+  background: var(--primario-o1);
+  text-decoration: none;
+}
+
+.menu-dropdown__seccion i {
+  flex-shrink: 0;
+  font-size: 18px;
+  color: var(--acento);
+}
+
+.menu-dropdown__divisor {
+  border: 0;
+  border-top: 1px solid var(--primario-o1);
+  margin: var(--espaciado-3) 0;
+}
+
+.menu-dropdown__seccion--contacto .btn {
+  width: 100%;
+  /* Sin esto, ".menu-dropdown__seccion a" (pensada para los links de
+     navegación del menú) le pisa el tamaño de fuente a 15px — el botón
+     queda más chico y el subrayado del hover, más finito, que en el
+     resto de los .btn--secundario del sitio. */
+  font-size: 16px;
+}
+
+/* "Contáctanos" también cae en ".menu-dropdown__seccion a:hover": sin esto,
+   mientras entra el relleno cian del secundario se vería el fondo violeta del
+   hover de los links detrás. (0,3,0) le gana a (0,2,1). */
+.menu-dropdown__seccion--contacto .btn:hover,
+.menu-dropdown__seccion--contacto .btn:focus-visible {
+  background: transparent;
+}
+
+/* ---------- Cabecera del menú de cuenta (avatar + nombre) ---------- */
+.menu-dropdown__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+}
+
+.menu-dropdown__cabecera img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.menu-dropdown__nombre {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.menu-dropdown__usuario {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1.3 var(--font-ui);
+}
+
+.menu-dropdown__social {
+  display: flex;
+  gap: var(--espaciado-1);
+  margin: 0 0 var(--espaciado-3);
+}
+
+.menu-dropdown__social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font-size: 20px;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+/* Mismo hover que los links de las secciones (ver arriba). */
+.menu-dropdown__social a:hover {
+  background: var(--primario-o1);
+  color: var(--acento);
+  text-decoration: none;
+}
+
+/* =========================================================
+   Carrito (dentro del menú desplegable)
+   El contador sobre el ícono está en header.css (.carrito__contador).
+   carrito.js arma la lista.
+   ========================================================= */
+.carrito__vacio {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 14px/1.4 var(--font-ui);
+}
+
+.carrito__lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+}
+
+.carrito__item {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-2);
+}
+
+.carrito__item img {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radio-sm);
+  object-fit: cover;
+}
+
+.carrito__item-nombre {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  color: var(--primario-c3);
+  font: 500 14px/1.3 var(--font-ui);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ícono solo, área táctil de 44px aunque el ícono sea chico (mismo criterio
+   que .header__icon-btn). */
+.carrito__quitar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--primario-c1);
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.carrito__quitar:hover {
+  background: var(--primario-o2);
+  color: var(--error);
+}
+
+.carrito__acciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+  margin-top: var(--espaciado-3);
+}
+
+.carrito__acciones .btn {
+  width: 100%;
+}
+
+/* "Cerrar sesión" es un <button> (no un link) que se ve como un item del
+   menú, pero en rojo. */
+.menu-dropdown__cerrar-sesion {
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-2);
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--error);
+  font: 500 15px var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+/* Colores invertidos en vez del hover violeta de los otros ítems: el rojo
+   sobre --primario-o1 da 2,91:1 (no llega a 4,5:1). Fondo --error con texto
+   --fondo da 6,95:1 y se lee como acción destructiva. */
+.menu-dropdown__cerrar-sesion:hover {
+  background: var(--error);
+  color: var(--fondo);
+}
+
+/* Sin movimiento: el menú aparece de golpe y los hovers cambian de color
+   sin transición. */
+@media (prefers-reduced-motion: reduce) {
+  .menu-dropdown {
+    animation: none;
+  }
+
+  .menu-dropdown__seccion a,
+  .menu-dropdown__social a,
+  .carrito__quitar,
+  .menu-dropdown__cerrar-sesion {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   Modal
+   <dialog> nativo (ej. "Pagar carrito"): el navegador resuelve el foco
+   atrapado, Escape y el fondo oscuro (::backdrop). compras.js lo abre.
+   ========================================================= */
+/* position: fixed + margin: auto lo centra. El <dialog> ya trae position
+   fixed, se repite para que se vea. */
+.modal {
+  position: fixed;
+  margin: auto;
+  width: min(26rem, 90vw);
+  max-height: calc(100vh - var(--espaciado-8));
+  overflow-y: auto;
+  border: none;
+  border-radius: var(--radio-xl);
+  padding: var(--espaciado-8);
+  background: var(--superficie);
+  color: var(--primario-c3);
+  box-shadow: 0 12px 30px var(--sombra-elevacion);
+}
+
+.modal::backdrop {
+  background: var(--velo-modal);
+}
+
+/* [open] es el atributo que el navegador le pone al <dialog> cuando se abre
+   (showModal()). La animación corre justo en ese momento, una sola vez. */
+.modal[open] {
+  animation: modal-pop var(--duracion-estado) var(--easing-rebote);
+}
+
+/* "pop": aparece de transparente a visible mientras crece del 92 % al 100 %.
+   La reusa .modal__exito (más abajo) con 0,4 s. */
+@keyframes modal-pop {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Botón "X": mismas medidas que .header__icon-btn, pero con clase propia
+   porque ese nombre pertenece al bloque .header. */
+.modal__cerrar {
+  position: absolute;
+  top: var(--espaciado-3);
+  right: var(--espaciado-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--primario-c3);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.modal__cerrar:hover {
+  background: var(--primario-o2);
+  color: var(--acento);
+}
+
+.modal__titulo {
+  margin: 0 0 var(--espaciado-4);
+}
+
+.modal__resumen {
+  color: var(--primario-c1);
+  font-size: 14px;
+}
+
+/* Dos campos en una fila (vencimiento y CVV); se apilan si no entran. */
+.modal__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--espaciado-4);
+}
+
+.modal__fila .field {
+  flex: 1;
+  min-width: 7rem;
+}
+
+.modal__form .btn {
+  width: 100%;
+  margin-top: var(--espaciado-2);
+}
+
+/* Reemplaza al form tras confirmar, mismo criterio que .auth-success
+   (login.css): fade + scale en vez de aparecer de golpe. */
+.modal__exito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-3);
+  padding: var(--espaciado-6) 0;
+  text-align: center;
+  animation: modal-pop var(--duracion-estado) var(--easing-rebote);
+}
+
+.modal__exito-icono {
+  font-size: 48px;
+  color: var(--exito);
+}
+
+/* Aviso a invitados: mismo layout que el éxito, pero el ícono no es verde
+   (no es una confirmación). */
+.modal__registro .modal__exito-icono {
+  color: var(--acento);
+}
+
+.modal__exito-titulo {
+  margin: 0;
+}
+
+.modal__exito-texto {
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal[open],
+  .modal__exito {
+    animation: none;
+  }
+
+  .modal__cerrar {
+    transition: none;
+  }
+}
+
+/* =========================================================
+   Campos de formulario
+   Un .field es label + input (o textarea) en columna. Lo usan login,
+   el modal de pago y el newsletter.
+   ========================================================= */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-1);
+  margin-bottom: var(--espaciado-4);
+}
+
+.field label {
+  font-size: 14px;
+  color: var(--primario-c1);
+}
+
+/* Borde en --primario: da 3,59:1 contra la card y WCAG 1.4.11 pide 3:1
+   para el límite de un campo (ver DECISIONES.md, T08b). */
+.field input {
+  background: var(--fondo);
+  border: 1px solid var(--primario);
+  border-radius: var(--radio-sm);
+  padding: var(--espaciado-2) var(--espaciado-4);
+  color: var(--primario-c3);
+  font: 400 16px var(--font-ui);
+}
+
+.field input:focus-visible {
+  border-color: var(--acento);
+}
+
+/* Texto de ayuda debajo de un input (ej: requisitos de la contraseña).
+   Se ve chico a propósito, pero siempre presente: la idea es que la
+   persona lo lea antes de escribir, no que se entere recién con un error. */
+.field__hint {
+  font-size: 12px;
+  color: var(--primario-c1);
+}
+
+/* ============================================================
+   Ficha de un juego
+   Usado por juego.html (Neon Circuit) y por producto.html (cualquier otro
+   juego del catálogo). Antes vivía en juego.css; se movió acá al pasar a
+   compartirse entre dos páginas (mismo criterio que con crearBotonCarrito()
+   y crearBadge() en carrito.js). El tablero y la Ayuda, específicos de
+   Neon Circuit, siguen en juego.css.
+   ============================================================ */
+
+/* ---------- Ruta de navegación (breadcrumb) ----------
+   Roboto Flex, no Orbitron: es navegación, no un título (h1-h3). */
+.breadcrumb {
+  margin-bottom: var(--espaciado-6);
+}
+
+.breadcrumb__lista {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-2);
+  font: 500 14px/1 var(--font-ui);
+}
+
+.breadcrumb__item {
+  color: var(--primario-c1);
+}
+
+/* Separador ">" entre items, generado con CSS: no es texto real, así que
+   no hace falta ocultarlo de los lectores de pantalla aparte. */
+.breadcrumb__item + .breadcrumb__item::before {
+  content: "›";
+  margin-right: var(--espaciado-2);
+  color: var(--primario-o1);
+}
+
+.breadcrumb__item a {
+  color: inherit;
+}
+
+.breadcrumb__item a:hover {
+  color: var(--acento);
+}
+
+.breadcrumb__item[aria-current="page"] {
+  color: var(--primario-c3);
+}
+
+/* ---------- Layout de 2 columnas + panel lateral ----------
+   Solo desktop (regla del proyecto: estas páginas no necesitan mobile
+   first), por eso no hay @media acá. Grid de 2 filas x 2 columnas (4
+   hijos directos de .juego-layout). align-items:stretch hace que, en la
+   fila 1, el contenido principal y el panel lateral midan siempre lo
+   mismo — sin cálculo manual, porque CSS Grid iguala la altura de todos
+   los ítems de una misma fila por spec. */
+.juego-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: stretch;
+  column-gap: var(--espaciado-6);
+  row-gap: var(--espaciado-8);
+  margin-top: var(--espaciado-6);
+}
+
+/* Fila 2: "Sobre el juego" + Galería a la izquierda y Compartir a la derecha.
+   Compartir queda debajo de Ayuda, en la misma columna lateral.
+   La fila 2 no necesita igualar alturas: con align-items:stretch general
+   de arriba, si no ponemos esto, un ítem más corto quedaría con una card
+   más alta que su contenido, con aire de sobra adentro. */
+.juego-layout__secundario,
+.juego-layout > .compartir {
+  align-self: start;
+}
+
+.juego-layout__secundario {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-8);
+}
+
+.juego-layout__secundario .sobre-juego,
+.juego-layout__secundario .galeria {
+  margin-top: 0;
+}
+
+/* Ficha + Ayuda en juego.html; solo la ficha en producto.html. */
+.panel-lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+/* ---------- Ficha del juego ---------- */
+.ficha-juego {
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.ficha-juego__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  margin-bottom: var(--espaciado-4);
+}
+
+/* Miniatura cuadrada (56x56). juego.html le pone el fondo fijo de Neon
+   Circuit por su cuenta; producto.js lo pisa con la imagen real del
+   juego (background-image inline). */
+.ficha-juego__miniatura {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radio-md);
+  background-position: center;
+  background-size: cover;
+}
+
+.ficha-juego__nombre {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+.ficha-juego__categoria {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1.3 var(--font-ui);
+}
+
+.ficha-juego__rating {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-1);
+  margin: 0 0 var(--espaciado-4);
+  color: var(--acento);
+  font: 500 14px/1 var(--font-ui);
+}
+
+.ficha-juego__resenas {
+  color: var(--primario-c1);
+}
+
+.ficha-juego__stats {
+  display: flex;
+  gap: var(--espaciado-6);
+  margin: 0;
+  padding-top: var(--espaciado-3);
+  border-top: 1px solid var(--primario-o1);
+}
+
+.ficha-juego__stats dt {
+  color: var(--primario-c1);
+  font: 400 12px/1.4 var(--font-ui);
+}
+
+.ficha-juego__stats dd {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 16px/1.3 var(--font-ui);
+}
+
+/* ---------- Sobre el juego ---------- */
+.sobre-juego {
+  margin-top: var(--espaciado-8);
+  max-width: 70ch;
+}
+
+.sobre-juego p {
+  margin: 0;
+}
+
+/* ---------- Galería ----------
+   Las dos páginas usan el carrusel de flip (más abajo). */
+.galeria {
+  margin-top: var(--espaciado-8);
+}
+
+.galeria__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--espaciado-4);
+}
+
+.galeria__cabecera h2 {
+  margin: 0;
+}
+
+.galeria__contador {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1 var(--font-ui);
+}
+
+/* Imagen de cada cara del carrusel: llena la cara sin deformarse. */
+.galeria__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Cara "sin más capturas" (solo producto.html, cuando el juego tiene una única
+   foto — ver js/galeria.js y DECISIONES.md, T12). Llena la cara igual que
+   .galeria__img. [hidden] la saca de la vista (base.css). */
+.galeria__vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-3);
+  width: 100%;
+  height: 100%;
+  padding: var(--espaciado-6);
+  background: var(--superficie);
+  color: var(--primario-c3);
+  text-align: center;
+}
+
+.galeria__vacio i {
+  color: var(--acento);
+  font-size: 48px;
+}
+
+.galeria__vacio p {
+  margin: 0;
+  max-width: 28ch;
+  font: 400 16px/1.4 var(--font-ui);
+}
+
+/* ---------- Galería animada: carrusel de flip (juego.html y producto.html) ----------
+   Se ve una sola foto grande a la vez; al pasar a
+   la siguiente, la tarjeta gira en 3D como una ficha que se da vuelta —
+   una animación de rotación real, no un simple desplazamiento. La lógica
+   que dispara el giro (qué foto va en cada cara y cuándo) vive en
+   js/galeria.js; acá solo el CSS que hace que ese giro se vea y se anime. */
+
+/* "perspective" en el contenedor es lo que le da profundidad al giro de la
+   tarjeta: sin esto, rotateY se ve aplastado en 2D, como si la tarjeta se
+   angostara en vez de girar. Cuanto más alto el valor, menos exagerada se
+   ve la perspectiva (1400px = un giro suave, no un efecto "ojo de pez"). */
+.galeria__visor {
+  position: relative;
+  perspective: 1400px;
+}
+
+/* La tarjeta que gira. transform-style: preserve-3d es lo que permite que
+   sus dos caras (los hijos .galeria__cara) mantengan su propia posición en
+   el espacio 3D en vez de aplanarse contra la pantalla — sin esto, el giro
+   de las caras de adentro no se notaría.
+   El ángulo en sí (--angulo) lo escribe js/galeria.js en cada click, sumando
+   o restando 180° según la dirección (nunca "vuelve" a 0: sigue girando
+   siempre para el mismo lado, así el giro nunca da un salto raro hacia
+   atrás). "transition" es lo único que hace falta para que ese cambio de
+   variable se vea como una animación en vez de un salto instantáneo. */
+.galeria__carta {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radio-md);
+  transform-style: preserve-3d;
+  transform: rotateY(var(--angulo, 0deg));
+  /* Curva con rebote: la tarjeta se pasa unos grados del giro y vuelve,
+     como una ficha que se asienta. */
+  transition: transform var(--duracion-estado) var(--easing-rebote);
+}
+
+/* Las 2 caras de la tarjeta, superpuestas exactamente en el mismo lugar
+   (position: absolute + inset: 0, una arriba de la otra). Giran junto con
+   la tarjeta porque son sus hijas dentro del mismo espacio 3D.
+   "backface-visibility: hidden" es la clave de todo el truco: apenas una
+   cara queda "mirando para atrás" (a más de 90° de giro), esta propiedad la
+   hace invisible — así nunca se ve una imagen espejada ni las dos fotos
+   mezcladas al mismo tiempo durante el giro. */
+.galeria__cara {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  backface-visibility: hidden;
+}
+
+/* La cara B arranca pre-girada 180° respecto de la tarjeta (al revés de la
+   cara A, que se queda en 0°). Es lo que hace que, cuando la tarjeta
+   completa su primer giro de 180°, la cara B termine mirando derecho hacia
+   el frente (sus 180° propios + los 180° que giró la tarjeta = 360°, que
+   es lo mismo que 0°) en vez de aparecer espejada. */
+.galeria__cara--b {
+  transform: rotateY(180deg);
+}
+
+/* Flechas para pasar de foto, superpuestas sobre la imagen (no debajo,
+   como en las filas de la Home) porque acá hay una sola foto grande, no
+   una fila para desplazar. */
+.galeria__flecha {
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  /* Centra el botón verticalmente sin tener que saber su alto de antemano:
+     lo corre la mitad de su propia altura hacia arriba. */
+  transform: translateY(-50%);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 0;
+  border-radius: 50%;
+  background: var(--fondo-o1);
+  color: var(--primario-c3);
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.galeria__flecha:hover,
+.galeria__flecha:focus-visible {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+.galeria__flecha--prev { left: var(--espaciado-3); }
+.galeria__flecha--next { right: var(--espaciado-3); }
+
+/* Sin movimiento: la tarjeta sigue cambiando de foto (sigue siendo
+   funcional), pero de golpe, sin el giro — se saca la única propiedad que
+   anima el cambio (transition), nada más. */
+@media (prefers-reduced-motion: reduce) {
+  .galeria__carta,
+  .galeria__flecha {
+    transition: none;
+  }
+}
+
+/* ---------- Compartir ----------
+   Redes y "Mensaje" son placeholders sin destino; solo "Copiar" hace algo
+   (compartir.js). */
+.compartir {
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.compartir__redes {
+  display: flex;
+  gap: var(--espaciado-2);
+  margin: var(--espaciado-4) 0;
+}
+
+.compartir__redes a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font-size: 20px;
+  transition: background-color var(--duracion-rapida) ease;
+}
+
+.compartir__redes a:hover {
+  background: var(--primario-o2);
+  text-decoration: none;
+}
+
+.compartir__acciones {
+  display: flex;
+  gap: var(--espaciado-3);
+  margin-bottom: var(--espaciado-4);
+}
+
+.compartir__acciones .btn {
+  flex: 1;
+}
+
+.compartir__link {
+  display: flex;
+  gap: var(--espaciado-2);
+}
+
+.compartir__link input {
+  flex: 1;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-3);
+  border: 1px solid var(--primario);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  color: var(--primario-c1);
+  font: 400 14px/1 var(--font-ui);
+}
+
+.compartir__copiar {
+  appearance: none;
+  min-height: var(--control-alto);
+  padding: 0 var(--espaciado-4);
+  border: 1px solid var(--acento);
+  border-radius: var(--radio-sm);
+  background: none;
+  color: var(--acento);
+  font: 600 14px/1 var(--font-ui);
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.compartir__copiar:hover {
+  background: var(--acento);
+  color: var(--fondo);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compartir__redes a,
+  .compartir__copiar {
+    transition: none;
+  }
+}
+
+/* ---------- Comunidad ----------
+   Lista de reseñas. min-width: 0 deja que la columna se achique dentro
+   del grid en vez de estirarlo. */
+.comunidad {
+  min-width: 0;
+}
+
+.comunidad__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: var(--espaciado-4);
+}
+
+.comunidad__cabecera h2 {
+  margin: 0;
+}
+
+.comunidad__contador {
+  margin: 0;
+  color: var(--primario-c1);
+  font: 400 13px/1 var(--font-ui);
+}
+
+.comunidad__lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.resena {
+  padding: var(--espaciado-4) 0;
+  border-top: 1px solid var(--primario-o1);
+}
+
+.resena__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  margin-bottom: var(--espaciado-3);
+}
+
+/* Iniciales en vez de foto: no hay avatares reales de la comunidad. */
+.resena__avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--fondo);
+  font: 600 14px/1 var(--font-ui);
+}
+
+.resena__avatar--1 { background: var(--primario-c1); }
+.resena__avatar--2 { background: var(--acento); }
+.resena__avatar--3 { background: var(--tablero-seleccionado); }
+
+.resena__nombre {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 14px/1.4 var(--font-ui);
+}
+
+.resena__fecha {
+  margin-left: var(--espaciado-2);
+  color: var(--primario-c1);
+  font: 400 13px/1.4 var(--font-ui);
+}
+
+/* Estrellas de la reseña: caracteres de Phosphor con un sr-only al lado
+   que dice el puntaje en palabras. */
+.resena__puntaje {
+  margin: 0;
+  color: var(--tablero-seleccionado);
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+/* Estrellas de Phosphor (variante regular, siempre de contorno): la
+   puntuación se marca con el color, no con relleno. */
+.resena__estrella--vacia {
+  color: var(--primario-o1);
+}
+
+.resena__texto {
+  margin: 0 0 var(--espaciado-3);
+  color: var(--primario-c1);
+}
+
+.resena__acciones {
+  display: flex;
+  gap: var(--espaciado-4);
+}
+
+/* "Útil" y "Responder": botones que parecen texto. */
+.resena__util,
+.resena__responder {
+  appearance: none;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--primario-c1);
+  font: 500 13px/1 var(--font-ui);
+  cursor: pointer;
+}
+
+.resena__util:hover,
+.resena__responder:hover {
+  color: var(--acento);
+  text-decoration: underline;
+}
+
+/* ---------- Dejá tu reseña ----------
+   Puntaje con radios + labels (CSS puro, sin JS): el truco es poner las
+   estrellas al revés en el HTML (5,4,3,2,1) y darlas vuelta visualmente
+   con row-reverse, así "esta y las siguientes en el HTML" son, en
+   pantalla, "esta y las anteriores" — la selección natural de un rating. */
+/* align-self: center: la card no se estira contra la altura de Comunidad. */
+.resena-form {
+  align-self: center;
+  padding: var(--espaciado-6);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.resena-form form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+.resena-form__puntaje {
+  padding: 0;
+  border: 0;
+}
+
+.resena-form__puntaje legend {
+  margin-bottom: var(--espaciado-2);
+  padding: 0;
+  color: var(--primario-c1);
+  font: 500 14px/1 var(--font-ui);
+}
+
+/* Los inputs van en orden 5,4,3,2,1 en el HTML; row-reverse los muestra
+   1 a 5. */
+.estrellas {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: var(--espaciado-1);
+  width: fit-content;
+}
+
+/* Radios invisibles pero con 44px de área, así siguen recibiendo foco y
+   selección por teclado. */
+.estrellas input {
+  position: absolute;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  opacity: 0;
+}
+
+.estrellas label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  color: var(--primario-o1);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.estrellas input:checked ~ label,
+.estrellas label:hover,
+.estrellas label:hover ~ label {
+  color: var(--tablero-seleccionado);
+}
+
+/* El input queda invisible (opacity: 0), así que el foco de teclado se
+   muestra en su label, no en él. */
+.estrellas input:focus-visible + label {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.resena-form textarea {
+  min-height: 96px;
+  padding: var(--espaciado-3);
+  border: 1px solid var(--primario);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  color: var(--primario-c3);
+  font: 400 14px/1.5 var(--font-ui);
+  resize: vertical;
+}
+
+.resena-form__contador {
+  margin: var(--espaciado-1) 0 0;
+  text-align: right;
+  color: var(--primario-c1);
+  font: 400 12px/1 var(--font-ui);
+}
+
+.resena-form__estado {
+  margin: 0;
+  color: var(--exito);
+  font: 500 14px/1 var(--font-ui);
+}

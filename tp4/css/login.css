@@ -1,0 +1,423 @@
+/*
+  login.css: Login / Registro (login.html)
+  Se carga al final. Usa tokens de variables.css, y de components.css los
+  botones (.btn), los campos (.field) y .link. login.html no tiene header
+  ni footer, aunque también cargue header.css y footer.css.
+  Secciones: splash de 2 columnas, selector Crear Cuenta / Ingresar,
+  formularios, campo de contraseña, checkboxes y captcha simulado,
+  botones sociales y bloque de éxito del registro.
+  Layout pensado solo para desktop (regla del proyecto), por eso casi no
+  hay @media. login.js prende y apaga las clases .active y is-visible.
+*/
+
+/* ---------- Splash de 2 columnas ----------
+   .auth-shell reemplaza el <main> genérico de base.css (que es de un
+   ancho máximo y centrado): acá necesitamos que ocupe toda la pantalla
+   partida en dos paneles. */
+.auth-shell {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  width: 100%;
+  max-width: none;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---------- Panel de marca (izquierda) ----------
+   Solo presentación: logo, título (el h1 de la página) y bajada. */
+.auth-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-8);
+  text-align: center;
+  background: linear-gradient(160deg, var(--primario-o2), var(--fondo));
+}
+
+/* Quieto: el flotado infinito era decorativo y no comunicaba nada
+   (corrección del profesor: animar solo lo que comunica). */
+.auth-brand__logo {
+  width: 96px;
+  height: 96px;
+}
+
+.auth-brand__title {
+  margin: 0;
+}
+
+.auth-brand__tagline {
+  max-width: 26rem;
+  margin: 0;
+  color: var(--primario-c1);
+}
+
+/* ---------- Panel del formulario (derecha) ---------- */
+.auth-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--espaciado-8);
+  background: var(--fondo);
+}
+
+/* La card del formulario. Los dos forms (registro e ingreso) viven adentro,
+   solo uno se muestra a la vez. */
+.auth-card {
+  width: 100%;
+  max-width: 30rem;
+  padding: var(--espaciado-6);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+/* ---------- Selector Crear Cuenta / Ingresar ----------
+   Es un role="tablist" con dos botones role="tab". login.js pone la clase
+   .active en el botón elegido y en el form (tabpanel) que le corresponde. */
+.auth-switch {
+  display: flex;
+  gap: var(--espaciado-1);
+  padding: var(--espaciado-2);
+  margin-bottom: var(--espaciado-6);
+  border-radius: var(--radio-xl);
+  background: var(--fondo);
+}
+
+.auth-switch__btn {
+  appearance: none;
+  flex: 1;
+  min-height: var(--control-alto);
+  padding: var(--espaciado-2);
+  border: 0;
+  border-radius: var(--radio-md);
+  background: none;
+  color: var(--primario-c1);
+  font: 600 15px/1 var(--font-ui);
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.auth-switch__btn:hover {
+  color: var(--primario-c3);
+}
+
+/* --primario-o1, igual que .btn--primario: con --primario-c3 el --primario
+   daba 3,62:1 y no pasaba el 4,5:1 de WCAG 1.4.3 (ver AUDITORIA.md, T02). */
+.auth-switch__btn.active,
+.auth-switch__btn.active:hover {
+  background: var(--primario-o1);
+  color: var(--primario-c3);
+}
+
+/* ---------- Paneles de formulario ----------
+   Ocultos por default, solo se ve el que tiene .active. */
+.auth-card__form {
+  display: none;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+/* .field ya trae margin-bottom desde components.css; acá el espacio
+   entre campos lo pone el gap de arriba, así que se anula para no sumar
+   los dos y terminar con el doble de separación de la cuenta. */
+.auth-card__form > .field {
+  margin-bottom: 0;
+}
+
+.auth-card__form.active {
+  display: flex;
+}
+
+/* Dos campos lado a lado (ej. vencimiento y CVV); en columna hasta 48rem. */
+.field-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-4);
+}
+
+.field-row .field {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.field--small {
+  flex: 0 0 auto;
+}
+
+/* ---------- Campo de contraseña con botón "ojo" ---------- */
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap input {
+  width: 100%;
+  padding-right: calc(var(--control-alto) + var(--espaciado-2));
+}
+
+/* Área táctil de 44px (--control-alto) aunque el ícono sea de 20px,
+   igual que .header__icon-btn en header.css. */
+.toggle-pass {
+  appearance: none;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  background: none;
+  border: 0;
+  border-radius: var(--radio-sm);
+  color: var(--primario-c1);
+  cursor: pointer;
+  transition: color var(--duracion-rapida) ease;
+}
+
+.toggle-pass:hover {
+  color: var(--primario-c3);
+}
+
+.toggle-pass.is-visible {
+  color: var(--acento);
+}
+
+.toggle-pass__icon {
+  font-size: 20px;
+}
+
+/* ---------- Checkboxes ----------
+   El <input> real está invisible (opacity: 0) pero sigue ahí, así conserva
+   foco y teclado. El cuadradito que se ve es .check-block__mark, que se
+   pinta con el selector de hermano input:checked ~ .check-block__mark. */
+.check-block {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--espaciado-3);
+  cursor: pointer;
+}
+
+.check-block input[type="checkbox"] {
+  position: absolute;
+  width: var(--control-target);
+  height: var(--control-target);
+  margin: 0;
+  opacity: 0;
+}
+
+.check-block__mark {
+  position: relative;
+  flex: 0 0 22px;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--primario);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  transition: background-color var(--duracion-rapida) ease, border-color var(--duracion-rapida) ease;
+}
+
+.check-block input:checked ~ .check-block__mark {
+  background: var(--acento);
+  border-color: var(--acento);
+}
+
+.check-block input:checked ~ .check-block__mark::after {
+  content: "";
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--acento-o3);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* El foco lo tiene el input invisible; se dibuja en la marca. */
+.check-block input:focus-visible ~ .check-block__mark {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+
+.check-block__label {
+  flex: 1;
+  color: var(--primario-c3);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* ---------- Captcha simulado ----------
+   Fila del captcha: simulado, pero con la paleta gris clara del widget
+   real de reCAPTCHA de Google en vez de los tokens violeta del sitio. Es
+   un widget de un tercero (se ve igual en cualquier página que lo use,
+   nunca toma el tema de quien lo integra). Es la única parte del CSS con
+   colores escritos a mano, a propósito. align-items:center (en vez de
+   heredar el flex-start de .check-block, pensado para labels de varias
+   líneas como "Acepto los términos...") porque acá todo el contenido es
+   de una sola línea y tiene que quedar centrado, no arrancando arriba. */
+.check-block--captcha {
+  align-items: center;
+  padding: var(--espaciado-3) var(--espaciado-4);
+  border: 1px solid #d3d3d3;
+  border-radius: var(--radio-sm);
+  background: #f9f9f9;
+  /* Sombra del widget de Google: forma parte de la misma excepción que los
+     colores fijos de arriba (ver DECISIONES.md, "Captcha simulado"). */
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.check-block--captcha .check-block__mark {
+  border-color: #c1c1c1;
+  background: #fff;
+}
+
+.check-block--captcha input:checked ~ .check-block__mark {
+  background: #4285f4;
+  border-color: #4285f4;
+}
+
+.check-block--captcha input:checked ~ .check-block__mark::after {
+  border-color: #fff;
+}
+
+.check-block--captcha .check-block__label {
+  color: #1a1a1a;
+}
+
+.recaptcha {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  color: #6b6b6b;
+  font-size: 10px;
+}
+
+/* Logo real de reCAPTCHA: flecha circular de "refresh" en dos tonos, no
+   un candado — dos <path>, uno por mitad del ícono. */
+.recaptcha__icon {
+  width: 26px;
+  height: 26px;
+}
+
+.recaptcha__icon-a {
+  fill: #4285f4;
+}
+
+.recaptcha__icon-b {
+  fill: #b3b3b3;
+}
+
+/* ---------- Botones ----------
+   Registrarse/Ingresar y los sociales usan .btn + .btn--primario/.btn--secundario
+   de components.css (con sus animaciones de hover); acá solo hacen falta
+   los ajustes que no vienen por default en ese componente genérico. */
+.auth-card__form .btn {
+  width: 100%;
+}
+
+.auth-card__form .btn--secundario {
+  gap: var(--espaciado-3);
+}
+
+/* Línea con texto en el medio ("o continuá con..."). Las dos rayas son
+   ::before y ::after con flex: 1. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+  color: var(--primario-c1);
+  font-size: 13px;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--primario-o1);
+}
+
+.social-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* ---------- Éxito de registro ----------
+   Reemplaza al form de registro (login.js le saca/pone el atributo
+   "hidden" a cada uno). La animación es la que pide el enunciado:
+   el bloque entra con fade + scale en vez de aparecer de golpe. */
+.auth-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-3);
+  padding: var(--espaciado-8) var(--espaciado-6);
+  text-align: center;
+  animation: auth-success-pop var(--duracion-estado) var(--easing-rebote);
+}
+
+.auth-success__icon {
+  font-size: 48px;
+  color: var(--exito);
+}
+
+/* Es un texto de bloque, no un h1-h3, pero queda en Orbitron por ser el
+   título del mensaje de éxito. */
+.auth-success__title {
+  margin: 0;
+  color: var(--primario-c3);
+  font: 600 20px/1.3 var(--font-display);
+}
+
+.auth-success__text {
+  margin: 0;
+  color: var(--primario-c1);
+  font-size: 14px;
+}
+
+@keyframes auth-success-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =========================================================
+   Tablet / desktop: los pares de campos van en una fila
+   ========================================================= */
+@media (min-width: 48rem) {
+  .field-row {
+    flex-direction: row;
+    gap: var(--espaciado-6);
+  }
+
+  .field-row .field--small {
+    flex-basis: 35%;
+  }
+}
+
+/* ---------- Reduced motion ----------
+   Sin animación de éxito. El bloque de éxito igual se muestra, solo que
+   sin el fade + scale. */
+@media (prefers-reduced-motion: reduce) {
+  .auth-switch__btn,
+  .toggle-pass,
+  .check-block__mark {
+    transition: none;
+  }
+
+  .auth-success {
+    animation: none;
+  }
+}

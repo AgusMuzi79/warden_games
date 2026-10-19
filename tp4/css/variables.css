@@ -1,0 +1,128 @@
+/* ============================================================
+   variables.css: tokens del design system y clases de tipografía
+   Se carga primero en las 4 páginas (index, producto, juego y login),
+   porque todo el CSS de después usa var(--token) y no escribe
+   colores, espaciados, radios ni fuentes a mano. Si falta un token,
+   se agrega acá. Ninguna regla de este archivo depende de otro CSS.
+   Los valores salen del design system de Figma, pero si Figma y este
+   archivo difieren, gana este.
+   ============================================================ */
+
+:root {
+  /* ---- Color: base ----
+     --superficie es el fondo de cards, header, footer y menús. Apunta a
+     --primario-o2 en vez de repetir el hex, así hay un solo lugar donde
+     cambiarlo. --fondo-o1 es --fondo al 75%, para círculos sobre imágenes. */
+  --fondo:            #19042A;
+  --fondo-o1:         rgba(25, 4, 42, 0.75);
+  --superficie:       var(--primario-o2);
+
+  /* ---- Color: primario (violeta) ----
+     Escala de claro (c3) a oscuro (o2). c = más claro, o = más oscuro. */
+  --primario-c3:     #ECDBFA;
+  --primario-c2:     #DAB7F5;
+  --primario-c1:     #CBA0EE;
+  --primario:        #9B4BDD;
+  --primario-o1:     #731EB8;
+  --primario-o2:     #2C0849;
+
+  /* ---- Color: acento (celeste) ----
+     Links, hovers, foco de campos y detalles. Misma lógica de c/o. */
+  --acento-c3:       #DEF5F7;      
+  --acento:          #52D1DC;  
+  --acento-o2:       #158993;  
+  --acento-o3:       #0A555C; 
+
+  /* ---- Color: feedback ---- */
+  --error:            #F87171;
+  --exito:            #4ADE80;
+
+  /* ---- Color: utilidad ----
+     --foco es el amarillo del anillo de :focus-visible (ver abajo). */
+  --foco:             #EEF434;
+  --sombra-elevacion: rgba(0, 0, 0, 0.35);
+  --velo-modal:       rgba(0, 0, 0, 0.6);   /* fondo oscurecido detrás de un <dialog> */
+  --resplandor-error: rgba(248, 113, 113, 0.55);
+
+  /* ---- Color: tablero (página del juego) ----
+     Paleta propia del tablero de Peg Solitaire / "Neon Circuit", separada
+     a propósito del violeta/celeste del resto del sitio (ver DECISIONES.md,
+     "Página del juego"). Los valores ya están definidos y no se tocan.
+     Los usa juego.css (fichas, leyenda, grilla de fondo). */
+  --tablero-activo:        #FF6A1A;
+  --tablero-descargado:    #0B0710;
+  --tablero-seleccionado:  #3FE8E4;
+  --tablero-destino:       #4C7DFF;
+  --tablero-grilla:        rgba(155, 75, 221, 0.15);
+
+  /* ---- Espaciado ----
+     Son múltiplos de 4px. Se saltea el 7 a propósito, y el 5 se sumó
+     después porque hacía falta un 20px para el gap del tablero. */
+  --espaciado-1:      4px;
+  --espaciado-2:      8px;
+  --espaciado-3:      12px;
+  --espaciado-4:      16px;
+  --espaciado-5:      20px;
+  --espaciado-6:      24px;
+  --espaciado-8:      32px;
+
+  /* ---- Radios ---- */
+  --radio-sm:         8px;
+  --radio-md:         16px;
+  --radio-xl:         24px;
+
+  /* ---- Controles ---- */
+  --control-alto:     44px;
+  --control-target:   24px;  /* minimo WCAG 2.2 SC 2.5.8 (AA) */
+
+  /* ---- Tipografia ----
+     Orbitron solo en h1-h3 y el logo. Roboto Flex todo el resto. */
+  --font-display:     'Orbitron', sans-serif;
+  --font-ui:          'Roboto Flex', system-ui, sans-serif;
+
+  /* ---- Movimiento ----
+     Duraciones y curvas de todas las animaciones (corrección del profesor:
+     las animaciones eran demasiado sutiles). Cada archivo tiene su bloque
+     prefers-reduced-motion que las apaga. */
+  --duracion-rapida:  150ms;  /* cambios solo de color (hover de íconos y links) */
+  --duracion-hover:   300ms;  /* hover de botones y cards */
+  --duracion-estado:  500ms;  /* cambios de estado: carruseles, menús, modales */
+  /* Curva con rebote: se pasa un poco del valor final y vuelve. */
+  --easing-rebote:    cubic-bezier(.34, 1.56, .64, 1);
+  /* Curva de frenado: arranca rápido y afloja hasta detenerse (rodillos del
+     sorteo de Blocka). */
+  --easing-frenado:   cubic-bezier(0.15, 0.7, 0.2, 1);
+  /* Resplandor celeste (--acento al 55%) para el hover de los botones. */
+  --glow-acento:      0 0 16px rgba(82, 209, 220, 0.55);
+}
+
+/* ============================================================
+   Tipografias
+   Clases utilitarias del design system. Solo las de display, h1, h2 y h3
+   usan Orbitron (títulos); el resto va en Roboto Flex. Hoy ningún
+   HTML las usa: los títulos toman el tamaño de base.css.
+   ============================================================ */
+
+.t-display  { font: 700 48px/1.10 var(--font-display); }
+.t-h1       { font: 700 32px/1.20 var(--font-display); }
+.t-h2       { font: 600 24px/1.25 var(--font-display); }
+.t-h3       { font: 600 20px/1.30 var(--font-display); }
+.t-label    { font: 500 18px/1.40 var(--font-ui);
+              letter-spacing: 0.05em;
+              text-transform: uppercase; }
+.t-body-l   { font: 400 16px/1.50 var(--font-ui); }
+.t-body-s   { font: 400 14px/1.50 var(--font-ui); }
+.t-caption  { font: 500 12px/1.40 var(--font-ui); }
+
+/* ============================================================
+   Cuando se hace tab en los botones
+   Foco visible global para quien navega con teclado. :where() deja la
+   especificidad en 0, así cualquier componente puede ajustar el outline
+   sin pelear. :focus-visible evita que salga al hacer click con mouse.
+   ============================================================ */
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--foco);
+  outline-offset: 2px;
+}
+

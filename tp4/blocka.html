@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Warden Games — Blocka</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Roboto+Flex:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./css/variables.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/header.css">
+  <link rel="stylesheet" href="./css/footer.css">
+  <link rel="stylesheet" href="./css/juego.css">
+  <link rel="stylesheet" href="./css/blocka.css">
+</head>
+<body>
+
+  <header class="header header--juego">
+  <div class="header__start">
+    <a class="header__logo" href="index.html" aria-label="Warden, ir al inicio">
+      <img src="assets/img/logo.png" alt="" width="32" height="32">
+      <span>Warden</span>
+    </a>
+  </div>
+ 
+  <div class="header__actions">
+    <a class="btn btn--secundario" href="index.html">Volver al menú</a>
+    <a class="header__avatar" href="#" aria-label="Mi cuenta">
+      <img src="assets/img/avatar.jpg" alt="" width="36" height="36">
+    </a>
+  </div>
+</header>
+
+  <main>
+    <!-- Título de la página para lectores de pantalla (el nombre del juego ya
+         se ve en el breadcrumb y en la card). Va oculto con .sr-only: así hay
+         un único h1, sin cambiar el diseño, a diferencia de juego.html (Peg),
+         que sigue sin h1 (ver DECISIONES.md). -->
+    <h1 class="sr-only">Blocka, rompecabezas de imágenes</h1>
+
+    <!-- Ruta de navegación (Etapa 4, parte 1). "Puzzle" no tiene página
+         propia todavía (las categorías de la Home son filtros, no rutas),
+         así que queda como texto, no como link. -->
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <ol class="breadcrumb__lista">
+        <li class="breadcrumb__item"><a href="index.html">Inicio</a></li>
+        <li class="breadcrumb__item">Puzzle</li>
+        <li class="breadcrumb__item" aria-current="page">Blocka</li>
+      </ol>
+    </nav>
+
+    <!-- Columna de contenido + panel lateral, una al lado de la otra
+         (solo desktop). Grid de 2 filas: la de arriba (tablero + ficha/Ayuda)
+         y la de abajo (Sobre el juego/Galería + Compartir) miden lo mismo
+         que su vecino de fila gracias a align-items:stretch — así el
+         tablero llega exactamente hasta el borde de Ayuda, sin importar
+         cuánto texto tenga. -->
+    <div class="juego-layout">
+
+      <!-- Tablero de Blocka: misma card que la del Peg Solitaire (.tablero,
+           808x660 px), con portada y botón "Jugar". Cuando se clickea
+           "Jugar" aparece el canvas donde se arma la imagen (js/blocka.js). -->
+      <section id="board" class="tablero" aria-label="Tablero de Blocka">
+
+        <!-- Cabecera de la card: oculta mientras se ve la portada (la imagen
+             ya trae el nombre del juego). js/blocka.js la muestra al
+             clickear "Jugar" y le pasa el foco. -->
+        <div class="tablero__cabecera" id="tablero-cabecera" tabindex="-1" hidden>
+          <p class="tablero__etiqueta">Blocka</p>
+        </div>
+
+        <div class="tablero__cuerpo">
+          <!-- Portada: la imagen es decorativa (trae el nombre del juego
+               dibujado), por eso alt="". -->
+          <div class="tablero__portada" id="tablero-portada">
+            <img class="tablero__portada-img" src="assets/img/blocka-comic-rojo.png" alt="">
+            <button type="button" class="btn btn--primario tablero__jugar" id="btn-jugar">Jugar</button>
+          </div>
+
+          <!-- Zona de juego: oculta hasta clickear "Jugar". El HUD (nivel,
+               tiempo y récord), el canvas y los botones los maneja
+               js/blocka.js. El párrafo de estado es role="status": el lector
+               de pantalla lo anuncia sin cortar lo que está leyendo. -->
+          <div class="tablero__juego" id="tablero-juego" hidden>
+
+            <!-- Pantalla de inicio: se ve después de la portada. Los récords
+                 los arma js/blocka.js (leen localStorage). Las instrucciones
+                 no van acá: están en el panel de Ayuda. "Comenzar" oculta
+                 esto y arranca el nivel 1. -->
+            <div class="blocka__inicio" id="blocka-inicio">
+              <section class="blocka__panel" aria-labelledby="inicio-records">
+                <div class="blocka__panel-cabecera">
+                  <h2 id="inicio-records">Récords</h2>
+                  <!-- Ver los récords de cada cantidad de piezas y de cada
+                       modo: dos grupos de píldoras, uno debajo del otro.
+                       aria-pressed marca la activa de cada grupo. -->
+                  <div class="blocka__selectores">
+                    <div class="blocka__vistas" role="group" aria-label="Ver récords según la cantidad de piezas">
+                      <button type="button" class="blocka__vista" data-piezas="4" aria-pressed="true">4 piezas</button>
+                      <button type="button" class="blocka__vista" data-piezas="9" aria-pressed="false">9 piezas</button>
+                      <button type="button" class="blocka__vista" data-piezas="16" aria-pressed="false">16 piezas</button>
+                    </div>
+                    <div class="blocka__vistas" role="group" aria-label="Ver récords según el modo">
+                      <button type="button" class="blocka__vista" data-modo="normal" aria-pressed="true">Normal</button>
+                      <button type="button" class="blocka__vista" data-modo="dificil" aria-pressed="false">Difícil</button>
+                    </div>
+                  </div>
+                </div>
+                <ul class="blocka__records" id="blocka-lista-records"></ul>
+                <p class="blocka__records-estado" id="blocka-records-estado" role="status"></p>
+              </section>
+
+              <button type="button" class="btn btn--primario" id="btn-comenzar">Comenzar</button>
+            </div>
+
+            <!-- Elección de piezas: se ve después de "Comenzar". Cada opción
+                 fija cuántas piezas tendrá la imagen y pasa a elegir el modo
+                 (js/blocka.js). La etiqueta de abajo es la grilla (2 × 2...),
+                 no Fácil/Medio/Difícil: "Difícil" es un modo. -->
+            <div class="blocka__dificultad" id="blocka-dificultad" hidden>
+              <h2 id="dificultad-titulo">Elegí la cantidad de piezas</h2>
+              <div class="blocka__opciones" role="group" aria-labelledby="dificultad-titulo">
+                <button type="button" class="blocka__opcion" data-piezas="4">
+                  <span class="blocka__opcion-numero">4</span>
+                  <span>piezas</span>
+                  <span class="blocka__opcion-nombre">2 × 2</span>
+                </button>
+                <button type="button" class="blocka__opcion" data-piezas="9">
+                  <span class="blocka__opcion-numero">9</span>
+                  <span>piezas</span>
+                  <span class="blocka__opcion-nombre">3 × 3</span>
+                </button>
+                <button type="button" class="blocka__opcion" data-piezas="16">
+                  <span class="blocka__opcion-numero">16</span>
+                  <span>piezas</span>
+                  <span class="blocka__opcion-nombre">4 × 4</span>
+                </button>
+              </div>
+              <p class="blocka__dificultad-nota">Con más piezas, el tiempo límite de los niveles avanzados es mayor.</p>
+              <button type="button" class="btn btn--terciario" id="btn-dificultad-volver">Volver</button>
+            </div>
+
+            <!-- Elección de modo: se ve después de elegir las piezas y antes
+                 del sorteo. Reusa el mismo bloque y las mismas tarjetas que la
+                 pantalla de piezas, con dos opciones. Cada una fija el modo y
+                 arranca el nivel 1 (js/blocka.js). -->
+            <div class="blocka__dificultad" id="blocka-modo" hidden>
+              <h2 id="modo-titulo">Elegí el modo</h2>
+              <div class="blocka__opciones blocka__opciones--dos" role="group" aria-labelledby="modo-titulo">
+                <button type="button" class="blocka__opcion" data-modo="normal">
+                  <span class="blocka__opcion-titulo">Normal</span>
+                  <span class="blocka__opcion-detalle">Cada nivel con su filtro: grises, negativo y mixtos.</span>
+                </button>
+                <button type="button" class="blocka__opcion" data-modo="dificil">
+                  <span class="blocka__opcion-titulo">Difícil</span>
+                  <span class="blocka__opcion-detalle">Filtro sorpresa: cada nivel sortea uno, sin repetir el anterior.</span>
+                </button>
+              </div>
+              <p class="blocka__dificultad-nota">Cada modo tiene sus propios récords.</p>
+              <button type="button" class="btn btn--terciario" id="btn-modo-volver">Volver</button>
+            </div>
+
+            <!-- Sorteo de la imagen: una tragamonedas de 3 rodillos que se ve
+                 entre "Comenzar" y el juego. js/blocka.js llena las tiras con
+                 imágenes y las hace girar. Los rodillos son decorativos
+                 (aria-hidden): el resultado lo anuncia el texto de estado. -->
+            <div class="blocka__sorteo" id="blocka-sorteo" tabindex="-1" hidden>
+              <p class="blocka__sorteo-titulo" id="blocka-sorteo-titulo"></p>
+              <div class="blocka__slot" aria-hidden="true">
+                <div class="blocka__rodillo"><div class="blocka__tira"></div></div>
+                <div class="blocka__rodillo"><div class="blocka__tira"></div></div>
+                <div class="blocka__rodillo"><div class="blocka__tira"></div></div>
+                <div class="blocka__linea"></div>
+              </div>
+              <p class="blocka__sorteo-estado" id="blocka-sorteo-estado" role="status"></p>
+            </div>
+
+            <!-- Partida: oculta hasta elegir "Comenzar". El HUD (nivel,
+                 tiempo y récord), el canvas y los botones los maneja
+                 js/blocka.js. El párrafo de estado es role="status": el
+                 lector de pantalla lo anuncia sin cortar lo que está leyendo. -->
+            <div class="blocka__partida" id="blocka-partida" hidden>
+              <div class="blocka__hud">
+                <p class="blocka__dato">Nivel <strong id="blocka-nivel">1 de 3</strong></p>
+                <p class="blocka__dato">Tiempo <strong id="blocka-tiempo">00:00.0</strong></p>
+                <p class="blocka__dato">Récord <strong id="blocka-record">—</strong></p>
+              </div>
+
+              <canvas class="blocka__canvas" id="blocka-canvas" width="480" height="480" tabindex="0"
+                      aria-label="Imagen dividida en partes giradas. Clic izquierdo gira una parte a la izquierda y clic derecho (o Mayús + clic), a la derecha. Con el teclado: las flechas eligen una parte, Q la gira a la izquierda y E, Enter o Espacio, a la derecha.">
+                <p>Tu navegador no soporta canvas, necesario para jugar a Blocka.</p>
+              </canvas>
+
+              <p class="blocka__estado" id="blocka-estado" role="status"></p>
+
+              <div class="blocka__acciones">
+                <button type="button" class="btn btn--secundario" id="btn-ayudita" hidden>Ayudita (+5 s)</button>
+                <button type="button" class="btn btn--terciario" id="btn-trampa" hidden>Trampa</button>
+                <button type="button" class="btn btn--secundario" id="btn-reintentar" hidden>Reintentar nivel</button>
+                <button type="button" class="btn btn--terciario" id="btn-inicio" hidden>Volver al inicio</button>
+                <button type="button" class="btn btn--primario" id="btn-siguiente" hidden>Siguiente nivel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Ficha del juego + Ayuda (Etapa 4, partes 3 y 6): misma fila que
+           el tablero, así miden exactamente lo mismo (align-items:stretch
+           en .juego-layout). Compartir queda en la fila de abajo, ver más
+           abajo — sigue viéndose debajo de Ayuda, en la misma columna. -->
+      <aside class="panel-lateral" aria-label="Información del juego">
+
+        <section class="ficha-juego">
+          <h2 class="sr-only">Ficha del juego</h2>
+          <div class="ficha-juego__cabecera">
+            <div class="ficha-juego__miniatura" aria-hidden="true"></div>
+            <div>
+              <p class="ficha-juego__nombre">Blocka</p>
+              <p class="ficha-juego__categoria">Puzzle · WardenDevs</p>
+            </div>
+          </div>
+          <p class="ficha-juego__rating">
+            <i class="ph ph-star" aria-hidden="true"></i> 4.6
+            <span class="ficha-juego__resenas">(967 reseñas)</span>
+          </p>
+          <dl class="ficha-juego__stats">
+            <div>
+              <dt>Jugando ahora</dt>
+              <dd>5.130</dd>
+            </div>
+            <div>
+              <dt>Tu récord</dt>
+              <dd id="ficha-record">Sin récord</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="ayuda" aria-labelledby="ayuda-titulo">
+          <h2 id="ayuda-titulo">
+            Ayuda
+            <span class="ayuda__tecla" aria-hidden="true">F1</span>
+          </h2>
+
+          <details class="ayuda__item" open>
+            <summary>Cómo se juega</summary>
+            <p>La imagen aparece cortada en partes (4, 9 o 16, según cuántas elijas) y cada una está girada. Hacé clic izquierdo sobre una parte para girarla hacia la izquierda, o clic derecho para girarla hacia la derecha, hasta que todas formen la imagen. Con un trackpad, Mayús + clic también gira hacia la derecha.</p>
+            <p>También podés jugar con el teclado: con las flechas elegís una parte (queda marcada con un borde punteado), con Q la girás hacia la izquierda y con E, Enter o Espacio, hacia la derecha.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Objetivo</summary>
+            <p>Armar la imagen en el menor tiempo posible. El reloj arranca cuando aparece la imagen, después del sorteo, y se frena al completarla: ese tiempo queda como tu récord del nivel.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Filtros</summary>
+            <p>Para complicarlo, la imagen aparece con un filtro: escala de grises, menos brillo (más oscura) o negativo. En el último nivel cada parte puede tener un filtro distinto. En el modo Difícil, en cambio, cada nivel sortea un solo filtro sorpresa para toda la imagen (nunca el mismo que el nivel anterior) y no te dice cuál es. Al terminar se quitan todos y ves la imagen original.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Ayudita y tiempo</summary>
+            <p>"Ayudita" deja una parte en su lugar y la bloquea, pero suma 5 segundos a tu tiempo. Se desactiva cuando ya no quedan partes mal puestas o cuando quedan menos de 5 segundos del tiempo máximo. En los niveles avanzados hay un tiempo máximo, que es mayor cuantas más piezas elijas: si se acaba, perdés el nivel y podés reintentarlo.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Niveles</summary>
+            <p>Hay tres niveles, cada uno con una imagen distinta: el 1 en escala de grises, el 2 en negativo y el 3 con filtros mezclados. Todos tienen tiempo máximo, y cada nivel te da menos tiempo que el anterior. Eso es el modo Normal; en el Difícil el filtro de cada nivel es sorpresa. Además elegís cuántas piezas: 4, 9 o 16. Cada combinación de piezas y modo tiene sus propios récords. Al completar un nivel podés repetirlo o pasar al siguiente.</p>
+          </details>
+
+          <ul class="ayuda__atajos">
+            <li><kbd>Clic izq.</kbd> Girar a la izquierda</li>
+            <li><kbd>Clic der.</kbd> Girar a la derecha</li>
+            <li><kbd>Mayús + clic</kbd> Girar a la derecha</li>
+            <li><kbd>Flechas</kbd> Elegir una parte</li>
+            <li><kbd>Q</kbd> Girar a la izquierda</li>
+            <li><kbd>E</kbd> <kbd>Enter</kbd> <kbd>Espacio</kbd> Girar a la derecha</li>
+          </ul>
+        </section>
+
+      </aside>
+
+      <!-- Fila de abajo: "Sobre el juego" + Galería a la izquierda (debajo
+           del tablero), Compartir a la derecha (debajo de Ayuda — sigue en
+           la misma columna que antes, ver DECISIONES.md). -->
+      <div class="juego-layout__secundario">
+
+        <!-- "Sobre el juego" (Etapa 4, parte 4). -->
+        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
+          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
+          <p>Blocka es un rompecabezas de imágenes. Cada nivel te muestra una foto cortada en 4, 9 o 16 partes, todas giradas, y a veces cubiertas con un filtro de color. Tenés que girar cada parte con el mouse hasta que encajen y formen la imagen completa, y hacerlo lo más rápido que puedas. Cuanto más avanzás, más difíciles se ponen los filtros.</p>
+        </section>
+
+        <!-- Galería: carrusel de flip 3D (motor genérico en js/galeria.js).
+             Muestra capturas del juego (inicio, sorteo, niveles, derrota y victoria); la lista completa está
+             en js/blocka.js. Los src/alt de acá abajo son solo el arranque. -->
+        <section class="galeria" aria-labelledby="galeria-titulo">
+          <div class="galeria__cabecera">
+            <h2 id="galeria-titulo">Galería</h2>
+            <p class="galeria__contador" id="galeria-contador" aria-live="polite">Foto 1 de 8</p>
+          </div>
+          <div class="galeria__visor">
+            <div class="galeria__carta" id="galeria-carta">
+              <div class="galeria__cara galeria__cara--a">
+                <img class="galeria__img" id="galeria-img-a" src="assets/img/blocka-inicio.jpg" alt="Pantalla de inicio de Blocka, con la tabla de récords por nivel y los botones para ver cada dificultad.">
+              </div>
+              <div class="galeria__cara galeria__cara--b">
+                <img class="galeria__img" id="galeria-img-b" src="assets/img/blocka-dificultad.jpg" alt="Pantalla para elegir la dificultad: 4, 9 o 16 piezas.">
+              </div>
+            </div>
+            <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">
+              <i class="ph ph-caret-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="galeria__flecha galeria__flecha--next" id="galeria-next" aria-label="Foto siguiente de la galería">
+              <i class="ph ph-caret-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </section>
+
+      </div>
+
+      <section class="compartir" aria-labelledby="compartir-titulo">
+        <h2 id="compartir-titulo">Compartir</h2>
+
+        <ul class="compartir__redes">
+          <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <div class="compartir__acciones">
+          <a class="btn btn--secundario" href="mailto:?subject=Jug%C3%A1%20Blocka&body=Mir%C3%A1%20este%20juego%3A%20https%3A%2F%2Fwardengames.com%2Fblocka">Enviar mail</a>
+          <button type="button" class="btn btn--secundario">Mensaje</button>
+        </div>
+
+        <div class="compartir__link">
+          <label class="sr-only" for="link-juego">Enlace para compartir</label>
+          <input type="text" id="link-juego" value="wardengames.com/blocka" readonly>
+          <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Comunidad + "Dejá tu reseña", uno al lado del otro (mismo layout de
+         2 columnas de más arriba: reusa .juego-layout). -->
+    <div class="juego-layout">
+
+      <!-- Comunidad (Etapa 4, parte 6). 3 reseñas reales y distintas entre
+           sí (largo, fecha, puntaje), no la misma repetida 3 veces como en
+           el mock de Figma. -->
+      <section class="comunidad" aria-labelledby="comunidad-titulo">
+        <div class="comunidad__cabecera">
+          <h2 id="comunidad-titulo">Comunidad</h2>
+          <p class="comunidad__contador">967 reseñas</p>
+        </div>
+
+        <ul class="comunidad__lista">
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--1" aria-hidden="true">MF</span>
+              <div>
+                <p class="resena__nombre">Malena F. <span class="resena__fecha">14 ago 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">El filtro negativo del último nivel me volvió loca: tardé más en darme cuenta de qué parte era cuál que en girarlas. Cuando se sacan los filtros y aparece la imagen con todos sus colores, la satisfacción es enorme.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (42)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--2" aria-hidden="true">BI</span>
+              <div>
+                <p class="resena__nombre">Bruno Ibarra <span class="resena__fecha">10 ago 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella resena__estrella--vacia"></i></span><span class="sr-only">Puntaje: 4 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Muy buen concepto. Me costó girar con el clic derecho en el trackpad de la notebook; con mouse va perfecto.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (15)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--3" aria-hidden="true">CN</span>
+              <div>
+                <p class="resena__nombre">Carla Núñez <span class="resena__fecha">2 jul 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Adictivo. Quise bajar mi récord del primer nivel y se me fue la tarde.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (6)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Dejá tu reseña (Etapa 4, parte 6). El puntaje es CSS puro (radios +
+           labels), sin JS: accesible por teclado y fácil de explicar. -->
+      <section class="resena-form" aria-labelledby="resena-form-titulo">
+        <h2 id="resena-form-titulo">Dejá tu reseña</h2>
+
+        <form id="form-resena" action="#" method="post" novalidate>
+          <fieldset class="resena-form__puntaje">
+            <legend>Tu puntaje</legend>
+            <div class="estrellas">
+              <input type="radio" id="estrella-5" name="puntaje" value="5">
+              <label for="estrella-5"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">5 estrellas</span></label>
+              <input type="radio" id="estrella-4" name="puntaje" value="4" checked>
+              <label for="estrella-4"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">4 estrellas</span></label>
+              <input type="radio" id="estrella-3" name="puntaje" value="3">
+              <label for="estrella-3"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">3 estrellas</span></label>
+              <input type="radio" id="estrella-2" name="puntaje" value="2">
+              <label for="estrella-2"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">2 estrellas</span></label>
+              <input type="radio" id="estrella-1" name="puntaje" value="1">
+              <label for="estrella-1"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">1 estrella</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="resena-texto">Tu reseña</label>
+            <textarea id="resena-texto" name="resena" maxlength="500" placeholder="Contá qué te pareció, sin spoilers de los últimos niveles."></textarea>
+            <p class="resena-form__contador"><span id="resena-contador">0</span>/500</p>
+          </div>
+
+          <button type="submit" class="btn btn--primario">Publicar</button>
+          <p class="resena-form__estado" id="resena-estado" role="status"></p>
+        </form>
+      </section>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+
+      <!-- Sponsors -->
+      <section class="sponsors" aria-labelledby="sponsors-title">
+        <div class="sponsors__row">
+          <h2 class="footer__label" id="sponsors-title">Sponsors</h2>
+          <ul class="sponsors__list">
+            <li><a href="#">Voltio</a></li>
+            <li><a href="#">Kraven</a></li>
+            <li><a href="#">NodoSur</a></li>
+            <li><a href="#">Hexa</a></li>
+            <li><a href="#">Cuenca</a></li>
+            <li><a href="#">Pixelería</a></li>
+            <li><a href="#">Uncas Games</a></li>
+          </ul>
+        </div>
+        <a class="sponsors__mail" href="mailto:sponsors@warden.gg">sponsors@warden.gg</a>
+      </section>
+
+      <hr class="footer__divider">
+
+      <!-- Marca + navegación -->
+      <div class="footer__grid">
+
+        <div class="brand">
+          <a class="brand__logo" href="index.html" aria-label="Warden, ir al inicio">
+            <img src="assets/img/logo.png" alt="" width="44" height="44">
+            <span>Warden</span>
+          </a>
+          <p class="brand__tagline">Miles de juegos, cero instalaciones. Entrás, jugás, seguís con tu día.</p>
+
+          <ul class="social" aria-label="Redes sociales de Warden">
+            <li><a href="#" aria-label="Warden en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Warden en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Warden en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Warden en YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+          </ul>
+        </div>
+
+        <nav class="footer__col" aria-labelledby="col-jugar">
+          <h2 class="footer__label" id="col-jugar">Jugar</h2>
+          <ul>
+            <li><a href="#">Destacados</a></li>
+            <li><a href="#">Últimos</a></li>
+            <li><a href="#">Recientes</a></li>
+            <li><a href="#">Top 100</a></li>
+            <li><a href="#">Actualizados</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer__col" aria-labelledby="col-devs">
+          <h2 class="footer__label" id="col-devs">Devs</h2>
+          <ul>
+            <li><a href="#">Publicá tu juego</a></li>
+            <li><a href="#">Documentación</a></li>
+            <li><a href="#">Ingresos</a></li>
+            <li><a href="#">Estado de la API</a></li>
+            <li><a href="#">Foro</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer__col" aria-labelledby="col-comunidad">
+          <h2 class="footer__label" id="col-comunidad">Comunidad</h2>
+          <ul>
+            <li><a href="#">Torneos</a></li>
+            <li><a href="#">Discord</a></li>
+            <li><a href="#">Embajadores</a></li>
+            <li><a href="#">Convivencia</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </nav>
+
+        <nav class="footer__col" aria-labelledby="col-ayuda">
+          <h2 class="footer__label" id="col-ayuda">Ayuda</h2>
+          <ul>
+            <li><a href="#">Centro de ayuda</a></li>
+            <li><a href="#">Preguntas</a></li>
+            <li><a href="#">Contacto</a></li>
+            <li><a href="#">Estado del servicio</a></li>
+            <li><a href="#">Accesibilidad</a></li>
+          </ul>
+        </nav>
+
+      </div>
+
+      <hr class="footer__divider">
+
+      <!-- Newsletter + empresa -->
+      <div class="footer__bottom">
+
+        <section class="newsletter" aria-labelledby="newsletter-title">
+          <h2 class="newsletter__title" id="newsletter-title">No te pierdas ningún lanzamiento</h2>
+          <p class="newsletter__copy">Un mail por semana con los juegos nuevos y los torneos que se vienen.</p>
+          <form class="newsletter__form" action="#" novalidate>
+            <label class="sr-only" for="newsletter-email">Tu correo electrónico</label>
+            <input type="email" id="newsletter-email" name="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
+            <button type="submit" class="btn btn--secundario">Suscribirse</button>
+          </form>
+          <!-- Confirmación de la suscripción (footer.js). role="status" y vacío desde el
+               principio: el lector de pantalla anuncia el texto cuando aparece. -->
+          <p class="newsletter__ok" role="status" tabindex="-1"></p>
+        </section>
+
+        <section class="company" aria-labelledby="company-title">
+          <h2 class="footer__label company__title" id="company-title">Warden Interactive S.R.L.</h2>
+          <address>
+            Av. Reforma Universitaria, Aulas Comunes 1 - Tandil, Argentina.<br>
+            CUIT 30-12345678-6<br>
+            <a href="mailto:hola@warden.gg">hola@warden.gg</a> - <a href="mailto:soporte@warden.gg">soporte@warden.gg</a><br>
+            <a href="tel:+541155550182">+54 11 5555-0182</a> - lun a vie de 9 a 18 hs
+          </address>
+        </section>
+
+      </div>
+
+      <hr class="footer__divider">
+
+      <!-- Barra legal -->
+      <div class="legal">
+        <nav aria-label="Información legal">
+          <ul class="legal__links">
+            <li><a href="#">Términos y condiciones</a></li>
+            <li><a href="#">Privacidad</a></li>
+            <li><a href="#">Cookies</a></li>
+            <li><a href="#">Botón de arrepentimiento</a></li>
+            <li><a href="#">Defensa de las y los consumidores</a></li>
+          </ul>
+        </nav>
+        <div class="legal__meta">
+          <p>© 2026 Warden Interactive S.R.L. Todos los derechos reservados.</p>
+          <p>v4.2.1 · build 20260909</p>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="./js/api.js" defer></script>
+  <script src="./js/galeria.js" defer></script>
+  <script src="./js/filtros.js" defer></script>
+  <script src="./js/blocka.js" defer></script>
+  <script src="./js/compartir.js" defer></script>
+  <script src="./js/resena.js" defer></script>
+  <script src="./js/footer.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,376 @@
+/* =========================================================
+   header.css: header del sitio, mobile first
+   Se carga en las 4 páginas, después de components.css. Usa tokens de
+   variables.css, .sr-only de base.css y de components.css los botones
+   (.btn) y el desplegable (.menu-dropdown, que acá solo se posiciona).
+   Tiene una estructura y tres variantes: Home con sesión, Home invitado
+   (las dos con el mismo CSS, cambia el avatar) y .header--juego, el
+   "modo foco" sin menú ni buscador (lo usan juego.html y producto.html). La grilla cambia en dos puntos:
+   mobile (una fila + buscador plegable) y desde 48rem (una sola fila).
+   ========================================================= */
+
+/* Contenedor: grilla con áreas con nombre, así cada hijo se ubica con
+   grid-area sin depender del orden del HTML. */
+
+.header {
+  display: grid;
+  /* Mobile: una sola fila con menú + logo, lupa en el medio y acciones.
+     El buscador ("search") es una segunda fila que solo aparece si se toca
+     la lupa (ver .header__search--abierto y js/buscador.js). Sin gap
+     vertical: si no, quedaría un hueco de 8px vacío con el buscador cerrado
+     (el margen lo pone el propio buscador al abrirse). */
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "start  lupa   actions"
+    "search search search";
+  align-items: center;
+  /* Gap horizontal chico: los botones de ícono ya tienen 44px de área táctil
+     con aire propio, y a 320px la fila (menú + logo, lupa, carrito + avatar)
+     no entraba con 12px entre columnas (ver AUDITORIA.md, T06b). */
+  gap: 0 var(--espaciado-1);
+  padding: var(--espaciado-2) var(--espaciado-4);
+  background: var(--superficie);
+}
+
+/* ---------- Izquierda: menú + logo ---------- */
+
+.header__start {
+  grid-area: start;
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-1);
+}
+
+/* Ancla el menú desplegable de categorías al botón hamburguesa. */
+.menu-hamburguesa {
+  position: relative;
+}
+
+/* Solo la posición: el aspecto del desplegable es .menu-dropdown
+   (components.css). */
+.menu-dropdown--hamburguesa {
+  top: calc(100% + var(--espaciado-2));
+  left: 0;
+}
+
+/* El logo es la única otra pieza con Orbitron fuera de h1-h3 (regla del
+   proyecto: títulos y logo). */
+.header__logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--espaciado-2);
+  color: var(--primario-c3);
+  font: 600 20px/1 var(--font-display);
+}
+
+.header__logo:hover {
+  text-decoration: none;
+}
+
+.header__logo img {
+  width: 32px;
+  height: 32px;
+}
+
+/* Bajo 22.5rem (360px) solo queda el ícono del logo: menú + logo con texto +
+   lupa + carrito + avatar necesitan unos 324px y a 320px hay 288, así que el
+   texto "Warden" se montaba debajo de la lupa. El link sigue nombrado por su
+   aria-label ("Warden, ir al inicio"), no depende de este texto. */
+.header__logo span {
+  display: none;
+}
+
+@media (min-width: 22.5rem) {
+  .header__logo span {
+    display: inline;
+  }
+}
+
+/* ---------- Buscador ---------- */
+
+/* Lupa que abre el buscador en mobile. Reusa .header__icon-btn (44px de
+   área táctil); en tablet/desktop se oculta porque el buscador ya está
+   siempre a la vista. */
+.header__search-toggle {
+  grid-area: lupa;
+  justify-self: center;
+}
+
+/* Mobile: cerrado por default; con la clase --abierto se muestra debajo. Es
+   una clase y no el atributo [hidden] porque en desktop tiene que verse
+   siempre, y [hidden] { display: none !important } no se puede pisar. */
+.header__search {
+  grid-area: search;
+  position: relative;
+  display: none;
+}
+
+.header__search--abierto {
+  display: block;
+  margin-top: var(--espaciado-2);
+}
+
+/* La lupa dentro del input es un botón submit: clickearla busca igual que
+   Enter (dispara el mismo submit que maneja buscador.js). Área de 44px
+   (--control-alto) aunque el ícono sea de 16; el centro del botón queda a
+   --espaciado-6 del borde, donde estaba el ícono antes. El padding-left del
+   input le deja lugar para que no se superponga con el texto. */
+.header__search-btn {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--espaciado-6) - var(--control-alto) / 2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--primario-c1);
+  font-size: 16px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  appearance: none;
+  transition: color var(--duracion-rapida) ease;
+}
+
+.header__search-btn:hover {
+  color: var(--acento);
+}
+
+/* Sin movimiento: los hovers del header (lupa, campo, íconos y avatar)
+   cambian de golpe, sin transición. */
+@media (prefers-reduced-motion: reduce) {
+  .header__search-btn,
+  .header__search input,
+  .header__icon-btn,
+  .header__avatar {
+    transition: none;
+  }
+}
+
+.header__search input {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--espaciado-4) 0 calc(var(--espaciado-6) + var(--control-alto) / 2);
+  background: var(--fondo);
+  /* Borde visible en reposo: --primario sobre --superficie (el fondo del
+     header) da 3,59:1, y WCAG 1.4.11 pide 3:1 para el límite de un campo.
+     Antes era transparente y el input (--fondo) quedaba a 1,13:1 del header
+     (ver AUDITORIA.md, T08). En hover se aclara, como feedback. */
+  border: 1px solid var(--primario);
+  border-radius: 999px;
+  color: var(--primario-c3);
+  font: 400 14px/1 var(--font-ui);
+  transition: border-color var(--duracion-rapida) ease;
+}
+
+.header__search input::placeholder {
+  color: var(--primario-c1);
+}
+
+.header__search input:hover {
+  border-color: var(--primario-c1);
+}
+
+/* ---------- Derecha: carrito + avatar ----------
+   Los tres menús (hamburguesa, carrito y cuenta) comparten .menu-dropdown;
+   cada uno tiene su wrapper con position: relative para anclarlo. El
+   carrito y la cuenta van alineados a la derecha (right: 0) para no
+   salirse de la pantalla. */
+
+.header__actions {
+  grid-area: actions;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--espaciado-2);
+}
+
+/* Botones de solo ícono: área táctil de 44px aunque el ícono sea de 24 */
+.header__icon-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radio-sm);
+  color: var(--primario-c3);
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.header__icon-btn:hover {
+  background: var(--primario-o2);
+  color: var(--acento);
+  text-decoration: none;
+}
+
+/* Ancla el desplegable del carrito a su botón, igual que .menu-cuenta. */
+.menu-carrito {
+  position: relative;
+}
+
+.menu-dropdown--carrito {
+  top: calc(100% + var(--espaciado-2));
+  right: 0;
+}
+
+/* Numerito de cantidad de ítems, sobre el ícono del carrito. Oculto por
+   JS (carrito.js) con [hidden] cuando el carrito está vacío. */
+.carrito__contador {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--acento);
+  color: var(--fondo);
+  font: 700 11px/1 var(--font-ui);
+}
+
+/* Ancla el menú de cuenta al avatar. Alineado a la derecha para no
+   desbordar el borde derecho de la pantalla. */
+.menu-cuenta {
+  position: relative;
+}
+
+.menu-dropdown--perfil {
+  top: calc(100% + var(--espaciado-2));
+  right: 0;
+}
+
+.header__avatar {
+  appearance: none;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+  transition: box-shadow var(--duracion-rapida) ease;
+}
+
+/* sesion.js muestra uno de los dos avatares (usuario o invitado) con el
+   atributo hidden. Esta regla repite lo que ya hace [hidden] en base.css,
+   para que se vea acá que display: inline-flex no lo pisa. */
+.header__avatar[hidden] {
+  display: none;
+}
+
+.header__avatar:hover {
+  box-shadow: 0 0 0 2px var(--acento);
+}
+
+.header__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Avatar sin sesión: es un <a> a login.html con un ícono sobre fondo claro. */
+.header__avatar--invitado {
+  align-items: center;
+  justify-content: center;
+  background: var(--primario-c1);
+  color: var(--fondo);
+  font-size: 22px;
+}
+
+/* ---------- Variante juego ----------
+   .header--juego: logo a la izquierda, estado de guardado al centro y
+   acciones a la derecha. Sin menú ni buscador para no distraer mientras
+   se juega. La grilla se repite en el @media de abajo porque .header la
+   pisa ahí con la de 3 columnas del buscador. */
+
+.header--juego {
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas: "start status actions";
+  padding-block: var(--espaciado-3);
+}
+
+/* "Partida guardada" (role="status" en el HTML). */
+.header__status {
+  grid-area: status;
+  margin: 0;
+  color: var(--primario-c3);
+  font: 500 14px/1.4 var(--font-ui);
+}
+
+/* "Volver al menú" más bajito que un .btn normal para que entre en la
+   fila del header. */
+.header--juego .btn {
+  min-height: 36px;
+  padding: 0 var(--espaciado-4);
+  font-size: 14px;
+}
+
+/* =========================================================
+   Tablet / desktop: todo en una fila, buscador centrado
+   Las dos columnas de los costados son iguales (1fr), así el buscador
+   queda centrado en la página y no entre el logo y las acciones.
+   ========================================================= */
+@media (min-width: 48rem) {
+  .header {
+    /* Buscador de 18rem en tablet y 24rem desde desktop (ver más abajo): con
+       24rem, a 768px las columnas laterales quedaban en 144px y el texto
+       "Warden" (176px con el menú) se metía 8px debajo del buscador. A 18rem
+       las laterales dan 187px y el buscador sigue centrado. */
+    --ancho-buscador: 18rem;
+    grid-template-columns: 1fr minmax(0, var(--ancho-buscador)) 1fr;
+    grid-template-areas: "start search actions";
+    gap: var(--espaciado-6);
+    padding-inline: var(--espaciado-6);
+  }
+
+  .header__search,
+  .header__search--abierto {
+    display: block;
+    margin-top: 0;
+  }
+
+  .header__search-toggle {
+    display: none;
+  }
+
+  /* Solo la Home (index.html): el header queda fijo arriba al scrollear.
+     Solo desde tablet — en mobile ocuparía demasiado de la pantalla. z-index
+     200, el mismo que los menús (ver .menu-dropdown en components.css):
+     tiene que quedar por encima del banner coverflow (llega a 100). */
+  .header--fijo {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+  }
+
+  /* Sin este bloque la regla .header de arriba (misma especificidad, más
+     tarde en el archivo) le pisaría las columnas al header del juego. */
+  .header--juego {
+    grid-template-columns: 1fr auto 1fr;
+    grid-template-areas: "start status actions";
+  }
+}
+
+/* Desktop: solo cambia la variable del ancho del buscador. Como no repite
+   grid-template-columns, no compite con .header--juego. */
+@media (min-width: 64rem) {
+  .header {
+    --ancho-buscador: 24rem;
+  }
+}

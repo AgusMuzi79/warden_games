@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Warden Games — Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700&family=Roboto+Flex:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="./css/variables.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/header.css">
+  <link rel="stylesheet" href="./css/footer.css">
+  <link rel="stylesheet" href="./css/home.css">
+</head>
+<body>
+
+  <!-- Loading simulado: se muestra al cargar la Home y se oculta desde
+       loading.js. Todo el bloque visual es aria-hidden: el lector de
+       pantalla ya tiene su propio anuncio fijo (el <p class="sr-only">
+       de abajo) — ni el % ni las frases graciosas se leen en voz alta,
+       cambiarían demasiadas veces en 5 segundos. -->
+  <div id="loading" class="loading-overlay" role="status" aria-busy="true">
+    <p class="sr-only">Cargando catálogo de juegos…</p>
+    <div class="loading__centro" aria-hidden="true">
+      <div class="loading__logo-wrap">
+        <svg class="loading__ring" viewBox="0 0 120 120">
+          <circle class="loading__ring-fondo" cx="60" cy="60" r="54"></circle>
+          <circle class="loading__ring-relleno" id="loading-ring" cx="60" cy="60" r="54"></circle>
+        </svg>
+        <img class="loading__logo" src="assets/img/logo.png" alt="">
+      </div>
+      <span class="loading__pct"><span id="loading-num">0</span>%</span>
+      <p class="loading__texto" id="loading-texto">Poniendo a correr a los hámsters…</p>
+    </div>
+  </div>
+
+  <header class="header header--fijo">
+  <div class="header__start">
+    <div class="menu-hamburguesa">
+      <button class="header__icon-btn" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu-principal">
+        <i class="ph ph-list" aria-hidden="true"></i>
+      </button>
+
+      <div id="menu-principal" class="menu-dropdown menu-dropdown--hamburguesa" hidden>
+        <nav class="menu-dropdown__seccion" aria-labelledby="menu-jugar-titulo">
+          <h2 class="menu-dropdown__titulo" id="menu-jugar-titulo">Jugar</h2>
+          <ul>
+            <li><a href="index.html#banner"><i class="ph ph-star" aria-hidden="true"></i> Destacados</a></li>
+            <li><a href="#"><i class="ph ph-sparkle" aria-hidden="true"></i> Últimos</a></li>
+            <li><a href="#"><i class="ph ph-clock" aria-hidden="true"></i> Recientes</a></li>
+            <li><a href="#"><i class="ph ph-trophy" aria-hidden="true"></i> Top 100</a></li>
+            <li><a href="#"><i class="ph ph-arrows-clockwise" aria-hidden="true"></i> Actualizados</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <!-- Cada categoría apunta a su fila de la Home: los ids los arma crearFila()
+             en home.js como "fila-" + título en minúscula. -->
+        <nav class="menu-dropdown__seccion" aria-labelledby="menu-categorias-titulo">
+          <h2 class="menu-dropdown__titulo" id="menu-categorias-titulo">Categorías</h2>
+          <ul>
+            <li><a href="index.html#fila-acción"><i class="ph ph-lightning" aria-hidden="true"></i> Acción</a></li>
+            <li><a href="index.html#fila-shooters"><i class="ph ph-crosshair-simple" aria-hidden="true"></i> Shooters</a></li>
+            <li><a href="index.html#fila-rpg"><i class="ph ph-sword" aria-hidden="true"></i> RPG</a></li>
+            <li><a href="index.html#fila-indie"><i class="ph ph-palette" aria-hidden="true"></i> Indie</a></li>
+            <li><a href="index.html#fila-aventura"><i class="ph ph-compass" aria-hidden="true"></i> Aventura</a></li>
+            <li><a href="index.html#fila-plataformas"><i class="ph ph-game-controller" aria-hidden="true"></i> Plataformas</a></li>
+            <li><a href="index.html#fila-puzzle"><i class="ph ph-puzzle-piece" aria-hidden="true"></i> Puzzle</a></li>
+            <li><a href="index.html#fila-estrategia"><i class="ph ph-brain" aria-hidden="true"></i> Estrategia</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <div class="menu-dropdown__seccion menu-dropdown__seccion--contacto">
+          <a class="btn btn--secundario" href="mailto:hola@warden.gg">Contáctanos</a>
+        </div>
+      </div>
+    </div>
+
+    <a class="header__logo" href="index.html" aria-label="Warden, ir al inicio">
+      <img src="assets/img/logo.png" alt="" width="32" height="32">
+      <span>Warden</span>
+    </a>
+  </div>
+
+  <button class="header__icon-btn header__search-toggle" type="button" aria-label="Buscar juegos" aria-expanded="false">
+    <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+  </button>
+
+  <form class="header__search" role="search" action="#">
+    <label class="sr-only" for="buscar">Buscar juegos</label>
+    <button class="header__search-btn" type="submit" aria-label="Buscar">
+      <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+    </button>
+    <input type="search" id="buscar" name="q" placeholder="Buscar juegos" autocomplete="off">
+  </form>
+
+  <div class="header__actions">
+    <div class="menu-carrito">
+      <button class="header__icon-btn" type="button" aria-label="Carrito" aria-expanded="false" aria-controls="menu-carrito-panel">
+        <i class="ph ph-shopping-cart-simple" aria-hidden="true"></i>
+        <span class="carrito__contador" id="carrito-contador" hidden>0</span>
+      </button>
+
+      <div id="menu-carrito-panel" class="menu-dropdown menu-dropdown--carrito" hidden>
+        <h2 class="menu-dropdown__titulo">Carrito</h2>
+
+        <p class="carrito__vacio" id="carrito-vacio">Todavía no agregaste ningún juego.</p>
+
+        <ul class="carrito__lista" id="carrito-lista">
+          <!-- Ítems generados por carrito.js -->
+        </ul>
+
+        <div class="carrito__acciones">
+          <a href="#" class="btn btn--terciario">Seguir comprando</a>
+          <button type="button" class="btn btn--primario" id="btn-pagar-carrito">Pagar carrito</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Con sesión -->
+    <div class="menu-cuenta">
+      <button class="header__avatar" type="button" aria-label="Mi cuenta" aria-expanded="false" aria-controls="menu-perfil" data-sesion="usuario" hidden>
+        <img src="assets/img/avatar.jpg" alt="" width="36" height="36">
+      </button>
+
+      <div id="menu-perfil" class="menu-dropdown menu-dropdown--perfil" hidden>
+        <div class="menu-dropdown__cabecera">
+          <img src="assets/img/avatar.jpg" alt="" width="48" height="48">
+          <div>
+            <p class="menu-dropdown__nombre">Nombre Apellido</p>
+            <p class="menu-dropdown__usuario">@username</p>
+          </div>
+        </div>
+
+        <hr class="menu-dropdown__divisor">
+
+        <nav class="menu-dropdown__seccion" aria-label="Cuenta">
+          <ul>
+            <li><a href="#">Mi perfil</a></li>
+            <li><a href="index.html#fila-mis-juegos">Mis juegos</a></li>
+            <li><a href="#">Favoritos</a></li>
+            <li><a href="#">Logros</a></li>
+            <li><a href="#">Configuración</a></li>
+          </ul>
+        </nav>
+
+        <hr class="menu-dropdown__divisor">
+
+        <ul class="menu-dropdown__social" aria-label="Redes sociales">
+          <li><a href="#" aria-label="Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+        </ul>
+
+        <button type="button" class="menu-dropdown__cerrar-sesion">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <!-- Sin sesión -->
+    <a class="header__avatar header__avatar--invitado" href="login.html" aria-label="Iniciar sesión" data-sesion="invitado">
+      <i class="ph ph-user" aria-hidden="true"></i>
+    </a>
+  </div>
+</header>
+
+  <!-- Modal de pago simulado: lo abre "Pagar carrito" (arriba). Sin pasarela
+       real (ver DECISIONES.md) — el form no valida contra nada ni manda
+       datos a ningún lado, solo simula que la compra salió bien. -->
+  <dialog id="modal-pago" class="modal" aria-label="Pagar carrito">
+    <button type="button" class="modal__cerrar" id="btn-cerrar-pago" aria-label="Cerrar">
+      <i class="ph ph-x" aria-hidden="true"></i>
+    </button>
+
+    <form id="form-pago" class="modal__form">
+      <h2 class="modal__titulo">Pagar carrito</h2>
+      <p class="modal__resumen" id="pago-resumen"></p>
+
+      <div class="field">
+        <label for="pago-nombre">Nombre en la tarjeta</label>
+        <input type="text" id="pago-nombre" name="nombre" required autocomplete="cc-name">
+      </div>
+
+      <div class="field">
+        <label for="pago-numero">Número de tarjeta</label>
+        <input type="text" id="pago-numero" name="numero" required inputmode="numeric" autocomplete="cc-number" placeholder="0000 0000 0000 0000" maxlength="19">
+      </div>
+
+      <div class="modal__fila">
+        <div class="field">
+          <label for="pago-vencimiento">Vencimiento</label>
+          <input type="text" id="pago-vencimiento" name="vencimiento" required autocomplete="cc-exp" placeholder="MM/AA" maxlength="5">
+        </div>
+
+        <div class="field">
+          <label for="pago-cvv">CVV</label>
+          <input type="text" id="pago-cvv" name="cvv" required inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn--primario">Confirmar compra</button>
+    </form>
+
+    <div class="modal__exito" id="pago-exito" role="status" hidden>
+      <i class="ph ph-check-circle modal__exito-icono" aria-hidden="true"></i>
+      <h2 class="modal__exito-titulo">¡Compra realizada!</h2>
+      <p class="modal__exito-texto">Gracias por tu compra.</p>
+    </div>
+
+    <div class="modal__exito modal__registro" id="pago-registro" role="alert" hidden>
+      <i class="ph ph-lock-key modal__exito-icono" aria-hidden="true"></i>
+      <h2 class="modal__exito-titulo">Necesitás una cuenta</h2>
+      <p class="modal__exito-texto">Para continuar con la compra debés registrarte.</p>
+      <a class="btn btn--primario" href="login.html">Registrarme</a>
+    </div>
+  </dialog>
+
+  <main>
+    <!-- Banner "Destacados": carrusel coverflow armado por js/carousel.js
+         con los juegos mejor puntuados de la API. La card activa queda de
+         frente al centro; las de los costados, giradas en 3D (perspective +
+         rotateY + translateZ), como si se alejaran hacia el fondo. -->
+    <section id="banner" aria-labelledby="banner-titulo">
+      <h1 id="banner-titulo" class="banner__titulo">Destacados</h1>
+      <div class="banner__viewport">
+        <div class="banner__escena">
+          <!-- Cards generadas por carousel.js -->
+        </div>
+      </div>
+      <div class="banner__dots">
+        <!-- Dots generados por carousel.js -->
+      </div>
+    </section>
+
+    <!-- Filas generadas por home.js: categorías por género para invitado,
+         o "Recomendados" si el avatar del header tiene data-sesion="usuario" -->
+    <!-- Resultado de la búsqueda del header (buscador.js). role="status": el
+         lector de pantalla lo anuncia sin mover el foco. Vacío = oculto. -->
+    <p id="busqueda-estado" class="busqueda-estado" role="status"></p>
+
+    <div id="filas-juegos"></div>
+  </main>
+
+<footer class="footer">
+  <div class="footer__inner">
+
+    <!-- Sponsors -->
+    <section class="sponsors" aria-labelledby="sponsors-title">
+      <div class="sponsors__row">
+        <h2 class="footer__label" id="sponsors-title">Sponsors</h2>
+        <ul class="sponsors__list">
+          <li><a href="#">Voltio</a></li>
+          <li><a href="#">Kraven</a></li>
+          <li><a href="#">NodoSur</a></li>
+          <li><a href="#">Hexa</a></li>
+          <li><a href="#">Cuenca</a></li>
+          <li><a href="#">Pixelería</a></li>
+          <li><a href="#">Uncas Games</a></li>
+        </ul>
+      </div>
+      <a class="sponsors__mail" href="mailto:sponsors@warden.gg">sponsors@warden.gg</a>
+    </section>
+
+    <hr class="footer__divider">
+
+    <!-- Marca + navegación -->
+    <div class="footer__grid">
+
+      <div class="brand">
+        <a class="brand__logo" href="index.html" aria-label="Warden, ir al inicio">
+          <img src="assets/img/logo.png" alt="" width="44" height="44">
+          <span>Warden</span>
+        </a>
+        <p class="brand__tagline">Miles de juegos, cero instalaciones. Entrás, jugás, seguís con tu día.</p>
+
+        <ul class="social" aria-label="Redes sociales de Warden">
+          <li><a href="#" aria-label="Warden en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Warden en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Warden en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+          <li><a href="#" aria-label="Warden en YouTube"><i class="ph ph-youtube-logo" aria-hidden="true"></i></a></li>
+        </ul>
+      </div>
+
+      <nav class="footer__col" aria-labelledby="col-jugar">
+        <h2 class="footer__label" id="col-jugar">Jugar</h2>
+        <ul>
+          <li><a href="#">Destacados</a></li>
+          <li><a href="#">Últimos</a></li>
+          <li><a href="#">Recientes</a></li>
+          <li><a href="#">Top 100</a></li>
+          <li><a href="#">Actualizados</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="col-devs">
+        <h2 class="footer__label" id="col-devs">Devs</h2>
+        <ul>
+          <li><a href="#">Publicá tu juego</a></li>
+          <li><a href="#">Documentación</a></li>
+          <li><a href="#">Ingresos</a></li>
+          <li><a href="#">Estado de la API</a></li>
+          <li><a href="#">Foro</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="col-comunidad">
+        <h2 class="footer__label" id="col-comunidad">Comunidad</h2>
+        <ul>
+          <li><a href="#">Torneos</a></li>
+          <li><a href="#">Discord</a></li>
+          <li><a href="#">Embajadores</a></li>
+          <li><a href="#">Convivencia</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </nav>
+
+      <nav class="footer__col" aria-labelledby="col-ayuda">
+        <h2 class="footer__label" id="col-ayuda">Ayuda</h2>
+        <ul>
+          <li><a href="#">Centro de ayuda</a></li>
+          <li><a href="#">Preguntas</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">Estado del servicio</a></li>
+          <li><a href="#">Accesibilidad</a></li>
+        </ul>
+      </nav>
+
+    </div>
+
+    <hr class="footer__divider">
+
+    <!-- Newsletter + empresa -->
+    <div class="footer__bottom">
+
+      <section class="newsletter" aria-labelledby="newsletter-title">
+        <h2 class="newsletter__title" id="newsletter-title">No te pierdas ningún lanzamiento</h2>
+        <p class="newsletter__copy">Un mail por semana con los juegos nuevos y los torneos que se vienen.</p>
+        <form class="newsletter__form" action="#" novalidate>
+          <label class="sr-only" for="newsletter-email">Tu correo electrónico</label>
+          <input type="email" id="newsletter-email" name="email" placeholder="tucorreo@ejemplo.com" autocomplete="email" required>
+          <button type="submit" class="btn btn--secundario">Suscribirse</button>
+        </form>
+        <!-- Confirmación de la suscripción (footer.js). role="status" y vacío desde el
+             principio: el lector de pantalla anuncia el texto cuando aparece. -->
+        <p class="newsletter__ok" role="status" tabindex="-1"></p>
+      </section>
+
+      <section class="company" aria-labelledby="company-title">
+        <h2 class="footer__label company__title" id="company-title">Warden Interactive S.R.L.</h2>
+        <address>
+          Av. Reforma Universitaria, Aulas Comunes 1 - Tandil, Argentina.<br>
+          CUIT 30-12345678-6<br>
+          <a href="mailto:hola@warden.gg">hola@warden.gg</a> - <a href="mailto:soporte@warden.gg">soporte@warden.gg</a><br>
+          <a href="tel:+541155550182">+54 11 5555-0182</a> - lun a vie de 9 a 18 hs
+        </address>
+      </section>
+
+    </div>
+
+    <hr class="footer__divider">
+
+    <!-- Barra legal -->
+    <div class="legal">
+      <nav aria-label="Información legal">
+        <ul class="legal__links">
+          <li><a href="#">Términos y condiciones</a></li>
+          <li><a href="#">Privacidad</a></li>
+          <li><a href="#">Cookies</a></li>
+          <li><a href="#">Botón de arrepentimiento</a></li>
+          <li><a href="#">Defensa de las y los consumidores</a></li>
+        </ul>
+      </nav>
+      <div class="legal__meta">
+        <p>© 2026 Warden Interactive S.R.L. Todos los derechos reservados.</p>
+        <p>v4.2.1 · build 20260909</p>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+  <script src="./js/api.js" defer></script>
+  <script src="./js/sesion.js" defer></script>
+  <script src="./js/carrito.js" defer></script>
+  <script src="./js/compras.js" defer></script>
+  <script src="./js/loading.js" defer></script>
+  <script src="./js/carousel.js" defer></script>
+  <script src="./js/carrusel-fila.js" defer></script>
+  <!-- buscador.js antes que home.js: home.js llama a filtrarJuegos() cuando
+       termina de armar las filas, y tiene que estar definida para entonces. -->
+  <script src="./js/buscador.js" defer></script>
+  <script src="./js/home.js" defer></script>
+  <script src="./js/menu.js" defer></script>
+  <script src="./js/logo-inicio.js" defer></script>
+  <script src="./js/footer.js" defer></script>
+</body>
+</html>
