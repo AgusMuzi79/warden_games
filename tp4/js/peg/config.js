@@ -35,6 +35,12 @@ export const DURACION_RECHAZO_MS = 300;  // la ficha sin movimientos tiembla
 export const DURACION_TEMBLOR_MS = 200;  // el tablero tiembla al comer una ficha
 export const DURACION_ESTELA_MS = 1400;  // lo que tarda en apagarse la estela
 export const DEMORA_FIN_MS = 700;        // espera antes de mostrar el fin
+export const DURACION_ONDA_MS = 500;     // onda expansiva de la ficha comida
+
+// Efectos de la ficha comida (ver efectos.js).
+export const CHISPAS_POR_EXPLOSION = 38;
+export const FUERZA_TEMBLOR = 8;         // cuántos px se corre el tablero, como máximo
+export const SEPARACION_SCANLINES = 3;   // una línea oscura cada 3 px
 
 // Imágenes de las fichas. Son relativas al documento (juego.html).
 export const FICHAS = {

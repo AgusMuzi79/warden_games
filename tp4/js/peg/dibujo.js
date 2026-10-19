@@ -14,7 +14,7 @@
 import { crearCanvas, cargarImagen, mulberry32, conAlfa, prefiereMenosMovimiento } from './utiles.js';
 import {
   ANCHO, ALTO, TAMANO_TABLERO, TABLERO_X, CELDA, OFFSET,
-  RADIO_FICHA, RADIO_HUECO, PADDING_FICHA, FICHAS, obtenerDpr,
+  RADIO_FICHA, RADIO_HUECO, PADDING_FICHA, FICHAS, SEPARACION_SCANLINES, obtenerDpr,
 } from './config.js';
 import { Tablero } from './tablero.js';
 
@@ -268,6 +268,21 @@ function crearFondo(colores, dpr) {
 }
 
 /**
+ * Arma las scanlines: líneas horizontales finas y oscuras sobre todo el
+ * canvas, como una pantalla vieja. Son quietas, así que no molestan a
+ * quien prefiere menos movimiento.
+ * @param {Record<string, string>} colores
+ * @param {number} dpr
+ * @returns {HTMLCanvasElement}
+ */
+function crearScanlines(colores, dpr) {
+  const { canvas, ctx } = crearCanvas(ANCHO, ALTO, dpr);
+  ctx.fillStyle = conAlfa(colores.descargado, 0.22);
+  for (let y = 0; y < ALTO; y += SEPARACION_SCANLINES) ctx.fillRect(0, y, ANCHO, 1);
+  return canvas;
+}
+
+/**
  * Prepara la imagen de una ficha: carga el PNG y le suma un brillo del
  * color dado. Devuelve el canvas directo (drawImage lo acepta igual que
  * una imagen); pasarlo por toDataURL fallaría al abrir con file://.
@@ -287,9 +302,9 @@ async function crearImagenFicha(ruta, colorBrillo, dpr) {
 }
 
 /**
- * Arma todo lo que se dibuja una sola vez: fondo, placa y las tres fichas.
+ * Arma todo lo que se dibuja una sola vez: fondo, placa, scanlines y las tres fichas.
  * @param {Record<string, string>} colores lo que devuelve obtenerColores()
- * @returns {Promise<{fondo: HTMLCanvasElement, placa: HTMLCanvasElement, fichas: Record<string, HTMLCanvasElement>}>}
+ * @returns {Promise<{fondo: HTMLCanvasElement, placa: HTMLCanvasElement, scanlines: HTMLCanvasElement, fichas: Record<string, HTMLCanvasElement>}>}
  */
 export async function prepararRecursos(colores) {
   const dpr = obtenerDpr();
@@ -301,8 +316,18 @@ export async function prepararRecursos(colores) {
   return {
     fondo: crearFondo(colores, dpr),
     placa: crearPlaca(colores, dpr),
+    scanlines: crearScanlines(colores, dpr),
     fichas: { naranja, cyan, blanca },
   };
+}
+
+/**
+ * Pinta las scanlines ya armadas encima de todo el canvas.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {{scanlines: HTMLCanvasElement}} recursos
+ */
+export function dibujarScanlines(ctx, recursos) {
+  ctx.drawImage(recursos.scanlines, 0, 0, ANCHO, ALTO);
 }
 
 /**

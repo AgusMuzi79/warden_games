@@ -4,6 +4,8 @@
 // reglas), el Reloj (tiempo con pausa), cuenta los movimientos, sabe en qué
 // fase está la partida (eligiendo bando, jugando o terminada) y maneja el
 // arrastre con el mouse y el cursor de teclado. En cada cuadro (requestAnimationFrame) redibuja todo el canvas.
+// Los efectos (explosión, estela, temblor) viven en efectos.js; acá solo se
+// avisa cuándo pasan.
 // Por qué una clase: el estado vive en un solo objeto (this) y cada método
 // hace una cosa; principal.js solo tiene que crear el Juego y conectarle
 // los eventos del canvas.
@@ -15,15 +17,16 @@
 import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from './utiles.js';
 import {
   ANCHO, ALTO, TABLERO_X, CELDA, OFFSET, RADIO_FICHA, TIEMPO_LIMITE_MS,
-  DURACION_VUELTA_MS, DURACION_RECHAZO_MS, DURACION_TEMBLOR_MS, obtenerDpr,
+  DURACION_VUELTA_MS, DURACION_RECHAZO_MS, obtenerDpr,
   BANDOS, ORDEN_BANDOS,
 } from './config.js';
 import { Tablero } from './tablero.js';
 import { Reloj } from './reloj.js';
 import {
   dibujarFondo, dibujarTablero, dibujarFichas, dibujarFicha, dibujarFantasma,
-  centroDeCelda, texto,
+  dibujarScanlines, centroDeCelda, texto,
 } from './dibujo.js';
+import { Efectos } from './efectos.js';
 import { dibujarHud } from './hud.js';
 import { dibujarSeleccion, bandoEn } from './pantallas.js';
 
@@ -59,6 +62,7 @@ export class Juego {
     this.dpr = obtenerDpr();
     this.tablero = new Tablero();
     this.reloj = new Reloj(TIEMPO_LIMITE_MS);
+    this.efectos = new Efectos();
     this.pausado = false;
     this.conFoco = false;               // el cursor de teclado se ve solo con foco de teclado
     this.cursor = { fila: 3, col: 3 };  // casilla marcada por el teclado
@@ -82,7 +86,7 @@ export class Juego {
     this.vuelta = null;             // { fila, col, x, y, inicio }: ficha que vuelve a su casilla
     this.rechazo = null;            // { fila, col, inicio }: ficha sin saltos que tiembla
     this.seleccion = null;          // { fila, col, movimientos }: ficha levantada con el teclado
-    this.temblorHasta = 0;          // hasta cuándo tiembla el tablero al comer una ficha
+    this.efectos.limpiar();         // sin chispas, estelas ni temblor de la partida anterior
   }
 
   /**
@@ -152,6 +156,15 @@ export class Juego {
   }
 
   /**
+   * Color del bando elegido (o de la tarjeta encendida), en hex. Lo usan
+   * la estela y la explosión.
+   * @returns {string}
+   */
+  get colorBando() {
+    return this.colores[BANDOS[this.bando || this.elegido].color];
+  }
+
+  /**
    * Frena el reloj (por ejemplo, mientras está abierta la ayuda). Si había
    * una ficha arrastrada, vuelve a su casilla.
    */
@@ -198,11 +211,10 @@ export class Juego {
     dibujarFondo(ctx, this.recursos);
 
     // Temblor del tablero al comer una ficha: se corre unos px al azar.
+    this.efectos.actualizar(t);
+    const temblor = this.efectos.desplazamiento(t);
     ctx.save();
-    if (t < this.temblorHasta) {
-      const fuerza = (this.temblorHasta - t) / DURACION_TEMBLOR_MS;
-      ctx.translate((Math.random() - 0.5) * 8 * fuerza, (Math.random() - 0.5) * 8 * fuerza);
-    }
+    ctx.translate(temblor.x, temblor.y);
     dibujarTablero(ctx, this.recursos);
     this.dibujarFantasmas(t);
 
@@ -217,6 +229,7 @@ export class Juego {
       levantada: aparte, resaltada, imagen: fichas.normal, imagenResaltada: fichas.levantada,
     });
     this.dibujarRechazo(t);
+    this.efectos.dibujar(ctx, t);  // estelas, ondas y chispas, encima de las fichas
     this.dibujarVuelta(t);
     this.dibujarArrastre();
     this.dibujarCursor();
@@ -335,6 +348,7 @@ export class Juego {
     texto(ctx, 'Apretá Reiniciar (o R) para elegir bando y jugar de nuevo.', ANCHO / 2, ALTO / 2 + 80, {
       fuente: '600 16px ' + this.fuentes.ui, color: this.colores.textoTenue, alinear: 'center',
     });
+    dibujarScanlines(ctx, this.recursos);
   }
 
   // ---------------------------------------------------------------
@@ -342,8 +356,8 @@ export class Juego {
   // ---------------------------------------------------------------
 
   /**
-   * Hace el salto de origen a destino, cuenta el movimiento y revisa si
-   * terminó la partida.
+   * Hace el salto de origen a destino, cuenta el movimiento, hace explotar
+   * la ficha comida y revisa si terminó la partida.
    * @param {{fila: number, col: number}} origen
    * @param {{fila: number, col: number}} destino
    * @param {number} t
@@ -351,7 +365,9 @@ export class Juego {
   jugar(origen, destino, t) {
     if (!this.tablero.mover(origen, destino)) return;
     this.movimientos++;
-    if (!prefiereMenosMovimiento()) this.temblorHasta = t + DURACION_TEMBLOR_MS;
+    // La ficha comida es la del medio entre el origen y el destino.
+    const comida = centroDeCelda((origen.fila + destino.fila) / 2, (origen.col + destino.col) / 2);
+    this.efectos.explotar(comida.x, comida.y, this.colorBando, this.fichasBando.normal, t);
     this.cursor = { fila: destino.fila, col: destino.col };
 
     const estado = this.tablero.estado();
@@ -439,6 +455,7 @@ export class Juego {
     if (!prefiereMenosMovimiento()) {
       this.vuelta = { fila: this.arrastre.fila, col: this.arrastre.col, x, y, inicio: t };
     }
+    this.efectos.cortarEstela();
     this.arrastre = null;
     this.canvas.style.cursor = 'default';
   }
@@ -470,6 +487,7 @@ export class Juego {
     this.rechazo = null;
     const centro = centroDeCelda(celda.fila, celda.col);
     this.arrastre = { ...celda, movimientos, px: x, py: y, difX: x - centro.x, difY: y - centro.y };
+    this.efectos.agregarEstela(centro.x, centro.y, this.colorBando, t);
     // Con la captura, los eventos siguen llegando al canvas aunque el puntero salga de él.
     this.canvas.setPointerCapture(evento.pointerId);
     this.canvas.style.cursor = 'grabbing';
@@ -491,6 +509,8 @@ export class Juego {
     if (this.arrastre) {
       this.arrastre.px = x;
       this.arrastre.py = y;
+      const ficha = this.posicionArrastre();
+      this.efectos.agregarEstela(ficha.x, ficha.y, this.colorBando, performance.now());
       return;
     }
     const celda = this.activo ? this.celdaEn(x, y) : null;
@@ -511,6 +531,10 @@ export class Juego {
       return;
     }
     const origen = { fila: this.arrastre.fila, col: this.arrastre.col };
+    // La estela termina justo en el centro de la casilla de destino.
+    const centro = centroDeCelda(destino.fila, destino.col);
+    this.efectos.agregarEstela(centro.x, centro.y, this.colorBando, t);
+    this.efectos.cortarEstela();
     this.arrastre = null;
     this.canvas.style.cursor = 'default';
     this.jugar(origen, destino, t);
