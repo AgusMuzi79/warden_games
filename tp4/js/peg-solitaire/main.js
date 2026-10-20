@@ -22,6 +22,7 @@ import { iniciarPagina } from './pagina.js';
 const canvas = document.getElementById('peg-canvas');
 const estado = document.getElementById('peg-estado');
 const botonReiniciar = document.getElementById('btn-peg-reiniciar');
+const botonHackear = document.getElementById('btn-peg-hackear');
 
 // El modelo no depende de ninguna imagen, así que se crea al instante. La
 // ayuda puede abrirse antes de que termine de cargar el resto: pausar el
@@ -54,7 +55,7 @@ async function arrancar() {
   const recursos = await prepararRecursos(colores);
   const vista = new PegView(canvas, recursos, colores, fuentes, estado);
 
-  controlador = new PegController(modelo, vista, botonReiniciar);
+  controlador = new PegController(modelo, vista, botonReiniciar, botonHackear);
   controlador.iniciar();
 }
 

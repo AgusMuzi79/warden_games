@@ -98,6 +98,27 @@ export class PegModel {
   }
 
   /**
+   * Indica si se puede usar "Hackear Sistema": partida en curso, sin pausa y
+   * con más de dos fichas (con dos o menos no queda nada que sacar).
+   * @returns {boolean}
+   */
+  get puedeHackear() {
+    return this.activo && this.tablero.contarFichas() > 2;
+  }
+
+  /**
+   * "Hackear Sistema": deja solo dos fichas, con un último salto para ganar
+   * (ver Tablero.dejarDosFichas). No cuenta como movimiento ni toca el reloj:
+   * la partida sigue, y gana quien haga ese salto.
+   * @returns {{fila: number, col: number}[] | null}
+   *   las casillas de las fichas que se sacaron, o null si no se puede hackear ahora
+   */
+  hackear() {
+    if (!this.puedeHackear) return null;
+    return this.tablero.dejarDosFichas();
+  }
+
+  /**
    * Milisegundos que quedan antes del límite de tiempo.
    * @returns {number}
    */

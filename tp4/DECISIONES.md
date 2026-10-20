@@ -185,6 +185,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 | `views/dibujo.js` | Vista | Tablero vacío (imagen), fichas y scanlines: los carga o arma una vez y los pinta. |
 | `views/hud.js` | Vista | Paneles de datos a los costados del tablero. |
 | `views/efectos.js` | Vista | Clase `Efectos`: explosión, onda, estela y temblor. |
+| `views/hackeo.js` | Vista | Efecto de "Hackear Sistema": fantasmas de las fichas, barrido de luz, barras y cartel. |
 | `views/pantallaSeleccion.js` | Vista | Pantalla de selección de bando (las dos tarjetas). |
 | `views/pantallaFin.js` | Vista | Elige entre la pantalla de victoria y la de derrota. |
 | `views/pantallaVictoria.js` | Vista | "SISTEMA RESTAURADO": ondas, nodo ganador y título con barrido. |
@@ -451,6 +452,58 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   abre antes de que termine de cargar el juego, la pausa va directo al modelo (que
   se crea al instante) y se respeta cuando se elige bando.
 - **Por qué:** leer cómo se juega no debería costar tiempo de la partida.
+
+### Botón "Hackear Sistema": deja dos fichas a un salto de ganar
+- **Qué:** un `<button class="btn btn--destructivo" id="btn-peg-hackear">` abajo
+  a la derecha del canvas (`.peg__pie`, alineado con el borde derecho del
+  canvas). Al apretarlo, `PegModel.hackear()` pide a `Tablero.dejarDosFichas()`
+  que saque todo salvo dos fichas, en (3, 1) y (3, 2), con el centro vacío. La
+  partida **sigue**: quien haga el salto que queda gana. Hay dos saltos
+  posibles y los dos ganan: el de (3, 1) sobre (3, 2) hasta el centro
+  ("conexión perfecta") y el de (3, 2) sobre (3, 1) hasta (3, 0) ("un solo
+  nodo").
+- **Por qué dos fichas y no una:** pedido de Fran. Con dos fichas sueltas el
+  juego se daría por perdido (quedan varias y ningún salto), así que las dos
+  tienen que quedar juntas y con un hueco detrás: es la "posición de prueba:
+  un salto para ganar" que mostraron los profes. Sirve para ver la victoria
+  rápido en la defensa.
+- **No cuenta como movimiento ni toca el reloj:** el último salto sí suma 1
+  movimiento, así que una partida hackeada termina con 1 movimiento.
+- **Solo se puede usar jugando:** `PegModel.puedeHackear` es verdadero con la
+  partida en curso, sin pausa y con más de dos fichas. El controlador
+  habilita o deshabilita el botón en cada cuadro (`sincronizarBotonHackear`,
+  solo toca el DOM si el estado cambió). Empieza deshabilitado en el HTML.
+  Después de usarlo vuelve a quedar deshabilitado (ya hay dos fichas), así no
+  se puede repetir.
+- **Efecto visual** (`views/hackeo.js`, `DURACION_HACKEO_MS` = 1400 ms): las
+  fichas que desaparecen quedan como fantasmas que tiemblan de lado a lado,
+  una franja de luz baja por el tablero, aparecen barras de colores al azar y
+  un cartel "SISTEMA HACKEADO / ACCESO CONCEDIDO" con aberración cromática se
+  enciende y se apaga. Además tiembla el tablero (`Efectos.temblar`). Mismo
+  lenguaje que la pantalla de derrota. Los colores salen de los tokens, como
+  el resto del canvas.
+- **Movimiento reducido:** no se crea el efecto ni tiembla el tablero; las
+  fichas desaparecen de golpe y el aviso para lectores de pantalla igual dice
+  qué pasó.
+- **Accesibilidad:** es un `<button>` real con texto visible. Al usarlo, el
+  foco pasa al canvas (`canvas.focus()`), porque el botón se deshabilita y el
+  foco se perdería, y para seguir jugando con el teclado. El aviso
+  (`role="status"`): "Sistema hackeado. Quedan dos nodos en la fila 4, columnas
+  2 y 3. Un salto más y ganás."
+- **Dónde vive cada parte (MVC):** la posición y la regla de cuándo se puede
+  son del modelo; el click y el cuadro a cuadro del botón son del controlador;
+  el efecto es de la vista.
+- **CSS:** el canvas y el pie comparten el ancho con una variable
+  (`--ancho-peg`, en `.peg`), así el botón queda alineado con el borde derecho
+  del canvas aunque este sea más angosto que la página. La resta del alto para
+  que el canvas entre sin scroll pasó de 200 a 252px (el pie suma 52). En
+  `components.css`, `.btn:disabled:hover` ahora también apaga la animación:
+  el pulso rojo del destructivo es una animación y le ganaba al estado
+  deshabilitado.
+- **Descartado:** ganar al instante (no deja "dos fichas"); dejar dos fichas
+  al azar (podían quedar sin salto y el botón terminaría en derrota); hacer
+  el efecto con una explosión por ficha (30 explosiones juntas son más de mil
+  chispas, y cada una pesa en el cuadro).
 
 ---
 

@@ -139,6 +139,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--espaciado-2);
+  /* Ancho del canvas, que también usa el pie para quedar alineado con su
+     borde derecho. La cuenta está explicada en .peg__canvas. */
+  --ancho-peg: min(100%, calc((100vh - 252px) * 1200 / 760));
 }
 
 /* Barra chica arriba del canvas: nombre del juego a la izquierda y el
@@ -183,6 +186,17 @@
   color: var(--acento);
 }
 
+/* Pie de la zona de juego: "Hackear Sistema" abajo a la derecha, debajo del
+   canvas y alineado con su borde derecho (mismo ancho y centrado, como el
+   canvas). El botón mide 44px (--control-alto), por eso el canvas resta 52px
+   más abajo (los 44 del botón y los 8 del gap). */
+.peg__pie {
+  display: flex;
+  justify-content: flex-end;
+  width: var(--ancho-peg);
+  margin-inline: auto;
+}
+
 /* El canvas dibuja a 1200x760 (atributos del HTML) y el CSS lo muestra
    más chico, sin deformarlo (aspect-ratio fija la proporción).
    El ancho es el menor entre:
@@ -190,14 +204,15 @@
    - el ancho que hace que el alto entre en la ventana sin scroll. Antes de
      la zona hay unos 122px (header 60 + padding de main 24 + breadcrumb
      14 + su margen 24) y la barra del "?" suma unos 60px más (52 + el gap
-     de 8). Con un poco de aire abajo, se le restan 200px al alto de la
-     ventana, y ese alto se pasa a ancho multiplicando por 1200 / 760.
+     de 8) y el pie con "Hackear Sistema" otros 52 (44 + 8). Con un poco de
+     aire abajo, se le restan 252px al alto de la ventana, y ese alto se
+     pasa a ancho multiplicando por 1200 / 760.
    En 1920x1080 gana el 100%: 1152px de ancho, unos 730px de alto.
    touch-action:none evita que el navegador use el arrastre del dedo para
    scrollear la página (en la Fase 2 el arrastre mueve los nodos). */
 .peg__canvas {
   display: block;
-  width: min(100%, calc((100vh - 200px) * 1200 / 760));
+  width: var(--ancho-peg);
   height: auto;
   aspect-ratio: 1200 / 760;
   margin-inline: auto;

@@ -44,12 +44,14 @@ export class PegController {
    * @param {import('../models/PegModel.js').PegModel} modelo el estado de la partida
    * @param {import('../views/PegView.js').PegView} vista quien dibuja
    * @param {HTMLElement} botonReiniciar el <button> "Reiniciar" de la página
+   * @param {HTMLButtonElement} botonHackear el <button> "Hackear Sistema" de la página
    */
-  constructor(modelo, vista, botonReiniciar) {
+  constructor(modelo, vista, botonReiniciar, botonHackear) {
     this.modelo = modelo;
     this.vista = vista;
     this.canvas = vista.canvas;
     this.botonReiniciar = botonReiniciar;
+    this.botonHackear = botonHackear;
     // Estado de la interacción (ver el comentario de arriba). Se lo pasa
     // entero a la vista en cada cuadro.
     this.ui = {
@@ -81,6 +83,7 @@ export class PegController {
     canvas.addEventListener('focus', () => this.alEnfocar(true));
     canvas.addEventListener('blur', () => this.alEnfocar(false));
     this.botonReiniciar.addEventListener('click', () => this.reiniciar());
+    this.botonHackear.addEventListener('click', () => this.hackear());
 
     requestAnimationFrame(this.cuadro);
     this.vista.avisar('Elegí tu bando: Usuarios o Programas de Clu.');
@@ -102,6 +105,7 @@ export class PegController {
     }
     // Pasada la demora, se muestra la pantalla de fin.
     if (this.finPendiente && t >= this.finEn) this.mostrarFin(t);
+    this.sincronizarBotonHackear();
 
     this.vista.render(this.modelo, this.ui, t);
     requestAnimationFrame(this.cuadro);
@@ -233,6 +237,34 @@ export class PegController {
       this.vista.avisar('Salto hecho. Quedan ' + this.modelo.tablero.contarFichas() + ' nodos y '
         + this.modelo.tablero.contarSaltos() + ' saltos posibles.');
     }
+  }
+
+  /**
+   * Habilita "Hackear Sistema" solo cuando se puede usar (partida en curso y
+   * con más de dos fichas). Solo toca el DOM si el estado cambió.
+   */
+  sincronizarBotonHackear() {
+    const deshabilitado = !this.modelo.puedeHackear;
+    if (this.botonHackear.disabled !== deshabilitado) this.botonHackear.disabled = deshabilitado;
+  }
+
+  /**
+   * "Hackear Sistema": el modelo deja solo dos fichas con un último salto
+   * para ganar; la vista hace el efecto. La partida sigue: gana quien haga
+   * ese salto. El foco pasa al canvas, para seguir jugando (el botón se
+   * deshabilita en el cuadro siguiente).
+   */
+  hackear() {
+    const t = performance.now();
+    const quitadas = this.modelo.hackear();
+    if (!quitadas) return;
+    this.cancelarArrastre(t);
+    this.ui.seleccion = null;
+    this.ui.cursor = { fila: 3, col: 2 };
+    this.vista.hackear(quitadas, t);
+    this.vista.avisar('Sistema hackeado. Quedan dos nodos en la fila 4, columnas 2 y 3. '
+      + 'Un salto más y ganás.');
+    this.canvas.focus();
   }
 
   /**

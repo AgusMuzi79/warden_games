@@ -76,6 +76,13 @@
           Tu navegador no puede mostrar el tablero de Neon Circuit. Probá con una versión actualizada de Chrome, Firefox o Edge.
         </canvas>
 
+        <!-- Abajo a la derecha del canvas. Empieza deshabilitado: el
+             controlador lo habilita solo mientras se juega. Deja dos fichas
+             a un salto de ganar (PegModel.hackear). -->
+        <div class="peg__pie">
+          <button type="button" class="btn btn--destructivo" id="btn-peg-hackear" disabled>Hackear Sistema</button>
+        </div>
+
         <!-- Cómo se juega con el teclado (lo lee el lector de pantalla al
              enfocar el canvas, por el aria-describedby). -->
         <p class="sr-only" id="peg-instrucciones">Primero elegís bando: con las flechas izquierda y derecha pasás de Usuarios a Programas de Clu, y con Enter o Espacio elegís. Ya en la partida, usá las flechas para moverte entre los nodos. Con Enter o Espacio levantás un nodo; después, las flechas eligen el destino y Enter o Espacio lo suelta. Escape deja el nodo en su lugar y R reinicia la partida (volvés a elegir bando). Cuando termina la partida, Enter o Espacio te llevan a jugar de nuevo.</p>

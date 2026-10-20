@@ -175,6 +175,23 @@ export class Tablero {
   }
 
   /**
+   * Deja solo dos fichas, en (3, 1) y (3, 2), con el centro (3, 3) vacío.
+   * Quedan dos saltos posibles y los dos ganan, porque dejan una sola ficha:
+   * (3, 1) sobre (3, 2) hasta el centro ("conexión perfecta") o (3, 2) sobre
+   * (3, 1) hasta (3, 0). Lo usa PegModel.hackear().
+   * @returns {{fila: number, col: number}[]} las casillas de las fichas que se sacaron
+   */
+  dejarDosFichas() {
+    const quitadas = [];
+    this.recorrer((fila, col) => {
+      const queda = fila === 3 && (col === 1 || col === 2);
+      if (this.grilla[fila][col] === true && !queda) quitadas.push({ fila, col });
+      this.grilla[fila][col] = queda;
+    });
+    return quitadas;
+  }
+
+  /**
    * Cómo está el tablero: 'ganado' si queda una sola ficha, 'sin-saltos' si
    * quedan varias pero ningún salto posible, 'jugando' en cualquier otro caso.
    * @returns {'ganado' | 'sin-saltos' | 'jugando'}

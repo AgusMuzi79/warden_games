@@ -25,13 +25,14 @@
 import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from '../utiles.js';
 import {
   ANCHO, ALTO, TABLERO_X, CELDA, OFFSET, RADIO_FICHA,
-  DURACION_VUELTA_MS, DURACION_RECHAZO_MS, obtenerDpr, BANDOS,
+  DURACION_VUELTA_MS, DURACION_RECHAZO_MS, DURACION_HACKEO_MS, obtenerDpr, BANDOS,
 } from '../config.js';
 import { Tablero } from '../models/Tablero.js';
 import {
   dibujarFondo, dibujarTablero, dibujarFichas, dibujarFicha, dibujarFantasma, centroDeCelda,
 } from './dibujo.js';
 import { Efectos } from './efectos.js';
+import { crearHackeo, dibujarEfectoHackeo } from './hackeo.js';
 import { dibujarHud } from './hud.js';
 import { dibujarSeleccion, bandoEn } from './pantallaSeleccion.js';
 import { dibujarFin, avisoDeFin, botonFinEn } from './pantallaFin.js';
@@ -60,6 +61,7 @@ export class PegView {
     this.efectos = new Efectos();
     this.vuelta = null;    // { fila, col, x, y, inicio }: ficha que vuelve a su casilla
     this.rechazo = null;   // { fila, col, inicio }: ficha sin saltos que tiembla
+    this.hackeo = null;    // efecto de "Hackear Sistema" en curso (ver hackeo.js)
 
     // Solo los atributos: el tamaño en pantalla lo decide el CSS.
     canvas.width = ANCHO * this.dpr;
@@ -219,6 +221,7 @@ export class PegView {
     this.efectos.limpiar();
     this.vuelta = null;
     this.rechazo = null;
+    this.hackeo = null;
   }
 
   /**
@@ -264,6 +267,18 @@ export class PegView {
   explotar(comida, bando, t) {
     const centro = centroDeCelda(comida.fila, comida.col);
     this.efectos.explotar(centro.x, centro.y, this.colorDe(bando), this.fichasDe(bando).normal, t);
+  }
+
+  /**
+   * Efecto de "Hackear Sistema": el tablero tiembla y las fichas que se
+   * sacaron se deshacen entre barridos de luz y un cartel (ver hackeo.js).
+   * Con movimiento reducido no anima nada.
+   * @param {{fila: number, col: number}[]} quitadas casillas de las fichas que se sacaron
+   * @param {number} t tiempo actual en ms
+   */
+  hackear(quitadas, t) {
+    this.efectos.temblar(t);
+    if (!prefiereMenosMovimiento()) this.hackeo = crearHackeo(quitadas, t);
   }
 
   /**
@@ -331,6 +346,7 @@ export class PegView {
     });
     this.dibujarRechazo(fichas.normal, t);
     this.efectos.dibujar(ctx, t);  // estelas, ondas y chispas, encima de las fichas
+    this.dibujarHackeo(fichas.normal, t);
     this.dibujarVuelta(fichas.normal, t);
     this.dibujarArrastre(ui.arrastre, fichas.levantada);
     this.dibujarCursor(modelo, ui);
@@ -373,6 +389,21 @@ export class PegView {
       const prendido = Boolean(encendido) && encendido.fila === m.fila && encendido.col === m.col;
       dibujarFantasma(this.ctx, m.fila, m.col, this.recursos, t, prendido, imagen);
     });
+  }
+
+  /**
+   * Efecto de "Hackear Sistema", si hay uno en curso. Cuando pasa su
+   * duración se borra solo.
+   * @param {HTMLCanvasElement} imagen ficha normal del bando
+   * @param {number} t
+   */
+  dibujarHackeo(imagen, t) {
+    if (!this.hackeo) return;
+    if (t - this.hackeo.inicio >= DURACION_HACKEO_MS) {
+      this.hackeo = null;
+      return;
+    }
+    dibujarEfectoHackeo(this.ctx, this.hackeo, DURACION_HACKEO_MS, t, this.colores, this.fuentes, imagen);
   }
 
   /**
