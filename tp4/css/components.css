@@ -191,6 +191,9 @@
   transform: none;
   box-shadow: none;
   text-shadow: none;
+  /* El pulso del destructivo es una animación, y una animación le gana a
+     las declaraciones normales: hay que apagarla acá. */
+  animation: none;
 }
 
 /* Sin movimiento: no hay elevación, crecimiento ni relleno animado. El

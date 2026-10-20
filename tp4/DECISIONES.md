@@ -22,7 +22,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ### `juego.html` pasa de página estática a juego jugable
 - **Qué:** la página del Peg del TPE2 tenía una grilla de `div` solo visual. Ahora
   el tablero es un `<canvas>` con el juego completo, y el código vive en
-  `tp4/js/peg/`. Se borró el `js/juego.js` viejo.
+  `tp4/js/peg-solitaire/` (organizado en MVC, ver "Patrón MVC"). Se borró el
+  `js/juego.js` viejo.
 - **Por qué:** el enunciado pide implementar la lógica del juego e integrarlo en
   la página del TPE2, que "debe poder ejecutarse desde la web".
 
@@ -121,15 +122,13 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   arriba y abajo el HUD y los títulos de fin.
 
 ### El juego no se ejecuta dos veces: un solo `<script type="module">`
-- **Qué:** `juego.html` carga solo `js/peg/pagina.js` como módulo, después de
-  `js/galeria.js` (script clásico con `defer`). `pagina.js` importa
-  `pausarJuego` y `reanudarJuego` de `principal.js`, y ese import es lo que
-  carga y arranca el juego.
-- **Por qué:** `pagina.js` necesita las funciones de pausa de `principal.js`. Si
-  el HTML cargara además `principal.js` con su propio `<script>`, el navegador
-  igual lo ejecuta una sola vez, pero queda menos claro quién arranca qué. Con un
-  solo punto de entrada en el HTML, el orden se lee en los `import`.
-- **`iniciarGaleria()` existe cuando corre `pagina.js`:** los módulos se
+- **Qué:** `juego.html` carga solo `js/peg-solitaire/main.js` como módulo, después
+  de `js/galeria.js` (script clásico con `defer`). `main.js` importa el modelo,
+  la vista, el controlador y `pagina.js` (galería y ayuda), y arranca el juego.
+- **Por qué:** con un solo punto de entrada en el HTML, el orden se lee en los
+  `import` y queda claro quién arranca qué. (Antes el punto de entrada era
+  `pagina.js`, que importaba `principal.js`; con el MVC ese rol pasó a `main.js`.)
+- **`iniciarGaleria()` existe cuando corre `main.js`:** los módulos se
   ejecutan diferidos y en orden de documento, como un `defer`, y `galeria.js`
   está antes.
 
@@ -147,8 +146,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ### ES modules (`type="module"`)
 - **Qué:** el código del Peg son módulos con `import` / `export`, en
-  `tp4/js/peg/`.
-- **Por qué:** con 12 archivos, los `import` dicen explícitamente qué usa cada
+  `tp4/js/peg-solitaire/`.
+- **Por qué:** con una docena de archivos, los `import` dicen explícitamente qué usa cada
   uno, y nada queda en el scope global (en el TPE2, dos scripts clásicos que
   declararon la misma constante rompieron la Home entera, ver
   `../tp2/DECISIONES.md`). Permite además importar la lógica desde Node para
@@ -162,68 +161,116 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   resto del sitio: con tantos archivos, el orden de carga y los nombres globales
   se vuelven difíciles de seguir.
 
-### Un módulo por responsabilidad
-| Archivo | Qué hace |
-|---|---|
-| `utiles.js` | Funciones chicas: `clamp`, `easeOut`, `formatearTiempo`, `crearCanvas`, `cargarImagen`, `mulberry32` (sin uso desde que el tablero es una imagen), `leerToken`, `conAlfa`, `prefiereMenosMovimiento`. |
-| `config.js` | Medidas, tiempos, rutas de las fichas y del tablero, `BANDOS`; lee colores y fuentes de `variables.css` (`obtenerColores()`, `obtenerFuentes()`). |
-| `tablero.js` | Clase `Tablero`: las reglas, sin canvas ni DOM. |
-| `reloj.js` | Clase `Reloj`: tiempo de la partida con pausa y límite. |
-| `dibujo.js` | Tablero vacío (imagen), fichas y scanlines: los carga o arma una vez y los pinta. |
-| `hud.js` | Paneles de datos a los costados del tablero. |
-| `efectos.js` | Clase `Efectos`: explosión, onda, estela y temblor. |
-| `pantallas.js` | Selección de bando y pantallas de fin, dibujadas encima del tablero. |
-| `juego.js` | Clase `Juego`: estado de la partida y loop de dibujo. |
-| `entrada.js` | Clase `Entrada`: mouse y teclado, traducidos a acciones del `Juego`. |
-| `principal.js` | Punto de entrada: carga fuentes e imágenes, crea `Juego` y `Entrada`, conecta Reiniciar. |
-| `pagina.js` | Lo de la página que no es el juego: galería y diálogo de ayuda. |
+### Patrón MVC solo en el Peg (pedido de los profes para el TPE4)
+- **Qué:** el código del Peg se separó en Modelo, Vista y Controlador, dentro de
+  `tp4/js/peg-solitaire/`. El resto del sitio no se tocó y funciona igual. El
+  juego se ve y se comporta como antes: es una reorganización, no una
+  funcionalidad nueva.
+- **Por qué:** los profes pidieron que la entrega 4 use MVC, solo en el Peg.
+  Cada parte tiene una sola responsabilidad y se puede explicar por separado:
+  el modelo son las reglas, la vista es el dibujo y el controlador es lo que
+  hace el usuario.
+- **Reemplaza** las decisiones anteriores "Un módulo por responsabilidad",
+  "`Tablero` es lógica pura", "`Juego` guarda el estado; `Entrada` maneja el
+  input" y "`principal.js` conecta las piezas": el código ya estaba partido en
+  módulos, y lo que se hizo fue regrupar esas piezas por rol y partir `Juego`,
+  que mezclaba estado, reglas y dibujo.
 
-- **Por qué:** cada archivo se puede leer y explicar solo, que es lo que se pide
-  en la defensa. Todos los métodos tienen un JSDoc corto en español (el
-  enunciado pide el código comentado).
+| Archivo | Rol | Qué hace |
+|---|---|---|
+| `models/PegModel.js` | Modelo | La partida: fase, bando elegido, movimientos, resultado; `jugar` (cuenta el movimiento y decide si se ganó o se perdió) y `verificarTiempo`. Usa un `Tablero` y un `Reloj`. Sin canvas ni DOM. |
+| `models/Tablero.js` | Modelo | Clase `Tablero`: la grilla de 7×7, saltos válidos, `mover` y contadores. No sabe de fases ni de tiempo. |
+| `models/reloj.js` | Modelo | Clase `Reloj`: tiempo de la partida con pausa y límite. |
+| `views/PegView.js` | Vista | `render(modelo, ui, t)` dibuja un cuadro entero; avisos para lectores de pantalla; geometría (qué casilla o tarjeta hay en un punto del canvas); animaciones visuales (explosión, estela, ficha que vuelve o tiembla). No decide reglas. |
+| `views/dibujo.js` | Vista | Tablero vacío (imagen), fichas y scanlines: los carga o arma una vez y los pinta. |
+| `views/hud.js` | Vista | Paneles de datos a los costados del tablero. |
+| `views/efectos.js` | Vista | Clase `Efectos`: explosión, onda, estela y temblor. |
+| `views/hackeo.js` | Vista | Efecto de "Hackear Sistema": fantasmas de las fichas, barrido de luz, barras y cartel. |
+| `views/pantallaSeleccion.js` | Vista | Pantalla de selección de bando (las dos tarjetas). |
+| `views/pantallaFin.js` | Vista | Elige entre la pantalla de victoria y la de derrota. |
+| `views/pantallaVictoria.js` | Vista | "SISTEMA RESTAURADO": ondas, nodo ganador y título con barrido. |
+| `views/pantallaDerrota.js` | Vista | "SISTEMA CORRUPTO": pantalla rota, barras de colores y título que tiembla. |
+| `views/finComun.js` | Vista | Lo que comparten las dos pantallas de fin: textos de cada motivo, botón "JUGAR DE NUEVO", estadísticas y aviso para lectores de pantalla. |
+| `controllers/PegController.js` | Controlador | Escucha mouse, teclado, foco y Reiniciar; le pregunta y le pide cambios al modelo, y le pide a la vista que anime o avise. Lleva el loop de dibujo y el estado de la interacción. |
+| `main.js` | Conexión | Único script del HTML: crea modelo, vista y controlador y los conecta. |
+| `pagina.js` | Página | Lo que no es el juego: galería y diálogo de ayuda. Recibe de `main.js` cómo pausar y reanudar. |
+| `config.js`, `utiles.js` | Compartidos | Medidas, tiempos, rutas y colores; funciones chicas. Solo tocan el navegador cuando se llama a una función que lo necesita. |
 
-### `Tablero` es lógica pura
-- **Qué:** `tablero.js` no toca `document` ni el canvas. `utiles.js` y
-  `config.js` solo tocan el navegador cuando se llama a una función que lo
-  necesita.
-- **Por qué:** las reglas se pueden probar en Node sin navegador (posición
-  inicial con 32 fichas y 4 saltos, salto válido e inválido, ganado,
-  sin-saltos, reloj con pausa y límite). El dibujo solo lee el estado; no decide
-  nada.
+- **Cómo se reparte el estado:**
+  - **Modelo:** lo que es de las reglas: grilla, movimientos, fase
+    (`'eligiendo'`, `'jugando'`, `'terminado'`), bando, reloj, pausa y `fin`
+    (resultado, motivo, tiempo, nodos). Se puede importar desde Node.
+  - **Controlador:** lo que depende del usuario, junto en `this.ui`: ficha
+    arrastrada (`arrastre`), ficha levantada con el teclado (`seleccion`),
+    `cursor`, tarjeta encendida (`elegido`), foco y botón de fin encendido. Se lo
+    pasa entero a la vista en cada cuadro.
+  - **Vista:** solo lo visual: los `Efectos` y las animaciones de la ficha que
+    vuelve o tiembla.
+- **La vista se comunica con el controlador, no con el modelo:** el controlador
+  llama a métodos como `vista.explotar(...)`, `vista.rechazar(...)` o
+  `vista.avisar(...)`. La vista solo lee el modelo para dibujar (en `render`).
+  El modelo no sabe que existen la vista ni el controlador.
+- **La fase `'terminando'` ya no está en el modelo.** Antes `Juego` tenía una fase
+  intermedia mientras corría la demora de 700 ms antes de mostrar el fin. Esa
+  demora depende de `prefers-reduced-motion` y de cuándo conviene mostrar la
+  pantalla, que es de presentación: el modelo pasa a `'terminado'` al instante y
+  el controlador espera `DEMORA_FIN_MS` antes de darle `ui.fin` a la vista. Para
+  el jugador no cambia nada, porque el tablero queda bloqueado en el mismo
+  momento.
+- **La geometría está en la vista:** convertir el mouse a coordenadas del canvas
+  y saber qué casilla hay bajo un punto (`celdaEn`, `destinoBajoFicha`...)
+  depende de cómo se dibuja, así que es de la vista. El controlador solo
+  recibe `{ fila, col }`.
+- **El modelo se protege solo:** `jugar()` devuelve `null` si la fase no es
+  `'jugando'`, aunque el controlador ya no llame al modelo en ese caso.
+- **Archivos auxiliares sueltos, no fundidos:** `reloj.js`, `Tablero.js`,
+  `dibujo.js`, `hud.js`, `efectos.js` y las pantallas quedaron como archivos
+  propios junto a `PegModel` y `PegView`. Fundirlos daba un `PegView.js` de más
+  de mil líneas. La idea del MVC es separar responsabilidades, no contar
+  archivos.
+- **Qué se dividió y qué no:**
+  - `Tablero.js` salió de `PegModel.js` (la grilla y sus reglas de salto se
+    prueban solas y la partida queda en unas 170 líneas). Los demás acceden con
+    `modelo.tablero.movimientosDesde(...)`, igual que en el código original.
+  - `pantallas.js` (537 líneas) se partió en una pantalla por archivo. Victoria
+    y derrota importan lo común de `finComun.js` en vez de importarse entre sí
+    (si no, habría un import circular), y `pantallaFin.js` elige cuál mostrar y
+    reexporta lo que usa `PegView`.
+  - `PegController.js` (unas 500 líneas) y `PegView.js` (unas 440) **no** se
+    dividieron: el mouse y el teclado comparten el mismo estado (`arrastre`,
+    `seleccion`, `cursor`) y la misma acción de rechazo, así que partirlos solo
+    sumaría indirección sin separar nada nuevo; y la vista es una sola
+    responsabilidad (dibujar un cuadro).
+- **Si falla la carga** (por ejemplo una imagen de ficha), el `catch` de
+  `main.js` hace visible el texto de `#peg-estado` con la clase `.peg__error`:
+  "No se pudo cargar el tablero. Recargá la página para intentar de nuevo."
+- **Descartado:** un patrón observador, donde el modelo avisa a la vista cada
+  vez que cambia. Con un loop que redibuja todo en cada cuadro (`render`) no
+  hace falta y es más código para explicar. También se descartó dejar el estado
+  de la interacción en el modelo: arrastre, cursor y foco no son reglas del
+  juego.
+- **Cómo se probó:** el modelo, solo, en Node (posición inicial, salto válido e
+  inválido, victoria, derrota, tiempo con pausa y límite), y el juego completo en
+  el navegador con servidor local: mouse (elegir bando, arrastrar, soltar donde
+  no vale), teclado (una partida entera hasta el fin) y Reiniciar.
 
-### `Juego` guarda el estado; `Entrada` maneja el input
-- **Qué:** `Juego` tiene el `Tablero`, el `Reloj`, los `Efectos`, la fase
-  (`'eligiendo'`, `'jugando'`, `'terminando'`, `'ganado'`, `'perdido'`), los
-  movimientos y lo que se está animando, y redibuja en `cuadro(t)`. `Entrada`
-  escucha los eventos del canvas y cambia ese estado a través de `this.juego`;
-  `juego.js` no sabe que `Entrada` existe.
-- **Por qué:** al sumar bandos, efectos y pantallas de fin, `juego.js` llegó a
-  741 líneas. Se partió sin cambiar comportamiento: el manejo de mouse y teclado
-  pasó a `entrada.js` (351 líneas) y `juego.js` quedó en 452.
-- **Descartado:** dejar todo en `juego.js` (demasiado largo para explicarlo).
-  El estado sigue entero en `Juego`, para que no haya dos lugares con estado de
-  la partida.
-
-### `principal.js` conecta las piezas
-- **Qué:** espera las fuentes (`cargarFuentes()` y la de títulos, con un tope de
-  1,5 s), lee los colores, arma los recursos (`prepararRecursos()`), ajusta los
-  atributos `width` / `height` del canvas al DPR, crea
-  `new Juego(...)` y `new Entrada(juego).conectar()`, y engancha Reiniciar.
-  Exporta `pausarJuego()` y `reanudarJuego()` para `pagina.js`.
-- **Por qué:** así ningún módulo del juego necesita saber cómo se arman los
-  demás. Si la ayuda se abre antes de que el juego esté listo, `pausaPedida`
-  recuerda la pausa y se aplica al terminar de cargar.
-- **Si falla la carga** (por ejemplo una imagen de ficha), el `catch` hace
-  visible el texto de `#peg-estado` con la clase `.peg__error`: "No se pudo
-  cargar el tablero. Recargá la página para intentar de nuevo."
+### Se arregló un bug que venía de antes: la onda podía congelar el juego
+- **Qué:** en `Efectos.dibujarOndas()`, el avance de la onda ahora se limita
+  con `clamp`.
+- **Por qué:** el tiempo del cuadro (`requestAnimationFrame`) puede ser unos ms
+  menor que el `performance.now()` con que se creó la onda. Con un salto muy
+  chico no se notaba, pero con una diferencia mayor el radio del arco daba
+  negativo, `arc()` lanzaba `IndexSizeError` y el error cortaba el loop de
+  dibujo: el juego quedaba congelado. Apareció al disparar muchos saltos casi a
+  la vez en una prueba; el código viejo tenía la misma cuenta.
 
 ---
 
 ## Reglas y lógica
 
 ### Grilla de 7×7 con `true` / `false` / `null`
-- **Qué:** `tablero.grilla[fila][col]` vale `true` (hay ficha), `false` (hueco
-  vacío) o `null` (fuera de la cruz). `Tablero.esCeldaValida()` define la cruz:
+- **Qué:** `modelo.grilla[fila][col]` vale `true` (hay ficha), `false` (hueco
+  vacío) o `null` (fuera de la cruz). `PegModel.esCeldaValida()` define la cruz:
   una casilla es parte de ella si su fila o su columna está entre 2 y 4. Al
   empezar todo está lleno menos el centro (3, 3).
 - **Por qué:** tres valores distintos evitan confundir "vacío" con "no existe", y
@@ -247,7 +294,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   si se olvida en un lugar muestra un número equivocado.
 
 ### Se revisa el estado después de cada movimiento
-- **Qué:** `Juego.jugar()` llama a `tablero.estado()` después de cada salto:
+- **Qué:** `PegModel.jugar()` llama a `estadoTablero()` después de cada salto:
   `'ganado'` si queda una ficha, `'sin-saltos'` si quedan varias pero ningún
   salto, `'jugando'` si no. Ganar con la última ficha en el centro es "conexión
   perfecta" (motivo `'central'`); en otro lugar, motivo `'un-nodo'`.
@@ -344,7 +391,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ## Interacción
 
 ### Arrastrar y soltar con pointer events
-- **Qué:** `Entrada` escucha `pointerdown`, `pointermove`, `pointerup` y
+- **Qué:** `PegController` escucha `pointerdown`, `pointermove`, `pointerup` y
   `pointercancel`. Al agarrar una ficha con saltos llama a
   `setPointerCapture()`; la ficha sigue al puntero un poco más grande, con
   sombra y con la imagen de "levantada" del bando. El mouse se pasa a
@@ -398,11 +445,65 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   aunque sea igual al anterior.
 
 ### La ayuda pausa el reloj
-- **Qué:** abrir el diálogo llama a `pausarJuego()`; `Juego.pausar()` frena el
-  reloj y devuelve a su casilla una ficha que se estuviera arrastrando. Cerrarlo
-  llama a `reanudarJuego()`. Mientras está en pausa, `Entrada` ignora clicks y
-  teclas del juego.
+- **Qué:** abrir el diálogo llama a `pausar()` del controlador (que `main.js`
+  le pasa a `pagina.js`): frena el reloj del modelo y devuelve a su casilla una
+  ficha que se estuviera arrastrando. Cerrarlo llama a `reanudar()`. Mientras
+  está en pausa, el controlador ignora clicks y teclas del juego. Si la ayuda se
+  abre antes de que termine de cargar el juego, la pausa va directo al modelo (que
+  se crea al instante) y se respeta cuando se elige bando.
 - **Por qué:** leer cómo se juega no debería costar tiempo de la partida.
+
+### Botón "Hackear Sistema": deja dos fichas a un salto de ganar
+- **Qué:** un `<button class="btn btn--destructivo" id="btn-peg-hackear">` abajo
+  a la derecha del canvas (`.peg__pie`, alineado con el borde derecho del
+  canvas). Al apretarlo, `PegModel.hackear()` pide a `Tablero.dejarDosFichas()`
+  que saque todo salvo dos fichas, en (3, 1) y (3, 2), con el centro vacío. La
+  partida **sigue**: quien haga el salto que queda gana. Hay dos saltos
+  posibles y los dos ganan: el de (3, 1) sobre (3, 2) hasta el centro
+  ("conexión perfecta") y el de (3, 2) sobre (3, 1) hasta (3, 0) ("un solo
+  nodo").
+- **Por qué dos fichas y no una:** pedido de Fran. Con dos fichas sueltas el
+  juego se daría por perdido (quedan varias y ningún salto), así que las dos
+  tienen que quedar juntas y con un hueco detrás: es la "posición de prueba:
+  un salto para ganar" que mostraron los profes. Sirve para ver la victoria
+  rápido en la defensa.
+- **No cuenta como movimiento ni toca el reloj:** el último salto sí suma 1
+  movimiento, así que una partida hackeada termina con 1 movimiento.
+- **Solo se puede usar jugando:** `PegModel.puedeHackear` es verdadero con la
+  partida en curso, sin pausa y con más de dos fichas. El controlador
+  habilita o deshabilita el botón en cada cuadro (`sincronizarBotonHackear`,
+  solo toca el DOM si el estado cambió). Empieza deshabilitado en el HTML.
+  Después de usarlo vuelve a quedar deshabilitado (ya hay dos fichas), así no
+  se puede repetir.
+- **Efecto visual** (`views/hackeo.js`, `DURACION_HACKEO_MS` = 1400 ms): las
+  fichas que desaparecen quedan como fantasmas que tiemblan de lado a lado,
+  una franja de luz baja por el tablero, aparecen barras de colores al azar y
+  un cartel "SISTEMA HACKEADO / ACCESO CONCEDIDO" con aberración cromática se
+  enciende y se apaga. Además tiembla el tablero (`Efectos.temblar`). Mismo
+  lenguaje que la pantalla de derrota. Los colores salen de los tokens, como
+  el resto del canvas.
+- **Movimiento reducido:** no se crea el efecto ni tiembla el tablero; las
+  fichas desaparecen de golpe y el aviso para lectores de pantalla igual dice
+  qué pasó.
+- **Accesibilidad:** es un `<button>` real con texto visible. Al usarlo, el
+  foco pasa al canvas (`canvas.focus()`), porque el botón se deshabilita y el
+  foco se perdería, y para seguir jugando con el teclado. El aviso
+  (`role="status"`): "Sistema hackeado. Quedan dos nodos en la fila 4, columnas
+  2 y 3. Un salto más y ganás."
+- **Dónde vive cada parte (MVC):** la posición y la regla de cuándo se puede
+  son del modelo; el click y el cuadro a cuadro del botón son del controlador;
+  el efecto es de la vista.
+- **CSS:** el canvas y el pie comparten el ancho con una variable
+  (`--ancho-peg`, en `.peg`), así el botón queda alineado con el borde derecho
+  del canvas aunque este sea más angosto que la página. La resta del alto para
+  que el canvas entre sin scroll pasó de 200 a 252px (el pie suma 52). En
+  `components.css`, `.btn:disabled:hover` ahora también apaga la animación:
+  el pulso rojo del destructivo es una animación y le ganaba al estado
+  deshabilitado.
+- **Descartado:** ganar al instante (no deja "dos fichas"); dejar dos fichas
+  al azar (podían quedar sin salto y el botón terminaría en derrota); hacer
+  el efecto con una explosión por ficha (30 explosiones juntas son más de mil
+  chispas, y cada una pesa en el cuadro).
 
 ---
 
@@ -444,7 +545,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   'lighter'`, como un neón.
 - **Por qué:** feedback claro de que el salto se hizo y qué ficha se fue, en la
   estética del sitio. La clase `Efectos` recuerda cada efecto y lo borra solo
-  cuando termina; `juego.js` solo avisa "explotó acá".
+  cuando termina; `PegView` solo avisa "explotó acá".
 
 ### Scanlines solo en las pantallas de fin
 - **Qué:** las líneas horizontales finas (una cada `SEPARACION_SCANLINES` px) se
@@ -464,8 +565,9 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   taparlo (`alturaTituloVictoria()`).
 
 ### Demora antes de mostrar el fin
-- **Qué:** `terminar()` congela el reloj y pasa a la fase `'terminando'`; la
-  pantalla aparece `DEMORA_FIN_MS` (700 ms) después.
+- **Qué:** `PegModel.terminar()` congela el reloj y pasa a la fase `'terminado'`;
+  `PegController` muestra la pantalla `DEMORA_FIN_MS` (700 ms) después
+  (`finPendiente` / `finEn`). Mientras tanto el tablero ya no responde.
 - **Por qué:** sin la demora, la pantalla de fin tapaba la explosión del último
   salto y no se veía qué pasó.
 

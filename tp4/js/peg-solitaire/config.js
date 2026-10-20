@@ -36,6 +36,7 @@ export const DURACION_TEMBLOR_MS = 200;  // el tablero tiembla al comer una fich
 export const DURACION_ESTELA_MS = 1400;  // lo que tarda en apagarse la estela
 export const DEMORA_FIN_MS = 700;        // espera antes de mostrar el fin
 export const DURACION_ONDA_MS = 500;     // onda expansiva de la ficha comida
+export const DURACION_HACKEO_MS = 1400;  // efecto del botón "Hackear Sistema" (ver hackeo.js)
 
 // Efectos de la ficha comida (ver efectos.js).
 export const CHISPAS_POR_EXPLOSION = 38;

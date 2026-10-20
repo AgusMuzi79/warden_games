@@ -1,10 +1,11 @@
-// tablero.js — Reglas del Peg Solitaire, sin nada de dibujo
+// Tablero.js — La grilla del Peg Solitaire y sus reglas de salto, sin dibujo
 //
-// Qué hace: guarda qué casillas tienen ficha y aplica las reglas del juego
-// (qué saltos se pueden hacer, mover una ficha, saber si se ganó o no quedan
-// saltos). No toca el canvas ni el DOM.
-// Por qué separado del dibujo: las reglas se pueden probar solas, y el
-// dibujo solo tiene que leer el estado, no decidir nada.
+// Qué hace: guarda qué casillas tienen ficha y aplica las reglas del tablero
+// (qué saltos se pueden hacer, mover una ficha, contar fichas y saltos). No
+// sabe nada de tiempo, bando ni fases de la partida: eso es de PegModel, que
+// usa un Tablero. No toca el canvas ni el DOM.
+// Por qué separado de PegModel: las reglas del tablero se pueden probar solas
+// y la partida (fase, reloj, resultado) queda más corta y fácil de explicar.
 //
 // La grilla es de 7x7. Cada casilla vale:
 //   true  -> hay una ficha
@@ -15,8 +16,8 @@
 const DIRECCIONES = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
 /**
- * Reglas del Peg Solitaire sobre la grilla de 7x7: saltos válidos, mover
- * fichas, victoria y fin por falta de saltos. No dibuja nada.
+ * Grilla de 7x7 y reglas de salto: saltos válidos, mover fichas y contar
+ * fichas y saltos. No dibuja nada.
  */
 export class Tablero {
   /**
@@ -69,6 +70,16 @@ export class Tablero {
   }
 
   /**
+   * Indica si hay una ficha en la casilla (fila, col).
+   * @param {number} fila
+   * @param {number} col
+   * @returns {boolean}
+   */
+  hayFicha(fila, col) {
+    return Tablero.esCeldaValida(fila, col) && this.grilla[fila][col] === true;
+  }
+
+  /**
    * Saltos posibles desde (fila, col): saltar una ficha vecina y caer en
    * un hueco vacío que está dos casillas más allá.
    * @param {number} fila
@@ -76,7 +87,7 @@ export class Tablero {
    * @returns {{fila: number, col: number, comida: {fila: number, col: number}}[]}
    */
   movimientosDesde(fila, col) {
-    if (!Tablero.esCeldaValida(fila, col) || this.grilla[fila][col] !== true) return [];
+    if (!this.hayFicha(fila, col)) return [];
     const movimientos = [];
     for (const [df, dc] of DIRECCIONES) {
       const destinoFila = fila + 2 * df;
@@ -109,7 +120,9 @@ export class Tablero {
 
   /**
    * Mueve una ficha si el salto es válido: la ficha pasa al destino y la
-   * del medio se saca. Si el salto no vale, no cambia nada.
+   * del medio se saca. Si el salto no vale, no cambia nada. Es solo el
+   * movimiento sobre la grilla; el conteo y el fin de partida los hace
+   * PegModel.jugar().
    * @param {{fila: number, col: number}} origen
    * @param {{fila: number, col: number}} destino
    * @returns {{fila: number, col: number} | null} la casilla comida, o null
@@ -162,9 +175,25 @@ export class Tablero {
   }
 
   /**
-   * Estado de la partida según el tablero:
-   * 'ganado' si queda una sola ficha, 'sin-saltos' si quedan varias pero
-   * ningún salto posible, 'jugando' en cualquier otro caso.
+   * Deja solo dos fichas, en (3, 1) y (3, 2), con el centro (3, 3) vacío.
+   * Quedan dos saltos posibles y los dos ganan, porque dejan una sola ficha:
+   * (3, 1) sobre (3, 2) hasta el centro ("conexión perfecta") o (3, 2) sobre
+   * (3, 1) hasta (3, 0). Lo usa PegModel.hackear().
+   * @returns {{fila: number, col: number}[]} las casillas de las fichas que se sacaron
+   */
+  dejarDosFichas() {
+    const quitadas = [];
+    this.recorrer((fila, col) => {
+      const queda = fila === 3 && (col === 1 || col === 2);
+      if (this.grilla[fila][col] === true && !queda) quitadas.push({ fila, col });
+      this.grilla[fila][col] = queda;
+    });
+    return quitadas;
+  }
+
+  /**
+   * Cómo está el tablero: 'ganado' si queda una sola ficha, 'sin-saltos' si
+   * quedan varias pero ningún salto posible, 'jugando' en cualquier otro caso.
    * @returns {'ganado' | 'sin-saltos' | 'jugando'}
    */
   estado() {
