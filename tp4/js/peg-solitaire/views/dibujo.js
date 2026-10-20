@@ -12,11 +12,11 @@
 // (variables.css); las transparencias se arman con conAlfa(). Los del
 // tablero vienen fijos en la imagen.
 
-import { crearCanvas, cargarImagen, conAlfa, prefiereMenosMovimiento } from './utiles.js';
+import { crearCanvas, cargarImagen, conAlfa, prefiereMenosMovimiento } from '../utiles.js';
 import {
   ANCHO, ALTO, TAMANO_TABLERO, TABLERO_X, CELDA, OFFSET,
   RADIO_FICHA, PADDING_FICHA, FICHAS, IMAGEN_TABLERO, SEPARACION_SCANLINES, obtenerDpr,
-} from './config.js';
+} from '../config.js';
 
 // Lado de la imagen de una ficha, con el espacio extra para el brillo.
 const LADO_FICHA = (RADIO_FICHA + PADDING_FICHA) * 2;
@@ -181,7 +181,7 @@ export function dibujarFicha(ctx, imagen, x, y, escala = 1, opacidad = 1) {
  * imagen para las fichas normales e imagenResaltada para la elegida. Si no
  * se pasan, quedan las de F2 (naranja y cyan).
  * @param {CanvasRenderingContext2D} ctx
- * @param {import('./tablero.js').Tablero} tablero
+ * @param {import('../models/Tablero.js').Tablero} tablero
  * @param {{fichas: Record<string, HTMLCanvasElement>}} recursos
  * @param {{levantada?: {fila: number, col: number}|null, resaltada?: {fila: number, col: number}|null, imagen?: HTMLCanvasElement, imagenResaltada?: HTMLCanvasElement}} [opciones]
  */

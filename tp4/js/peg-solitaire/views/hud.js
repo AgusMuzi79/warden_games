@@ -6,8 +6,8 @@
 // Por qué no está el botón Reiniciar: va a ser un <button> real del HTML
 // (se puede usar con teclado y lector de pantalla), no un dibujo.
 
-import { clamp, conAlfa, formatearTiempo, prefiereMenosMovimiento } from './utiles.js';
-import { ANCHO } from './config.js';
+import { clamp, conAlfa, formatearTiempo, prefiereMenosMovimiento } from '../utiles.js';
+import { ANCHO } from '../config.js';
 import { texto } from './dibujo.js';
 
 const MARGEN = 36;            // distancia de los paneles al borde del canvas

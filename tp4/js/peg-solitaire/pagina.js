@@ -4,8 +4,9 @@
 //   1. Le pasa las 4 capturas del Peg a la galería animada.
 //   2. Abre y cierra el diálogo de ayuda (botón "?" o tecla F1), y pausa
 //      la partida mientras está abierto.
-// El juego en sí (tablero, nodos, reglas, reloj) vive en otros módulos de
-// esta misma carpeta; el punto de entrada es principal.js.
+// El juego en sí (modelo, vista y controlador) vive en las carpetas models/,
+// views/ y controllers/; el punto de entrada es main.js, que es el único
+// script que carga juego.html y llama a iniciarPagina() de acá.
 //
 // Es un módulo (type="module" en el HTML). Los módulos se ejecutan diferidos,
 // como un script con defer, y en el orden en que aparecen en el documento.
@@ -14,11 +15,8 @@
 // galeria.js la declara con function fuera de todo bloque.
 // Un módulo trae 'use strict' de forma implícita y no expone nada global.
 //
-// juego.html carga solo este archivo. Al importar principal.js, el
-// navegador lo carga y lo ejecuta antes que este, una sola vez, y arranca
-// el juego. De ahí se traen las funciones para pausar y reanudar.
-
-import { pausarJuego, reanudarJuego } from './principal.js';
+// No importa nada del juego: para pausar y reanudar la partida mientras la
+// ayuda está abierta usa las dos funciones que le pasa main.js.
 
 // ---------------------------------------------------------------
 // Galería
@@ -35,7 +33,19 @@ const FOTOS_GALERIA_PEG = [
   { src: 'assets/img/peg-derrota.jpg', alt: 'Pantalla de derrota "Sistema corrupto", sin saltos válidos o sin tiempo.' },
 ];
 
-iniciarGaleria(FOTOS_GALERIA_PEG);
+/**
+ * Prepara la página: arma la galería y guarda cómo pausar y reanudar la
+ * partida para cuando se abra y se cierre la ayuda.
+ * @param {{pausar: () => void, reanudar: () => void}} partida
+ */
+export function iniciarPagina(partida) {
+  acciones = partida;
+  iniciarGaleria(FOTOS_GALERIA_PEG);
+}
+
+// Qué hacer con la partida al abrir y cerrar la ayuda. Hasta que main.js
+// llame a iniciarPagina() no hace nada.
+let acciones = { pausar() {}, reanudar() {} };
 
 // ---------------------------------------------------------------
 // Diálogo de ayuda
@@ -73,7 +83,7 @@ function abrirAyuda() {
   // Mientras se lee la ayuda, el reloj no corre. Con el modal abierto el
   // resto de la página queda inerte: el canvas no recibe foco ni teclas,
   // así que las teclas del juego no hacen nada hasta cerrarla.
-  pausarJuego();
+  acciones.pausar();
 }
 
 /**
@@ -112,6 +122,6 @@ dialogoAyuda.addEventListener('click', (evento) => {
 // vuelve al botón "?", también si se abrió con F1 desde otro lugar: así
 // quien usa teclado sabe dónde quedó. También se reanuda la partida.
 dialogoAyuda.addEventListener('close', () => {
-  reanudarJuego();
+  acciones.reanudar();
   botonAyuda.focus();
 });

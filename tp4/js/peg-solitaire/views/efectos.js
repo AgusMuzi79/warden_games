@@ -6,7 +6,7 @@
 //     expande y la ficha que se infla y desaparece;
 //   - la estela de luz que deja la ficha mientras se la arrastra (estilo Tron);
 //   - el temblor del tablero al comer una ficha.
-// Por qué una clase aparte: juego.js solo avisa "explotó acá" o "la ficha
+// Por qué una clase aparte: PegView solo avisa "explotó acá" o "la ficha
 // pasó por acá", y esta clase se encarga de recordar cada efecto, dibujarlo
 // y borrarlo cuando termina.
 //
@@ -14,14 +14,14 @@
 // (prefers-reduced-motion), no se crea ningún efecto y el tablero no tiembla.
 // El juego funciona igual, solo sin animaciones.
 //
-// Los colores llegan desde juego.js (salen de obtenerColores()); acá solo se
+// Los colores llegan desde PegView (salen de obtenerColores()); acá solo se
 // aclaran o se les pone transparencia.
 
-import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from './utiles.js';
+import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from '../utiles.js';
 import {
   DURACION_ESTELA_MS, DURACION_TEMBLOR_MS, DURACION_ONDA_MS,
   CHISPAS_POR_EXPLOSION, FUERZA_TEMBLOR,
-} from './config.js';
+} from '../config.js';
 import { dibujarFicha } from './dibujo.js';
 
 const VUELTA = Math.PI * 2;
@@ -204,7 +204,10 @@ export class Efectos {
    */
   dibujarOndas(ctx, t) {
     for (const onda of this.ondas) {
-      const avance = (t - onda.inicio) / DURACION_ONDA_MS;
+      // clamp: t viene de requestAnimationFrame y inicio de performance.now();
+      // si la onda se creó unos ms "después" del cuadro, t - inicio da
+      // negativo y el radio del arco también, lo que corta el loop de dibujo.
+      const avance = clamp((t - onda.inicio) / DURACION_ONDA_MS);
       // La ficha usa el primer 40 % de la onda para inflarse y desaparecer.
       const avanceFicha = clamp(avance / 0.4);
       if (avanceFicha < 1) {

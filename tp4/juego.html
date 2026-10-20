@@ -51,9 +51,9 @@
          lateral (ficha, Ayuda y Compartir) a la derecha. -->
     <div class="juego-layout juego-layout--peg">
 
-      <!-- Zona de juego. El tablero se dibuja en el <canvas> (js/peg/).
+      <!-- Zona de juego. El tablero se dibuja en el <canvas> (js/peg-solitaire/).
            Arriba, una barra chica con el nombre, el botón Reiniciar y el
-           botón "?", que abre la ayuda en un diálogo (js/peg/pagina.js). -->
+           botón "?", que abre la ayuda en un diálogo (js/peg-solitaire/pagina.js). -->
       <section class="peg" aria-label="Zona de juego de Neon Circuit">
         <div class="peg__barra">
           <p class="tablero__etiqueta">Neon Circuit</p>
@@ -66,7 +66,7 @@
         </div>
 
         <!-- 1200x760 es la resolución lógica en la que se dibuja
-             (principal.js la multiplica por la densidad de la pantalla); el
+             (PegView la multiplica por la densidad de la pantalla); el
              CSS lo muestra más chico sin deformarlo. El texto de adentro
              solo se ve si el navegador no soporta canvas.
              tabindex="0" lo hace enfocable para jugar con el teclado.
@@ -81,7 +81,7 @@
         <p class="sr-only" id="peg-instrucciones">Primero elegís bando: con las flechas izquierda y derecha pasás de Usuarios a Programas de Clu, y con Enter o Espacio elegís. Ya en la partida, usá las flechas para moverte entre los nodos. Con Enter o Espacio levantás un nodo; después, las flechas eligen el destino y Enter o Espacio lo suelta. Escape deja el nodo en su lugar y R reinicia la partida (volvés a elegir bando). Cuando termina la partida, Enter o Espacio te llevan a jugar de nuevo.</p>
 
         <!-- Avisos del juego para lectores de pantalla (nodo levantado,
-             salto hecho, fin de partida). Lo escribe principal.js. -->
+             salto hecho, fin de partida). Lo escribe PegView (avisar). -->
         <p class="sr-only" id="peg-estado" role="status"></p>
       </section>
 
@@ -96,7 +96,7 @@
 
         <!-- Galería animada (flip 3D). El motor genérico vive en
              js/galeria.js; la lista de las 4 capturas del Peg está en
-             js/peg/pagina.js, que la pasa con iniciarGaleria(). Los src/alt
+             js/peg-solitaire/pagina.js, que la pasa con iniciarGaleria(). Los src/alt
              de acá son solo el arranque (fotos 1 y 2). -->
         <section class="galeria" aria-labelledby="galeria-titulo">
           <div class="galeria__cabecera">
@@ -150,7 +150,7 @@
 
         <!-- Ayuda: la única fuente del texto de las instrucciones. El
              diálogo del botón "?" copia estos desplegables y los atajos
-             (js/peg/pagina.js), así el texto se escribe una sola vez. -->
+             (js/peg-solitaire/pagina.js), así el texto se escribe una sola vez. -->
         <section class="ayuda" aria-labelledby="ayuda-titulo">
           <h2 id="ayuda-titulo">
             Ayuda
@@ -223,7 +223,7 @@
     </div>
 
     <!-- Diálogo de ayuda (botón "?" o F1). Reusa el componente .modal
-         (components.css). El cuerpo está vacío a propósito: js/peg/pagina.js
+         (components.css). El cuerpo está vacío a propósito: js/peg-solitaire/pagina.js
          lo llena copiando los desplegables y los atajos de la sección Ayuda
          de la página, así el texto vive en un solo lugar. -->
     <dialog class="modal peg-ayuda" id="peg-ayuda" aria-labelledby="peg-ayuda-titulo">
@@ -472,9 +472,9 @@
   <script src="./js/api.js" defer></script>
   <script src="./js/galeria.js" defer></script>
   <!-- Módulo del Peg: va después de galeria.js (usa su iniciarGaleria).
-       pagina.js importa principal.js, que arranca el juego: por eso se
-       carga un solo <script> y el juego no se ejecuta dos veces. -->
-  <script type="module" src="./js/peg/pagina.js"></script>
+       main.js importa el modelo, la vista y pagina.js (galería y ayuda) y
+       arranca el juego: por eso se carga un solo <script>. -->
+  <script type="module" src="./js/peg-solitaire/main.js"></script>
   <script src="./js/compartir.js" defer></script>
   <script src="./js/resena.js" defer></script>
   <script src="./js/footer.js" defer></script>
