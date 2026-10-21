@@ -8,7 +8,8 @@
 // getRed/getGreen/getBlue y escribir el resultado con setPixel.
 //
 // Expone estas globales (los scripts no usan type="module"):
-//   filtroGrises(imageData), filtroBrillo(imageData), filtroNegativo(imageData)
+//   filtroGrises(imageData), filtroBrillo(imageData), filtroNegativo(imageData),
+//   filtroBordes(imageData)
 //   FILTROS: objeto que asocia el nombre de un filtro con su función.
 // Lo usa js/blocka.js, que tiene que cargarse después de este archivo.
 
@@ -99,10 +100,48 @@ function filtroNegativo(imageData) {
   return salida;
 }
 
+// Bordes (Sobel): marca dónde el brillo cambia de golpe entre un píxel y sus
+// vecinos. Los contornos quedan blancos y las zonas parejas, negras.
+// Por cada píxel se mira el cuadrado de 3x3 a su alrededor (en gris):
+//   gx = columna derecha - columna izquierda (cambio de izquierda a derecha)
+//   gy = fila de abajo - fila de arriba (cambio de arriba hacia abajo)
+// con peso 2 en el vecino del medio. La intensidad es la raíz de gx² + gy²,
+// limitada a 255 (puede pasarse: el máximo teórico es ~1442).
+// A diferencia de los otros filtros, cada píxel depende de sus vecinos: por
+// eso se lee siempre de imageData y se escribe en salida, nunca en el mismo.
+function filtroBordes(imageData) {
+  const ancho = imageData.width;
+  const alto = imageData.height;
+  const salida = new ImageData(ancho, alto);
+
+  // Brillo (promedio de los canales) de un vecino. Si cae fuera de la imagen,
+  // se usa el píxel del borde: así también se calculan los píxeles del marco
+  // (si se salteaban, quedaban transparentes, como arranca salida).
+  const gris = (x, y) => {
+    const vx = Math.min(ancho - 1, Math.max(0, x));
+    const vy = Math.min(alto - 1, Math.max(0, y));
+    return (getRed(imageData, vx, vy) + getGreen(imageData, vx, vy) + getBlue(imageData, vx, vy)) / 3;
+  };
+
+  for (let x = 0; x < ancho; x++) {
+    for (let y = 0; y < alto; y++) {
+      const gx = -gris(x - 1, y - 1) - 2 * gris(x - 1, y) - gris(x - 1, y + 1)
+               +  gris(x + 1, y - 1) + 2 * gris(x + 1, y) + gris(x + 1, y + 1);
+      const gy = -gris(x - 1, y - 1) - 2 * gris(x, y - 1) - gris(x + 1, y - 1)
+               +  gris(x - 1, y + 1) + 2 * gris(x, y + 1) + gris(x + 1, y + 1);
+      const borde = Math.min(255, Math.sqrt(gx * gx + gy * gy));
+      setPixel(salida, x, y, borde, borde, borde, 255);
+    }
+  }
+
+  return salida;
+}
+
 // Para elegir un filtro por su nombre desde la configuración de los niveles
 // (FILTROS['grises'] devuelve la función filtroGrises).
 const FILTROS = {
   grises: filtroGrises,
   brillo: filtroBrillo,
   negativo: filtroNegativo,
+  bordes: filtroBordes,
 };

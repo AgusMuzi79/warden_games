@@ -119,7 +119,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ## Filtros
 
 ### `js/filtros.js` aparte, con la estructura de la plantilla de la cátedra
-- **Qué:** tres funciones (`filtroGrises`, `filtroBrillo`, `filtroNegativo`) que
+- **Qué:** cuatro funciones (`filtroGrises`, `filtroBrillo`, `filtroNegativo`,
+  `filtroBordes`) que
   reciben un `ImageData` y devuelven uno nuevo, más el objeto `FILTROS` que
   asocia cada nombre con su función. Misma estructura que `cargar-imagen.html`:
   doble `for` sobre los píxeles, `getRed/getGreen/getBlue` para leer y
@@ -144,6 +145,31 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Descartado:** restar un valor fijo a cada canal (aplasta los tonos oscuros
   a negro y les quita contraste).
 
+### Filtro de bordes (Sobel)
+- **Qué:** `filtroBordes` en `filtros.js`, registrado como `bordes` en
+  `FILTROS` y en `NOMBRES_FILTRO`. Por cada píxel mira el cuadrado de 3x3 a su
+  alrededor (en gris) y calcula cuánto cambia el brillo de izquierda a derecha
+  (`gx`) y de arriba hacia abajo (`gy`), con los pesos 1, 2, 1 de Sobel. La
+  intensidad es `√(gx² + gy²)`, con tope en 255: los contornos quedan blancos
+  y las zonas parejas, negras. Pedido de la cátedra (un filtro más).
+- **Dónde se usa:** reemplaza al segundo negativo del nivel 3, así los cuatro
+  filtros aparecen en la mezcla. En Difícil entra solo al sorteo, porque
+  `sortearFiltro()` elige de `Object.keys(FILTROS)`.
+- **Lee de un ImageData y escribe en otro:** es el primer filtro en el que cada
+  píxel depende de sus vecinos. Si escribiera sobre la misma imagen, los
+  vecinos de la derecha y de abajo ya estarían filtrados.
+- **Los vecinos fuera de la imagen usan el píxel del borde:** `new ImageData`
+  arranca transparente, y si se salteaba el marco de 1 px quedaba sin pintar
+  y se veía el fondo de la card. Como se aplica por pieza, en el corte entre
+  dos piezas no aparece un borde falso.
+- **No afecta la detección de piezas lisas:** `rotacionesEquivalentes()`
+  compara el recorte `original`, no el filtrado.
+- **Descartado:** el borde simple (restar solo el vecino de la derecha y el de
+  abajo): es más corto, pero marca peor los bordes en diagonal y no tiene el
+  suavizado del peso 2. También se descartó invertirlo (bordes negros sobre
+  blanco): se parece demasiado a un dibujo y lo blanco se confunde con el
+  fondo de los logos.
+
 ### Los filtros se aplican por pieza, una sola vez, al armar el nivel
 - **Qué:** cada pieza guarda su recorte `original` y un `lienzo` ya filtrado
   (dos canvas chicos del tamaño de la pieza, fuera de la página). El juego
@@ -160,7 +186,9 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   nombre, el filtro vale para todas las piezas; con cuatro, cada pieza lleva el
   suyo. Hoy (decisión del equipo): nivel 1 escala de grises, sin tiempo
   máximo; nivel 2 negativo, con tiempo máximo; nivel 3 un filtro distinto por
-  pieza (negativo, brillo, grises, negativo), con tiempo máximo.
+  pieza (negativo, brillo, grises, bordes), con tiempo máximo.
+- **Actualización:** el cuarto filtro del nivel 3 era un segundo negativo; con
+  el filtro de bordes pasó a ser `bordes` (ver "Filtro de bordes (Sobel)").
 - **Antes:** nivel 1 brillo, nivel 2 grises. Se reordenó de menos a más
   difícil: los grises se reconocen enseguida, el negativo cuesta más y la
   mezcla es lo más difícil.
@@ -599,9 +627,9 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   no en mezclar.
 - **Por qué nunca el mismo que el nivel anterior:** `ultimoFiltro` guarda el
   último sorteado y se vuelve a sortear si sale igual, el mismo criterio que
-  `ultimaImagen` con las imágenes. Con solo tres filtros, repetir seguido se
+  `ultimaImagen` con las imágenes. Con tan pocos filtros, repetir seguido se
   sentiría como que no hubo sorteo.
-- **Por qué de `FILTROS` y no de `NIVELES`:** `FILTROS` son los tres filtros
+- **Por qué de `FILTROS` y no de `NIVELES`:** `FILTROS` son los filtros
   que existen; tomarlos de `NIVELES` mezclaría la lista del nivel 3 y el
   negativo saldría el doble de veces.
 - **Descartado:** un filtro al azar por pieza (lo descartó el equipo) y sortear

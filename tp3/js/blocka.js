@@ -84,10 +84,9 @@ const BANCO_IMAGENES = [
 // cuesta más de reconocer y, a la vez, el tiempo máximo baja de un nivel al
 // siguiente. Si se acaba el tiempo, se pierde el nivel. tiempoMax tiene un
 // valor por cantidad de piezas, escrito a mano (ver limiteSegundos()).
-// En el nivel 3, la lista de 4 filtros hace que aparezcan los tres en
-// cualquier dificultad: con 4 piezas, una por filtro (y el negativo dos
-// veces); con 9, la pieza i usa el filtro i % 4; con 16 (4 por fila), cada
-// columna repite el mismo filtro.
+// En el nivel 3, la lista de 4 filtros hace que aparezcan los cuatro en
+// cualquier dificultad: con 4 piezas, una por filtro; con 9, la pieza i usa
+// el filtro i % 4; con 16 (4 por fila), cada columna repite el mismo filtro.
 // "nombre" es el texto que se muestra en la pantalla de inicio.
 // Esta lista es la del modo Normal. En el modo Difícil se ignoran "filtros" y
 // "nombre": cada nivel sortea un filtro (ver filtrosDelNivel()). tiempoMax
@@ -95,7 +94,7 @@ const BANCO_IMAGENES = [
 const NIVELES = [
   { nombre: 'Escala de grises', filtros: ['grises'], tiempoMax: { 4: 30, 9: 40, 16: 50 } },
   { nombre: 'Negativo', filtros: ['negativo'], tiempoMax: { 4: 20, 9: 30, 16: 40 } },
-  { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'negativo'], tiempoMax: { 4: 10, 9: 20, 16: 30 } },
+  { nombre: 'Filtros mixtos', filtros: ['negativo', 'brillo', 'grises', 'bordes'], tiempoMax: { 4: 10, 9: 20, 16: 30 } },
 ];
 
 // ---------- Dificultad: cantidad de piezas ----------
@@ -139,6 +138,7 @@ const NOMBRES_FILTRO = {
   grises: 'escala de grises',
   brillo: 'brillo al 30 %',
   negativo: 'negativo',
+  bordes: 'bordes',
 };
 
 // Texto que se suma al mensaje de fin de nivel: en Difícil dice qué filtro
@@ -157,7 +157,7 @@ let vistaModo = 'normal';
 let ultimoFiltro = null;
 
 // Sortea el filtro del modo Difícil: uno de los de FILTROS (js/filtros.js:
-// grises, brillo y negativo), distinto al del nivel anterior. Se llama al
+// grises, brillo, negativo y bordes), distinto al del nivel anterior. Se llama al
 // empezar cada nivel, también al reintentarlo o al pasar al siguiente.
 function sortearFiltro() {
   const nombres = Object.keys(FILTROS);
