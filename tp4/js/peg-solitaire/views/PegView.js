@@ -315,7 +315,7 @@ export class PegView {
    * @param {boolean} ui.conFoco el canvas tiene foco de teclado
    * @param {boolean} ui.botonEncendido el mouse está sobre "JUGAR DE NUEVO"
    * @param {object | null} ui.fin datos de la pantalla de fin (con mostradoEn), o null si todavía no se muestra
-   * @param {number} t tiempo actual en ms (lo pasa requestAnimationFrame)
+   * @param {number} t tiempo actual en ms (performance.now(), ver PegController.cuadro)
    */
   render(modelo, ui, t) {
     const ctx = this.ctx;

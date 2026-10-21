@@ -204,10 +204,10 @@ export class Efectos {
    */
   dibujarOndas(ctx, t) {
     for (const onda of this.ondas) {
-      // clamp: t viene de requestAnimationFrame y inicio de performance.now();
-      // si la onda se creó unos ms "después" del cuadro, t - inicio da
-      // negativo y el radio del arco también, lo que corta el loop de dibujo.
-      const avance = clamp((t - onda.inicio) / DURACION_ONDA_MS);
+      // Sin clamp: actualizar() ya borró las ondas terminadas y t sale del
+      // mismo reloj que inicio (ver PegController.cuadro), así que el avance
+      // queda entre 0 y 1.
+      const avance = (t - onda.inicio) / DURACION_ONDA_MS;
       // La ficha usa el primer 40 % de la onda para inflarse y desaparecer.
       const avanceFicha = clamp(avance / 0.4);
       if (avanceFicha < 1) {

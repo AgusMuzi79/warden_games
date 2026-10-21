@@ -263,6 +263,25 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   negativo, `arc()` lanzaba `IndexSizeError` y el error cortaba el loop de
   dibujo: el juego quedaba congelado. Apareció al disparar muchos saltos casi a
   la vez en una prueba; el código viejo tenía la misma cuenta.
+- **Actualización: se arregló la causa, no solo la onda.** Ese `clamp` tapaba
+  el síntoma en un solo efecto; las chispas, el hackeo y el temblor tenían la
+  misma resta con dos relojes distintos. Ahora:
+  - **Un solo reloj:** `PegController.cuadro()` toma su tiempo de
+    `performance.now()`, igual que los eventos que crean los efectos, en vez
+    del tiempo que pasa `requestAnimationFrame` (que es el del comienzo del
+    cuadro y puede ser anterior a un evento que llegó justo antes). Un efecto
+    siempre se crea antes del cuadro que lo dibuja, así que su edad nunca da
+    negativa. Se sacaron los `clamp` que solo estaban por eso (en
+    `dibujarOndas` y en `dibujarEfectoHackeo`); los que quedan limitan el
+    final de una animación (por ejemplo, la ficha que vuelve llega a 1 y se
+    borra), no el principio.
+  - **El loop no se corta:** el cuerpo de `cuadro()` va en un `try/finally` y
+    el cuadro siguiente se pide en el `finally`. Si algo falla al dibujar, el
+    error aparece en la consola pero el juego sigue.
+  - **Descartado:** guardar el tiempo del último cuadro y usarlo en los
+    eventos: también sirve, pero obliga a pasar ese valor por todos los
+    métodos; leer `performance.now()` en los dos lados es más simple de
+    explicar.
 
 ---
 

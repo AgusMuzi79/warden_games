@@ -96,19 +96,32 @@ export class PegController {
   /**
    * Un cuadro de la animación: revisa el tiempo en el modelo, muestra el fin
    * cuando pasa la demora y le pide a la vista que dibuje.
-   * @param {number} t tiempo actual en ms (lo pasa requestAnimationFrame)
+   *
+   * Un solo reloj: el tiempo del cuadro sale de performance.now(), el mismo
+   * que usan los eventos (mouse, teclado, botones) para marcar cuándo empieza
+   * cada efecto. Como un efecto siempre se crea antes del cuadro que lo
+   * dibuja, su edad (t - inicio) nunca da negativa. El tiempo que pasa
+   * requestAnimationFrame no se usa: es el del comienzo del cuadro y puede
+   * ser unos ms anterior a un evento que llegó justo antes.
+   *
+   * El try/finally pide el cuadro siguiente aunque algo falle al dibujar:
+   * el error se ve en la consola, pero el juego no se congela.
    */
-  cuadro(t) {
-    if (this.modelo.verificarTiempo()) {
-      this.cancelarArrastre(t);
-      this.alTerminar(t);
-    }
-    // Pasada la demora, se muestra la pantalla de fin.
-    if (this.finPendiente && t >= this.finEn) this.mostrarFin(t);
-    this.sincronizarBotonHackear();
+  cuadro() {
+    try {
+      const t = performance.now();
+      if (this.modelo.verificarTiempo()) {
+        this.cancelarArrastre(t);
+        this.alTerminar(t);
+      }
+      // Pasada la demora, se muestra la pantalla de fin.
+      if (this.finPendiente && t >= this.finEn) this.mostrarFin(t);
+      this.sincronizarBotonHackear();
 
-    this.vista.render(this.modelo, this.ui, t);
-    requestAnimationFrame(this.cuadro);
+      this.vista.render(this.modelo, this.ui, t);
+    } finally {
+      requestAnimationFrame(this.cuadro);
+    }
   }
 
   /**

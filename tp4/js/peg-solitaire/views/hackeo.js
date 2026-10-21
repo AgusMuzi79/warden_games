@@ -152,9 +152,10 @@ function dibujarCartel(ctx, avance, colores, fuentes) {
  * @param {HTMLCanvasElement} imagen ficha normal del bando
  */
 export function dibujarEfectoHackeo(ctx, hackeo, duracionMs, t, colores, fuentes, imagen) {
-  // clamp: t viene de requestAnimationFrame e inicio de performance.now(),
-  // así que al principio la resta puede dar un poco negativa.
-  const avance = clamp((t - hackeo.inicio) / duracionMs);
+  // Sin clamp: PegView borra el efecto al llegar a su duración y t sale del
+  // mismo reloj que inicio (ver PegController.cuadro), así que el avance
+  // queda entre 0 y 1.
+  const avance = (t - hackeo.inicio) / duracionMs;
   dibujarFantasmas(ctx, hackeo, avance, imagen);
   dibujarBarrido(ctx, avance, colores);
   dibujarBarras(ctx, hackeo, avance, t, colores);
