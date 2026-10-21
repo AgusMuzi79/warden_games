@@ -515,7 +515,11 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **CSS:** el canvas y el pie comparten el ancho con una variable
   (`--ancho-peg`, en `.peg`), así el botón queda alineado con el borde derecho
   del canvas aunque este sea más angosto que la página. La resta del alto para
-  que el canvas entre sin scroll pasó de 200 a 252px (el pie suma 52). En
+  que el canvas entre sin scroll pasó de 200px a
+  `200px + var(--control-alto) + var(--espaciado-2)`: el pie suma el alto del
+  botón (44) y el gap (8). Con tokens y no con el número sumado (como estaba
+  al principio), así si cambia el alto de los controles o el espaciado, la
+  cuenta sigue bien. El valor que da es el mismo. En
   `components.css`, `.btn:disabled:hover` ahora también apaga la animación:
   el pulso rojo del destructivo es una animación y le ganaba al estado
   deshabilitado.

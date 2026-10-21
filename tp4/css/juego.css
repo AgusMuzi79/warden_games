@@ -141,7 +141,7 @@
   gap: var(--espaciado-2);
   /* Ancho del canvas, que también usa el pie para quedar alineado con su
      borde derecho. La cuenta está explicada en .peg__canvas. */
-  --ancho-peg: min(100%, calc((100vh - 252px) * 1200 / 760));
+  --ancho-peg: min(100%, calc((100vh - 200px - var(--control-alto) - var(--espaciado-2)) * 1200 / 760));
 }
 
 /* Barra chica arriba del canvas: nombre del juego a la izquierda y el
@@ -204,9 +204,11 @@
    - el ancho que hace que el alto entre en la ventana sin scroll. Antes de
      la zona hay unos 122px (header 60 + padding de main 24 + breadcrumb
      14 + su margen 24) y la barra del "?" suma unos 60px más (52 + el gap
-     de 8) y el pie con "Hackear Sistema" otros 52 (44 + 8). Con un poco de
-     aire abajo, se le restan 252px al alto de la ventana, y ese alto se
-     pasa a ancho multiplicando por 1200 / 760.
+     de 8) y el pie con "Hackear Sistema" otros 52: el alto del botón
+     (--control-alto, 44) más el gap (--espaciado-2, 8). Con un poco de
+     aire abajo, se le restan 200px más esos dos tokens (252 en total) al
+     alto de la ventana, y ese alto se pasa a ancho multiplicando por
+     1200 / 760.
    En 1920x1080 gana el 100%: 1152px de ancho, unos 730px de alto.
    touch-action:none evita que el navegador use el arrastre del dedo para
    scrollear la página (en la Fase 2 el arrastre mueve los nodos). */
