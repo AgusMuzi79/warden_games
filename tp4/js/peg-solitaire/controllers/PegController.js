@@ -177,19 +177,19 @@ export class PegController {
 
   /**
    * Reiniciar (tecla R o botón de la página): vuelve a la selección de bando.
+   * @param {string} [aviso] primera frase del aviso para lectores de pantalla
    */
-  reiniciar() {
+  reiniciar(aviso = 'Partida reiniciada.') {
     this.mostrarSeleccion();
-    this.vista.avisar('Partida reiniciada. Elegí tu bando: Usuarios o Programas de Clu.');
+    this.vista.avisar(aviso + ' Elegí tu bando: Usuarios o Programas de Clu.');
   }
 
   /**
    * "JUGAR DE NUEVO" (botón del canvas, Enter o Espacio en la pantalla de
-   * fin): vuelve a la selección de bando, igual que Reiniciar.
+   * fin): lo mismo que Reiniciar, con otro aviso.
    */
   jugarDeNuevo() {
-    this.mostrarSeleccion();
-    this.vista.avisar('Nueva partida. Elegí tu bando: Usuarios o Programas de Clu.');
+    this.reiniciar('Nueva partida.');
   }
 
   /**

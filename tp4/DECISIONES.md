@@ -186,6 +186,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 | `views/hud.js` | Vista | Paneles de datos a los costados del tablero. |
 | `views/efectos.js` | Vista | Clase `Efectos`: explosión, onda, estela y temblor. |
 | `views/hackeo.js` | Vista | Efecto de "Hackear Sistema": fantasmas de las fichas, barrido de luz, barras y cartel. |
+| `views/glitch.js` | Vista | Lo que comparten el hackeo y la derrota: texto con aberración cromática y barras de colores al azar. |
 | `views/pantallaSeleccion.js` | Vista | Pantalla de selección de bando (las dos tarjetas). |
 | `views/pantallaFin.js` | Vista | Elige entre la pantalla de victoria y la de derrota. |
 | `views/pantallaVictoria.js` | Vista | "SISTEMA RESTAURADO": ondas, nodo ganador y título con barrido. |
@@ -282,6 +283,40 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
     eventos: también sirve, pero obliga a pasar ese valor por todos los
     métodos; leer `performance.now()` en los dos lados es más simple de
     explicar.
+
+### Código repetido unificado (review del PR #11)
+- **Qué:**
+  - **Una sola carga de fuentes:** `cargarFuentes()` (`views/hud.js`) espera
+    también Orbitron (la de los títulos). `main.js` tenía una función propia
+    solo para esa fuente, con el mismo tope de 1,5 s; se borró.
+  - **Glitch compartido:** `views/glitch.js` tiene `dibujarTextoGlitch()` (el
+    texto con una copia naranja y otra cyan corridas, y la clara encima) y
+    `dibujarBarrasGlitch()` (barras de colores que se sortean cada tanto). Los
+    usan el cartel "SISTEMA HACKEADO" (`hackeo.js`) y el título "SISTEMA
+    CORRUPTO" (`pantallaDerrota.js`), cada uno con sus números: tamaño de
+    letra, cuánto se corren las copias, color del brillo, cada cuántos ms se
+    sortean las barras (80 y 90), cuántas son y en qué zona aparecen (el
+    tablero o todo el canvas). El estado de las barras pasa a tener la misma
+    forma en los dos lados (`{ en, lista }`). Al ser ES modules, `glitch.js`
+    no suma ningún `<script>` al HTML: lo importan los dos archivos.
+  - **Un solo "empezar de cero" en el modelo:** `reiniciar()` y
+    `elegirBando()` repetían cómo se deja el tablero, los movimientos, el
+    resultado y la marca de hackeo. Ahora los dos llaman a `#limpiarPartida()`,
+    un método privado (el `#` hace que solo lo pueda usar la clase).
+  - **"Jugar de nuevo" reusa Reiniciar:** `jugarDeNuevo()` llama a
+    `reiniciar('Nueva partida.')`; el aviso es lo único que cambiaba.
+  - En `pagina.js` se corrigió un comentario viejo que decía que las capturas
+    de la galería todavía no existían (ya están en `assets/img/`).
+- **Por qué:** lo marcó el code review. Dos copias del mismo código se
+  terminan separando: un arreglo en una no llega a la otra.
+- **Una diferencia mínima en el cartel del hackeo:** antes solo la copia cyan
+  saltaba arriba o abajo (hasta 2 px); ahora saltan las dos, como en la
+  derrota. Es lo que permite usar una sola función sin una opción más para
+  cada copia, y a simple vista no se distingue.
+- **Descartado:** dejar las barras dentro de `finComun.js` (es de las
+  pantallas de fin, y el hackeo no es una pantalla de fin) y que el hackeo
+  importe de `pantallaDerrota.js` (mezcla dos efectos que no dependen uno del
+  otro).
 
 ---
 

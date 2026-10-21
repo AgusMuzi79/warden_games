@@ -42,11 +42,8 @@ export class PegModel {
    * elegido antes se conserva (la selección arranca en él).
    */
   reiniciar() {
-    this.tablero.reiniciar();
-    this.movimientos = 0;
+    this.#limpiarPartida();
     this.fase = 'eligiendo';
-    this.fin = null;   // { resultado, motivo, hackeado, tiempoMs, movimientos, nodos, ultima } al terminar
-    this.hackeado = false;  // se usó "Hackear Sistema" en esta partida
     // Se arranca y se congela en el mismo instante: marca 0 ms jugados hasta que se elija bando.
     this.reloj.iniciar();
     this.reloj.congelar();
@@ -57,14 +54,23 @@ export class PegModel {
    * @param {string} clave 'usuarios' o 'clu'
    */
   elegirBando(clave) {
-    this.tablero.reiniciar();
-    this.movimientos = 0;
-    this.fin = null;
-    this.hackeado = false;
+    this.#limpiarPartida();
     this.bando = clave;
     this.fase = 'jugando';
     this.reloj.iniciar();
     if (this.pausado) this.reloj.pausar();
+  }
+
+  /**
+   * Lo que comparten reiniciar() y elegirBando(): tablero inicial, sin
+   * movimientos, sin resultado y sin hackeo. Es privado (el # del nombre):
+   * solo lo usa esta clase.
+   */
+  #limpiarPartida() {
+    this.tablero.reiniciar();
+    this.movimientos = 0;
+    this.fin = null;   // { resultado, motivo, hackeado, tiempoMs, movimientos, nodos, ultima } al terminar
+    this.hackeado = false;  // se usó "Hackear Sistema" en esta partida
   }
 
   /**

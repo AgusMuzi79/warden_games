@@ -12,41 +12,12 @@
 import { conAlfa, clamp, prefiereMenosMovimiento } from '../utiles.js';
 import { ANCHO, ALTO } from '../config.js';
 import { texto, dibujarScanlines } from './dibujo.js';
+import { dibujarTextoGlitch, dibujarBarrasGlitch } from './glitch.js';
 import { MOTIVOS, cajaBotonFin, lineaEstadisticas, dibujarBotonFin } from './finComun.js';
 
 // Barras de colores de la derrota. Se sortean de nuevo cada 90 ms (no en
 // cada cuadro), así se ven como un parpadeo y no como ruido.
 const barrasGlitch = { en: -Infinity, lista: [] };
-
-/**
- * Título de la derrota con aberración cromática: una copia naranja y otra
- * cyan corridas a los costados, y la clara encima.
- * @param {CanvasRenderingContext2D} ctx
- * @param {Record<string, string>} colores
- * @param {{titulo: string}} fuentes
- * @param {number} y
- * @param {number} corrimiento cuántos px se separan las copias
- * @param {boolean} quieto true con movimiento reducido (sin temblor al azar)
- */
-function dibujarTituloGlitch(ctx, colores, fuentes, y, corrimiento, quieto) {
-  const cadena = 'SISTEMA CORRUPTO';
-  const x = ANCHO / 2;
-  const fuente = '700 62px ' + fuentes.titulo;
-  const azar = () => (quieto ? 0 : (Math.random() - 0.5) * corrimiento);
-  ctx.save();
-  // 'lighter' suma los colores donde las copias se pisan.
-  ctx.globalCompositeOperation = 'lighter';
-  texto(ctx, cadena, x - corrimiento, y + azar(), {
-    fuente, color: conAlfa(colores.activo, 0.85), alinear: 'center', espaciado: 6,
-  });
-  texto(ctx, cadena, x + corrimiento, y - azar(), {
-    fuente, color: conAlfa(colores.acento, 0.85), alinear: 'center', espaciado: 6,
-  });
-  ctx.restore();
-  texto(ctx, cadena, x, y, {
-    fuente, color: colores.textoClaro, alinear: 'center', espaciado: 6, brillo: colores.activo, desenfoque: 24,
-  });
-}
 
 /**
  * Efecto de pantalla rota de la derrota: franjas del propio canvas corridas
@@ -69,24 +40,9 @@ function dibujarRotura(ctx, colores, t, fuerte, dpr) {
     ctx.drawImage(ctx.canvas, 0, y * dpr, ANCHO * dpr, alto * dpr, corrimiento, y, ANCHO, alto);
   }
 
-  if (t - barrasGlitch.en > 90) {
-    barrasGlitch.en = t;
-    const tonos = [colores.activo, colores.acento, colores.destino];
-    barrasGlitch.lista = Array.from({ length: fuerte ? 14 : 6 }, () => ({
-      x: Math.random() * ANCHO,
-      y: Math.random() * ALTO,
-      w: 40 + Math.random() * (Math.random() < 0.15 ? ANCHO : 200),
-      h: 2 + Math.random() * 10,
-      color: tonos[Math.floor(Math.random() * tonos.length)],
-    }));
-  }
-  ctx.save();
-  ctx.globalAlpha = 0.7;
-  barrasGlitch.lista.forEach((barra) => {
-    ctx.fillStyle = barra.color;
-    ctx.fillRect(barra.x, barra.y, barra.w, barra.h);
+  dibujarBarrasGlitch(ctx, barrasGlitch, t, colores, {
+    cada: 90, cantidad: fuerte ? 14 : 6, x: 0, ancho: ANCHO, altoMax: 10, alfa: 0.7,
   });
-  ctx.restore();
 }
 
 /**
@@ -112,7 +68,14 @@ export function dibujarDerrota(ctx, recursos, colores, fuentes, fin, { t, dpr, e
   ctx.fillRect(0, 0, ANCHO, ALTO);
 
   const centroX = ANCHO / 2;
-  dibujarTituloGlitch(ctx, colores, fuentes, ALTO / 2 - 40, fuerte ? 9 : 2.5, quieto);
+  // Título con aberración cromática (ver glitch.js); quieto con movimiento reducido.
+  const corrimiento = fuerte ? 9 : 2.5;
+  dibujarTextoGlitch(ctx, 'SISTEMA CORRUPTO', centroX, ALTO / 2 - 40, colores, {
+    fuente: '700 62px ' + fuentes.titulo,
+    corrimiento,
+    temblor: quieto ? 0 : corrimiento,
+    brillo: colores.activo,
+  });
 
   // Caja con el motivo, del ancho del texto.
   const etiqueta = MOTIVOS[fin.motivo].etiqueta;

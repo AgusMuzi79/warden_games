@@ -35,22 +35,11 @@ iniciarPagina({
 });
 
 /**
- * Espera la fuente de los títulos (Orbitron), con el mismo tope de 1,5 s
- * que cargarFuentes() para no trabar el juego si la red está lenta.
- * @param {{titulo: string}} fuentes
- * @returns {Promise<void>}
- */
-async function cargarFuenteTitulo(fuentes) {
-  const carga = document.fonts.load('700 52px ' + fuentes.titulo).catch(() => {});
-  await Promise.race([carga, new Promise((listo) => setTimeout(listo, 1500))]);
-}
-
-/**
  * Prepara los recursos, crea la vista y el controlador, y arranca el juego.
  */
 async function arrancar() {
   const fuentes = obtenerFuentes();
-  await Promise.all([cargarFuentes(fuentes), cargarFuenteTitulo(fuentes)]);
+  await cargarFuentes(fuentes);
   const colores = obtenerColores();
   const recursos = await prepararRecursos(colores);
   const vista = new PegView(canvas, recursos, colores, fuentes, estado);

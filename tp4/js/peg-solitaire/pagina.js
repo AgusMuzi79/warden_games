@@ -22,10 +22,8 @@
 // Galería
 // ---------------------------------------------------------------
 
-// Las 4 capturas del Peg, en el orden en que se vive una partida.
-// Todavía no existen: las agrega el equipo en assets/img/ con estos nombres.
-// Mientras falten, la galería muestra la imagen rota pero sigue girando
-// (galeria.js gira igual si una foto no carga).
+// Las 4 capturas del Peg (en assets/img/), en el orden en que se vive una
+// partida. Si alguna no carga, la galería sigue girando igual (galeria.js).
 const FOTOS_GALERIA_PEG = [
   { src: 'assets/img/peg-seleccion.jpg', alt: 'Pantalla para elegir bando: Usuarios, con nodos cyan, o Programas de Clu, con nodos naranja.' },
   { src: 'assets/img/peg-partida.jpg', alt: 'Partida en curso, con un nodo levantado y los fantasmas de destino en los huecos donde se puede soltar.' },

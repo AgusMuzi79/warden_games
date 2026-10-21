@@ -15,8 +15,9 @@ const ANCHO_BARRA = 148;
 const AVISO_MS = 30 * 1000;   // con menos de 30 s el tiempo se pinta de naranja
 
 /**
- * Espera a que carguen las fuentes del HUD, con un tope de 1,5 s para no
- * trabar el juego si la red está lenta.
+ * Espera a que carguen las fuentes del canvas (Roboto Flex del HUD y
+ * Orbitron de los títulos), con un tope de 1,5 s para no trabar el juego si
+ * la red está lenta.
  * @param {{titulo: string, ui: string}} fuentes
  * @returns {Promise<void>}
  */
@@ -24,6 +25,7 @@ export async function cargarFuentes(fuentes) {
   const cargas = Promise.all([
     document.fonts.load('600 13px ' + fuentes.ui),
     document.fonts.load('700 42px ' + fuentes.ui),
+    document.fonts.load('700 52px ' + fuentes.titulo),
   ]).catch(() => {});
   await Promise.race([cargas, new Promise((listo) => setTimeout(listo, 1500))]);
 }
