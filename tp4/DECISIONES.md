@@ -524,6 +524,42 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   el efecto con una explosión por ficha (30 explosiones juntas son más de mil
   chispas, y cada una pesa en el cuadro).
 
+### Arreglos del hackeo y victoria hackeada marcada (review del PR #11)
+- **Qué:**
+  - **Sin fichas fantasma:** `PegView.hackear()` borra la ficha que temblaba
+    (`rechazo`, 300 ms) o que volvía a su casilla (`vuelta`, 220 ms), y el
+    controlador, si había una ficha arrastrada, la suelta sin la animación de
+    vuelta (antes llamaba a `cancelarArrastre()`, que la creaba). Esas fichas
+    podían ser de las que se sacan y quedaban dibujadas un rato encima del
+    tablero hackeado.
+  - **El cartel no tapa el fin:** el efecto dura 1400 ms y la pantalla de fin
+    aparece 700 ms después del salto ganador, así que si se ganaba enseguida,
+    "SISTEMA HACKEADO" quedaba encima de la victoria. `mostrarFin()` lo corta
+    con `vista.detenerHackeo()`. Se corta al mostrar el fin y no en el salto,
+    para que la explosión del último salto se vea completa.
+  - **El foco no se pierde:** `sincronizarBotonHackear()`, si el botón tiene
+    el foco cuando se deshabilita (por ejemplo, se termina el tiempo), pasa
+    el foco al canvas antes. Un botón deshabilitado pierde el foco y quedaría
+    en el `<body>`.
+  - **La victoria hackeada lo dice:** `PegModel.hackear()` marca
+    `this.hackeado = true`; se vuelve a `false` en cada partida nueva y viaja
+    en `fin.hackeado`. La pantalla de victoria muestra "VICTORIA CON HACKEO ·
+    NO CUENTA" y el aviso para lectores de pantalla dice "Ganaste con Hackear
+    Sistema (no cuenta)", en vez de "conexión perfecta" o "un solo nodo"
+    (`motivoDe()` en `finComun.js`). El título sigue siendo "SISTEMA
+    RESTAURADO": la partida se ganó igual.
+- **Por qué:** decisión del equipo, mismo criterio que la Trampa de Blocka
+  ("no cuenta para el récord"): sin la marca, una partida hackeada que
+  termina en el centro festejaba una "conexión perfecta" que nadie logró.
+  Los otros tres los encontró el code review del PR #11.
+- **`fin.motivo` no cambia:** sigue diciendo dónde quedó el último nodo
+  (`'central'` o `'un-nodo'`); la marca va aparte, así el modelo no mezcla
+  "cómo terminó el tablero" con "cómo se llegó".
+- **Una derrota hackeada** (se termina el tiempo después de hackear) se
+  muestra como cualquier derrota: no festeja nada que haya que aclarar.
+- **Descartado:** un motivo `'hackeado'` en el modelo (perdía dónde quedó el
+  nodo) y deshabilitar el botón sin mover el foco (el foco caía al `<body>`).
+
 ---
 
 ## Bandos (tipos de fichas)

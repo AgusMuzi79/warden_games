@@ -19,9 +19,10 @@ import { texto } from './dibujo.js';
 // ---------------------------------------------------------------
 //
 // PegController arma un objeto "fin" (con los datos del modelo) cuando se muestra la pantalla:
-// { resultado, motivo, tiempoMs, movimientos, nodos, ultima, mostradoEn }
+// { resultado, motivo, hackeado, tiempoMs, movimientos, nodos, ultima, mostradoEn }
 //   resultado: 'ganado' | 'perdido'
 //   motivo: 'central' | 'un-nodo' | 'sin-saltos' | 'tiempo' (ver MOTIVOS)
+//   hackeado: true si en la partida se usó "Hackear Sistema" (ver motivoDe)
 //   ultima: casilla del nodo que quedó solo ({fila, col}), o null si se perdió
 //   mostradoEn: instante (ms) en que apareció la pantalla; de ahí salen las animaciones
 
@@ -32,7 +33,20 @@ export const MOTIVOS = {
   'un-nodo': { etiqueta: 'UN SOLO NODO ACTIVO', frase: 'Quedó un solo nodo' },
   'sin-saltos': { etiqueta: 'NO QUEDAN SALTOS VÁLIDOS', frase: 'No quedan saltos válidos.' },
   tiempo: { etiqueta: 'SE TERMINÓ EL TIEMPO', frase: 'Se terminó el tiempo.' },
+  // Victoria después de "Hackear Sistema": no cuenta como una partida real
+  // (mismo criterio que la Trampa de Blocka), así que no dice "conexión perfecta".
+  hackeado: { etiqueta: 'VICTORIA CON HACKEO  ·  NO CUENTA', frase: 'Ganaste con Hackear Sistema (no cuenta)' },
 };
+
+/**
+ * Cómo se dice el motivo de este fin. Una victoria hackeada usa su propio
+ * texto, aunque el último salto haya terminado en el centro.
+ * @param {{resultado: string, motivo: string, hackeado: boolean}} fin
+ * @returns {{etiqueta: string, frase: string}}
+ */
+export function motivoDe(fin) {
+  return fin.resultado === 'ganado' && fin.hackeado ? MOTIVOS.hackeado : MOTIVOS[fin.motivo];
+}
 
 const TEXTO_BOTON_FIN = 'JUGAR DE NUEVO';
 const ANCHO_BOTON_FIN = 260;
@@ -90,7 +104,7 @@ export function avisoDeFin(fin) {
   const tiempo = tiempoUsado(fin.tiempoMs);
   const movimientos = fin.movimientos + (fin.movimientos === 1 ? ' movimiento' : ' movimientos');
   const cierre = ' Apretá Enter para jugar de nuevo.';
-  const frase = MOTIVOS[fin.motivo].frase;
+  const frase = motivoDe(fin).frase;
   if (fin.resultado === 'ganado') {
     return 'Sistema restaurado. ' + frase + ' en ' + tiempo + ' y ' + movimientos + '.' + cierre;
   }

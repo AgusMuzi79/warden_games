@@ -145,6 +145,7 @@ export class PegController {
     // mostradoEn: de ahí salen las animaciones de la pantalla de fin.
     this.ui.fin = { ...this.modelo.fin, mostradoEn: t };
     this.ui.botonEncendido = false;
+    this.vista.detenerHackeo();  // el cartel del hackeo no va encima del fin
     this.vista.avisarFin(this.ui.fin);
   }
 
@@ -255,10 +256,15 @@ export class PegController {
   /**
    * Habilita "Hackear Sistema" solo cuando se puede usar (partida en curso y
    * con más de dos fichas). Solo toca el DOM si el estado cambió.
+   * Si el botón tenía el foco cuando se deshabilita (por ejemplo, se terminó
+   * el tiempo), el foco pasa antes al canvas: un botón deshabilitado lo
+   * pierde y quedaría en el <body>.
    */
   sincronizarBotonHackear() {
     const deshabilitado = !this.modelo.puedeHackear;
-    if (this.botonHackear.disabled !== deshabilitado) this.botonHackear.disabled = deshabilitado;
+    if (this.botonHackear.disabled === deshabilitado) return;
+    if (deshabilitado && document.activeElement === this.botonHackear) this.canvas.focus();
+    this.botonHackear.disabled = deshabilitado;
   }
 
   /**
@@ -266,12 +272,19 @@ export class PegController {
    * para ganar; la vista hace el efecto. La partida sigue: gana quien haga
    * ese salto. El foco pasa al canvas, para seguir jugando (el botón se
    * deshabilita en el cuadro siguiente).
+   * Si había una ficha arrastrada, se suelta sin la animación de vuelta: puede
+   * ser una de las que se sacan, y deslizarse a su casilla la dibujaría como
+   * un fantasma.
    */
   hackear() {
     const t = performance.now();
     const quitadas = this.modelo.hackear();
     if (!quitadas) return;
-    this.cancelarArrastre(t);
+    if (this.ui.arrastre) {
+      this.ui.arrastre = null;
+      this.vista.cortarEstela();
+      this.vista.fijarCursor('default');
+    }
     this.ui.seleccion = null;
     this.ui.cursor = { fila: 3, col: 2 };
     this.vista.hackear(quitadas, t);

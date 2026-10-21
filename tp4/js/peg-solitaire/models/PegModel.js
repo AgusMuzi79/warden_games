@@ -45,7 +45,8 @@ export class PegModel {
     this.tablero.reiniciar();
     this.movimientos = 0;
     this.fase = 'eligiendo';
-    this.fin = null;   // { resultado, motivo, tiempoMs, movimientos, nodos, ultima } al terminar
+    this.fin = null;   // { resultado, motivo, hackeado, tiempoMs, movimientos, nodos, ultima } al terminar
+    this.hackeado = false;  // se usó "Hackear Sistema" en esta partida
     // Se arranca y se congela en el mismo instante: marca 0 ms jugados hasta que se elija bando.
     this.reloj.iniciar();
     this.reloj.congelar();
@@ -59,6 +60,7 @@ export class PegModel {
     this.tablero.reiniciar();
     this.movimientos = 0;
     this.fin = null;
+    this.hackeado = false;
     this.bando = clave;
     this.fase = 'jugando';
     this.reloj.iniciar();
@@ -109,12 +111,14 @@ export class PegModel {
   /**
    * "Hackear Sistema": deja solo dos fichas, con un último salto para ganar
    * (ver Tablero.dejarDosFichas). No cuenta como movimiento ni toca el reloj:
-   * la partida sigue, y gana quien haga ese salto.
+   * la partida sigue, y gana quien haga ese salto. La partida queda marcada
+   * como hackeada (this.hackeado), así la victoria lo dice.
    * @returns {{fila: number, col: number}[] | null}
    *   las casillas de las fichas que se sacaron, o null si no se puede hackear ahora
    */
   hackear() {
     if (!this.puedeHackear) return null;
+    this.hackeado = true;
     return this.tablero.dejarDosFichas();
   }
 
@@ -184,6 +188,7 @@ export class PegModel {
     this.fin = {
       resultado,
       motivo,
+      hackeado: this.hackeado,
       // Tope en el límite: si se agotó, el último cuadro pudo pasarse unos ms.
       tiempoMs: Math.min(this.reloj.transcurrido(), this.reloj.limiteMs),
       movimientos: this.movimientos,

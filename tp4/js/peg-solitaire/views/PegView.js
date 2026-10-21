@@ -277,8 +277,21 @@ export class PegView {
    * @param {number} t tiempo actual en ms
    */
   hackear(quitadas, t) {
+    // Si una ficha temblaba o volvía a su casilla, se corta: puede ser una de
+    // las que se sacan y quedaría dibujada encima como un fantasma.
+    this.vuelta = null;
+    this.rechazo = null;
     this.efectos.temblar(t);
     if (!prefiereMenosMovimiento()) this.hackeo = crearHackeo(quitadas, t);
+  }
+
+  /**
+   * Corta el efecto de hackeo si todavía está corriendo. Se usa al mostrar
+   * la pantalla de fin: el cartel "SISTEMA HACKEADO" dura 1400 ms y no tiene
+   * que quedar encima de esa pantalla.
+   */
+  detenerHackeo() {
+    this.hackeo = null;
   }
 
   /**

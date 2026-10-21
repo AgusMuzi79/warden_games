@@ -13,7 +13,7 @@ import { conAlfa, clamp, easeOut, prefiereMenosMovimiento } from '../utiles.js';
 import { ANCHO, ALTO } from '../config.js';
 import { texto, dibujarScanlines, dibujarFicha, centroDeCelda } from './dibujo.js';
 import {
-  MOTIVOS, alturaTituloVictoria, cajaBotonFin, lineaEstadisticas, dibujarBotonFin,
+  motivoDe, alturaTituloVictoria, cajaBotonFin, lineaEstadisticas, dibujarBotonFin,
 } from './finComun.js';
 
 /**
@@ -83,7 +83,7 @@ export function dibujarVictoria(ctx, recursos, colores, fuentes, fin, { t, image
   // El resto aparece cuando el barrido está terminando.
   ctx.save();
   ctx.globalAlpha = clamp((pasado - 700) / 400);
-  texto(ctx, MOTIVOS[fin.motivo].etiqueta, centroX, y + 54, {
+  texto(ctx, motivoDe(fin).etiqueta, centroX, y + 54, {
     fuente: '600 20px ' + fuentes.ui, color: colores.acento, alinear: 'center', espaciado: 6,
   });
   texto(ctx, lineaEstadisticas(fin), centroX, y + 92, {
