@@ -109,16 +109,17 @@ async function crearImagenFicha(ruta, colorBrillo, dpr) {
  */
 export async function prepararRecursos(colores) {
   const dpr = obtenerDpr();
-  const [tablero, naranja, cyan, blanca] = await Promise.all([
+  const [tablero, naranja, cyan, blanca, roja] = await Promise.all([
     cargarImagen(IMAGEN_TABLERO),
     crearImagenFicha(FICHAS.naranja, colores.activo, dpr),
     crearImagenFicha(FICHAS.cyan, colores.acento, dpr),
     crearImagenFicha(FICHAS.blanca, colores.destino, dpr),
+    crearImagenFicha(FICHAS.roja, colores.error, dpr),
   ]);
   return {
     tablero,
     scanlines: crearScanlines(colores, dpr),
-    fichas: { naranja, cyan, blanca },
+    fichas: { naranja, cyan, blanca, roja },
   };
 }
 

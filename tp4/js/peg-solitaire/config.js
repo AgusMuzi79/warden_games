@@ -52,6 +52,7 @@ export const FICHAS = {
   naranja: 'assets/img/ficha-naranja.png',
   cyan: 'assets/img/ficha-cyan.png',
   blanca: 'assets/img/ficha-blanca.png',
+  roja: 'assets/img/ficha-ares-roja.png',
 };
 
 // Bandos (como en Tron: Legacy, cyan son los Usuarios y naranja el ejército
@@ -75,7 +76,7 @@ export const BANDOS = {
     nombre: 'Programas de Clu',
     lema: 'La perfección del sistema',
     ficha: 'naranja',
-    fichaLevantada: 'cyan',
+    fichaLevantada: 'roja',
     color: 'activo',
     tarjeta: { x: ANCHO / 2 + 30, y: 210, w: 300, h: 360 },
   },
@@ -105,6 +106,7 @@ export function obtenerColores() {
     destino: leerToken('--tablero-destino'),
     textoClaro: leerToken('--acento-c3'),
     activo: leerToken('--tablero-activo'),
+    error: leerToken('--error'),
     descargado: leerToken('--tablero-descargado'),
     textoTenue: leerToken('--texto-tenue'),
     placa: leerToken('--placa'),
