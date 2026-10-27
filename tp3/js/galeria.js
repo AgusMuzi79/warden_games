@@ -60,6 +60,19 @@ function iniciarGaleria(fotos) {
   ponerEnCara(imgA, diapositivas[0]);
   ponerEnCara(imgB, diapositivas[Math.min(1, diapositivas.length - 1)]);
 
+  // Precarga: se piden todas las fotos apenas arranca la galería. Mientras se
+  // lee la página ya se van descargando, y al hacer clic están en la caché del
+  // navegador. Sin esto, la descarga recién empezaba con el clic y, con fotos
+  // pesadas, la carta giraba mostrando la foto anterior hasta que llegaba la nueva.
+  fotos.forEach((foto) => {
+    const precarga = new Image();
+    precarga.src = foto.src;
+  });
+
+  // true mientras se espera que una foto esté lista para girar. Los clics que
+  // llegan en ese momento se ignoran, para no encolar giros.
+  let esperando = false;
+
   // Índice de la diapositiva que se ve ahora (arranca en 0, la de la cara A).
   let indiceVisible = 0;
 
@@ -87,7 +100,9 @@ function iniciarGaleria(fotos) {
   actualizarContador();
 
   // direccion: 1 para "siguiente", -1 para "anterior".
-  function girar(direccion) {
+  // Es async porque espera a que la foto nueva esté lista antes de girar.
+  async function girar(direccion) {
+    if (esperando) return;
     const total = diapositivas.length;
 
     // La diapositiva nueva se calcula a partir de la que se ve hoy, no de una
@@ -102,6 +117,20 @@ function iniciarGaleria(fotos) {
     // Se carga en la cara escondida: el cambio de src no se ve hasta que gire.
     const imgDestino = caraOculta === 'a' ? imgA : imgB;
     ponerEnCara(imgDestino, diapositivas[nuevoIndice]);
+
+    // decode() devuelve una promesa que se cumple cuando la foto ya se
+    // descargó y se puede pintar. Si ya estaba precargada, se cumple enseguida.
+    // Si falla (foto rota), se gira igual: el catch evita que el clic quede
+    // trabado. El mensaje de "sin más capturas" no es una foto: no hay que esperar.
+    if (!diapositivas[nuevoIndice].vacio) {
+      esperando = true;
+      try {
+        await imgDestino.decode();
+      } catch {
+        // Se gira igual, con lo que haya en la cara.
+      }
+      esperando = false;
+    }
 
     // Cambiar --angulo es lo único que dispara la animación: el giro lo hace
     // la transition del CSS.

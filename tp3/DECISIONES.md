@@ -921,3 +921,26 @@ reaplicaron sobre `tp3/` en bloques; cada bloque queda comentado en su CSS.
   resplandor celeste del hover sí queda (aparece de golpe: no es movimiento y
   sigue avisando el hover). Se extendió a los hovers del header, footer,
   compartir y flechas de la galería. `loading.js` oculta el overlay de golpe.
+
+## Galería: la foto nueva tardaba en aparecer después del giro
+
+### Precarga de las fotos y giro recién cuando la foto está lista
+- **Qué pasaba:** en GitHub Pages, al pasar de foto la carta giraba enseguida,
+  pero la imagen nueva aparecía unos segundos después. `girar()` le cambiaba el
+  `src` a la cara escondida en el mismo momento del clic, así que la descarga
+  recién empezaba ahí. Con las capturas del Peg (PNG de 0,9 a 3,2 MB) la carta
+  terminaba de girar antes de que llegara la foto, y mientras tanto se veía la
+  anterior. En local no se notaba porque los archivos se leen al instante.
+- **Qué:** `js/galeria.js` hace dos cosas. Al iniciar, crea un `new Image()`
+  por cada foto para que se vayan descargando mientras se lee la página. En
+  `girar()`, después de poner la foto en la cara escondida, espera
+  `img.decode()` (una promesa que se cumple cuando la foto ya se puede pintar)
+  y recién ahí cambia `--angulo`. Si la foto falla, gira igual (`catch`).
+  Mientras espera, los clics se ignoran (`esperando`) para no encolar giros.
+- **Afecta a las tres galerías** (`juego.html`, `blocka.html` y
+  `producto.html`), porque comparten el motor.
+- **Descartado:** solo precargar (si se hace clic antes de que termine la
+  descarga, vuelve el problema) y solo esperar `decode()` sin precargar (cada
+  clic esperaría la descarga entera, con la carta quieta). Pasar las capturas
+  PNG del Peg a JPG bajaría el peso de unos 8 MB a menos de 1 MB; queda como
+  mejora aparte.
