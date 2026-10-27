@@ -840,6 +840,18 @@ Se corrió el código real del juego en el navegador sobre cada imagen con 4, 9 
   fijas, o sea 11 por resolver en vez de 16. Se acepta; Fran lo prefirió a
   sacar la imagen.
 
+### Las viñetas de cómic van reemplazando a los logos
+- **Qué:** se suman 3 tapas de cómic al banco (`comic-amazing-spider-man.jpg`,
+  `comic-spiderman-nuevo-dia.jpg` y `comic-realmguard.jpg`, de 480x480, como el
+  tablero): quedan 24 imágenes. Los 21 logos siguen hasta que haya viñetas para
+  reemplazarlos.
+- **Por qué:** decisión del equipo, para que combinen con la portada de cómic
+  del juego.
+- **Por qué de a poco y no todas juntas:** el enunciado pide 6 imágenes o más.
+  Sacar los logos antes de tener las viñetas dejaría el banco con 3.
+- **Descartado:** comentar los logos en el código mientras se prueba. Una
+  imagen que ya no se usa se borra de `BANCO_IMAGENES`, no se deja comentada.
+
 ## Galería con capturas del juego
 
 ### La galería muestra cómo se ve el juego, no el banco de imágenes

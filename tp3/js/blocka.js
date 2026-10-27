@@ -72,6 +72,10 @@ const BANCO_IMAGENES = [
   { src: 'assets/img/thor.jpg', alt: 'Imagen de Thor, una de las que se arman en Blocka.' },
   { src: 'assets/img/wolverine.jpg', alt: 'Imagen de Wolverine, una de las que se arman en Blocka.' },
   { src: 'assets/img/x-men.jpg', alt: 'Imagen de los X-Men, una de las que se arman en Blocka.', estricta: true },
+  // Viñetas de cómic: van a ir reemplazando a los logos de arriba.
+  { src: 'assets/img/comic-amazing-spider-man.jpg', alt: 'Tapa del cómic The Amazing Spider-Man, una de las imágenes que se arman en Blocka.' },
+  { src: 'assets/img/comic-spiderman-nuevo-dia.jpg', alt: 'Tapa del cómic Spiderman: Un nuevo día, una de las imágenes que se arman en Blocka.' },
+  { src: 'assets/img/comic-realmguard.jpg', alt: 'Tapa del cómic Realmguard, una de las imágenes que se arman en Blocka.' },
 ];
 
 // ---------- Niveles ----------
