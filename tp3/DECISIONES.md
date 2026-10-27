@@ -260,6 +260,44 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Detalle de CSS:** para centrar el contenido en vertical dentro de la card,
   `.tablero__cuerpo` pasa a columna flex y `.tablero__juego` a `flex: 1`; el
   `height: 100%` de `juego.css` no alcanza porque el cuerpo no tiene alto fijo.
+- **Actualización: esta pantalla y "Comenzar" ya no existen** (ver la entrada
+  siguiente, "Jugar lleva directo a elegir las piezas; los récords, aparte").
+
+### "Jugar" lleva directo a elegir las piezas; los récords, aparte
+- **Qué:** "Jugar" (portada) abre "Elegí la cantidad de piezas"; de ahí se
+  elige el modo y arranca el sorteo y el nivel 1, como antes. Se sacó la
+  pantalla de inicio con "Comenzar". La tabla de récords (con sus píldoras de
+  piezas y modo y sus tachitos, sin cambios) se abre con un botón
+  **Récords** (`btn--secundario`, ícono `ph-trophy`) en la pantalla de piezas, y
+  tiene su propio **Volver**, que lleva de nuevo a las piezas. "Volver al
+  inicio" (al ganar, al perder, después del nivel 3 o si la imagen no carga)
+  también lleva a las piezas (`mostrarPiezas()`, que reemplaza a
+  `mostrarInicio()`). Reemplaza la entrada anterior.
+- **Por qué:** pedido de Agus. Las píldoras de la tabla (4 / 9 / 16 piezas,
+  Normal / Difícil) parecían la configuración de la partida, pero después
+  "Comenzar" volvía a preguntar piezas y modo: se elegía dos veces lo mismo, o
+  se creía haber elegido algo que no se usaba. Ahora la única elección es la
+  de las tarjetas, y los récords quedan claramente como algo para mirar.
+- **El reloj sigue arrancando después del sorteo:** el "Comenzar" del enunciado
+  ("el temporizador se inicia cuando el usuario elige Comenzar") pasa a ser la
+  tarjeta de modo, que es la última elección antes de jugar. "Siguiente nivel"
+  y "Reintentar nivel" no cambian.
+- **La pantalla de piezas no tiene "Volver":** es la primera después de la
+  portada, y no hay a dónde volver dentro del juego (la portada solo tiene
+  "Jugar"). Para salir está el "Volver al menú" del header.
+- **Los récords abren en lo último jugado:** las píldoras se marcan con las
+  piezas y el modo de la última partida (`vistaRecords` y `vistaModo` se fijan
+  al elegir el modo, igual que antes).
+- **Foco:** "Jugar" y "Volver al inicio" lo pasan a la tarjeta de las piezas
+  jugadas por última vez (la de 4 si todavía no se jugó), así un Enter repite
+  la elección. "Récords" lo pasa al título de la tabla (`<h2 tabindex="-1">`),
+  que el lector de pantalla anuncia, y su "Volver" lo devuelve al botón
+  "Récords". La cabecera "Blocka" de la card deja de recibir el foco (ya no
+  hace falta) y pierde su `tabindex`.
+- **Descartado:** dejar la pantalla de inicio y que "Comenzar" usara lo que
+  marcaban las píldoras (mezcla "ver récords" con "configurar la partida" en
+  los mismos botones) y poner los récords debajo de las tarjetas de piezas (no
+  entran en la card de 660 px junto con las tarjetas).
 
 ### El reloj se calcula contra el instante de inicio, con décimas
 - **Qué:** `iniciarReloj()` guarda `performance.now()` y un `setInterval` de
@@ -286,7 +324,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ### Fin de nivel: "Reintentar nivel", "Volver al inicio" y "Siguiente nivel"
 - **Qué:** al armar la imagen aparecen "Reintentar nivel" (mismo nivel, imagen
-  nueva), "Volver al inicio" (pantalla de inicio del juego, con los récords) y,
+  nueva), "Volver al inicio" (inicio del juego: la elección de piezas) y,
   si hay un nivel siguiente, "Siguiente nivel" (arranca al instante, otra
   imagen y otro filtro). Tras el último nivel no hay "siguiente". Al perder por
   tiempo quedan "Reintentar nivel" y "Volver al inicio".
@@ -388,7 +426,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ## Extra: sorteo de la imagen (tragamonedas)
 
 ### Tres rodillos que frenan en la misma imagen
-- **Qué:** entre "Comenzar" / "Siguiente nivel" / "Reintentar nivel" y el juego,
+- **Qué:** entre la elección del modo / "Siguiente nivel" / "Reintentar nivel" y el juego,
   aparece una tragamonedas de 3 rodillos. Cada rodillo es una ventana de 3
   casillas de alto sobre una tira vertical de imágenes del banco. Las tiras
   caen y frenan una tras otra (izquierda, centro, derecha) hasta dejar la
@@ -449,7 +487,8 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ## Borrar récords
 
 ### Un tachito por fila, con el botón destructivo
-- **Qué:** cada fila de la tabla de récords (pantalla de inicio) tiene un botón
+- **Qué:** cada fila de la tabla de récords (se abre con "Récords" desde la
+  elección de piezas) tiene un botón
   cuadrado de 44 px con el ícono `ph-trash` de Phosphor, que borra el récord de
   ese nivel. Usa `btn--destructivo`: borde y ícono rojos y, al pasar el mouse,
   se rellena de rojo con el pulso de resplandor (la cuarta animación de hover,
@@ -464,8 +503,10 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **Al borrar:** `eliminarRecord()` saca la clave del nivel del objeto en
   `localStorage` (mismo `try/catch` que `guardarRecord`), se rearma la tabla, se
   actualiza "Tu récord" de la ficha y un texto de estado (`role="status"`)
-  anuncia "Récord del nivel N borrado." El foco pasa a "Comenzar", porque el
-  tachito que lo tenía deja de verse.
+  anuncia "Récord del nivel N borrado." El foco pasa al botón "Deshacer" de
+  ese aviso, porque el tachito que lo tenía deja de verse; al deshacer, pasa al
+  título de la tabla ("Récords"). Antes iba a "Comenzar", que ya no existe (ver
+  "Jugar lleva directo a elegir las piezas; los récords, aparte").
 - **Sin récord, el tachito no se ve** (`visibility: hidden`): no hay nada que
   borrar, no recibe foco y sigue ocupando su lugar para que las filas queden
   alineadas.
@@ -512,6 +553,9 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   grilla (2 × 2, 3 × 3, 4 × 4), la pantalla se llama "Elegí la cantidad de
   piezas" y, al elegir, no arranca el nivel: pasa a elegir el modo (ver "Extra:
   modo Normal y Difícil").
+- **Actualización 2:** ya no hay "Comenzar": "Jugar" (portada) abre esta
+  pantalla directo, y su "Volver" se reemplazó por el botón "Récords" (ver
+  "Jugar lleva directo a elegir las piezas; los récords, aparte").
 
 ### Un solo tablero de 480x480 píxeles
 - **Qué:** `LADO_TABLERO = 480`. `DIFICULTADES` guarda cuántas piezas entran por
@@ -653,11 +697,13 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ### Récords por piezas, modo y nivel
 - **Qué:** la clave pasa a ser `"<piezas>-<modo>-<nivel>"` (por ejemplo
   `"16-dificil-2"`), con modo `normal` o `dificil`, en todos los lugares que
-  leen, guardan o borran un récord. La tabla del inicio suma un segundo grupo
+  leen, guardan o borran un récord. La tabla de récords suma un segundo grupo
   de píldoras (Normal / Difícil, con `aria-pressed`, mismo estilo que las de
   piezas) debajo del primero. Los tachitos borran el récord de las piezas y el
   modo que se ven, y su `aria-label` nombra el modo. "Tu récord" de la ficha y
   la tabla, al volver de una partida, quedan en las piezas y el modo jugados.
+  Estas píldoras solo eligen qué récords se ven: no configuran la partida (ver
+  "Jugar lleva directo a elegir las piezas; los récords, aparte").
 - **Por qué:** un tiempo con el filtro fijo (que se conoce de antemano) no se
   puede comparar con uno con filtro sorpresa.
 - **Los récords viejos (claves `"4-0"`, `"16-2"`...) dejan de verse:** mismo

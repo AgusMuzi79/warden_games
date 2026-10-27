@@ -28,8 +28,9 @@
   height: auto;
 }
 
-/* ---------- Pantalla de inicio ----------
-   La tabla de récords y, abajo, el botón Comenzar. */
+/* ---------- Pantalla de récords ----------
+   La tabla de récords y, abajo, el botón Volver (a la elección de piezas).
+   Se abre con el botón "Récords" de la pantalla de piezas. */
 .blocka__inicio {
   display: flex;
   flex-direction: column;
@@ -146,7 +147,7 @@
 
 /* Aviso "Récord del nivel N borrado." debajo de la tabla, con el botón
    "Deshacer" al lado. Flex para alinear el texto y el botón; el alto mínimo es
-   el del botón (--control-alto), así "Comenzar" no salta cuando el botón
+   el del botón (--control-alto), así "Volver" no salta cuando el botón
    aparece o desaparece. */
 .blocka__records-estado {
   display: flex;
@@ -252,6 +253,12 @@
   color: var(--primario-c2);
   font: 400 14px/1.5 var(--font-ui);
   text-align: center;
+}
+
+/* Botón "Récords" de la pantalla de piezas: .btn no deja espacio entre el
+   ícono del trofeo y el texto, así que se lo da el gap del flex. */
+.blocka__btn-records {
+  gap: var(--espaciado-2);
 }
 
 /* ---------- Sorteo (tragamonedas) ----------

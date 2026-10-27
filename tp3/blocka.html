@@ -67,8 +67,8 @@
 
         <!-- Cabecera de la card: oculta mientras se ve la portada (la imagen
              ya trae el nombre del juego). js/blocka.js la muestra al
-             clickear "Jugar" y le pasa el foco. -->
-        <div class="tablero__cabecera" id="tablero-cabecera" tabindex="-1" hidden>
+             clickear "Jugar" (el foco pasa a la elección de piezas). -->
+        <div class="tablero__cabecera" id="tablero-cabecera" hidden>
           <p class="tablero__etiqueta">Blocka</p>
         </div>
 
@@ -86,14 +86,15 @@
                de pantalla lo anuncia sin cortar lo que está leyendo. -->
           <div class="tablero__juego" id="tablero-juego" hidden>
 
-            <!-- Pantalla de inicio: se ve después de la portada. Los récords
-                 los arma js/blocka.js (leen localStorage). Las instrucciones
-                 no van acá: están en el panel de Ayuda. "Comenzar" oculta
-                 esto y arranca el nivel 1. -->
-            <div class="blocka__inicio" id="blocka-inicio">
+            <!-- Récords: se abre con el botón "Récords" de la pantalla de
+                 piezas y vuelve a ella con "Volver". Es solo para mirar (y
+                 borrar) récords: las píldoras eligen qué récords se ven, no
+                 configuran la partida. La lista la arma js/blocka.js (lee
+                 localStorage). -->
+            <div class="blocka__inicio" id="blocka-records" hidden>
               <section class="blocka__panel" aria-labelledby="inicio-records">
                 <div class="blocka__panel-cabecera">
-                  <h2 id="inicio-records">Récords</h2>
+                  <h2 id="inicio-records" tabindex="-1">Récords</h2>
                   <!-- Ver los récords de cada cantidad de piezas y de cada
                        modo: dos grupos de píldoras, uno debajo del otro.
                        aria-pressed marca la activa de cada grupo. -->
@@ -113,13 +114,15 @@
                 <p class="blocka__records-estado" id="blocka-records-estado" role="status"></p>
               </section>
 
-              <button type="button" class="btn btn--primario" id="btn-comenzar">Comenzar</button>
+              <button type="button" class="btn btn--terciario" id="btn-records-volver">Volver</button>
             </div>
 
-            <!-- Elección de piezas: se ve después de "Comenzar". Cada opción
-                 fija cuántas piezas tendrá la imagen y pasa a elegir el modo
+            <!-- Elección de piezas: es lo primero que se ve después de la
+                 portada (y al volver de un nivel). Cada opción fija cuántas
+                 piezas tendrá la imagen y pasa a elegir el modo
                  (js/blocka.js). La etiqueta de abajo es la grilla (2 × 2...),
-                 no Fácil/Medio/Difícil: "Difícil" es un modo. -->
+                 no Fácil/Medio/Difícil: "Difícil" es un modo. "Récords" abre
+                 la tabla de récords. -->
             <div class="blocka__dificultad" id="blocka-dificultad" hidden>
               <h2 id="dificultad-titulo">Elegí la cantidad de piezas</h2>
               <div class="blocka__opciones" role="group" aria-labelledby="dificultad-titulo">
@@ -140,7 +143,10 @@
                 </button>
               </div>
               <p class="blocka__dificultad-nota">Con más piezas, el tiempo límite de los niveles avanzados es mayor.</p>
-              <button type="button" class="btn btn--terciario" id="btn-dificultad-volver">Volver</button>
+              <button type="button" class="btn btn--secundario blocka__btn-records" id="btn-records">
+                <i class="ph ph-trophy" aria-hidden="true"></i>
+                Récords
+              </button>
             </div>
 
             <!-- Elección de modo: se ve después de elegir las piezas y antes
@@ -164,7 +170,7 @@
             </div>
 
             <!-- Sorteo de la imagen: una tragamonedas de 3 rodillos que se ve
-                 entre "Comenzar" y el juego. js/blocka.js llena las tiras con
+                 entre la elección del modo y el juego. js/blocka.js llena las tiras con
                  imágenes y las hace girar. Los rodillos son decorativos
                  (aria-hidden): el resultado lo anuncia el texto de estado. -->
             <div class="blocka__sorteo" id="blocka-sorteo" tabindex="-1" hidden>
@@ -178,7 +184,7 @@
               <p class="blocka__sorteo-estado" id="blocka-sorteo-estado" role="status"></p>
             </div>
 
-            <!-- Partida: oculta hasta elegir "Comenzar". El HUD (nivel,
+            <!-- Partida: oculta hasta terminar el sorteo. El HUD (nivel,
                  tiempo y récord), el canvas y los botones los maneja
                  js/blocka.js. El párrafo de estado es role="status": el
                  lector de pantalla lo anuncia sin cortar lo que está leyendo. -->

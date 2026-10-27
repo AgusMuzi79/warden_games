@@ -1,12 +1,12 @@
 // blocka.js — Página de Blocka
 //
 // Qué hace hoy:
-//   1. Maneja la portada y la pantalla de inicio: "Jugar" (portada) lleva al
-//      inicio (tabla de récords, con un tachito para borrar cada uno) y
-//      "Comenzar" lleva a elegir la cantidad de piezas (4, 9 o 16) y después
-//      el modo: Normal (cada nivel con su filtro fijo) o Difícil (cada nivel
-//      sortea un filtro sorpresa). El tiempo límite depende de la cantidad de
-//      piezas, y los récords, de la cantidad de piezas y del modo.
+//   1. Maneja la portada y el arranque: "Jugar" (portada) lleva directo a
+//      elegir la cantidad de piezas (4, 9 o 16) y después el modo: Normal
+//      (cada nivel con su filtro fijo) o Difícil (cada nivel sortea un filtro
+//      sorpresa). Desde la pantalla de piezas, "Récords" abre la tabla de
+//      récords (con un tachito para borrar cada uno). El tiempo límite depende
+//      de la cantidad de piezas, y los récords, de la cantidad de piezas y del modo.
 //   2. Sorteo de la imagen: una tragamonedas de 3 rodillos que frena, uno
 //      tras otro, en la imagen elegida para el nivel (extra del enunciado).
 //   3. Motor del nivel: carga la imagen sorteada, la corta en piezas, les
@@ -15,7 +15,8 @@
 //      el teclado (flechas para elegir, Q / E para girar) hasta armar la imagen. Al armarla se quitan los filtros con un fundido.
 //   4. Temporizador (arranca al terminar el sorteo, se frena al armar la imagen),
 //      récord por piezas, modo y nivel guardado en localStorage y paso entre niveles
-//      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio").
+//      ("Siguiente nivel", "Reintentar nivel" o "Volver al inicio", que lleva
+//      a la elección de piezas).
 //   5. Extras: "Ayudita" (deja una parte bien puesta y fija, suma 5 segundos),
 //      "Trampa" (resuelve el nivel, sin récord; oculta, solo con el atajo
 //      Alt + T para la demo) y tiempo máximo en los
@@ -23,11 +24,11 @@
 //   6. Le pasa a la galería animada las capturas del juego.
 //
 // Depende de blocka.html: #tablero-cabecera, #tablero-portada,
-// #tablero-juego, #btn-jugar, #blocka-canvas, #blocka-estado, los datos del
-// pantalla de inicio (#blocka-inicio, #blocka-lista-records,
+// #tablero-juego, #btn-jugar, #blocka-canvas, #blocka-estado,
+// la tabla de récords (#blocka-records, #inicio-records, #blocka-lista-records,
 // #blocka-records-estado, .blocka__vista[data-piezas], .blocka__vista[data-modo],
-// #btn-comenzar), la elección de piezas (#blocka-dificultad,
-// .blocka__opcion[data-piezas], #btn-dificultad-volver), la elección de modo
+// #btn-records-volver), la elección de piezas (#blocka-dificultad,
+// .blocka__opcion[data-piezas], #btn-records), la elección de modo
 // (#blocka-modo, .blocka__opcion[data-modo], #btn-modo-volver), el sorteo (#blocka-sorteo, #blocka-sorteo-titulo, #blocka-sorteo-estado,
 // .blocka__slot y las 3 .blocka__tira), la partida (#blocka-partida), el HUD (#blocka-nivel, #blocka-tiempo,
 // #blocka-record, #ficha-record) y los botones (#btn-ayudita, #btn-trampa,
@@ -299,11 +300,8 @@ btnJugar.addEventListener('click', () => {
 
   // "Jugar" tenía el foco y desaparece con la portada. Sin esto el foco cae
   // al <body> y quien navega con teclado o lector de pantalla se pierde.
-  // La cabecera es lo primero visible de la card, y puede recibir el foco
-  // por código (tiene tabindex="-1" en el HTML).
-  cabecera.focus();
-
-  mostrarInicio();
+  // mostrarPiezas() lo pasa a la primera tarjeta de piezas.
+  mostrarPiezas();
 });
 
 // ---------- Motor del nivel ----------
@@ -319,7 +317,8 @@ const datoNivel = document.getElementById('blocka-nivel');
 const datoTiempo = document.getElementById('blocka-tiempo');
 const datoRecord = document.getElementById('blocka-record');
 const fichaRecord = document.getElementById('ficha-record');
-const inicio = document.getElementById('blocka-inicio');
+const pantallaRecords = document.getElementById('blocka-records');
+const tituloRecords = document.getElementById('inicio-records');
 const partida = document.getElementById('blocka-partida');
 const sorteo = document.getElementById('blocka-sorteo');
 const sorteoTitulo = document.getElementById('blocka-sorteo-titulo');
@@ -333,13 +332,13 @@ const dificultad = document.getElementById('blocka-dificultad');
 // ven igual); se distinguen por su atributo data-piezas o data-modo. Lo mismo
 // con los dos grupos de píldoras de la tabla de récords (.blocka__vista).
 const opcionesDificultad = document.querySelectorAll('.blocka__opcion[data-piezas]');
-const btnDificultadVolver = document.getElementById('btn-dificultad-volver');
+const btnRecords = document.getElementById('btn-records');
+const btnRecordsVolver = document.getElementById('btn-records-volver');
 const pantallaModo = document.getElementById('blocka-modo');
 const opcionesModo = document.querySelectorAll('.blocka__opcion[data-modo]');
 const btnModoVolver = document.getElementById('btn-modo-volver');
 const botonesVista = document.querySelectorAll('.blocka__vista[data-piezas]');
 const botonesVistaModo = document.querySelectorAll('.blocka__vista[data-modo]');
-const btnComenzar = document.getElementById('btn-comenzar');
 const btnAyudita = document.getElementById('btn-ayudita');
 const btnTrampa = document.getElementById('btn-trampa');
 const btnSiguiente = document.getElementById('btn-siguiente');
@@ -743,8 +742,8 @@ function actualizarAyudita() {
 }
 
 // Muestra el récord del nivel actual en el HUD y en la ficha del juego. Por
-// defecto es el de las piezas y el modo que se juegan; en el inicio, el de los
-// que se están viendo en la tabla.
+// defecto es el de las piezas y el modo que se juegan; fuera de la partida
+// (elección de piezas y tabla de récords), el de los que se ven en la tabla.
 function mostrarRecord(cantidad = cantidadPiezas, modoRecord = modo) {
   const record = leerRecord(cantidad, modoRecord, indiceNivel);
   datoRecord.textContent = record === undefined ? '—' : formatearTiempo(record);
@@ -760,8 +759,8 @@ function ocultarAcciones() {
 
 // Prepara el nivel actual: sortea una imagen (distinta a la del nivel
 // anterior), muestra la tragamonedas y, cuando termina, arranca el nivel.
-// Quien llega acá ya eligió empezar, con "Comenzar", "Siguiente nivel" o
-// "Reintentar nivel".
+// Quien llega acá ya eligió empezar, con una tarjeta de modo, "Siguiente
+// nivel" o "Reintentar nivel".
 function iniciarNivel() {
   detenerReloj();
   // Si el nivel anterior todavía estaba en su fundido final, se corta: si no,
@@ -787,8 +786,9 @@ function iniciarNivel() {
   } while (BANCO_IMAGENES.length > 1 && indiceImagen === ultimaImagen);
   ultimaImagen = indiceImagen;
 
-  // Se muestra la tragamonedas en lugar del inicio o de la partida anterior.
-  inicio.hidden = true;
+  // Se muestra la tragamonedas en lugar de la elección de modo o de la
+  // partida anterior.
+  pantallaRecords.hidden = true;
   dificultad.hidden = true;
   pantallaModo.hidden = true;
   partida.hidden = true;
@@ -965,22 +965,54 @@ function sortear(indiceGanadora) {
   }));
 }
 
-// Pantalla de inicio: se ve después de la portada y al volver de un nivel.
-// Muestra la tabla de récords (de las piezas y el modo que se estén viendo).
-// Todavía no hay partida: se eligen piezas y modo con "Comenzar".
-function mostrarInicio() {
+// Elección de piezas: es la primera pantalla después de la portada y a la
+// que vuelve "Volver al inicio" (al terminar o perder un nivel, o si la imagen
+// no cargó). Corta lo que hubiera en juego y deja todo listo para una partida
+// nueva desde el nivel 1. El foco va a la tarjeta de las piezas que se
+// jugaron por última vez (la primera, si todavía no se jugó), así quien usa
+// teclado puede repetir la elección con un Enter.
+function mostrarPiezas() {
   detenerReloj();
   cancelarFundido();
   nivelActivo = false;
   indiceNivel = 0;
   partida.hidden = true;
   sorteo.hidden = true;
-  dificultad.hidden = true;
   pantallaModo.hidden = true;
-  inicio.hidden = false;
+  pantallaRecords.hidden = true;
+  dificultad.hidden = false;
+  recordsEstado.textContent = '';
+  // "Tu récord" de la ficha pasa a las piezas y el modo que se jugaron.
+  actualizarVistaRecords();
+  enfocarPiezasElegidas();
+}
+
+// Pasa el foco a la tarjeta de las piezas elegidas (o a la primera).
+function enfocarPiezasElegidas() {
+  const elegida = [...opcionesDificultad].find((opcion) => Number(opcion.dataset.piezas) === cantidadPiezas);
+  (elegida || opcionesDificultad[0]).focus();
+}
+
+// "Récords" (elección de piezas): abre la tabla de récords. Las píldoras
+// arrancan marcando las piezas y el modo de la última partida (vistaRecords y
+// vistaModo se fijan al elegir el modo). El foco va al título de la tabla
+// (tiene tabindex="-1" en el HTML), que el lector de pantalla anuncia.
+btnRecords.addEventListener('click', () => {
+  dificultad.hidden = true;
+  pantallaRecords.hidden = false;
   recordsEstado.textContent = '';
   actualizarVistaRecords();
-}
+  tituloRecords.focus();
+});
+
+// "Volver" (récords): de nuevo a la elección de piezas, con el foco en
+// "Récords", que es el botón desde el que se llegó.
+btnRecordsVolver.addEventListener('click', () => {
+  pantallaRecords.hidden = true;
+  recordsEstado.textContent = '';
+  dificultad.hidden = false;
+  btnRecords.focus();
+});
 
 // Marca qué píldoras de la tabla están activas: una del grupo de piezas (4, 9
 // o 16) y una del grupo de modo (Normal o Difícil).
@@ -1088,14 +1120,14 @@ function borrarRecordDelInicio(indice) {
     mostrarRecordsInicio();
     mostrarRecord(vistaRecords, vistaModo);
     recordsEstado.textContent = 'Récord restaurado.';
-    // El botón "Deshacer" desaparece con el texto nuevo: el foco vuelve a
-    // "Comenzar" para no caer al <body>.
-    btnComenzar.focus();
+    // El botón "Deshacer" desaparece con el texto nuevo: el foco vuelve al
+    // título de la tabla para no caer al <body>.
+    tituloRecords.focus();
   });
 
   // El aviso y el botón van juntos en el mismo párrafo. Si después otra
-  // acción cambia el texto (otro borrado, cambiar de dificultad, volver al
-  // inicio), el botón desaparece solo: ya no hay nada que deshacer.
+  // acción cambia el texto (otro borrado, cambiar de dificultad, salir con
+  // "Volver"), el botón desaparece solo: ya no hay nada que deshacer.
   recordsEstado.replaceChildren(
     `Récord del nivel ${indice + 1} con ${cantidad} piezas (${MODOS[modoBorrado].nombre}) borrado.`,
     deshacer
@@ -1108,14 +1140,6 @@ function borrarRecordDelInicio(indice) {
 
 // ---------- Elección de piezas y de modo ----------
 
-// "Comenzar" (inicio): lleva a elegir cuántas piezas tendrá la imagen.
-btnComenzar.addEventListener('click', () => {
-  inicio.hidden = true;
-  dificultad.hidden = false;
-  // El botón que se apretó desaparece: el foco pasa a la primera opción.
-  opcionesDificultad[0].focus();
-});
-
 // Cada opción (4, 9 o 16 piezas) fija la cantidad de piezas y pasa a elegir
 // el modo. Todavía no arranca nada: falta el modo.
 opcionesDificultad.forEach((opcion) => {
@@ -1123,21 +1147,15 @@ opcionesDificultad.forEach((opcion) => {
     cantidadPiezas = Number(opcion.dataset.piezas);
     dificultad.hidden = true;
     pantallaModo.hidden = false;
-    // Mismo criterio que con "Comenzar": la tarjeta apretada desaparece y el
-    // foco pasa a la primera opción de la pantalla nueva.
+    // La tarjeta apretada desaparece: el foco pasa a la primera opción de la
+    // pantalla nueva, para no caer al <body>.
     opcionesModo[0].focus();
   });
 });
 
-// "Volver" (elección de piezas): de nuevo al inicio.
-btnDificultadVolver.addEventListener('click', () => {
-  mostrarInicio();
-  btnComenzar.focus();
-});
-
 // Cada modo (Normal o Difícil) lo fija y arranca el nivel 1, que empieza por
-// el sorteo de la imagen. La tabla del inicio pasa a mostrar los récords de
-// esas piezas y ese modo, así al volver se ve lo que se acaba de jugar.
+// el sorteo de la imagen. La tabla de récords pasa a mostrar los de esas
+// piezas y ese modo, así al abrirla se ve lo que se acaba de jugar.
 opcionesModo.forEach((opcion) => {
   opcion.addEventListener('click', () => {
     modo = opcion.dataset.modo;
@@ -1153,14 +1171,13 @@ opcionesModo.forEach((opcion) => {
 btnModoVolver.addEventListener('click', () => {
   pantallaModo.hidden = true;
   dificultad.hidden = false;
-  const elegida = [...opcionesDificultad].find((opcion) => Number(opcion.dataset.piezas) === cantidadPiezas);
-  (elegida || opcionesDificultad[0]).focus();
+  enfocarPiezasElegidas();
 });
 
 // Termina el nivel porque se armó la imagen (o porque se hizo trampa): frena
 // el reloj, guarda el récord si corresponde y ofrece seguir ("Siguiente
 // nivel", salvo en el último), repetir el nivel ("Reintentar nivel") o
-// volver a la pantalla de inicio ("Volver al inicio"). Con trampa no se
+// volver a elegir las piezas ("Volver al inicio"). Con trampa no se
 // guarda récord.
 function terminarNivel(conTrampa = false) {
   detenerReloj();
@@ -1198,7 +1215,7 @@ function terminarNivel(conTrampa = false) {
 }
 
 // Se acabó el tiempo máximo: se pierde el nivel. Se puede reintentar (mismo
-// nivel, con una imagen nueva) o volver a la pantalla de inicio.
+// nivel, con una imagen nueva) o volver a elegir las piezas.
 function perderNivel() {
   detenerReloj();
   nivelActivo = false;
@@ -1293,13 +1310,10 @@ btnSiguiente.addEventListener('click', () => {
   }
 });
 
-// "Volver al inicio": vuelve a la pantalla de inicio del juego (la tabla de
-// récords), no a la Home del sitio. Para eso está el "Volver al menú"
-// del header.
-btnInicio.addEventListener('click', () => {
-  mostrarInicio();
-  btnComenzar.focus();
-});
+// "Volver al inicio": vuelve al inicio del juego (la elección de piezas), no a
+// la Home del sitio. Para eso está el "Volver al menú" del header.
+// mostrarPiezas() ya mueve el foco.
+btnInicio.addEventListener('click', () => mostrarPiezas());
 
 // Convierte el punto donde se hizo clic (en píxeles de la pantalla) a la
 // pieza que está ahí. El CSS puede mostrar el canvas más chico que sus píxeles
