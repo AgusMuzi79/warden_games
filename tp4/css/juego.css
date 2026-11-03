@@ -197,6 +197,82 @@
   margin-inline: auto;
 }
 
+/* "Hackear Sistema": en vez del pulso rojo del destructivo, un hover que se
+   siente a hackeo (ver DECISIONES.md). Tres capas, todas en CSS:
+   - Glitch: dos copias del texto (::before celeste, ::after naranja) quedan
+     DETRÁS del texto real (z-index: -1) y en hover se desfasan y se recortan
+     en franjas con clip-path, a saltos. Solo se mueven en una ráfaga corta al
+     final de cada ciclo; el resto del tiempo el texto está limpio.
+   - Escaneo: una franja de luz baja por el botón (capa de fondo animada) sobre
+     líneas finas de terminal. Va en el fondo del botón porque los dos
+     pseudo-elementos ya los usa el glitch.
+   - El borde parpadea entre celeste y naranja.
+   Naranja = --tablero-activo, el de las fichas. El texto y el borde en reposo
+   también son naranjas, para que el hover no cambie de color de golpe.
+   :not(:disabled): el botón empieza deshabilitado y no debe animarse así. */
+.peg__hackear {
+  border-color: var(--tablero-activo);
+  color: var(--tablero-activo);
+}
+
+.peg__hackear::before,
+.peg__hackear::after {
+  content: attr(data-texto);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.peg__hackear::before { color: var(--acento); }
+.peg__hackear::after  { color: var(--tablero-activo); }
+
+.peg__hackear:not(:disabled):hover {
+  background:
+    linear-gradient(to bottom, transparent 40%, var(--acento-o2) 50%, transparent 60%) 0 -2.75em / 100% 100% no-repeat,
+    repeating-linear-gradient(to bottom, transparent 0 2px, var(--sombra-elevacion) 2px 3px),
+    var(--fondo);
+  border-color: var(--acento);
+  color: var(--primario-c3);
+  animation: hackeo-barrido 0.9s linear infinite, hackeo-borde 0.6s steps(1, end) infinite;
+}
+
+.peg__hackear:not(:disabled):hover::before { opacity: 1; animation: hackeo-glitch-a 1.2s steps(1, end) infinite; }
+.peg__hackear:not(:disabled):hover::after  { opacity: 1; animation: hackeo-glitch-b 1.2s steps(1, end) infinite; }
+
+/* 2.75em ~ el alto del botón (44px a 16px de letra): la franja entra por arriba
+   y sale por abajo. */
+@keyframes hackeo-barrido { to { background-position-y: 2.75em, 0, 0; } }
+
+@keyframes hackeo-borde {
+  0%   { border-color: var(--acento); }
+  50%  { border-color: var(--tablero-activo); }
+}
+
+/* Casi todo el ciclo queda limpio (clip-path cierra la copia entera); el fallo
+   es una ráfaga corta entre el 72 % y el 96 %. */
+@keyframes hackeo-glitch-a {
+  0%, 72%   { transform: translate(0, 0);      clip-path: inset(0 0 100% 0); }
+  74%       { transform: translate(-3px, 0);   clip-path: inset(10% 0 55% 0); }
+  80%       { transform: translate(3px, 1px);  clip-path: inset(55% 0 15% 0); }
+  86%       { transform: translate(-2px, 0);   clip-path: inset(30% 0 40% 0); }
+  92%       { transform: translate(2px, -1px); clip-path: inset(0 0 70% 0); }
+  96%, 100% { transform: translate(0, 0);      clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes hackeo-glitch-b {
+  0%, 72%   { transform: translate(0, 0);      clip-path: inset(100% 0 0 0); }
+  76%       { transform: translate(3px, 0);    clip-path: inset(60% 0 10% 0); }
+  82%       { transform: translate(-3px, 0);   clip-path: inset(15% 0 60% 0); }
+  88%       { transform: translate(2px, 1px);  clip-path: inset(40% 0 30% 0); }
+  94%       { transform: translate(-2px, 0);   clip-path: inset(70% 0 0 0); }
+  97%, 100% { transform: translate(0, 0);      clip-path: inset(100% 0 0 0); }
+}
+
 /* El canvas dibuja a 1200x760 (atributos del HTML) y el CSS lo muestra
    más chico, sin deformarlo (aspect-ratio fija la proporción).
    El ancho es el menor entre:
@@ -258,6 +334,19 @@
 @media (prefers-reduced-motion: reduce) {
   .peg__ayuda-btn {
     transition: none;
+  }
+
+  /* Sin movimiento: nada de franja ni glitch. Queda el fondo oscuro con el
+     borde celeste fijo, que ya avisa el hover. */
+  .peg__hackear:not(:disabled):hover,
+  .peg__hackear:not(:disabled):hover::before,
+  .peg__hackear:not(:disabled):hover::after {
+    animation: none;
+  }
+
+  .peg__hackear:not(:disabled):hover::before,
+  .peg__hackear:not(:disabled):hover::after {
+    opacity: 0;
   }
 }
 

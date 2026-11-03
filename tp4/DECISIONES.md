@@ -563,6 +563,37 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   el efecto con una explosión por ficha (30 explosiones juntas son más de mil
   chispas, y cada una pesa en el cuadro).
 
+### Hover de "Hackear Sistema": glitch + escaneo, en naranja
+- **Qué:** el botón deja de usar el relleno rojo y el pulso del `btn--destructivo`
+  en hover y gana su propia clase, `.peg__hackear` (`juego.css`). En hover el
+  fondo pasa a `--fondo` con tres capas: un glitch del texto (copias celeste y
+  naranja detrás del texto, desfasadas y recortadas con `clip-path` en una
+  ráfaga corta por ciclo), una franja de luz que baja con líneas finas de
+  terminal, y el borde parpadeando entre celeste y naranja. Todo CSS, con
+  `@keyframes` (`hackeo-barrido`, `hackeo-borde`, `hackeo-glitch-a/b`) y el
+  texto repetido en `data-texto` para las copias.
+- **Por qué:** pedido de Fran. El hover rojo era idéntico al de "Reintentar
+  nivel" de Blocka (la cuarta variante de botón) y no se sentía a "hackear
+  sistema". Ahora se parece al efecto del canvas (aberración cromática, franja
+  de luz).
+- **Naranja en vez de rojo:** `--tablero-activo`, el color de las fichas. El
+  texto y el borde en reposo también pasan a naranja (si no, el botón pasaba de
+  rojo a naranja al hacer hover).
+- **El texto sigue legible:** la primera prueba tapaba las letras porque las
+  copias iban encima y se movían todo el tiempo. Ahora van detrás del texto
+  real (`z-index: -1`, posible porque `.btn` tiene `z-index: 0`) y solo se
+  mueven en una ráfaga de ~25 % del ciclo de 1,2 s.
+- **El escaneo va en el fondo del botón:** los dos pseudo-elementos ya los
+  usa el glitch, así que la franja y las líneas son capas de `background`
+  animadas con `background-position-y`.
+- **`:not(:disabled)`:** el botón empieza deshabilitado y vuelve a estarlo
+  después de usarlo; ahí no tiene que animarse.
+- **Movimiento reducido:** sin franja ni glitch ni parpadeo; queda el fondo
+  oscuro con borde celeste fijo.
+- **Descartado:** el texto que se codifica con símbolos al azar (suma JS para
+  un botón y cambia el texto que lee el lector de pantalla), y la franja sola
+  o el glitch solo (se probaron en una hoja aparte).
+
 ### Arreglos del hackeo y victoria hackeada marcada (review del PR #11)
 - **Qué:**
   - **Sin fichas fantasma:** `PegView.hackear()` borra la ficha que temblaba
