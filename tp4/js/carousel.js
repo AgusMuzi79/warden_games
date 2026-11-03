@@ -58,9 +58,9 @@ const NEON_CIRCUIT = {
   enlace: 'juego.html',
 };
 
-// Orden en el banner: Blocka primero (arranca como card activa) y Neon
-// Circuit segundo.
-const JUEGOS_PROPIOS = [BLOCKA, NEON_CIRCUIT];
+// Orden en el banner: Neon Circuit primero (arranca como card activa, es el
+// juego de esta entrega) y Blocka segundo.
+const JUEGOS_PROPIOS = [NEON_CIRCUIT, BLOCKA];
 
 // Un juego propio es uno de la lista de arriba (los de la API no están).
 function esPropio(juego) {
