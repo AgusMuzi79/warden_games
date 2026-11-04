@@ -33,7 +33,6 @@ export const TIEMPO_LIMITE_MS = 5 * 60 * 1000;
 export const DURACION_VUELTA_MS = 220;   // la ficha vuelve a su casilla si el soltado no vale
 export const DURACION_RECHAZO_MS = 300;  // la ficha sin movimientos tiembla
 export const DURACION_TEMBLOR_MS = 200;  // el tablero tiembla al comer una ficha
-export const DURACION_ESTELA_MS = 1400;  // lo que tarda en apagarse la estela
 export const DEMORA_FIN_MS = 700;        // espera antes de mostrar el fin
 export const DURACION_ONDA_MS = 500;     // onda expansiva de la ficha comida
 export const DURACION_HACKEO_MS = 1400;  // efecto del botón "Hackear Sistema" (ver hackeo.js)

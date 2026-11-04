@@ -181,10 +181,10 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 | `models/PegModel.js` | Modelo | La partida: fase, bando elegido, movimientos, resultado; `jugar` (cuenta el movimiento y decide si se ganó o se perdió) y `verificarTiempo`. Usa un `Tablero` y un `Reloj`. Sin canvas ni DOM. |
 | `models/Tablero.js` | Modelo | Clase `Tablero`: la grilla de 7×7, saltos válidos, `mover` y contadores. No sabe de fases ni de tiempo. |
 | `models/reloj.js` | Modelo | Clase `Reloj`: tiempo de la partida con pausa y límite. |
-| `views/PegView.js` | Vista | `render(modelo, ui, t)` dibuja un cuadro entero; avisos para lectores de pantalla; geometría (qué casilla o tarjeta hay en un punto del canvas); animaciones visuales (explosión, estela, ficha que vuelve o tiembla). No decide reglas. |
+| `views/PegView.js` | Vista | `render(modelo, ui, t)` dibuja un cuadro entero; avisos para lectores de pantalla; geometría (qué casilla o tarjeta hay en un punto del canvas); animaciones visuales (explosión, ficha que vuelve o tiembla). No decide reglas. |
 | `views/dibujo.js` | Vista | Tablero vacío (imagen), fichas y scanlines: los carga o arma una vez y los pinta. |
 | `views/hud.js` | Vista | Paneles de datos a los costados del tablero. |
-| `views/efectos.js` | Vista | Clase `Efectos`: explosión, onda, estela y temblor. |
+| `views/efectos.js` | Vista | Clase `Efectos`: explosión, onda y temblor. |
 | `views/hackeo.js` | Vista | Efecto de "Hackear Sistema": fantasmas de las fichas, barrido de luz, barras y cartel. |
 | `views/glitch.js` | Vista | Lo que comparten el hackeo y la derrota: texto con aberración cromática y barras de colores al azar. |
 | `views/pantallaSeleccion.js` | Vista | Pantalla de selección de bando (las dos tarjetas). |
@@ -643,7 +643,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   `BANDOS` (`config.js`) guarda para cada uno la imagen normal, la levantada, el
   color, el lema y dónde va su tarjeta.
 - **Por qué:** el punto 9 del enunciado pide diferentes tipos de fichas según la
-  temática. El color del bando también tiñe la estela y la explosión.
+  temática. El color del bando también tiñe la explosión.
 - **La ficha levantada de Usuarios es blanca:** primero era naranja; se cambió a
   blanca a pedido de Agus, como en el prototipo. Una ficha levantada del mismo
   cyan que las demás no se distinguiría.
@@ -661,16 +661,20 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 ## Efectos y pantallas de fin
 
-### Explosión, onda, estela y temblor (`efectos.js`)
+### Explosión, onda y temblor (`efectos.js`)
 - **Qué:** al comer una ficha: chispas (`CHISPAS_POR_EXPLOSION`, 38), un
   destello, una onda que crece (`DURACION_ONDA_MS`) y la ficha comida que se
   infla y desaparece; el tablero tiembla (`FUERZA_TEMBLOR` px durante
-  `DURACION_TEMBLOR_MS`). Al arrastrar, la ficha deja una estela de luz que se
-  apaga en `DURACION_ESTELA_MS`. Se suman con `globalCompositeOperation =
+  `DURACION_TEMBLOR_MS`). Se suman con `globalCompositeOperation =
   'lighter'`, como un neón.
 - **Por qué:** feedback claro de que el salto se hizo y qué ficha se fue, en la
   estética del sitio. La clase `Efectos` recuerda cada efecto y lo borra solo
   cuando termina; `PegView` solo avisa "explotó acá".
+- **Se sacó la estela al arrastrar:** la ficha dejaba una línea de luz (estilo
+  Tron) que se apagaba en 1,4 s. Decisión del equipo: no la pide el enunciado y
+  sumaba código (puntos guardados por cuadro, dos pasadas de trazo) para
+  explicar en la defensa sin aportar al juego. El arrastre sigue igual: la
+  ficha levantada y los fantasmas de destino ya muestran qué se mueve y a dónde.
 
 ### Scanlines solo en las pantallas de fin
 - **Qué:** las líneas horizontales finas (una cada `SEPARACION_SCANLINES` px) se
@@ -702,7 +706,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 
 - **Qué se apaga** con `prefers-reduced-motion: reduce`
   (`prefiereMenosMovimiento()`):
-  - explosión, onda, estela y temblor (no se crea ningún efecto);
+  - explosión, onda y temblor (no se crea ningún efecto);
   - la ficha que vuelve deslizándose (vuelve de golpe) y la que tiembla al
     rechazarla (solo queda el aviso);
   - la demora del fin (aparece al instante) y sus animaciones (barrido, ondas,

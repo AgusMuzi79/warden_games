@@ -282,7 +282,6 @@ export class PegController {
     if (!quitadas) return;
     if (this.ui.arrastre) {
       this.ui.arrastre = null;
-      this.vista.cortarEstela();
       this.vista.fijarCursor('default');
     }
     this.ui.seleccion = null;
@@ -351,7 +350,6 @@ export class PegController {
     }
     const centro = vista.centroDeCelda(celda.fila, celda.col);
     ui.arrastre = { ...celda, movimientos, px: x, py: y, difX: x - centro.x, difY: y - centro.y };
-    vista.agregarEstela(centro.x, centro.y, this.bandoActual(), t);
     // Con la captura, los eventos siguen llegando al canvas aunque el puntero salga de él.
     this.canvas.setPointerCapture(evento.pointerId);
     vista.fijarCursor('grabbing');
@@ -379,8 +377,6 @@ export class PegController {
     if (ui.arrastre) {
       ui.arrastre.px = x;
       ui.arrastre.py = y;
-      const ficha = vista.posicionArrastre(ui.arrastre);
-      vista.agregarEstela(ficha.x, ficha.y, this.bandoActual(), performance.now());
       return;
     }
     const celda = modelo.activo ? vista.celdaEn(x, y) : null;
@@ -402,10 +398,6 @@ export class PegController {
       return;
     }
     const origen = { fila: ui.arrastre.fila, col: ui.arrastre.col };
-    // La estela termina justo en el centro de la casilla de destino.
-    const centro = vista.centroDeCelda(destino.fila, destino.col);
-    vista.agregarEstela(centro.x, centro.y, this.bandoActual(), t);
-    vista.cortarEstela();
     ui.arrastre = null;
     vista.fijarCursor('default');
     this.jugar(origen, destino, t);

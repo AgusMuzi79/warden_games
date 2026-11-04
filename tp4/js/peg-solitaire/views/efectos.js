@@ -1,13 +1,11 @@
-// efectos.js — Efectos visuales del Peg: explosión, estela y temblor
+// efectos.js — Efectos visuales del Peg: explosión y temblor
 //
 // Qué hace: guarda y dibuja los efectos que duran un rato y después se
 // apagan solos:
 //   - la explosión de la ficha comida: chispas, un destello, una onda que se
 //     expande y la ficha que se infla y desaparece;
-//   - la estela de luz que deja la ficha mientras se la arrastra (estilo Tron);
 //   - el temblor del tablero al comer una ficha.
-// Por qué una clase aparte: PegView solo avisa "explotó acá" o "la ficha
-// pasó por acá", y esta clase se encarga de recordar cada efecto, dibujarlo
+// Por qué una clase aparte: PegView solo avisa "explotó acá", y esta clase se encarga de recordar cada efecto, dibujarlo
 // y borrarlo cuando termina.
 //
 // Movimiento reducido: si la persona prefiere menos movimiento
@@ -19,7 +17,7 @@
 
 import { conAlfa, easeOut, clamp, prefiereMenosMovimiento } from '../utiles.js';
 import {
-  DURACION_ESTELA_MS, DURACION_TEMBLOR_MS, DURACION_ONDA_MS,
+  DURACION_TEMBLOR_MS, DURACION_ONDA_MS,
   CHISPAS_POR_EXPLOSION, FUERZA_TEMBLOR,
 } from '../config.js';
 import { dibujarFicha } from './dibujo.js';
@@ -44,7 +42,7 @@ function aclarar(hex, cantidad) {
 }
 
 /**
- * Efectos visuales pasajeros del Peg (explosión, onda, estela y temblor):
+ * Efectos visuales pasajeros del Peg (explosión, onda y temblor):
  * los guarda, los dibuja y los borra cuando terminan.
  */
 export class Efectos {
@@ -61,8 +59,6 @@ export class Efectos {
   limpiar() {
     this.chispas = [];        // { x, y, inicio, angulo, velocidad, vida, largo, grosor, color }
     this.ondas = [];          // { x, y, inicio, color, claro, imagen }
-    this.estelas = [];        // { color, claro, puntos: [{ x, y, t }] }
-    this.estelaActual = null; // la estela de la ficha que se está arrastrando
     this.temblorHasta = 0;    // hasta cuándo tiembla el tablero
   }
 
@@ -115,85 +111,22 @@ export class Efectos {
   }
 
   /**
-   * Suma un punto a la estela de la ficha arrastrada. Si no había estela,
-   * empieza una nueva. Los puntos muy pegados (menos de 3 px) se saltean.
-   * @param {number} x
-   * @param {number} y
-   * @param {string} color color del bando, en hex
-   * @param {number} t tiempo actual en ms
-   */
-  agregarEstela(x, y, color, t) {
-    if (prefiereMenosMovimiento()) return;
-    if (!this.estelaActual) {
-      this.estelaActual = { color, claro: aclarar(color, 0.75), puntos: [] };
-      this.estelas.push(this.estelaActual);
-    }
-    const puntos = this.estelaActual.puntos;
-    const ultimo = puntos[puntos.length - 1];
-    if (!ultimo || Math.hypot(x - ultimo.x, y - ultimo.y) > 3) puntos.push({ x, y, t });
-  }
-
-  /**
-   * La ficha se soltó: la estela deja de crecer y se apaga sola.
-   */
-  cortarEstela() {
-    this.estelaActual = null;
-  }
-
-  /**
-   * Borra lo que ya terminó: chispas y ondas viejas, y los puntos de estela
-   * que ya se apagaron.
+   * Borra lo que ya terminó: chispas y ondas viejas.
    * @param {number} t tiempo actual en ms
    */
   actualizar(t) {
     this.chispas = this.chispas.filter((c) => t - c.inicio < c.vida);
     this.ondas = this.ondas.filter((o) => t - o.inicio < DURACION_ONDA_MS);
-    for (const estela of this.estelas) {
-      while (estela.puntos.length && t - estela.puntos[0].t > DURACION_ESTELA_MS) estela.puntos.shift();
-    }
-    // Una estela con menos de 2 puntos no dibuja nada; se borra salvo que siga creciendo.
-    this.estelas = this.estelas.filter((e) => e.puntos.length > 1 || e === this.estelaActual);
   }
 
   /**
-   * Dibuja los efectos en el orden del prototipo: estelas, ondas y chispas.
+   * Dibuja los efectos en el orden del prototipo: ondas y chispas.
    * @param {CanvasRenderingContext2D} ctx
    * @param {number} t tiempo actual en ms
    */
   dibujar(ctx, t) {
-    this.dibujarEstelas(ctx, t);
     this.dibujarOndas(ctx, t);
     this.dibujarChispas(ctx, t);
-  }
-
-  /**
-   * Estela de luz: cada tramo se apaga según su antigüedad, así la cola se
-   * acorta detrás de la ficha. Dos pasadas: un halo ancho y un centro fino.
-   * @param {CanvasRenderingContext2D} ctx
-   * @param {number} t
-   */
-  dibujarEstelas(ctx, t) {
-    ctx.save();
-    // 'lighter' suma la luz de lo que se superpone, como un neón.
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.lineCap = 'round';
-    for (const estela of this.estelas) {
-      const puntos = estela.puntos;
-      for (let i = 1; i < puntos.length; i++) {
-        const brillo = 1 - (t - puntos[i].t) / DURACION_ESTELA_MS;
-        if (brillo <= 0) continue;
-        ctx.beginPath();
-        ctx.moveTo(puntos[i - 1].x, puntos[i - 1].y);
-        ctx.lineTo(puntos[i].x, puntos[i].y);
-        ctx.strokeStyle = conAlfa(estela.color, 0.3 * brillo);
-        ctx.lineWidth = 16;
-        ctx.stroke();
-        ctx.strokeStyle = conAlfa(estela.claro, 0.95 * brillo);
-        ctx.lineWidth = 3.5;
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
   }
 
   /**

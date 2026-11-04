@@ -2,7 +2,7 @@
 //
 // Qué hace: en cada cuadro toma el estado del modelo (PegModel) y lo pinta:
 // fondo y tablero vacío, fichas, hints de destino (los "fantasmas"), efectos
-// (explosión, estela, temblor), el HUD con el tiempo, y las pantallas de
+// (explosión, temblor), el HUD con el tiempo, y las pantallas de
 // selección de bando y de fin. También escribe los avisos para lectores de
 // pantalla y responde "qué hay en este punto del canvas" (geometría).
 // No decide reglas: no sabe qué salto es válido ni cuándo termina la partida,
@@ -87,7 +87,7 @@ export class PegView {
   }
 
   /**
-   * Color de un bando, en hex. Lo usan la estela y la explosión.
+   * Color de un bando, en hex. Lo usa la explosión.
    * @param {string} clave 'usuarios' o 'clu'
    * @returns {string}
    */
@@ -255,7 +255,6 @@ export class PegView {
     if (!prefiereMenosMovimiento()) {
       this.vuelta = { fila: arrastre.fila, col: arrastre.col, x, y, inicio: t };
     }
-    this.efectos.cortarEstela();
   }
 
   /**
@@ -292,24 +291,6 @@ export class PegView {
    */
   detenerHackeo() {
     this.hackeo = null;
-  }
-
-  /**
-   * Suma un punto a la estela de luz de la ficha arrastrada.
-   * @param {number} x
-   * @param {number} y
-   * @param {string} bando 'usuarios' o 'clu'
-   * @param {number} t tiempo actual en ms
-   */
-  agregarEstela(x, y, bando, t) {
-    this.efectos.agregarEstela(x, y, this.colorDe(bando), t);
-  }
-
-  /**
-   * La ficha se soltó: la estela deja de crecer y se apaga sola.
-   */
-  cortarEstela() {
-    this.efectos.cortarEstela();
   }
 
   // ---------------------------------------------------------------
@@ -358,7 +339,7 @@ export class PegView {
       levantada: aparte, resaltada, imagen: fichas.normal, imagenResaltada: fichas.levantada,
     });
     this.dibujarRechazo(fichas.normal, t);
-    this.efectos.dibujar(ctx, t);  // estelas, ondas y chispas, encima de las fichas
+    this.efectos.dibujar(ctx, t);  // ondas y chispas, encima de las fichas
     this.dibujarHackeo(fichas.normal, t);
     this.dibujarVuelta(fichas.normal, t);
     this.dibujarArrastre(ui.arrastre, fichas.levantada);
