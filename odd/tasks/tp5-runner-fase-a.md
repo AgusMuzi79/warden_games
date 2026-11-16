@@ -25,4 +25,4 @@ la integración web son Fase B (Fran). Prompt completo: `docs/prompt-tp5-runner.
 - [x] T7. Cierre: docs/tp5-estado.md, línea en CLAUDE.md, tp5/DECISIONES.md, resumen para la defensa.
 
 ## Progreso
-- T1a hecho. T1b–T6 hechas por un writer delegado (trigger: 2+ archivos no triviales). T7 hecha (docs/tp5-estado.md, CLAUDE.md, tp5/DECISIONES.md). Review nativo bloqueado: la selección de untracked da invalid_request. Siguiente: Fase B (Fran).
+- T1a hecho. T1b–T6 hechas por un writer delegado (trigger: 2+ archivos no triviales). T7 hecha (docs/tp5-estado.md, CLAUDE.md, tp5/DECISIONES.md). Review nativo: Agus decidió dejarlo sin revisar (2026-11-16). Siguiente: Fase B (Fran).
