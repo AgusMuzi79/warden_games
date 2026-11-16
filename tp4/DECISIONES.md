@@ -386,7 +386,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 ### Todo lo estático se prepara una vez, al cargar
 - **Qué:** `prepararRecursos()` carga la imagen del tablero vacío
   (`tablero-peg.jpg`, ver "Punto 1 del enunciado") y arma en canvas fuera de
-  pantalla (`crearCanvas()`) las scanlines y las tres fichas con su brillo. En
+  pantalla (`crearCanvas()`) las scanlines y las cuatro fichas con su brillo. En
   cada cuadro se copian con `drawImage`.
 - **Por qué:** el tablero tiene muchas líneas y sombras, y las fichas un brillo
   difuso; calcularlos 60 veces por segundo sería lento. Copiar una imagen ya
@@ -432,9 +432,9 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   tiene ancho fijo en el canvas y un número puede moverse un poco al cambiar.
 
 ### Las fichas son imágenes PNG
-- **Qué:** `FICHAS` (`config.js`) apunta a `ficha-naranja.png`, `ficha-cyan.png`
-  y `ficha-blanca.png` en `assets/img/`. `crearImagenFicha()` las carga y les
-  suma un brillo del color del bando.
+- **Qué:** `FICHAS` (`config.js`) apunta a `ficha-naranja.png`, `ficha-cyan.png`,
+  `ficha-blanca.png` y `ficha-ares-roja.png` en `assets/img/`.
+  `crearImagenFicha()` las carga y les suma un brillo del color del bando.
 - **Por qué:** el enunciado lo pide como obligatorio: las piezas no pueden ser
   un color sólido.
 - **El brillo se arma en un canvas, no con `toDataURL`:** el canvas se usa
@@ -639,7 +639,7 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
   (`dibujarSeleccion()`), con dos tarjetas. La temática es Tron: Legacy.
   - **Usuarios:** fichas cyan (`--acento`), ficha levantada y fantasmas blancos.
   - **Programas de Clu:** fichas naranja (`--tablero-activo`), ficha levantada y
-    fantasmas cyan.
+    fantasmas rojos (`ficha-ares-roja.png`, con brillo `--error`).
   `BANDOS` (`config.js`) guarda para cada uno la imagen normal, la levantada, el
   color, el lema y dónde va su tarjeta.
 - **Por qué:** el punto 9 del enunciado pide diferentes tipos de fichas según la
@@ -647,6 +647,9 @@ Cada decisión: **qué** hicimos, **por qué**, y qué **alternativa** descartam
 - **La ficha levantada de Usuarios es blanca:** primero era naranja; se cambió a
   blanca a pedido de Agus, como en el prototipo. Una ficha levantada del mismo
   cyan que las demás no se distinguiría.
+- **La ficha levantada de Clu es roja (Ares):** primero era cyan; se cambió a
+  la ficha roja (commit c8412d2). Así cada bando tiene su propia ficha
+  levantada y el cyan queda solo para los Usuarios.
 
 ### Se elige con mouse o con teclado, dentro del canvas
 - **Qué:** click en una tarjeta, o flechas para cambiar y Enter / Espacio para

@@ -103,7 +103,7 @@ async function crearImagenFicha(ruta, colorBrillo, dpr) {
 
 /**
  * Carga y arma todo lo que se prepara una sola vez: la imagen del tablero
- * vacío, las scanlines y las tres fichas.
+ * vacío, las scanlines y las cuatro fichas.
  * @param {Record<string, string>} colores lo que devuelve obtenerColores()
  * @returns {Promise<{tablero: HTMLImageElement, scanlines: HTMLCanvasElement, fichas: Record<string, HTMLCanvasElement>}>}
  */
