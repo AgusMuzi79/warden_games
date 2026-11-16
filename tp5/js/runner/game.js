@@ -8,8 +8,9 @@
 // Fases: 'menu' (sin partida), 'jugando', 'pausa', 'muriendo' (se ve la
 // explosión antes de la pantalla de derrota) y 'fin'.
 
-import { JUEGO, JUGADOR } from './config.js';
+import { JUEGO, JUGADOR, MUNDO } from './config.js';
 import { crearLoop } from './loop.js';
+import { crearParallax } from './parallax.js';
 import {
   crearJugador, impulsar as impulsarJugador, actualizarJugador, descontarTiempos,
   cajaJugador, prepararVistaJugador, dibujarJugador, centroVertical,
@@ -17,7 +18,7 @@ import {
 
 /**
  * Crea el juego.
- * @param {{ juego: HTMLElement, jugador: HTMLElement, hitboxJugador: HTMLElement }} dom
+ * @param {{ juego: HTMLElement, capas: HTMLElement[], jugador: HTMLElement, hitboxJugador: HTMLElement }} dom
  * @param {(resultado: 'victoria' | 'derrota', puntaje: number) => void} alTerminar
  */
 export function crearJuego(dom, alTerminar) {
@@ -27,9 +28,11 @@ export function crearJuego(dom, alTerminar) {
     jugador: crearJugador(),
     tiempoSacudon: 0,
     tiempoFin: 0,       // cuenta regresiva de la fase 'muriendo'
+    tiempoRalentizado: 0,
     debug: false,
   };
   const loop = crearLoop(paso);
+  const parallax = crearParallax(dom.capas);
 
   prepararVistaJugador(dom.jugador, dom.hitboxJugador);
   dibujar();
@@ -43,6 +46,8 @@ export function crearJuego(dom, alTerminar) {
     estado.jugador = crearJugador();
     estado.tiempoSacudon = 0;
     estado.tiempoFin = 0;
+    estado.tiempoRalentizado = 0;
+    parallax.reiniciar();
     estado.fase = 'jugando';
     dom.juego.classList.remove('is-paused');
     dibujar();
@@ -74,8 +79,20 @@ export function crearJuego(dom, alTerminar) {
     }
     if (estado.fase !== 'jugando') return;
 
+    estado.tiempoRalentizado = Math.max(0, estado.tiempoRalentizado - dt);
+    parallax.actualizar(velocidadMundo(), dt);
     actualizarJugador(estado.jugador, dt);
     revisarBordes();
+  }
+
+  /**
+   * Velocidad actual del mundo en px/s: la base, o menos si un drone la
+   * ralentizó. Todo lo que scrollea (capas y entidades) usa este número.
+   * @returns {number}
+   */
+  function velocidadMundo() {
+    const factor = estado.tiempoRalentizado > 0 ? MUNDO.factorRalentizado : 1;
+    return MUNDO.velocidadBase * factor;
   }
 
   /** Techo y suelo cuentan como choque. */
@@ -107,6 +124,7 @@ export function crearJuego(dom, alTerminar) {
 
   /** Escribe el estado en el DOM. */
   function dibujar() {
+    parallax.dibujar();
     dibujarJugador(estado.jugador, dom.jugador, dom.hitboxJugador);
     dom.juego.classList.toggle('is-shaking', estado.tiempoSacudon > 0);
   }

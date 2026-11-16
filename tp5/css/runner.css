@@ -52,6 +52,47 @@
   to   { background-position-x: calc(var(--frames) * var(--frame-w) * -1); }
 }
 
+/* ---- Parallax (.layer--1..4) ----
+   Cada capa mide el ancho del juego más un tile (--tile, lo escribe
+   parallax.js desde config.js), así al correrla hasta un tile entero
+   nunca queda un hueco a la derecha. Las capas 1 a 3 son los PNG del pack
+   (224 px de alto) escalados x2 = 448 px, justo hasta el suelo. */
+.layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: calc(var(--ancho) + var(--tile));
+  height: var(--suelo);
+  background-repeat: repeat-x;
+  background-size: var(--tile) 100%;
+  image-rendering: pixelated;
+}
+
+.layer--1 { background-image: url("../assets/game/bg/capa1-cielo.png"); }
+.layer--2 { background-image: url("../assets/game/bg/capa2-ciudad-lejana.png"); }
+
+/* La capa 3 comparte arte con los obstáculos: más oscura y apagada para
+   que los edificios de adelante se lean claramente. */
+.layer--3 {
+  background-image: url("../assets/game/bg/capa3-edificios.png");
+  filter: brightness(0.5) saturate(0.7);
+}
+
+/* Suelo (no viene en el pack): franja de abajo con una grilla neón hecha
+   con gradientes. Las líneas verticales se repiten cada --tile (64 px),
+   que es lo que avanza el parallax antes de volver a 0. Vista mínima: la
+   Fase B la pule. */
+.layer--4 {
+  top: var(--suelo);
+  height: var(--alto-suelo);
+  background:
+    linear-gradient(var(--acento), var(--acento)) 0 0 / 100% 2px no-repeat,
+    linear-gradient(to right, var(--primario) 2px, transparent 2px) 0 0 / var(--tile) 100% repeat-x,
+    linear-gradient(var(--tablero-grilla) 2px, transparent 2px) 0 0 / 100% 23px,
+    var(--placa);
+}
+
 /* ---- Moto (.player) ----
    El JS escribe translate3d + rotate en .player. El balanceo del vuelo
    va en .player__body, un elemento aparte, para que la animación CSS no

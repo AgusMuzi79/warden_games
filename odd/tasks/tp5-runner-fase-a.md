@@ -19,7 +19,7 @@ la integración web son Fase B (Fran). Prompt completo: `docs/prompt-tp5-runner.
 - [x] T1b. `tp5/runner.html` mínima (header, footer, #game vacío). Evidencia: head/header/footer copiados de juego.html; carga runner.css al final.
 - [x] T2. `docs/tp5-contrato.md`. Evidencia: estructura, quién escribe qué, clases de estado con duración, pantallas, HUD y entrada.
 - [x] T3. Base: config, loop (rAF + dt con tope), input, main (precarga, pantallas inicio/selector), player (gravedad, impulso, rotación, techo/suelo), runner.css. Evidencia: node --check ok en los 7 módulos; en Chrome (localhost:8085) carga → selector → la moto cae, choca el suelo (explosión .is-hit) y aparece #screen-lose con el foco en Reintentar. Suma game.js (orquesta update/render) y preload.js.
-- [ ] T4. Parallax 4 capas desde una velocidad base; suelo factor 1.
+- [x] T4. Parallax 4 capas desde una velocidad base; suelo factor 1. Evidencia: transforms medidos en Chrome -10/-29/-57/-(95 mod 64) px = 0,1/0,3/0,6/1 x 95 px recorridos. Se sumó `<meta name="darkreader-lock">`: la extensión Dark Reader invertía los PNG.
 - [ ] T5. Spawner + obstáculos + colisión AABB + debug H + puntaje + borrado.
 - [ ] T6. Drone, coleccionable, vidas/modos, invulnerabilidad, victoria/derrota, pausa, HUD.
 - [ ] T7. Cierre: docs/tp5-estado.md, línea en CLAUDE.md, tp5/DECISIONES.md, resumen para la defensa.

@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- El sitio ya es oscuro: esta meta le pide a la extensión Dark Reader
+       que no lo modifique (si no, "invierte" los PNG del pixel art). -->
+  <meta name="darkreader-lock">
   <title>Warden Games — Neon Rider</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +51,13 @@
            aria-describedby apunta a los controles, que el lector lee al
            entrar. -->
       <div id="game" class="game" tabindex="0" aria-describedby="game-controles">
+
+        <!-- Parallax: 4 capas, de la más lejana a la más cercana. El JS
+             solo les escribe translate3d (js/runner/parallax.js). -->
+        <div class="layer layer--1" aria-hidden="true"></div>
+        <div class="layer layer--2" aria-hidden="true"></div>
+        <div class="layer layer--3" aria-hidden="true"></div>
+        <div class="layer layer--4" aria-hidden="true"></div>
 
         <!-- Moto. .player la mueve el JS (translate3d + rotate); adentro,
              .player__body hace el balanceo del vuelo con CSS. -->
