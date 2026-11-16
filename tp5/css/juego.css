@@ -1,0 +1,488 @@
+/*
+  juego.css: páginas de juego (juego.html, Peg Solitaire / "Neon Circuit"
+  en la interfaz, y blocka.html, que carga este archivo y después blocka.css)
+  Se carga al final. Usa tokens de variables.css, sobre todo los
+  --tablero-* (paleta propia del tablero, separada de la del sitio).
+  Acá viven: la card .tablero (con portada) que usa Blocka, la zona de
+  juego del Peg en canvas (.peg, solo juego.html) y la Ayuda. El
+  breadcrumb, el layout de 2 columnas, la ficha, "Sobre el juego", la
+  Galería, Compartir, Comunidad y "Dejá tu reseña" viven en components.css
+  porque producto.html también los usa.
+  Solo desktop (regla del proyecto), por eso no hay @media de ancho.
+*/
+
+/* ============================================================
+   Tablero: marco de la card (hoy lo usa Blocka; el Peg pasó a canvas)
+   ============================================================ */
+/* Alto "base" de la fila de arriba (tablero + panel lateral). Una sola
+   variable para las dos cosas que tienen que medir lo mismo: el tablero
+   (min-height) y el tope del panel lateral (max-height, más abajo). */
+.juego-layout {
+  --alto-tablero: 660px;
+}
+
+.tablero {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radio-xl);
+  /* La cabecera es de otro color; sin esto, se saldría de las esquinas
+     redondeadas de la card en vez de seguirlas. */
+  overflow: hidden;
+  background: var(--superficie);
+  /* align-self:start saca al tablero del stretch de .juego-layout: si no,
+     cada vez que se abre otro desplegable de Ayuda (misma fila del grid),
+     el tablero se estiraba en conjunto para seguirle el alto. min-height
+     fija el alto "base" (el que tiene con Ayuda en su estado por
+     default), independiente de cuánto crezca Ayuda después. */
+  align-self: start;
+  min-height: var(--alto-tablero);
+}
+
+/* Cabecera y cuerpo: el cuerpo lleva la portada (estado inicial) o el juego. */
+/* Franja de cabecera, de un violeta más claro que el cuerpo — así se ve en
+   Figma, no es la etiqueta flotando sola sobre la grilla. */
+.tablero__cabecera {
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: var(--espaciado-3) 0;
+  background: var(--primario-o1);
+}
+
+.tablero__cuerpo {
+  /* position:relative ancla la portada absoluta (más abajo) a esta caja. */
+  position: relative;
+  flex: 1;
+  /* Menos padding arriba y abajo que a los costados: arriba, para acercar
+     el grid a la cabecera ("Neon Circuit"); abajo, para acercar la leyenda
+     al borde de la card (space-between de .tablero__juego ya la lleva al
+     fondo del padding; con menos padding-bottom, ese fondo queda más abajo). */
+  padding: var(--espaciado-3) var(--espaciado-6) var(--espaciado-3);
+  /* Grilla tenue de fondo (como el "papel cuadriculado" de Figma). El
+     background-image respeta el border-radius de .tablero solo, así que
+     no hace falta repetirlo acá. */
+  background-image:
+    linear-gradient(var(--tablero-grilla) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tablero-grilla) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Portada: tapa toda la caja de .tablero__cuerpo (inset:0 se mide desde el
+   borde de relleno del padre, así que cubre también donde iría su padding
+   — la imagen llega de punta a punta de la card, sin recorte). */
+.tablero__portada {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tablero__portada-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  /* Recorta la imagen para llenar el espacio sin deformarla, sea cual sea
+     su proporción original (misma técnica que el banner "Destacados" y
+     las cards de juegos de la Home). */
+  object-fit: cover;
+}
+
+/* Botón "Jugar": el estilo lo trae .btn--primario, igual que en producto. */
+.tablero__jugar {
+  /* Por encima de la imagen (que también es position:absolute). */
+  position: relative;
+}
+
+/* .tablero__juego reemplaza el rol que tenía .tablero__cuerpo antes de que
+   existiera la portada: ocupa toda la altura disponible y reparte el
+   espacio de sobra entre el grid y la leyenda con space-between. */
+.tablero__juego {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Etiqueta placeholder del mock de Figma (ahí decía "Botón", sin función
+   definida todavía). En vez de un <button> sin ninguna acción real, es un
+   rótulo fijo con el nombre del juego. */
+.tablero__etiqueta {
+  margin: 0;
+  padding: var(--espaciado-2) var(--espaciado-6);
+  border: 2px solid var(--acento);
+  border-radius: 999px;
+  background: var(--fondo);
+  color: var(--acento);
+  font: 600 14px/1 var(--font-ui);
+  box-shadow: 0 0 8px var(--acento);
+}
+
+/* ============================================================
+   Peg en canvas (solo juego.html)
+   Todo va colgado de .juego-layout--peg o de .peg, así Blocka (que
+   también carga este archivo y usa .juego-layout) no cambia en nada.
+   ============================================================ */
+/* Fila 1: la zona de juego ocupa todo el ancho; fila 2: Sobre el juego +
+   Galería a la izquierda y el panel lateral (ficha, Ayuda, Compartir) a
+   la derecha. Sin margin-top: el breadcrumb ya deja 24px de aire arriba,
+   y cada píxel cuenta para que el canvas entre sin scroll. */
+.juego-layout--peg {
+  margin-top: 0;
+}
+
+/* Zona de juego: ocupa las dos columnas del grid (1 / -1 = de la primera
+   línea a la última). */
+.peg {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+  /* Ancho del canvas, que también usa el pie para quedar alineado con su
+     borde derecho. La cuenta está explicada en .peg__canvas. */
+  --ancho-peg: min(100%, calc((100vh - 200px - var(--control-alto) - var(--espaciado-2)) * 1200 / 760));
+}
+
+/* Barra chica arriba del canvas: nombre del juego a la izquierda y el
+   botón "?" a la derecha. Mide lo que el botón (44px) más 4px arriba y
+   abajo: unos 52px. */
+.peg__barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--espaciado-1) 0;
+}
+
+/* Grupo de la derecha de la barra: Reiniciar (un .btn--secundario común)
+   y el botón "?". Los dos miden 44px de alto, así quedan alineados. */
+.peg__acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+}
+
+/* Botón "?" de la ayuda. Mismas medidas que .modal__cerrar (44px de área,
+   ícono solo), con clase propia porque aquel va posicionado adentro del
+   modal. */
+.peg__ayuda-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  color: var(--primario-c3);
+  font-size: 22px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease, color var(--duracion-rapida) ease;
+}
+
+.peg__ayuda-btn:hover {
+  background: var(--primario-o1);
+  color: var(--acento);
+}
+
+/* Pie de la zona de juego: "Hackear Sistema" abajo a la derecha, debajo del
+   canvas y alineado con su borde derecho (mismo ancho y centrado, como el
+   canvas). El botón mide 44px (--control-alto), por eso el canvas resta 52px
+   más abajo (los 44 del botón y los 8 del gap). */
+.peg__pie {
+  display: flex;
+  justify-content: flex-end;
+  width: var(--ancho-peg);
+  margin-inline: auto;
+}
+
+/* "Hackear Sistema": en vez del pulso rojo del destructivo, un hover que se
+   siente a hackeo (ver DECISIONES.md). Tres capas, todas en CSS:
+   - Glitch: dos copias del texto (::before celeste, ::after naranja) quedan
+     DETRÁS del texto real (z-index: -1) y en hover se desfasan y se recortan
+     en franjas con clip-path, a saltos. Solo se mueven en una ráfaga corta al
+     final de cada ciclo; el resto del tiempo el texto está limpio.
+   - Escaneo: una franja de luz baja por el botón (capa de fondo animada) sobre
+     líneas finas de terminal. Va en el fondo del botón porque los dos
+     pseudo-elementos ya los usa el glitch.
+   - El borde parpadea entre celeste y naranja.
+   Naranja = --tablero-activo, el de las fichas. El texto y el borde en reposo
+   también son naranjas, para que el hover no cambie de color de golpe.
+   :not(:disabled): el botón empieza deshabilitado y no debe animarse así. */
+.peg__hackear {
+  border-color: var(--tablero-activo);
+  color: var(--tablero-activo);
+}
+
+.peg__hackear::before,
+.peg__hackear::after {
+  content: attr(data-texto);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.peg__hackear::before { color: var(--acento); }
+.peg__hackear::after  { color: var(--tablero-activo); }
+
+.peg__hackear:not(:disabled):hover {
+  background:
+    linear-gradient(to bottom, transparent 40%, var(--acento-o2) 50%, transparent 60%) 0 -2.75em / 100% 100% no-repeat,
+    repeating-linear-gradient(to bottom, transparent 0 2px, var(--sombra-elevacion) 2px 3px),
+    var(--fondo);
+  border-color: var(--acento);
+  color: var(--primario-c3);
+  animation: hackeo-barrido 0.9s linear infinite, hackeo-borde 0.6s steps(1, end) infinite;
+}
+
+.peg__hackear:not(:disabled):hover::before { opacity: 1; animation: hackeo-glitch-a 1.2s steps(1, end) infinite; }
+.peg__hackear:not(:disabled):hover::after  { opacity: 1; animation: hackeo-glitch-b 1.2s steps(1, end) infinite; }
+
+/* 2.75em ~ el alto del botón (44px a 16px de letra): la franja entra por arriba
+   y sale por abajo. */
+@keyframes hackeo-barrido { to { background-position-y: 2.75em, 0, 0; } }
+
+@keyframes hackeo-borde {
+  0%   { border-color: var(--acento); }
+  50%  { border-color: var(--tablero-activo); }
+}
+
+/* Casi todo el ciclo queda limpio (clip-path cierra la copia entera); el fallo
+   es una ráfaga corta entre el 72 % y el 96 %. */
+@keyframes hackeo-glitch-a {
+  0%, 72%   { transform: translate(0, 0);      clip-path: inset(0 0 100% 0); }
+  74%       { transform: translate(-3px, 0);   clip-path: inset(10% 0 55% 0); }
+  80%       { transform: translate(3px, 1px);  clip-path: inset(55% 0 15% 0); }
+  86%       { transform: translate(-2px, 0);   clip-path: inset(30% 0 40% 0); }
+  92%       { transform: translate(2px, -1px); clip-path: inset(0 0 70% 0); }
+  96%, 100% { transform: translate(0, 0);      clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes hackeo-glitch-b {
+  0%, 72%   { transform: translate(0, 0);      clip-path: inset(100% 0 0 0); }
+  76%       { transform: translate(3px, 0);    clip-path: inset(60% 0 10% 0); }
+  82%       { transform: translate(-3px, 0);   clip-path: inset(15% 0 60% 0); }
+  88%       { transform: translate(2px, 1px);  clip-path: inset(40% 0 30% 0); }
+  94%       { transform: translate(-2px, 0);   clip-path: inset(70% 0 0 0); }
+  97%, 100% { transform: translate(0, 0);      clip-path: inset(100% 0 0 0); }
+}
+
+/* El canvas dibuja a 1200x760 (atributos del HTML) y el CSS lo muestra
+   más chico, sin deformarlo (aspect-ratio fija la proporción).
+   El ancho es el menor entre:
+   - 100%: todo el ancho de main (1152px en una pantalla Full HD), y
+   - el ancho que hace que el alto entre en la ventana sin scroll. Antes de
+     la zona hay unos 122px (header 60 + padding de main 24 + breadcrumb
+     14 + su margen 24) y la barra del "?" suma unos 60px más (52 + el gap
+     de 8) y el pie con "Hackear Sistema" otros 52: el alto del botón
+     (--control-alto, 44) más el gap (--espaciado-2, 8). Con un poco de
+     aire abajo, se le restan 200px más esos dos tokens (252 en total) al
+     alto de la ventana, y ese alto se pasa a ancho multiplicando por
+     1200 / 760.
+   En 1920x1080 gana el 100%: 1152px de ancho, unos 730px de alto.
+   touch-action:none evita que el navegador use el arrastre del dedo para
+   scrollear la página (en la Fase 2 el arrastre mueve los nodos). */
+.peg__canvas {
+  display: block;
+  width: var(--ancho-peg);
+  height: auto;
+  aspect-ratio: 1200 / 760;
+  margin-inline: auto;
+  border-radius: var(--radio-xl);
+  /* Fondo mientras cargan las fuentes y las imágenes (hasta 1,5 s): el
+     mismo casi negro de los huecos, con la grilla tenue del tablero
+     encima. Después el juego pinta todo el canvas y lo tapa. */
+  background-color: var(--tablero-descargado);
+  background-image:
+    linear-gradient(var(--tablero-grilla) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tablero-grilla) 1px, transparent 1px);
+  background-size: 28px 28px;
+  touch-action: none;
+}
+
+/* El foco de teclado del canvas usa el anillo global (--foco, en
+   variables.css), que ya incluye [tabindex]: no hace falta nada acá.
+
+   Aviso de error si el tablero no carga: principal.js le saca .sr-only al
+   <p id="peg-estado"> y le pone esta clase, así se ve en la página. */
+.peg__error {
+  margin: 0;
+  color: var(--error);
+  font: 600 16px/1.4 var(--font-ui);
+  text-align: center;
+}
+
+/* Diálogo de ayuda: reusa .modal (components.css), un poco más ancho
+   porque lleva el texto de todo el acordeón. Este archivo se carga después
+   de components.css, así que a igual especificidad gana este ancho. */
+.peg-ayuda {
+  width: min(34rem, 90vw);
+}
+
+/* En el diálogo el contenido clonado no está adentro de .ayuda, así que
+   el título necesita su propio aire con la X de cerrar. */
+.peg-ayuda .modal__titulo {
+  padding-right: var(--control-alto);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .peg__ayuda-btn {
+    transition: none;
+  }
+
+  /* Sin movimiento: nada de franja ni glitch. Queda el fondo oscuro con el
+     borde celeste fijo, que ya avisa el hover. */
+  .peg__hackear:not(:disabled):hover,
+  .peg__hackear:not(:disabled):hover::before,
+  .peg__hackear:not(:disabled):hover::after {
+    animation: none;
+  }
+
+  .peg__hackear:not(:disabled):hover::before,
+  .peg__hackear:not(:disabled):hover::after {
+    opacity: 0;
+  }
+}
+
+/* ============================================================
+   Ayuda
+   El layout de 2 columnas (.juego-layout), el panel lateral y la ficha del
+   juego viven en components.css: producto.html también los usa, y no
+   arma un board propio. Ayuda sigue acá porque son las reglas de Peg
+   Solitaire, específicas de Neon Circuit. Mismo estilo de card que
+   .ficha-juego (padding/borde/radio/fondo) repetido a propósito: son 5
+   líneas, no vale la pena una clase compartida solo para esto.
+   ============================================================ */
+/* El panel lateral no puede pasar del alto del tablero: si Ayuda crece al
+   abrir un desplegable, la fila del grid crecía con ella y empujaba hacia
+   abajo "Sobre el juego", la Galería y Compartir. Con el tope, la ficha
+   mantiene su alto y Ayuda hace scroll adentro (overflow-y: auto). */
+.juego-layout .panel-lateral {
+  max-height: var(--alto-tablero);
+}
+
+/* En el Peg el panel lateral ya no está al lado del tablero (que pasó a
+   ocupar todo el ancho), así que no hay un alto que respetar: se saca el
+   tope de arriba. Los dos selectores tienen la misma especificidad (dos
+   clases); gana este porque está después. align-self:start evita que el
+   panel se estire hasta el alto de la galería. */
+.juego-layout--peg .panel-lateral {
+  max-height: none;
+  align-self: start;
+}
+
+/* Galería del Peg con la proporción del canvas (1200x760), no 16:9: las
+   capturas son el canvas entero y con 16:9 object-fit: cover les cortaría
+   arriba y abajo. Mismo criterio que la galería de Blocka (blocka.css). */
+.juego-layout--peg .galeria__carta {
+  aspect-ratio: 1200 / 760;
+}
+
+.juego-layout .ficha-juego {
+  flex-shrink: 0;
+}
+
+.ayuda {
+  overflow-y: auto;
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+/* Título con la tecla de atajo ("F1") a la derecha. */
+.ayuda h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 20px;
+}
+
+.ayuda__tecla {
+  padding: var(--espaciado-1) var(--espaciado-2);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  color: var(--primario-c1);
+  font: 500 12px/1 var(--font-ui);
+}
+
+.ayuda__item {
+  border-top: 1px solid var(--primario-o1);
+}
+
+/* Acordeón nativo con <details>/<summary>: el navegador resuelve el abrir
+   y cerrar. El "+" y el "−" son un ::after que cambia con [open]. */
+.ayuda__item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: var(--control-alto);
+  color: var(--primario-c3);
+  font: 600 15px/1.3 var(--font-ui);
+  cursor: pointer;
+  list-style: none;
+}
+
+/* Chrome/Safari agregan su propio triángulo aparte de list-style */
+.ayuda__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.ayuda__item summary::after {
+  content: "+";
+  color: var(--acento);
+  font-size: 18px;
+}
+
+.ayuda__item[open] summary::after {
+  content: "−";
+}
+
+.ayuda__item p {
+  margin: 0 0 var(--espaciado-3);
+  color: var(--primario-c1);
+  font-size: 14px;
+}
+
+/* Lista de atajos de teclado con <kbd> (en el Peg: R, F1, Esc). */
+.ayuda__atajos {
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+  margin-top: var(--espaciado-4);
+  padding-top: var(--espaciado-4);
+  border-top: 1px solid var(--primario-o1);
+  color: var(--primario-c1);
+  font: 400 14px/1 var(--font-ui);
+}
+
+.ayuda__atajos li {
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-3);
+}
+
+.ayuda__atajos kbd {
+  min-width: 28px;
+  padding: var(--espaciado-1) var(--espaciado-2);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-sm);
+  background: var(--fondo);
+  color: var(--primario-c3);
+  font: 600 12px/1 var(--font-ui);
+  text-align: center;
+}
+
+/* .ficha-juego__miniatura (components.css) no trae imagen propia: en
+   producto.html la pone producto.js según el juego; acá es siempre la
+   misma, así que va fija en vez de por JS. */
+.ficha-juego__miniatura {
+  background-image: url("../assets/img/miniatura-neon-circuit.png");
+}
+
