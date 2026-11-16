@@ -17,9 +17,195 @@
    recorta lo que entra o sale por los costados. */
 .game {
   position: relative;
-  width: 960px;
-  height: 540px;
   overflow: hidden;
   background: var(--fondo);
   border-radius: var(--radio-sm);
+}
+
+/* ---- Área de juego: capas de dibujo ----
+   Los tamaños (--ancho, --alto, --suelo, --alto-suelo) los escribe
+   main.js desde config.js, para que el CSS y la lógica usen los mismos
+   números. user-select: none evita seleccionar texto al clickear rápido. */
+.game {
+  width: var(--ancho, 960px);
+  height: var(--alto, 540px);
+  user-select: none;
+  cursor: pointer;
+}
+
+/* Todo lo de adentro se posiciona desde la esquina de arriba a la
+   izquierda y se mueve SOLO con transform (lo escribe el JS). */
+.game .player,
+.game .hitbox {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Spritesheets: todas las tiras son horizontales y de frames iguales.
+   Cada elemento define --frames y --frame-w (ancho de un frame ya
+   escalado) y la animación corre background-position-x de 0 a
+   -frames x frame-w con steps(frames): un salto por frame, sin
+   deslizar. */
+@keyframes sprite-tira {
+  from { background-position-x: 0; }
+  to   { background-position-x: calc(var(--frames) * var(--frame-w) * -1); }
+}
+
+/* ---- Moto (.player) ----
+   El JS escribe translate3d + rotate en .player. El balanceo del vuelo
+   va en .player__body, un elemento aparte, para que la animación CSS no
+   pise el transform del JS. */
+.player {
+  z-index: 2;
+  transform-origin: center;
+}
+
+.player__body {
+  position: absolute;
+  inset: 0;
+  animation: vuelo 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes vuelo {
+  from { transform: translateY(-4px); }
+  to   { transform: translateY(4px); }
+}
+
+/* moto.png mira a la izquierda: scaleX(-1) la da vuelta. */
+.player__sprite {
+  position: absolute;
+  inset: 0;
+  background: url("../assets/game/sprites/moto.png") no-repeat;
+  image-rendering: pixelated;
+  transform: scaleX(-1);
+}
+
+/* Llama del propulsor: sale por atrás (a la izquierda) y parpadea
+   cambiando de largo. Con .is-boost se estira. Vista mínima (Fase A). */
+.player__flame {
+  position: absolute;
+  top: 30px;
+  left: -14px;
+  width: 20px;
+  height: 8px;
+  border-radius: var(--radio-sm);
+  background: linear-gradient(to left, var(--tablero-activo), var(--foco));
+  transform-origin: right center;
+  animation: llama 0.12s steps(2) infinite alternate;
+}
+
+@keyframes llama {
+  from { transform: scaleX(0.6); }
+  to   { transform: scaleX(1.1); }
+}
+
+.player.is-boost .player__flame {
+  animation: none;
+  transform: scaleX(2.2);
+}
+
+/* Explosión del choque: explosion.png (6 frames de 55x52) escalada x2 y
+   centrada sobre la moto. Termina en -660px, que ya está fuera de la
+   tira: queda invisible sin tener que ocultarla. */
+.player__explosion {
+  --frames: 6;
+  --frame-w: 110px;
+  position: absolute;
+  top: -22px;
+  left: -9px;
+  width: 110px;
+  height: 104px;
+  background: url("../assets/game/sprites/explosion.png") no-repeat 0 0 / 660px 104px;
+  image-rendering: pixelated;
+  opacity: 0;
+}
+
+.player.is-hit .player__explosion {
+  opacity: 1;
+  animation: sprite-tira 0.6s steps(6) forwards;
+}
+
+/* Invulnerable: parpadea. */
+.player.is-invulnerable .player__body {
+  animation: vuelo 0.6s ease-in-out infinite alternate, parpadeo 0.15s steps(2) infinite;
+}
+
+@keyframes parpadeo {
+  to { opacity: 0.2; }
+}
+
+/* ---- Hitboxes (debug con H) ---- */
+.hitbox {
+  z-index: 3;
+  display: none;
+  box-sizing: border-box;
+  border: 2px solid var(--foco);
+  pointer-events: none;
+}
+
+.game.is-debug .hitbox {
+  display: block;
+}
+
+/* ---- Sacudón y pausa ---- */
+.game.is-shaking {
+  animation: sacudon 0.4s linear;
+}
+
+@keyframes sacudon {
+  20%  { transform: translate(-8px, 4px); }
+  40%  { transform: translate(8px, -4px); }
+  60%  { transform: translate(-6px, -2px); }
+  80%  { transform: translate(6px, 2px); }
+}
+
+/* En pausa se congela cualquier animación CSS de adentro. */
+.game.is-paused * {
+  animation-play-state: paused;
+}
+
+/* ---- Pantallas (carga, inicio, pausa, victoria, derrota) ----
+   Vista mínima de la Fase A: texto y botones sobre un velo. */
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-8);
+  background: var(--velo-modal);
+  color: var(--primario-c3);
+  text-align: center;
+  cursor: default;
+}
+
+.screen__texto {
+  margin: 0;
+  font-family: var(--font-ui);
+}
+
+.screen__acciones {
+  display: flex;
+  gap: var(--espaciado-3);
+}
+
+/* ---- Movimiento reducido ----
+   Sin sacudón ni balanceo; la invulnerabilidad se muestra con opacidad
+   fija en lugar de parpadeo. Los sprites y el scroll se quedan: son el
+   juego. */
+@media (prefers-reduced-motion: reduce) {
+  .game.is-shaking,
+  .player__body,
+  .player__flame {
+    animation: none;
+  }
+
+  .player.is-invulnerable .player__body {
+    animation: none;
+    opacity: 0.5;
+  }
 }
