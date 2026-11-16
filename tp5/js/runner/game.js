@@ -8,19 +8,26 @@
 // Fases: 'menu' (sin partida), 'jugando', 'pausa', 'muriendo' (se ve la
 // explosión antes de la pantalla de derrota) y 'fin'.
 
-import { JUEGO, JUGADOR, MUNDO, OBSTACULO, MODOS } from './config.js';
+import { JUEGO, JUGADOR, MUNDO, OBSTACULO, DRONE, COLECCIONABLE, MODOS } from './config.js';
 import { crearLoop } from './loop.js';
 import { crearParallax } from './parallax.js';
 import { crearHud } from './hud.js';
-import { crearSpawner, siguientePar, elegir } from './spawner.js';
+import { crearSpawner, siguientePar, elegir, entre } from './spawner.js';
 import { seTocan, cajaEnMundo } from './collision.js';
 import {
   crearJugador, impulsar as impulsarJugador, actualizarJugador, descontarTiempos,
-  cajaJugador, prepararVistaJugador, dibujarJugador,
+  cajaJugador, prepararVistaJugador, dibujarJugador, centroVertical,
 } from './entities/player.js';
 import {
   crearObstaculo, actualizarObstaculo, dibujarObstaculo, salioDePantalla,
 } from './entities/obstacle.js';
+import {
+  crearDrone, actualizarDrone, explotarDrone, cajaDrone, dibujarDrone, droneTerminado,
+} from './entities/drone.js';
+import {
+  crearColeccionable, actualizarColeccionable, recoger, cajaColeccionable,
+  dibujarColeccionable, coleccionableTerminado, crearTextoFlotante,
+} from './entities/collectible.js';
 
 /**
  * Crea el juego.
@@ -50,11 +57,16 @@ export function crearJuego(dom, alTerminar) {
       fase: 'jugando',
       modo: claveModo,
       jugador: crearJugador(),
+      vidas: MODOS[claveModo].vidas,  // Infinity en Fácil
       obstaculos: [],
+      drones: [],
+      coleccionables: [],
+      textos: [],                    // "+3" flotantes
       spawner: crearSpawner(),
       proximaX: OBSTACULO.primeraX,  // x donde va a empezar el próximo par
       puntaje: 0,
       pasados: 0,                    // obstáculos pasados (achica el hueco)
+      generados: 0,                  // pares creados (los drones esperan unos cuantos)
       tiempoSacudon: 0,
       tiempoFin: 0,                  // cuenta regresiva de la fase 'muriendo'
       tiempoRalentizado: 0,
@@ -79,8 +91,13 @@ export function crearJuego(dom, alTerminar) {
 
   /** Saca del DOM todas las entidades de la partida anterior. */
   function vaciarMundo() {
-    estado.obstaculos.forEach((obstaculo) => obstaculo.elemento.remove());
+    for (const lista of [estado.obstaculos, estado.drones, estado.coleccionables, estado.textos]) {
+      lista.forEach((entidad) => entidad.elemento.remove());
+    }
     estado.obstaculos = [];
+    estado.drones = [];
+    estado.coleccionables = [];
+    estado.textos = [];
   }
 
   /**
@@ -102,7 +119,8 @@ export function crearJuego(dom, alTerminar) {
     if (estado.fase === 'muriendo') {
       // El mundo queda quieto; solo corren los tiempos de las animaciones.
       descontarTiempos(estado.jugador, dt);
-      estado.obstaculos.forEach((obstaculo) => actualizarObstaculo(obstaculo, 0, dt));
+      moverEntidades(0, dt);
+      borrarTerminadas();
       estado.tiempoFin -= dt;
       if (estado.tiempoFin <= 0) terminar('derrota');
       return;
@@ -113,11 +131,25 @@ export function crearJuego(dom, alTerminar) {
     const velocidad = velocidadMundo();
     parallax.actualizar(velocidad, dt);
     actualizarJugador(estado.jugador, dt);
-    estado.obstaculos.forEach((obstaculo) => actualizarObstaculo(obstaculo, velocidad, dt));
+    moverEntidades(velocidad, dt);
     generar(velocidad, dt);
     contarPasados();
     revisarChoques();
-    borrarFueraDePantalla();
+    borrarTerminadas();
+    if (estado.fase === 'jugando' && estado.puntaje >= JUEGO.puntajeObjetivo) terminar('victoria');
+  }
+
+  /**
+   * Mueve todas las entidades con el mundo (a velocidad 0 se quedan quietas
+   * pero sus temporizadores siguen corriendo).
+   * @param {number} velocidad
+   * @param {number} dt
+   */
+  function moverEntidades(velocidad, dt) {
+    estado.obstaculos.forEach((obstaculo) => actualizarObstaculo(obstaculo, velocidad, dt));
+    estado.drones.forEach((drone) => actualizarDrone(drone, velocidad, dt));
+    estado.coleccionables.forEach((coleccionable) => actualizarColeccionable(coleccionable, velocidad, dt));
+    estado.textos.forEach((texto) => { texto.tiempo -= dt; });
   }
 
   /**
@@ -148,7 +180,39 @@ export function crearJuego(dom, alTerminar) {
       );
       estado.obstaculos.push(obstaculo);
       dom.mundo.append(obstaculo.elemento);
+      estado.generados += 1;
+      agregarExtras(obstaculo, par);
       estado.proximaX += obstaculo.ancho + par.separacion;
+    }
+  }
+
+  /**
+   * A veces suma un coleccionable en el hueco del par y un drone en el
+   * espacio que queda hasta el próximo.
+   * @param {object} obstaculo el par recién creado
+   * @param {{ hueco: number, centro: number, separacion: number }} par
+   */
+  function agregarExtras(obstaculo, par) {
+    if (Math.random() < COLECCIONABLE.probabilidad) {
+      const lado = COLECCIONABLE.lado;
+      const x = obstaculo.x + (obstaculo.ancho - lado) / 2;
+      const desvio = entre(-COLECCIONABLE.desvioMax, COLECCIONABLE.desvioMax, Math.random);
+      const coleccionable = crearColeccionable(x, par.centro + desvio - lado / 2);
+      estado.coleccionables.push(coleccionable);
+      dom.mundo.append(coleccionable.elemento);
+    }
+
+    if (estado.generados >= DRONE.desdeObstaculo && Math.random() < DRONE.probabilidad) {
+      // A mitad de camino hasta el próximo par, arriba o abajo de la
+      // altura del hueco (así se puede esquivar pasando por el otro lado).
+      const x = obstaculo.x + obstaculo.ancho + (par.separacion - DRONE.ancho) / 2;
+      const lado = Math.random() < 0.5 ? -1 : 1;
+      const minimo = JUEGO.techo + DRONE.amplitud;
+      const maximo = JUEGO.suelo - DRONE.alto - DRONE.amplitud;
+      const yBase = Math.min(maximo, Math.max(minimo, par.centro + lado * DRONE.desvio - DRONE.alto / 2));
+      const drone = crearDrone(x, yBase);
+      estado.drones.push(drone);
+      dom.mundo.append(drone.elemento);
     }
   }
 
@@ -163,40 +227,91 @@ export function crearJuego(dom, alTerminar) {
     }
   }
 
-  /** Techo, suelo y obstáculos. */
+  /**
+   * Choques de la moto. Mientras es invulnerable atraviesa edificios,
+   * carteles y drones, y el techo y el suelo solo la frenan. Los
+   * coleccionables se agarran siempre.
+   */
   function revisarChoques() {
-    const caja = cajaJugador(estado.jugador);
+    const jugador = estado.jugador;
+    const caja = cajaJugador(jugador);
+    const invulnerable = jugador.tiempoInvulnerable > 0;
+
+    // Techo y suelo.
     if (caja.y < JUEGO.techo || caja.y + caja.alto > JUEGO.suelo) {
-      chocar();
-      return;
-    }
-    for (const obstaculo of estado.obstaculos) {
-      const toca = obstaculo.cajas.some((hitbox) => seTocan(caja, cajaEnMundo(obstaculo.x, 0, hitbox)));
-      if (toca) {
-        obstaculo.tiempoChoque = OBSTACULO.duracionChoque;
-        chocar();
+      if (invulnerable) {
+        const minimo = JUEGO.techo - JUGADOR.hitbox.dy;
+        const maximo = JUEGO.suelo - JUGADOR.hitbox.dy - JUGADOR.hitbox.alto;
+        jugador.y = Math.min(maximo, Math.max(minimo, jugador.y));
+        jugador.vy = 0;
+      } else {
+        recibirDanio(true);
         return;
+      }
+    }
+
+    if (!invulnerable) {
+      for (const obstaculo of estado.obstaculos) {
+        const toca = obstaculo.cajas.some((hitbox) => seTocan(caja, cajaEnMundo(obstaculo.x, 0, hitbox)));
+        if (toca) {
+          obstaculo.tiempoChoque = OBSTACULO.duracionChoque;
+          recibirDanio(false);
+          return;
+        }
+      }
+      for (const drone of estado.drones) {
+        if (!drone.explotando && seTocan(caja, cajaDrone(drone))) {
+          explotarDrone(drone);
+          estado.tiempoRalentizado = MUNDO.duracionRalentizado;
+          recibirDanio(false);
+          return;
+        }
+      }
+    }
+
+    for (const coleccionable of estado.coleccionables) {
+      if (!coleccionable.recogido && seTocan(caja, cajaColeccionable(coleccionable))) {
+        recoger(coleccionable);
+        estado.puntaje += COLECCIONABLE.puntos;
+        const texto = crearTextoFlotante(coleccionable.x, coleccionable.y, `+${COLECCIONABLE.puntos}`);
+        estado.textos.push(texto);
+        dom.mundo.append(texto.elemento);
       }
     }
   }
 
-  /** Choque: animación de la moto y sacudón. Por ahora termina la partida. */
-  function chocar() {
+  /**
+   * Un choque que hace daño: explosión de la moto y sacudón siempre. En
+   * Normal y Difícil resta una vida; en Fácil (vidas infinitas) no. Si
+   * quedan vidas, la moto queda invulnerable un rato y, si chocó contra el
+   * techo o el suelo, vuelve al centro para no volver a chocar enseguida.
+   * @param {boolean} fueBorde chocó contra el techo o el suelo
+   */
+  function recibirDanio(fueBorde) {
     const jugador = estado.jugador;
     jugador.tiempoChoque = JUGADOR.duracionChoque;
-    jugador.vy = 0;
     estado.tiempoSacudon = JUEGO.duracionSacudon;
-    estado.fase = 'muriendo';
-    estado.tiempoFin = JUEGO.esperaDerrota;
+    estado.vidas -= 1;  // Infinity - 1 sigue siendo Infinity
+
+    if (estado.vidas <= 0) {
+      jugador.vy = 0;
+      estado.fase = 'muriendo';
+      estado.tiempoFin = JUEGO.esperaDerrota;
+      return;
+    }
+    jugador.tiempoInvulnerable = JUGADOR.duracionInvulnerable;
+    if (fueBorde) {
+      jugador.y = centroVertical();
+      jugador.vy = 0;
+    }
   }
 
-  /** Borra del DOM y del arreglo los pares que ya salieron por la izquierda. */
-  function borrarFueraDePantalla() {
-    estado.obstaculos = estado.obstaculos.filter((obstaculo) => {
-      if (!salioDePantalla(obstaculo)) return true;
-      obstaculo.elemento.remove();
-      return false;
-    });
+  /** Borra del DOM y del arreglo lo que salió de pantalla o terminó su animación. */
+  function borrarTerminadas() {
+    estado.obstaculos = filtrarYBorrar(estado.obstaculos, salioDePantalla);
+    estado.drones = filtrarYBorrar(estado.drones, droneTerminado);
+    estado.coleccionables = filtrarYBorrar(estado.coleccionables, coleccionableTerminado);
+    estado.textos = filtrarYBorrar(estado.textos, (texto) => texto.tiempo <= 0);
   }
 
   /**
@@ -214,9 +329,11 @@ export function crearJuego(dom, alTerminar) {
   function dibujar() {
     parallax.dibujar();
     estado.obstaculos.forEach(dibujarObstaculo);
+    estado.drones.forEach(dibujarDrone);
+    estado.coleccionables.forEach(dibujarColeccionable);
     dibujarJugador(estado.jugador, dom.jugador, dom.hitboxJugador);
     dom.juego.classList.toggle('is-shaking', estado.tiempoSacudon > 0);
-    hud.dibujar({ puntaje: estado.puntaje, vidas: MODOS[estado.modo].vidas, modo: MODOS[estado.modo].nombre });
+    hud.dibujar({ puntaje: estado.puntaje, vidas: estado.vidas, modo: MODOS[estado.modo].nombre });
   }
 
   return {
@@ -273,4 +390,18 @@ export function crearJuego(dom, alTerminar) {
       dom.juego.classList.toggle('is-debug', estado.debug);
     },
   };
+}
+
+/**
+ * Se queda con las entidades que siguen y saca del DOM las que terminaron.
+ * @param {object[]} lista
+ * @param {(entidad: object) => boolean} terminada
+ * @returns {object[]} lista nueva, sin las terminadas
+ */
+function filtrarYBorrar(lista, terminada) {
+  return lista.filter((entidad) => {
+    if (!terminada(entidad)) return true;
+    entidad.elemento.remove();
+    return false;
+  });
 }

@@ -90,6 +90,17 @@ elemento del DOM y del arreglo cuando se termina el tiempo.
 
 Mientras un drone explota o un coleccionable se recoge, ya no colisiona.
 
+Notas para la Fase B:
+- `.is-boost` dura 0,2 s desde la última pulsación: si se pulsa de nuevo
+  antes de que termine, la clase sigue puesta y una animación con
+  `@keyframes` no se reinicia (el JS no fuerza un reflow, porque no lee el
+  DOM). Conviene que el estirón de la llama sea una transición o un estado,
+  no una animación de una sola vez.
+- Mientras la moto es invulnerable atraviesa edificios, carteles y drones;
+  el techo y el suelo solo la frenan. Los coleccionables se agarran igual.
+- En la fase de derrota el mundo queda quieto 1 s (`JUEGO.esperaDerrota`)
+  para que se vea la explosión; recién ahí aparece `#screen-lose`.
+
 ---
 
 ## Variables CSS por entidad (las pone el JS una vez)
@@ -124,7 +135,7 @@ Dentro de win y lose, `.screen__score` muestra el puntaje final.
 | Id | Contenido |
 |---|---|
 | `#score` | puntaje (número) |
-| `#lives` | un `<i class="ph ph-heart hud__vida">` por vida; en Fácil, el texto "∞" con `.hud__vida--infinita` |
+| `#lives` (`.hud__vidas`) | un `<i class="ph ph-heart hud__vida">` por vida; en Fácil, un `<span class="hud__vida hud__vida--infinita">∞</span>`. `aria-label` con la cantidad |
 | `#mode` | nombre del modo |
 | `#progress` | `role="progressbar"` con `aria-valuenow`; la barra interna escala con `scaleX` |
 

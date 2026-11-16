@@ -37,7 +37,10 @@
    izquierda y se mueve SOLO con transform (lo escribe el JS). */
 .game .player,
 .game .hitbox,
-.game .obstacle {
+.game .obstacle,
+.game .drone,
+.game .collectible,
+.game .float-text {
   position: absolute;
   top: 0;
   left: 0;
@@ -160,6 +163,80 @@
 
 @keyframes temblor {
   50% { translate: 3px 0; }
+}
+
+/* ---- Drone ----
+   drone.png: 4 frames de 55x52 (escala x1), en loop. */
+.drone {
+  --frames: 4;
+  --frame-w: 55px;
+  background: url("../assets/game/sprites/drone.png") no-repeat 0 0 / 220px 52px;
+  image-rendering: pixelated;
+  animation: sprite-tira 0.4s steps(4) infinite;
+}
+
+/* Al chocarlo cambia a la tira de la explosión (6 frames) y la corre
+   una sola vez; game.js lo borra cuando termina (0,5 s). */
+.drone.is-exploding {
+  --frames: 6;
+  background-image: url("../assets/game/sprites/explosion.png");
+  background-size: 330px 52px;
+  animation: sprite-tira 0.5s steps(6) forwards;
+}
+
+/* ---- Coleccionable ----
+   Todavía no hay sprite: el placeholder es un rombo celeste neón que
+   late. Para pasarlo a un spritesheet horizontal, agregarle a
+   .collectible__sprite la clase --sheet y definir --img, --frames,
+   --frame-w y --frame-h: la animación ya usa sprite-tira con
+   steps(var(--frames)), como el drone. */
+.collectible__sprite {
+  position: absolute;
+  inset: 4px;
+  background: var(--acento);
+  box-shadow: var(--glow-acento);
+  transform: rotate(45deg);
+  animation: latido 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes latido {
+  from { transform: rotate(45deg) scale(0.85); }
+  to   { transform: rotate(45deg) scale(1.1); }
+}
+
+.collectible__sprite--sheet {
+  inset: 0;
+  width: var(--frame-w);
+  height: var(--frame-h);
+  background: var(--img) no-repeat 0 0 / calc(var(--frames) * var(--frame-w)) var(--frame-h);
+  box-shadow: none;
+  transform: none;
+  image-rendering: pixelated;
+  animation: sprite-tira 0.6s steps(var(--frames)) infinite;
+}
+
+/* Recogido: crece y se desvanece (0,4 s, después game.js lo borra). */
+.collectible.is-collected .collectible__sprite {
+  animation: recogida 0.4s ease-out forwards;
+}
+
+@keyframes recogida {
+  to { transform: rotate(45deg) scale(2.5); opacity: 0; }
+}
+
+/* "+3": sube y se desvanece (0,8 s). El span es el que se anima, porque
+   el transform de .float-text lo escribe el JS. */
+.float-text span {
+  display: block;
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--acento);
+  animation: flotar 0.8s ease-out forwards;
+}
+
+@keyframes flotar {
+  to { transform: translateY(-40px); opacity: 0; }
 }
 
 /* ---- HUD ----
@@ -360,7 +437,8 @@
   .obstacle.is-hit .obstacle__top,
   .obstacle.is-hit .obstacle__bottom,
   .player__body,
-  .player__flame {
+  .player__flame,
+  .collectible__sprite {
     animation: none;
   }
 
