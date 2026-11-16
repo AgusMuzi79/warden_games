@@ -22,7 +22,7 @@ la integración web son Fase B (Fran). Prompt completo: `docs/prompt-tp5-runner.
 - [x] T4. Parallax 4 capas desde una velocidad base; suelo factor 1. Evidencia: transforms medidos en Chrome -10/-29/-57/-(95 mod 64) px = 0,1/0,3/0,6/1 x 95 px recorridos. Se sumó `<meta name="darkreader-lock">`: la extensión Dark Reader invertía los PNG.
 - [x] T5. Spawner + obstáculos + colisión AABB + debug H + puntaje + borrado. Evidencia: prueba en Node del spawner (2000 pares x 3 modos: 0 violaciones de salto ±150, márgenes y separación 280–420; hueco 220→180→130 Normal, 190→130 Difícil) y de seTocan; en Chrome con piloto automático: puntaje sube, hitboxes con H, nunca más de 3 `.obstacle` en el DOM. Bug corregido: url() en variable CSS se resolvía contra css/ → se pasa a URL absoluta.
 - [x] T6. Drone, coleccionable, vidas/modos, invulnerabilidad, victoria/derrota, pausa, HUD. Evidencia (Chrome, rAF reemplazado por un timer de 16 ms porque la pestaña automatizada corre a ~2 fps, y piloto automático): Normal llegó a 50 → #screen-win con 3→2→1 vidas en el HUD y +3 por chip; Difícil sin tocar nada → #screen-lose a los ~2 s; Fácil: choques con .is-hit/.is-invulnerable/.is-shaking, vidas ∞, nunca pierde; P/Esc pausan y reanudan (capas quietas en pausa); blur → pausa automática; drone que explota se mueve a ~99 px/s (220 x 0,45). Nunca más de 4 entidades en .world.
-- [ ] T7. Cierre: docs/tp5-estado.md, línea en CLAUDE.md, tp5/DECISIONES.md, resumen para la defensa.
+- [x] T7. Cierre: docs/tp5-estado.md, línea en CLAUDE.md, tp5/DECISIONES.md, resumen para la defensa.
 
 ## Progreso
-- T1a hecho. T1b–T6 hechas por un writer delegado (trigger: 2+ archivos no triviales). Siguiente: T7 (cierre).
+- T1a hecho. T1b–T6 hechas por un writer delegado (trigger: 2+ archivos no triviales). T7 hecha (docs/tp5-estado.md, CLAUDE.md, tp5/DECISIONES.md). Review nativo bloqueado: la selección de untracked da invalid_request. Siguiente: Fase B (Fran).
