@@ -1,0 +1,25 @@
+/* ============================================================
+   runner.css: página y juego de Neon Rider (TPE5)
+   Se carga último (después de footer.css). Fase A: vista mínima
+   funcional. El contrato de clases está en docs/tp5-contrato.md.
+   ============================================================ */
+
+/* ---- Página ---- */
+
+.runner {
+  display: flex;
+  justify-content: center;
+  padding-block: var(--espaciado-6);
+}
+
+/* Área de juego de tamaño fijo (960x540): el juego es solo desktop y
+   todas las posiciones del JS están en estos píxeles. overflow: hidden
+   recorta lo que entra o sale por los costados. */
+.game {
+  position: relative;
+  width: 960px;
+  height: 540px;
+  overflow: hidden;
+  background: var(--fondo);
+  border-radius: var(--radio-sm);
+}

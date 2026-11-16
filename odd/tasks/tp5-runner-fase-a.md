@@ -16,7 +16,7 @@ la integración web son Fase B (Fran). Prompt completo: `docs/prompt-tp5-runner.
 
 ## Tareas
 - [x] T1a. Copiar tp4/ a tp5/ (no pisa assets/game/); DECISIONES.md nuevo. Ruta: inline (mecánico).
-- [ ] T1b. `tp5/runner.html` mínima (header, footer, #game vacío).
+- [x] T1b. `tp5/runner.html` mínima (header, footer, #game vacío). Evidencia: head/header/footer copiados de juego.html; carga runner.css al final.
 - [ ] T2. `docs/tp5-contrato.md`.
 - [ ] T3. Base: config, loop (rAF + dt con tope), input, main (precarga, pantallas inicio/selector), player (gravedad, impulso, rotación, techo/suelo), runner.css.
 - [ ] T4. Parallax 4 capas desde una velocidad base; suelo factor 1.
