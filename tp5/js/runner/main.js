@@ -33,6 +33,8 @@ areaJuego.style.setProperty('--alto-suelo', `${JUEGO.alto - JUEGO.suelo}px`);
 const juego = crearJuego({
   juego: areaJuego,
   capas: [...areaJuego.querySelectorAll('.layer')],
+  mundo: areaJuego.querySelector('.world'),
+  hud: areaJuego.querySelector('.hud'),
   jugador: areaJuego.querySelector('.player'),
   hitboxJugador: areaJuego.querySelector('.hitbox--player'),
 }, mostrarFin);

@@ -97,7 +97,7 @@ Mientras un drone explota o un coleccionable se recoge, ya no colisiona.
 - `.obstacle__bottom`: `--img` (url del tope del edificio), `--img-alto`.
 - `.obstacle__banner`: `--img`, `--frames`, `--frame-w` (ya escalado), `--alto`.
   La animación es `steps(var(--frames))` sobre `background-position-x`.
-- `.obstacle__top`: `--alto-cartel` (para que la estructura llegue hasta el cartel).
+- `.obstacle__top`: `--ancho-cartel` (ancho del cartel ya escalado; la estructura y la hitbox de arriba se centran con ese ancho).
 - `.collectible__sprite`: placeholder por CSS. Para pasarlo a spritesheet:
   ponerle la clase `.collectible__sprite--sheet` y definir `--img`,
   `--frames`, `--frame-w`, `--frame-h` (ver el comentario en `runner.css`).

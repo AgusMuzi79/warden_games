@@ -59,6 +59,10 @@
         <div class="layer layer--3" aria-hidden="true"></div>
         <div class="layer layer--4" aria-hidden="true"></div>
 
+        <!-- Entidades (edificios, carteles, drones, coleccionables): las
+             crea y las borra el JS. -->
+        <div class="world" aria-hidden="true"></div>
+
         <!-- Moto. .player la mueve el JS (translate3d + rotate); adentro,
              .player__body hace el balanceo del vuelo con CSS. -->
         <div class="player" aria-hidden="true">
@@ -70,6 +74,16 @@
         </div>
         <!-- Caja de colisión de la moto: solo se ve con la tecla H. -->
         <div class="hitbox hitbox--player" aria-hidden="true"></div>
+
+        <!-- HUD: lo actualiza js/runner/hud.js cuando cambia un dato. -->
+        <div class="hud">
+          <p class="hud__item">Puntaje <span id="score" class="hud__numero">0</span></p>
+          <p class="hud__item">Vidas <span id="lives" class="hud__vidas" aria-label="Vidas"></span></p>
+          <p class="hud__item">Modo <span id="mode" class="hud__numero"></span></p>
+          <div id="progress" class="hud__progress" role="progressbar" aria-label="Progreso hacia la meta" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+            <span class="hud__progress-bar"></span>
+          </div>
+        </div>
 
         <!-- Pantallas. Las muestra y oculta main.js (una a la vez). -->
         <div id="screen-loading" class="screen">

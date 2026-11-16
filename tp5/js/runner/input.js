@@ -24,7 +24,7 @@ export function conectarEntrada(areaJuego, acciones) {
     if (evento.repeat) return;
     // Si se está escribiendo en un campo (el newsletter del footer), las
     // teclas son de ese campo, no del juego.
-    if (evento.target.closest('input, textarea, select')) return;
+    if (evento.target instanceof Element && evento.target.closest('input, textarea, select')) return;
 
     if (TECLAS_IMPULSO.includes(evento.code)) {
       // Solo se cancela el comportamiento normal (el espacio scrollea la

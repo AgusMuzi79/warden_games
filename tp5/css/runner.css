@@ -36,7 +36,8 @@
 /* Todo lo de adentro se posiciona desde la esquina de arriba a la
    izquierda y se mueve SOLO con transform (lo escribe el JS). */
 .game .player,
-.game .hitbox {
+.game .hitbox,
+.game .obstacle {
   position: absolute;
   top: 0;
   left: 0;
@@ -91,6 +92,122 @@
     linear-gradient(to right, var(--primario) 2px, transparent 2px) 0 0 / var(--tile) 100% repeat-x,
     linear-gradient(var(--tablero-grilla) 2px, transparent 2px) 0 0 / 100% 23px,
     var(--placa);
+}
+
+/* ---- Mundo y obstáculos ----
+   .world tapa toda el área y contiene las entidades que crea el JS. */
+.world {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+/* Un par: ocupa del techo al suelo; el JS solo lo mueve en x. */
+.obstacle {
+  height: var(--suelo);
+}
+
+/* Estructura que cuelga del techo, con el cartel en la punta. El cartel
+   está pegado abajo: si la estructura es más baja que el cartel, el cartel
+   se recorta arriba (overflow: hidden) y el hueco sigue siendo exacto. */
+.obstacle__top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  /* Estructura: una columna centrada de la mitad del ancho del cartel
+     (--ancho-cartel lo pone obstacle.js). Vista mínima de la Fase A. */
+  background: linear-gradient(var(--primario-o1), var(--primario-o1)) 50% 0 / calc(var(--ancho-cartel) / 2) 100% no-repeat;
+}
+
+/* Cartel: tira de 4 frames escalada x2 (tamaños en las variables que
+   pone obstacle.js). */
+.obstacle__banner {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  height: var(--alto);
+  margin-left: calc(var(--frame-w) / -2);
+  background: var(--img) no-repeat 0 0 / calc(var(--frames) * var(--frame-w)) var(--alto);
+  image-rendering: pixelated;
+  animation: sprite-tira 0.8s steps(var(--frames)) infinite;
+}
+
+/* Edificio: el PNG es el tope; debajo, un cuerpo liso hasta el suelo
+   (la Fase B lo cambia por una franja repetida). */
+.obstacle__bottom {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  background:
+    var(--img) no-repeat 0 0,
+    linear-gradient(var(--placa-borde), var(--placa-borde)) 0 var(--img-alto) / 100% 100% no-repeat;
+  image-rendering: pixelated;
+}
+
+/* Choque contra el par: tiembla (vista mínima). */
+.obstacle.is-hit .obstacle__top,
+.obstacle.is-hit .obstacle__bottom {
+  animation: temblor 0.1s linear infinite;
+}
+
+.obstacle.is-hit .obstacle__banner {
+  animation-duration: 0.2s;
+}
+
+@keyframes temblor {
+  50% { translate: 3px 0; }
+}
+
+/* ---- HUD ----
+   Números en Roboto Flex con tabular-nums: todos los dígitos miden lo
+   mismo y el puntaje no "baila" al cambiar. */
+.hud {
+  position: absolute;
+  top: var(--espaciado-3);
+  left: var(--espaciado-3);
+  right: var(--espaciado-3);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: var(--espaciado-6);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--primario-c3);
+  pointer-events: none;
+}
+
+.hud__item {
+  margin: 0;
+}
+
+.hud__numero {
+  font-variant-numeric: tabular-nums;
+  color: var(--acento);
+}
+
+.hud__vidas {
+  color: var(--error);
+}
+
+.hud__progress {
+  flex: 1;
+  height: var(--espaciado-2);
+  border: 1px solid var(--primario);
+  border-radius: var(--radio-sm);
+  overflow: hidden;
+}
+
+/* La barra crece con scaleX (la escribe hud.js) desde la izquierda. */
+.hud__progress-bar {
+  display: block;
+  height: 100%;
+  background: var(--acento);
+  transform: scaleX(0);
+  transform-origin: left;
 }
 
 /* ---- Moto (.player) ----
@@ -240,6 +357,8 @@
    juego. */
 @media (prefers-reduced-motion: reduce) {
   .game.is-shaking,
+  .obstacle.is-hit .obstacle__top,
+  .obstacle.is-hit .obstacle__bottom,
   .player__body,
   .player__flame {
     animation: none;

@@ -1,57 +1,86 @@
 // game.js — Estado de la partida, update y render de cada cuadro
 //
 // Junta todas las piezas: en cada cuadro el loop llama a paso(dt), que
-// primero actualiza el estado (física, choques) y después lo dibuja. El
-// estado es un objeto JS; el DOM solo recibe transforms y clases (ver
-// docs/tp5-contrato.md). main.js se encarga de las pantallas.
+// primero actualiza el estado (física, spawner, choques, puntaje) y después
+// lo dibuja. El estado es un objeto JS; el DOM solo recibe transforms y
+// clases (ver docs/tp5-contrato.md). main.js se encarga de las pantallas.
 //
 // Fases: 'menu' (sin partida), 'jugando', 'pausa', 'muriendo' (se ve la
 // explosión antes de la pantalla de derrota) y 'fin'.
 
-import { JUEGO, JUGADOR, MUNDO } from './config.js';
+import { JUEGO, JUGADOR, MUNDO, OBSTACULO, MODOS } from './config.js';
 import { crearLoop } from './loop.js';
 import { crearParallax } from './parallax.js';
+import { crearHud } from './hud.js';
+import { crearSpawner, siguientePar, elegir } from './spawner.js';
+import { seTocan, cajaEnMundo } from './collision.js';
 import {
   crearJugador, impulsar as impulsarJugador, actualizarJugador, descontarTiempos,
-  cajaJugador, prepararVistaJugador, dibujarJugador, centroVertical,
+  cajaJugador, prepararVistaJugador, dibujarJugador,
 } from './entities/player.js';
+import {
+  crearObstaculo, actualizarObstaculo, dibujarObstaculo, salioDePantalla,
+} from './entities/obstacle.js';
 
 /**
  * Crea el juego.
- * @param {{ juego: HTMLElement, capas: HTMLElement[], jugador: HTMLElement, hitboxJugador: HTMLElement }} dom
+ * @param {{
+ *   juego: HTMLElement, capas: HTMLElement[], mundo: HTMLElement,
+ *   jugador: HTMLElement, hitboxJugador: HTMLElement, hud: HTMLElement,
+ * }} dom
  * @param {(resultado: 'victoria' | 'derrota', puntaje: number) => void} alTerminar
  */
 export function crearJuego(dom, alTerminar) {
-  const estado = {
-    fase: 'menu',
-    modo: null,
-    jugador: crearJugador(),
-    tiempoSacudon: 0,
-    tiempoFin: 0,       // cuenta regresiva de la fase 'muriendo'
-    tiempoRalentizado: 0,
-    debug: false,
-  };
+  const estado = crearEstado('normal');
+  estado.fase = 'menu';
   const loop = crearLoop(paso);
   const parallax = crearParallax(dom.capas);
+  const hud = crearHud(dom.hud);
 
   prepararVistaJugador(dom.jugador, dom.hitboxJugador);
   dibujar();
+
+  /**
+   * Estado de una partida nueva.
+   * @param {string} claveModo
+   * @returns {object}
+   */
+  function crearEstado(claveModo) {
+    return {
+      fase: 'jugando',
+      modo: claveModo,
+      jugador: crearJugador(),
+      obstaculos: [],
+      spawner: crearSpawner(),
+      proximaX: OBSTACULO.primeraX,  // x donde va a empezar el próximo par
+      puntaje: 0,
+      pasados: 0,                    // obstáculos pasados (achica el hueco)
+      tiempoSacudon: 0,
+      tiempoFin: 0,                  // cuenta regresiva de la fase 'muriendo'
+      tiempoRalentizado: 0,
+      debug: false,
+    };
+  }
 
   /**
    * Arranca una partida nueva en el modo elegido.
    * @param {string} claveModo 'facil' | 'normal' | 'dificil'
    */
   function iniciarPartida(claveModo) {
-    estado.modo = claveModo;
-    estado.jugador = crearJugador();
-    estado.tiempoSacudon = 0;
-    estado.tiempoFin = 0;
-    estado.tiempoRalentizado = 0;
+    loop.detener();
+    vaciarMundo();
+    const debug = estado.debug;
+    Object.assign(estado, crearEstado(claveModo), { debug });
     parallax.reiniciar();
-    estado.fase = 'jugando';
     dom.juego.classList.remove('is-paused');
     dibujar();
     loop.iniciar();
+  }
+
+  /** Saca del DOM todas las entidades de la partida anterior. */
+  function vaciarMundo() {
+    estado.obstaculos.forEach((obstaculo) => obstaculo.elemento.remove());
+    estado.obstaculos = [];
   }
 
   /**
@@ -73,6 +102,7 @@ export function crearJuego(dom, alTerminar) {
     if (estado.fase === 'muriendo') {
       // El mundo queda quieto; solo corren los tiempos de las animaciones.
       descontarTiempos(estado.jugador, dt);
+      estado.obstaculos.forEach((obstaculo) => actualizarObstaculo(obstaculo, 0, dt));
       estado.tiempoFin -= dt;
       if (estado.tiempoFin <= 0) terminar('derrota');
       return;
@@ -80,9 +110,14 @@ export function crearJuego(dom, alTerminar) {
     if (estado.fase !== 'jugando') return;
 
     estado.tiempoRalentizado = Math.max(0, estado.tiempoRalentizado - dt);
-    parallax.actualizar(velocidadMundo(), dt);
+    const velocidad = velocidadMundo();
+    parallax.actualizar(velocidad, dt);
     actualizarJugador(estado.jugador, dt);
-    revisarBordes();
+    estado.obstaculos.forEach((obstaculo) => actualizarObstaculo(obstaculo, velocidad, dt));
+    generar(velocidad, dt);
+    contarPasados();
+    revisarChoques();
+    borrarFueraDePantalla();
   }
 
   /**
@@ -95,10 +130,54 @@ export function crearJuego(dom, alTerminar) {
     return MUNDO.velocidadBase * factor;
   }
 
-  /** Techo y suelo cuentan como choque. */
-  function revisarBordes() {
+  /**
+   * Crea los pares que entran por la derecha. proximaX se mueve con el
+   * mundo; cuando llega cerca del borde derecho se crea un par ahí y se
+   * corre al siguiente lugar (ancho del par + separación al azar). Así la
+   * distancia entre pares es exacta y no depende de los fps.
+   * @param {number} velocidad
+   * @param {number} dt
+   */
+  function generar(velocidad, dt) {
+    estado.proximaX -= velocidad * dt;
+    while (estado.proximaX < JUEGO.ancho + 100) {
+      const par = siguientePar(estado.spawner, MODOS[estado.modo], estado.pasados);
+      const obstaculo = crearObstaculo(
+        estado.proximaX, par.hueco, par.centro,
+        elegir(OBSTACULO.edificios, Math.random), elegir(OBSTACULO.carteles, Math.random),
+      );
+      estado.obstaculos.push(obstaculo);
+      dom.mundo.append(obstaculo.elemento);
+      estado.proximaX += obstaculo.ancho + par.separacion;
+    }
+  }
+
+  /** +1 por cada par que la moto dejó atrás. */
+  function contarPasados() {
+    for (const obstaculo of estado.obstaculos) {
+      if (!obstaculo.pasado && obstaculo.x + obstaculo.ancho < estado.jugador.x) {
+        obstaculo.pasado = true;
+        estado.pasados += 1;
+        estado.puntaje += 1;
+      }
+    }
+  }
+
+  /** Techo, suelo y obstáculos. */
+  function revisarChoques() {
     const caja = cajaJugador(estado.jugador);
-    if (caja.y < JUEGO.techo || caja.y + caja.alto > JUEGO.suelo) chocar();
+    if (caja.y < JUEGO.techo || caja.y + caja.alto > JUEGO.suelo) {
+      chocar();
+      return;
+    }
+    for (const obstaculo of estado.obstaculos) {
+      const toca = obstaculo.cajas.some((hitbox) => seTocan(caja, cajaEnMundo(obstaculo.x, 0, hitbox)));
+      if (toca) {
+        obstaculo.tiempoChoque = OBSTACULO.duracionChoque;
+        chocar();
+        return;
+      }
+    }
   }
 
   /** Choque: animación de la moto y sacudón. Por ahora termina la partida. */
@@ -111,6 +190,15 @@ export function crearJuego(dom, alTerminar) {
     estado.tiempoFin = JUEGO.esperaDerrota;
   }
 
+  /** Borra del DOM y del arreglo los pares que ya salieron por la izquierda. */
+  function borrarFueraDePantalla() {
+    estado.obstaculos = estado.obstaculos.filter((obstaculo) => {
+      if (!salioDePantalla(obstaculo)) return true;
+      obstaculo.elemento.remove();
+      return false;
+    });
+  }
+
   /**
    * Fin de la partida: frena el loop y avisa a main.js.
    * @param {'victoria' | 'derrota'} resultado
@@ -119,21 +207,23 @@ export function crearJuego(dom, alTerminar) {
     estado.fase = 'fin';
     loop.detener();
     dibujar();
-    alTerminar(resultado, 0);
+    alTerminar(resultado, estado.puntaje);
   }
 
   /** Escribe el estado en el DOM. */
   function dibujar() {
     parallax.dibujar();
+    estado.obstaculos.forEach(dibujarObstaculo);
     dibujarJugador(estado.jugador, dom.jugador, dom.hitboxJugador);
     dom.juego.classList.toggle('is-shaking', estado.tiempoSacudon > 0);
+    hud.dibujar({ puntaje: estado.puntaje, vidas: MODOS[estado.modo].vidas, modo: MODOS[estado.modo].nombre });
   }
 
   return {
     iniciarPartida,
     /** @returns {string} fase actual */
     get fase() { return estado.fase; },
-    /** @returns {string|null} modo de la última partida */
+    /** @returns {string} modo de la última partida */
     get modo() { return estado.modo; },
 
     /**
@@ -166,12 +256,13 @@ export function crearJuego(dom, alTerminar) {
       loop.iniciar();
     },
 
-    /** Deja la partida (botón "Cambiar modo" de la pausa). */
+    /** Deja la partida (botón "Cambiar modo"): limpia el mundo y vuelve al menú. */
     abandonar() {
       loop.detener();
-      estado.fase = 'menu';
-      estado.jugador = crearJugador();
-      estado.jugador.y = centroVertical();
+      vaciarMundo();
+      const debug = estado.debug;
+      Object.assign(estado, crearEstado(estado.modo), { debug, fase: 'menu' });
+      parallax.reiniciar();
       dom.juego.classList.remove('is-paused');
       dibujar();
     },
