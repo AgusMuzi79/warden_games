@@ -3,6 +3,18 @@
 Página web de mini juegos — Trabajo práctico de Interfaces de Usuario (TUDAI — UNICEN).
 Grupo 24: Agustín Muzi y Francisco Fernández.
 
+## Acceso rápido
+
+**Sitio publicado:** https://agusmuzi79.github.io/warden_games/
+
+| Entrega | Link |
+|---|---|
+| TPE5 (Neon Rider) | [Sitio](https://agusmuzi79.github.io/warden_games/tp5/) · [Juego](https://agusmuzi79.github.io/warden_games/tp5/runner.html) |
+| TPE4 (Peg Solitaire en canvas) | [Sitio](https://agusmuzi79.github.io/warden_games/tp4/) |
+| TPE3 (Blocka) | [Sitio](https://agusmuzi79.github.io/warden_games/tp3/) |
+| TPE2 | [Sitio](https://agusmuzi79.github.io/warden_games/tp2/) |
+| TPE1 | [Prototipo](https://agusmuzi79.github.io/warden_games/tpe1/) |
+
 ## Estructura del proyecto
 
 ```
