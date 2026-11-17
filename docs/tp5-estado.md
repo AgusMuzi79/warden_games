@@ -71,7 +71,9 @@ El juego se puede jugar de punta a punta en los 3 modos en `tp5/runner.html`.
 - [ ] Integrado en la web con ayuda, descripción, imágenes y créditos (Fase B).
 - [ ] Animaciones notorias (Fase B).
 
-## Fase B (vista + integración, Fran) — pendiente
+## Fase B (vista + integración, Fran) — terminada (2026-11-17)
+
+Plan original (el detalle y los motivos están en `tp5/DECISIONES.md`):
 1. Animaciones del avatar a fondo y notorias: vuelo con llama, impulso (con el reinicio de `.is-boost`), choque con explosión, temblor y destello, e invulnerabilidad.
 2. Edificios con el cuerpo repetido del PNG y carteles colgando de su estructura; que los obstáculos se distingan de la capa 3.
 3. Animaciones del drone, del chip, del "+3" y la reacción del obstáculo al choque.
@@ -79,3 +81,22 @@ El juego se puede jugar de punta a punta en los 3 modos en `tp5/runner.html`.
 5. HUD con fondo y pantallas (inicio, pausa, victoria, derrota) con la estética de las entregas anteriores; limpiar la escena detrás de las pantallas de fin.
 6. Integración web: cómo jugar, descripción, capturas, créditos (Warped City de ansimuz, con su licencia) y agregar el juego a la Home.
 7. Jugarlo a mano, ajustar `config.js` y cerrar los criterios de aceptación.
+
+### Resultado de la Fase B
+- **Sprites reales:** moto en vuelo (4 cuadros), moto destruida (6), chip (6), drone y carteles, todos con `steps()`. Moto, chip y portada generados con IA y procesados.
+- **Animaciones por evento:** impulso (estirón), choque (explosión + temblor + destello rojo), invulnerabilidad (parpadeo con brillo), chispa del cartel, drone que estalla, chip que se recoge y "+3" flotante.
+- **Escenario:** cuerpo de los edificios con franjas espejadas del PNG; HUD afuera del juego; pantallas con panel; game over con la escena visible detrás.
+- **Página:** `runner.html` con breadcrumb, juego a todo el ancho, Sobre el juego, Galería (4 capturas), Créditos, ficha, Ayuda (sección + diálogo "?" y F1), Compartir y reseñas. `js/runner-pagina.js` tiene la galería y el diálogo.
+- **Home:** Neon Rider es el primer destacado del banner (`NEON_RIDER` en `carousel.js`).
+
+### Cambios en la lógica de la Fase A (avisar a Agus)
+- El drone ya no resta vida: ralentiza el mundo (`MUNDO.duracionRalentizado` = 3 s) y explota. Ahora es más chico (36×34) y más difícil de agarrar. Motivo: la cátedra pide que un elemento animado no termine el juego solo.
+- En Fácil la moto no se destruye ni tiembla: solo parpadea.
+- Al morir, `jugador.tiempoChoque = Infinity`: la moto destruida queda a la vista en el game over.
+- Hitboxes y tamaños nuevos en `config.js` (moto 74×48 con hitbox 51×24; moneda 32 con hitbox 26).
+- `main.js` apunta a `.hud` fuera de `#game` y escucha el evento `runner:pausar` (lo dispara la ayuda).
+
+### Pendientes
+- Verificar la licencia de Warped City (ansimuz) y escribirla en los créditos.
+- Jugar los 3 modos completos y ajustar `config.js` si hace falta.
+- Torreta (`turret.png`) sin usar.

@@ -29,19 +29,17 @@ La parte fija está en `tp5/runner.html`; las entidades las crea el JS dentro de
       .hitbox (x2)              cajas de colisión (solo se ven con H)
     .drone                      enemigo (spritesheet)
       .hitbox
-    .collectible                chip celeste
-      .collectible__sprite      placeholder / futuro spritesheet
+    .collectible                chip dorado
+      .collectible__sprite      moneda-chip.png (tira de 6 cuadros)
       .hitbox
     .float-text                 "+3" flotante
       span
   .player                       la moto
     .player__body               balanceo del vuelo
-      .player__flame            llama del propulsor
-      .player__sprite           moto.png espejada
-    .player__explosion          explosión del choque
+      .player__sprite           moto-vuelo.png (tira de 4 cuadros, espejada)
+    .player__explosion          moto-choque.png (tira de 6 cuadros)
   .hitbox.hitbox--player        caja de colisión de la moto (solo con H)
-  .hud
-    #score  #lives  #mode  #progress (.hud__progress-bar)
+  (el .hud NO está dentro de #game: es hermano, arriba del área de juego)
   #screen-loading  #screen-start  #screen-pause  #screen-win  #screen-lose
   #game-status                  texto para lectores de pantalla (role="status")
 ```
@@ -84,13 +82,13 @@ elemento del DOM y del arreglo cuando se termina el tiempo.
 | `.is-hit` | `.player` | `game.js` | choque (obstáculo, drone, techo o suelo) | `JUGADOR.duracionChoque` (0,6 s) |
 | `.is-invulnerable` | `.player` | `game.js` | después de un choque | `JUGADOR.duracionInvulnerable` (1,5 s) |
 | `.is-hit` | `.obstacle` | `game.js` | la moto chocó ese obstáculo | `OBSTACULO.duracionChoque` (0,5 s) |
-| `.is-exploding` | `.drone` | `game.js` | la moto chocó el drone | `DRONE.duracionExplosion` (0,5 s), después se borra |
+| `.is-exploding` | `.drone` | `game.js` | la moto tocó el drone (no hace daño: solo ralentiza el mundo) | `DRONE.duracionExplosion` (0,5 s), después se borra |
 | `.is-collected` | `.collectible` | `game.js` | la moto lo agarró | `COLECCIONABLE.duracionRecogida` (0,4 s), después se borra |
 | `.float-text` | (elemento nuevo) | `collectible.js` | al agarrar un coleccionable | `COLECCIONABLE.duracionTexto` (0,8 s), después se borra |
 
 Mientras un drone explota o un coleccionable se recoge, ya no colisiona.
 
-Notas para la Fase B:
+Notas (Fase B, resueltas en la vista):
 - `.is-boost` dura 0,2 s desde la última pulsación: si se pulsa de nuevo
   antes de que termine, la clase sigue puesta y una animación con
   `@keyframes` no se reinicia (el JS no fuerza un reflow, porque no lee el
@@ -128,9 +126,20 @@ visible a la vez.
 | `#screen-win` | puntaje objetivo alcanzado | `data-action="retry"`, `data-action="menu"` |
 | `#screen-lose` | sin vidas (después de 1 s de explosión) | `data-action="retry"`, `data-action="menu"` |
 
-Dentro de win y lose, `.screen__score` muestra el puntaje final.
+Las pantallas llevan un `.screen__panel` adentro. Dentro de win y lose,
+`.screen__score` muestra el puntaje final. La derrota es "Game over": la escena
+queda visible detrás y el panel ofrece `data-action="retry"` (seguir jugando) y
+`data-action="menu"`.
+
+Cambios de la Fase B que tocan la lógica: el drone no resta vida (solo
+ralentiza `MUNDO.duracionRalentizado` s y explota); en Fácil la moto no
+se destruye (sin `.is-hit` ni temblor, solo parpadea); al morir
+`jugador.tiempoChoque = Infinity` para que se vea la moto destruida en el game over.
 
 ## HUD
+
+El `.hud` va afuera de `#game`, arriba (Fran, Fase B): así no le saca protagonismo
+al juego. Los ids no cambian.
 
 | Id | Contenido |
 |---|---|

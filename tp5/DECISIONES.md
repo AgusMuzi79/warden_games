@@ -41,3 +41,61 @@ El detalle de la implementación (fases, contrato DOM, valores de config) está 
   El suelo va a factor 1, igual que los obstáculos.
 - **Por qué:** cuando el drone ralentiza el mundo, todas las capas frenan en proporción
   sin tocar nada más. Detalle y valores en `../docs/tp5-estado.md`.
+
+## Neon Rider (Fase B: vista e integración)
+
+### Los sprites son tiras reales animadas con `steps()`
+- **Qué:** moto en vuelo (4 cuadros), moto destruida (6) y chip (6) son tiras PNG. Un
+  `@keyframes` mueve `background-position-x` con `steps(N)`; `--frames` y `--frame-w`
+  son variables CSS. La moto va espejada con `scaleX(-1)` y usa las propiedades
+  independientes `scale`/`rotate`/`filter` para no pisar el `transform` del JS.
+- **Por qué:** la cátedra pide que el objeto que vuela sea una cadena de imágenes, no una
+  imagen fija. Las tiras se generaron con IA sobre fondo verde y se recortaron con
+  chroma key, con el mismo recorte para todos los cuadros.
+- **Descartado:** rotar una sola imagen (no cumple la consigna) y un GIF (prohibido).
+
+### El drone ayuda, no mata
+- **Qué:** tocar un drone lo hace estallar y ralentiza el mundo 3 s, sin restar vida. Es
+  chico (36×34) para que cueste agarrarlo.
+- **Por qué:** la cátedra dice que un elemento animado no tiene que terminar el juego
+  por sí solo. Pedido de Fran: que sea una ayuda difícil de atrapar.
+- **Descartado:** drone que resta vida (Fase A), que incumple ese criterio.
+
+### Fácil no destruye la moto
+- **Qué:** en Fácil el choque no activa `.is-hit` ni el temblor: la moto solo parpadea.
+  Normal y Difícil sí muestran la explosión y el temblor. Al morir, la moto destruida
+  queda a la vista (`tiempoChoque = Infinity`).
+- **Por qué:** en Fácil la moto es invencible; destruirla contradecía el modo.
+
+### Cuerpo de los edificios con franjas espejadas
+- **Qué:** el cuerpo repite la franja de abajo del PNG, alternando normal y `scaleY(-1)`.
+- **Por qué:** repetir la misma franja deja una costura visible; espejarla la oculta.
+  Una grilla de ventanas en CSS se veía mal (se probó y se descartó).
+
+### HUD afuera del área de juego
+- **Qué:** el HUD es una barra arriba del juego, del mismo ancho (960 px).
+- **Por qué:** dentro del juego le quitaba protagonismo a la acción. Pedido de Fran.
+
+### Game over con la escena visible
+- **Qué:** al perder, la escena queda detrás y un panel ofrece "Seguir jugando" o "Volver
+  al inicio".
+- **Por qué:** se entiende qué pasó y se reintenta sin volver al selector.
+
+### La página reusa el esquema del Peg
+- **Qué:** `runner.html` copia la estructura de `juego.html` (juego a todo el ancho, y
+  debajo Sobre el juego + Galería + Créditos, y la columna con ficha, Ayuda y Compartir).
+  Carga `juego.css` antes de `runner.css` y reusa `.peg__ayuda-btn` y `.peg-ayuda`.
+  La Ayuda también se abre en un diálogo con "?" o F1, y pausa la partida avisando con el
+  evento `runner:pausar`.
+- **Por qué:** mismo diseño que el resto de las páginas de juego y nada de CSS duplicado.
+  El evento evita que `runner-pagina.js` importe el juego.
+- **Descartado:** copiar los estilos de Ayuda a `runner.css`.
+
+### Neon Rider primero en el banner de la Home
+- **Qué:** `NEON_RIDER` va primero en `JUEGOS_PROPIOS` (`carousel.js`): 3 propios y 2 de la API.
+- **Por qué:** es el juego de esta entrega, mismo criterio que Blocka y Neon Circuit antes.
+
+### Créditos
+- **Qué:** fondos, edificios y carteles: *Warped City* de ansimuz. Moto, chip, portada y
+  capturas: generados con IA y retocados por el equipo.
+- **Pendiente:** verificar y escribir la licencia de Warped City.

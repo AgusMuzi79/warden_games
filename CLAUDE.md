@@ -12,7 +12,7 @@ Entrega: 30/09/2026 23:59, desde el branch `gh-pages`.
 Decisiones ya tomadas y su justificación (un archivo por entrega, en su carpeta):
 @tp2/DECISIONES.md (TPE1 y TPE2) y @tp3/DECISIONES.md (TPE3, Blocka)
 Etapas de la corrección en curso (qué está hecho, qué falta, quién puede tomarlo): @ETAPAS.md
-TP5 Runner: Fase A (lógica, Agus) terminada. Antes de trabajar en tp5/, leé docs/tp5-estado.md y docs/tp5-contrato.md y seguí con la Fase B (vista + integración, Fran).
+TP5 Runner: Fase A (lógica, Agus) y Fase B (vista + integración, Fran) terminadas. Antes de trabajar en tp5/, leé docs/tp5-estado.md y docs/tp5-contrato.md; pendientes: licencia de Warped City en los créditos y ajustes de `config.js` tras jugarlo.
 
 ---
 
