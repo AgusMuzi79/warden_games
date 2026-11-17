@@ -25,6 +25,9 @@ export function conectarEntrada(areaJuego, acciones) {
     // Si se está escribiendo en un campo (el newsletter del footer), las
     // teclas son de ese campo, no del juego.
     if (evento.target instanceof Element && evento.target.closest('input, textarea, select')) return;
+    // Con un diálogo abierto (la ayuda), las teclas son del diálogo: Esc lo
+    // cierra y la partida sigue en pausa hasta que se elija continuar.
+    if (document.querySelector('dialog[open]')) return;
 
     if (TECLAS_IMPULSO.includes(evento.code)) {
       // Solo se cancela el comportamiento normal (el espacio scrollea la
