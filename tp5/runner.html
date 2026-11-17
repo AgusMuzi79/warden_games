@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="./css/components.css">
   <link rel="stylesheet" href="./css/header.css">
   <link rel="stylesheet" href="./css/footer.css">
+  <link rel="stylesheet" href="./css/juego.css">
   <link rel="stylesheet" href="./css/runner.css">
 </head>
 <body>
@@ -38,15 +39,45 @@
 
 
   <main>
-    <!-- Página del runner (TPE5, Fase A). Por ahora solo la zona de juego:
-         la ayuda, la descripción, la galería y los créditos son de la
-         Fase B. El h1 va oculto porque el nombre ya se ve en la pantalla
-         de inicio del juego. -->
+    <!-- Página del runner (TPE5). Mismo esquema que la del Peg (juego.html):
+         breadcrumb, zona de juego a todo el ancho y, debajo, "Sobre el
+         juego" + Galería + Créditos a la izquierda y ficha + Ayuda +
+         Compartir a la derecha. El h1 va oculto porque el nombre ya se ve
+         en el breadcrumb y en la pantalla de inicio del juego. -->
     <h1 class="sr-only">Neon Rider, runner de motos voladoras</h1>
 
-    <!-- Zona de juego (960x540). Todo lo de adentro lo arma y mueve
-         js/runner/: el contrato de ids y clases está en docs/tp5-contrato.md. -->
+    <nav class="breadcrumb" aria-label="Ruta de navegación">
+      <ol class="breadcrumb__lista">
+        <li class="breadcrumb__item"><a href="index.html">Inicio</a></li>
+        <li class="breadcrumb__item">Acción</li>
+        <li class="breadcrumb__item" aria-current="page">Neon Rider</li>
+      </ol>
+    </nav>
+
+    <div class="juego-layout juego-layout--peg juego-layout--runner">
+
     <section class="runner" aria-label="Zona de juego de Neon Rider">
+      <!-- Barra de arriba, como la del Peg: el nombre a la izquierda y el
+           botón "?" a la derecha, que abre la ayuda en un diálogo
+           (js/runner-pagina.js). -->
+      <div class="runner__barra">
+        <p class="tablero__etiqueta">Neon Rider</p>
+        <button type="button" class="peg__ayuda-btn" id="btn-runner-ayuda" aria-label="Cómo se juega" aria-haspopup="dialog">
+          <i class="ph ph-question" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <!-- HUD: va afuera del área de juego, arriba, para no tapar la acción.
+      Lo actualiza js/runner/hud.js cuando cambia un dato. -->
+      <div class="hud">
+        <p class="hud__item">Puntaje <span id="score" class="hud__numero">0</span></p>
+        <p class="hud__item">Vidas <span id="lives" class="hud__vidas" aria-label="Vidas"></span></p>
+        <p class="hud__item">Modo <span id="mode" class="hud__numero"></span></p>
+        <div id="progress" class="hud__progress" role="progressbar" aria-label="Progreso hacia la meta" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
+          <span class="hud__progress-bar"></span>
+        </div>
+      </div>
+
       <!-- tabindex="0": el área se puede enfocar y recibe el teclado.
            aria-describedby apunta a los controles, que el lector lee al
            entrar. -->
@@ -67,7 +98,6 @@
              .player__body hace el balanceo del vuelo con CSS. -->
         <div class="player" aria-hidden="true">
           <div class="player__body">
-            <div class="player__flame"></div>
             <div class="player__sprite"></div>
           </div>
           <div class="player__explosion"></div>
@@ -75,55 +105,55 @@
         <!-- Caja de colisión de la moto: solo se ve con la tecla H. -->
         <div class="hitbox hitbox--player" aria-hidden="true"></div>
 
-        <!-- HUD: lo actualiza js/runner/hud.js cuando cambia un dato. -->
-        <div class="hud">
-          <p class="hud__item">Puntaje <span id="score" class="hud__numero">0</span></p>
-          <p class="hud__item">Vidas <span id="lives" class="hud__vidas" aria-label="Vidas"></span></p>
-          <p class="hud__item">Modo <span id="mode" class="hud__numero"></span></p>
-          <div id="progress" class="hud__progress" role="progressbar" aria-label="Progreso hacia la meta" aria-valuemin="0" aria-valuemax="50" aria-valuenow="0">
-            <span class="hud__progress-bar"></span>
-          </div>
-        </div>
-
         <!-- Pantallas. Las muestra y oculta main.js (una a la vez). -->
         <div id="screen-loading" class="screen">
           <p class="screen__texto">Cargando… <span id="loading-percent">0</span> %</p>
         </div>
 
         <div id="screen-start" class="screen" hidden>
-          <h2 class="screen__titulo">Neon Rider</h2>
-          <p class="screen__texto" id="game-controles">Espacio, ↑, W o clic para subir. P o Esc para pausar.</p>
-          <p class="screen__texto">Elegí el modo:</p>
-          <div class="screen__acciones">
-            <button type="button" class="btn btn--secundario" data-mode="facil">Fácil (invencible)</button>
-            <button type="button" class="btn btn--primario" data-mode="normal">Normal (3 vidas)</button>
-            <button type="button" class="btn btn--secundario" data-mode="dificil">Difícil (1 vida)</button>
+          <div class="screen__panel">
+            <h2 class="screen__titulo">Neon Rider</h2>
+            <p class="screen__texto" id="game-controles">Espacio, ↑, W o clic para subir. P o Esc para pausar.</p>
+            <p class="screen__texto">Elegí el modo:</p>
+            <div class="screen__acciones">
+              <button type="button" class="btn btn--secundario" data-mode="facil">Fácil (invencible)</button>
+              <button type="button" class="btn btn--primario" data-mode="normal">Normal (3 vidas)</button>
+              <button type="button" class="btn btn--secundario" data-mode="dificil">Difícil (1 vida)</button>
+            </div>
           </div>
         </div>
 
-        <div id="screen-pause" class="screen" hidden>
-          <h2 class="screen__titulo">Pausa</h2>
-          <div class="screen__acciones">
-            <button type="button" class="btn btn--primario" data-action="resume">Continuar</button>
-            <button type="button" class="btn btn--secundario" data-action="menu">Cambiar modo</button>
+        <div id="screen-pause" class="screen screen--fin" hidden>
+          <div class="screen__panel">
+            <h2 class="screen__titulo">Pausa</h2>
+            <div class="screen__acciones">
+              <button type="button" class="btn btn--primario" data-action="resume">Continuar</button>
+              <button type="button" class="btn btn--secundario" data-action="menu">Volver al inicio</button>
+            </div>
           </div>
         </div>
 
-        <div id="screen-win" class="screen" hidden>
-          <h2 class="screen__titulo">¡Llegaste a la meta!</h2>
-          <p class="screen__texto">Puntaje: <span class="screen__score">0</span></p>
-          <div class="screen__acciones">
-            <button type="button" class="btn btn--primario" data-action="retry">Jugar de nuevo</button>
-            <button type="button" class="btn btn--secundario" data-action="menu">Cambiar modo</button>
+        <div id="screen-win" class="screen screen--fin" hidden>
+          <div class="screen__panel">
+            <h2 class="screen__titulo screen__titulo--victoria">¡Llegaste a la meta!</h2>
+            <p class="screen__texto">Puntaje: <span class="screen__score">0</span></p>
+            <div class="screen__acciones">
+              <button type="button" class="btn btn--primario" data-action="retry">Jugar de nuevo</button>
+              <button type="button" class="btn btn--secundario" data-action="menu">Volver al inicio</button>
+            </div>
           </div>
         </div>
 
-        <div id="screen-lose" class="screen" hidden>
-          <h2 class="screen__titulo">Sistema caído</h2>
-          <p class="screen__texto">Te quedaste sin vidas. Puntaje: <span class="screen__score">0</span></p>
-          <div class="screen__acciones">
-            <button type="button" class="btn btn--destructivo" data-action="retry">Reintentar</button>
-            <button type="button" class="btn btn--secundario" data-action="menu">Cambiar modo</button>
+        <!-- Game over: el juego queda visible detrás (con la moto destruida)
+             y el panel ofrece seguir jugando o volver al inicio. -->
+        <div id="screen-lose" class="screen screen--fin" hidden>
+          <div class="screen__panel screen__panel--derrota">
+            <h2 class="screen__titulo screen__titulo--derrota">Game over</h2>
+            <p class="screen__texto">Sistema caído. Puntaje: <span class="screen__score">0</span></p>
+            <div class="screen__acciones">
+              <button type="button" class="btn btn--primario" data-action="retry">Seguir jugando</button>
+              <button type="button" class="btn btn--secundario" data-action="menu">Volver al inicio</button>
+            </div>
           </div>
         </div>
 
@@ -131,7 +161,251 @@
         <p id="game-status" class="sr-only" role="status"></p>
       </div>
     </section>
+
+      <!-- Fila 2, columna izquierda: "Sobre el juego", Galería y créditos. -->
+      <div class="juego-layout__secundario">
+
+        <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
+          <h2 id="sobre-juego-titulo">Sobre el juego</h2>
+          <p>Neon Rider es un runner de motos voladoras en una ciudad cyberpunk de noche. Tu moto avanza sola y vos controlás la altura: tenés que pasar entre los edificios que suben desde abajo y los carteles gigantes que cuelgan de arriba, juntar chips que suman puntos y llegar a la meta.</p>
+          <p>Hay tres modos: Fácil, donde la moto es invencible y sirve para aprender el recorrido; Normal, con tres vidas; y Difícil, con una sola. Los drones que patrullan el cielo no te hacen daño: si los tocás, estallan y el mundo se ralentiza unos segundos para darte aire.</p>
+        </section>
+
+        <!-- Galería animada (flip 3D). El motor genérico es js/galeria.js; la
+             lista de capturas está en js/runner-pagina.js. Los src/alt de
+             acá son solo el arranque (fotos 1 y 2). -->
+        <section class="galeria" aria-labelledby="galeria-titulo">
+          <div class="galeria__cabecera">
+            <h2 id="galeria-titulo">Galería</h2>
+            <p class="galeria__contador" id="galeria-contador" aria-live="polite">Foto 1 de 4</p>
+          </div>
+          <div class="galeria__visor">
+            <div class="galeria__carta" id="galeria-carta">
+              <div class="galeria__cara galeria__cara--a">
+                <img class="galeria__img" id="galeria-img-a" src="assets/img/inicio.jpg" alt="Pantalla de inicio de Neon Rider: elegís el modo Fácil, Normal o Difícil sobre la ciudad de fondo.">
+              </div>
+              <div class="galeria__cara galeria__cara--b">
+                <img class="galeria__img" id="galeria-img-b" src="assets/img/partida-en-juego.jpg" alt="Partida en curso: la moto vuela entre un edificio y un cartel colgante, con el puntaje y las vidas arriba.">
+              </div>
+            </div>
+            <button type="button" class="galeria__flecha galeria__flecha--prev" id="galeria-prev" aria-label="Foto anterior de la galería">
+              <i class="ph ph-caret-left" aria-hidden="true"></i>
+            </button>
+            <button type="button" class="galeria__flecha galeria__flecha--next" id="galeria-next" aria-label="Foto siguiente de la galería">
+              <i class="ph ph-caret-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </section>
+
+        <section class="creditos" aria-labelledby="creditos-titulo">
+          <h2 id="creditos-titulo">Créditos</h2>
+          <ul class="creditos__lista">
+            <li>Fondos, edificios y carteles: pack <em>Warped City</em>, de <a class="link" href="https://ansimuz.itch.io/" target="_blank" rel="noopener">ansimuz</a>.</li>
+            <li>Moto, chip, portada y capturas: generados con IA y retocados por el equipo.</li>
+            <li>Código, animaciones y diseño de la interfaz: Agus y Fran, de Warden.</li>
+          </ul>
+        </section>
+
+      </div>
+
+      <!-- Fila 2, columna derecha: ficha, Ayuda y Compartir. -->
+      <aside class="panel-lateral" aria-label="Información del juego">
+
+        <section class="ficha-juego">
+          <h2 class="sr-only">Ficha del juego</h2>
+          <div class="ficha-juego__cabecera">
+            <div class="ficha-juego__miniatura" aria-hidden="true"></div>
+            <div>
+              <p class="ficha-juego__nombre">Neon Rider</p>
+              <p class="ficha-juego__categoria">Acción · WardenDevs</p>
+            </div>
+          </div>
+          <p class="ficha-juego__rating">
+            <i class="ph ph-star" aria-hidden="true"></i> 4.5
+            <span class="ficha-juego__resenas">(612 reseñas)</span>
+          </p>
+          <dl class="ficha-juego__stats">
+            <div>
+              <dt>Jugando ahora</dt>
+              <dd>3.276</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="ayuda" aria-labelledby="ayuda-titulo">
+          <h2 id="ayuda-titulo">
+            Ayuda
+            <span class="ayuda__tecla" aria-hidden="true">F1</span>
+          </h2>
+
+          <details class="ayuda__item" open>
+            <summary>Objetivo</summary>
+            <p>Llegar a la meta sin quedarte sin vidas. La barra de arriba muestra cuánto falta para llegar.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Cómo se juega</summary>
+            <p>La moto avanza sola. Con Espacio, la flecha arriba, W o un clic le das un impulso hacia arriba; si no hacés nada, cae. Pasá por el hueco entre los edificios de abajo y los carteles de arriba. Chocar con uno te cuesta una vida.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Modos</summary>
+            <p>Fácil: la moto es invencible y nunca se destruye. Normal: tenés 3 vidas, y tras un choque quedás unos segundos parpadeando, sin poder chocar. Difícil: una sola vida.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Chips y drones</summary>
+            <p>Cada chip dorado suma 3 puntos. Los drones no te lastiman: al tocarlos estallan y el mundo va más lento unos segundos, así es más fácil esquivar. Son chicos y se mueven, atraparlos es parte del desafío.</p>
+          </details>
+
+          <details class="ayuda__item">
+            <summary>Cuándo termina</summary>
+            <p>Ganás al llegar a la meta. Perdés al quedarte sin vidas: ves el puntaje y podés seguir jugando o volver al inicio.</p>
+          </details>
+
+          <ul class="ayuda__atajos">
+            <li><kbd>Espacio</kbd> <kbd>↑</kbd> <kbd>W</kbd> Subir (también con clic)</li>
+            <li><kbd>P</kbd> <kbd>Esc</kbd> Pausar y reanudar</li>
+            <li><kbd>H</kbd> Ver las cajas de colisión (para depurar)</li>
+            <li><kbd>F1</kbd> Abrir la ayuda (también con el botón "?")</li>
+          </ul>
+        </section>
+
+        <section class="compartir" aria-labelledby="compartir-titulo">
+          <h2 id="compartir-titulo">Compartir</h2>
+
+          <ul class="compartir__redes">
+            <li><a href="#" aria-label="Compartir en Facebook"><i class="ph ph-facebook-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en TikTok"><i class="ph ph-tiktok-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en X"><i class="ph ph-x-logo" aria-hidden="true"></i></a></li>
+            <li><a href="#" aria-label="Compartir en Instagram"><i class="ph ph-instagram-logo" aria-hidden="true"></i></a></li>
+          </ul>
+
+          <div class="compartir__acciones">
+            <a class="btn btn--secundario" href="mailto:?subject=Jug%C3%A1%20Neon%20Rider&body=Mir%C3%A1%20este%20juego%3A%20https%3A%2F%2Fwardengames.com%2Fneon-rider">Enviar mail</a>
+            <button type="button" class="btn btn--secundario">Mensaje</button>
+          </div>
+
+          <div class="compartir__link">
+            <label class="sr-only" for="link-juego">Enlace para compartir</label>
+            <input type="text" id="link-juego" value="wardengames.com/neon-rider" readonly>
+            <button type="button" class="compartir__copiar" id="btn-copiar-link">Copiar</button>
+          </div>
+        </section>
+
+      </aside>
+
+    </div>
+
+    <!-- Diálogo de ayuda (botón "?" o F1). Reusa el componente .modal. El
+         cuerpo está vacío a propósito: js/runner-pagina.js lo llena copiando
+         los desplegables y los atajos de la sección Ayuda, así el texto vive
+         en un solo lugar. -->
+    <dialog class="modal peg-ayuda" id="runner-ayuda" aria-labelledby="runner-ayuda-titulo">
+      <button type="button" class="modal__cerrar" id="runner-ayuda-cerrar" aria-label="Cerrar la ayuda">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+      <h2 class="modal__titulo" id="runner-ayuda-titulo">Cómo se juega</h2>
+      <div id="runner-ayuda-cuerpo"></div>
+    </dialog>
+
+    <!-- Comunidad + "Dejá tu reseña", uno al lado del otro (mismo layout de
+         2 columnas de más arriba: reusa .juego-layout). -->
+    <div class="juego-layout">
+
+      <!-- Comunidad (Etapa 4, parte 6). 3 reseñas reales y distintas entre
+           sí (largo, fecha, puntaje), no la misma repetida 3 veces como en
+           el mock de Figma. -->
+      <section class="comunidad" aria-labelledby="comunidad-titulo">
+        <div class="comunidad__cabecera">
+          <h2 id="comunidad-titulo">Comunidad</h2>
+          <p class="comunidad__contador">612 reseñas</p>
+        </div>
+
+        <ul class="comunidad__lista">
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--1" aria-hidden="true">MF</span>
+              <div>
+                <p class="resena__nombre">Malena F. <span class="resena__fecha">14 ago 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Llegué a la meta en Normal después de unos veinte intentos. Los carteles que cuelgan de arriba te cierran el paso justo cuando creés que ya lo tenés. El drone que frena todo es un salvavidas, pero hay que animarse a perseguirlo.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (42)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--2" aria-hidden="true">BI</span>
+              <div>
+                <p class="resena__nombre">Bruno Ibarra <span class="resena__fecha">10 ago 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella resena__estrella--vacia"></i></span><span class="sr-only">Puntaje: 4 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Me encanta el parallax de la ciudad de fondo. En Fácil se siente raro no poder chocar, pero sirve para aprender dónde van los huecos antes de pasar a Normal.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (15)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+
+          <li class="resena">
+            <div class="resena__cabecera">
+              <span class="resena__avatar resena__avatar--3" aria-hidden="true">CN</span>
+              <div>
+                <p class="resena__nombre">Carla Núñez <span class="resena__fecha">2 jul 2026</span></p>
+                <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
+              </div>
+            </div>
+            <p class="resena__texto">Difícil con una sola vida es puro nervio. Adictivo.</p>
+            <div class="resena__acciones">
+              <button type="button" class="resena__util">Útil (6)</button>
+              <button type="button" class="resena__responder">Responder</button>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Dejá tu reseña (Etapa 4, parte 6). El puntaje es CSS puro (radios +
+           labels), sin JS: accesible por teclado y fácil de explicar. -->
+      <section class="resena-form" aria-labelledby="resena-form-titulo">
+        <h2 id="resena-form-titulo">Dejá tu reseña</h2>
+
+        <form id="form-resena" action="#" method="post" novalidate>
+          <fieldset class="resena-form__puntaje">
+            <legend>Tu puntaje</legend>
+            <div class="estrellas">
+              <input type="radio" id="estrella-5" name="puntaje" value="5">
+              <label for="estrella-5"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">5 estrellas</span></label>
+              <input type="radio" id="estrella-4" name="puntaje" value="4" checked>
+              <label for="estrella-4"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">4 estrellas</span></label>
+              <input type="radio" id="estrella-3" name="puntaje" value="3">
+              <label for="estrella-3"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">3 estrellas</span></label>
+              <input type="radio" id="estrella-2" name="puntaje" value="2">
+              <label for="estrella-2"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">2 estrellas</span></label>
+              <input type="radio" id="estrella-1" name="puntaje" value="1">
+              <label for="estrella-1"><i class="ph ph-star" aria-hidden="true"></i><span class="sr-only">1 estrella</span></label>
+            </div>
+          </fieldset>
+
+          <div class="field">
+            <label for="resena-texto">Tu reseña</label>
+            <textarea id="resena-texto" name="resena" maxlength="500" placeholder="Contá qué te pareció, sin spoilers de la meta."></textarea>
+            <p class="resena-form__contador"><span id="resena-contador">0</span>/500</p>
+          </div>
+
+          <button type="submit" class="btn btn--primario">Publicar</button>
+          <p class="resena-form__estado" id="resena-estado" role="status"></p>
+        </form>
+      </section>
+
+    </div>
   </main>
+
 
   <footer class="footer">
     <div class="footer__inner">
@@ -271,7 +545,11 @@
     </div>
   </footer>
 
+  <script src="./js/galeria.js" defer></script>
+  <script src="./js/compartir.js" defer></script>
+  <script src="./js/resena.js" defer></script>
   <script src="./js/footer.js" defer></script>
+  <script src="./js/runner-pagina.js" defer></script>
   <!-- Juego: main.js importa el resto de js/runner/ (módulos ES). -->
   <script type="module" src="./js/runner/main.js"></script>
 </body>

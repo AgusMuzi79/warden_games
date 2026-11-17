@@ -1,9 +1,10 @@
 // drone.js — Drone enemigo
 //
 // Aparece entre dos pares y flota con un vaivén suave (una onda seno sobre
-// su altura base). Si la moto lo choca, explota (.is-exploding), resta una
-// vida y ralentiza el mundo; eso lo decide game.js. Acá solo vive su estado
-// y su dibujo.
+// su altura base). No hace daño: si la moto lo agarra, explota
+// (.is-exploding) y ralentiza el mundo, lo que ayuda a pasar; eso lo
+// decide game.js. Es chico para que cueste agarrarlo. Acá solo vive su
+// estado y su dibujo.
 
 import { DRONE } from '../config.js';
 import { cajaEnMundo, crearVistaHitbox } from '../collision.js';

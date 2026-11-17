@@ -86,6 +86,20 @@ function crearVista(ancho, arriba, abajo, edificio, cartel, cajas) {
   inferior.style.transform = `translate3d(0, ${abajo}px, 0)`;
   inferior.style.setProperty('--img', urlCss(edificio.src));
   inferior.style.setProperty('--img-alto', `${edificio.alto}px`);
+  inferior.style.setProperty('--franja', `${OBSTACULO.franjaEdificio}px`);
+
+  // Si el edificio tiene que llegar más abajo que el PNG, se agregan
+  // tramos con la franja de abajo, alternando derecho y espejado (ver
+  // .obstacle__tramo en runner.css). Se crean una vez, al crear el par.
+  const franja = OBSTACULO.franjaEdificio;
+  const altoTotal = JUEGO.suelo - abajo;
+  for (let y = edificio.alto, i = 0; y < altoTotal; y += franja, i += 1) {
+    const tramo = document.createElement('div');
+    tramo.className = i % 2 === 0 ? 'obstacle__tramo obstacle__tramo--espejo' : 'obstacle__tramo';
+    tramo.style.top = `${y}px`;
+    tramo.style.height = `${franja}px`;
+    inferior.append(tramo);
+  }
 
   elemento.append(superior, inferior, ...cajas.map(crearVistaHitbox));
   return elemento;

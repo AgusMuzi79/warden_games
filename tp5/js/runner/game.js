@@ -228,9 +228,9 @@ export function crearJuego(dom, alTerminar) {
   }
 
   /**
-   * Choques de la moto. Mientras es invulnerable atraviesa edificios,
-   * carteles y drones, y el techo y el suelo solo la frenan. Los
-   * coleccionables se agarran siempre.
+   * Choques de la moto. Mientras es invulnerable atraviesa edificios y
+   * carteles, y el techo y el suelo solo la frenan. Los coleccionables y
+   * los drones (que no hacen daño) se agarran siempre.
    */
   function revisarChoques() {
     const jugador = estado.jugador;
@@ -259,13 +259,15 @@ export function crearJuego(dom, alTerminar) {
           return;
         }
       }
-      for (const drone of estado.drones) {
-        if (!drone.explotando && seTocan(caja, cajaDrone(drone))) {
-          explotarDrone(drone);
-          estado.tiempoRalentizado = MUNDO.duracionRalentizado;
-          recibirDanio(false);
-          return;
-        }
+    }
+
+    // Drones: no hacen daño, son una ayuda. Al agarrar uno explota y el
+    // mundo se ralentiza un rato (la moto también los agarra si es
+    // invulnerable).
+    for (const drone of estado.drones) {
+      if (!drone.explotando && seTocan(caja, cajaDrone(drone))) {
+        explotarDrone(drone);
+        estado.tiempoRalentizado = MUNDO.duracionRalentizado;
       }
     }
 
@@ -281,20 +283,27 @@ export function crearJuego(dom, alTerminar) {
   }
 
   /**
-   * Un choque que hace daño: explosión de la moto y sacudón siempre. En
-   * Normal y Difícil resta una vida; en Fácil (vidas infinitas) no. Si
+   * Un choque que hace daño. En Normal y Difícil: explosión de la moto,
+   * sacudón y una vida menos. En Fácil (vidas infinitas) solo hay
+   * invulnerabilidad con parpadeo, sin explosión ni sacudón. Si
    * quedan vidas, la moto queda invulnerable un rato y, si chocó contra el
    * techo o el suelo, vuelve al centro para no volver a chocar enseguida.
    * @param {boolean} fueBorde chocó contra el techo o el suelo
    */
   function recibirDanio(fueBorde) {
     const jugador = estado.jugador;
-    jugador.tiempoChoque = JUGADOR.duracionChoque;
-    estado.tiempoSacudon = JUEGO.duracionSacudon;
+    // En Fácil (vidas infinitas) no hay destrucción ni sacudón: la moto
+    // solo queda invulnerable y parpadea.
+    if (estado.vidas !== Infinity) {
+      jugador.tiempoChoque = JUGADOR.duracionChoque;
+      estado.tiempoSacudon = JUEGO.duracionSacudon;
+    }
     estado.vidas -= 1;  // Infinity - 1 sigue siendo Infinity
 
     if (estado.vidas <= 0) {
       jugador.vy = 0;
+      // Queda destruida (frame final de la tira de choque) detrás del game over.
+      jugador.tiempoChoque = Infinity;
       estado.fase = 'muriendo';
       estado.tiempoFin = JUEGO.esperaDerrota;
       return;

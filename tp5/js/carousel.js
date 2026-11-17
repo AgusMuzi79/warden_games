@@ -52,15 +52,21 @@ const BLOCKA = {
   enlace: 'blocka.html',
 };
 
+const NEON_RIDER = {
+  name: 'Neon Rider',
+  background_image: 'assets/img/portada-neon-rider.jpg',
+  enlace: 'runner.html',
+};
+
 const NEON_CIRCUIT = {
   name: 'Neon Circuit',
   background_image: 'assets/img/portada-tronpeg-1616x1320.png',
   enlace: 'juego.html',
 };
 
-// Orden en el banner: Neon Circuit primero (arranca como card activa, es el
-// juego de esta entrega) y Blocka segundo.
-const JUEGOS_PROPIOS = [NEON_CIRCUIT, BLOCKA];
+// Orden en el banner: Neon Rider primero (arranca como card activa, es el
+// juego de esta entrega), después Neon Circuit y Blocka.
+const JUEGOS_PROPIOS = [NEON_RIDER, NEON_CIRCUIT, BLOCKA];
 
 // Un juego propio es uno de la lista de arriba (los de la API no están).
 function esPropio(juego) {

@@ -8,7 +8,9 @@
 
 .runner {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-3);
   padding-block: var(--espaciado-6);
 }
 
@@ -80,7 +82,7 @@
    que los edificios de adelante se lean claramente. */
 .layer--3 {
   background-image: url("../assets/game/bg/capa3-edificios.png");
-  filter: brightness(0.5) saturate(0.7);
+  filter: brightness(0.35) saturate(0.6);
 }
 
 /* Suelo (no viene en el pack): franja de abajo con una grilla neón hecha
@@ -112,16 +114,44 @@
 
 /* Estructura que cuelga del techo, con el cartel en la punta. El cartel
    está pegado abajo: si la estructura es más baja que el cartel, el cartel
-   se recorta arriba (overflow: hidden) y el hueco sigue siendo exacto. */
+   se recorta arriba (overflow: hidden) y el hueco sigue siendo exacto.
+   El resplandor violeta separa a los obstáculos del fondo. */
 .obstacle__top {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   overflow: hidden;
-  /* Estructura: una columna centrada de la mitad del ancho del cartel
-     (--ancho-cartel lo pone obstacle.js). Vista mínima de la Fase A. */
-  background: linear-gradient(var(--primario-o1), var(--primario-o1)) 50% 0 / calc(var(--ancho-cartel) / 2) 100% no-repeat;
+  filter: drop-shadow(0 0 4px var(--primario));
+}
+
+/* Dos cables del ancho del cartel (a 1/4 y a 3/4) que bajan del techo
+   hasta el cartel (--ancho-cartel lo pone obstacle.js). */
+.obstacle__top::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: var(--ancho-cartel);
+  height: 100%;
+  margin-left: calc(var(--ancho-cartel) / -2);
+  background:
+    linear-gradient(var(--primario), var(--primario)) 25% 0 / 4px 100% no-repeat,
+    linear-gradient(var(--primario), var(--primario)) 75% 0 / 4px 100% no-repeat;
+}
+
+/* Soporte del techo: una barra un poco más ancha que el cartel con un
+   filo cian abajo. */
+.obstacle__top::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(var(--ancho-cartel) + 12px);
+  height: 10px;
+  margin-left: calc((var(--ancho-cartel) + 12px) / -2);
+  background: var(--placa-borde);
+  border-bottom: 2px solid var(--acento);
 }
 
 /* Cartel: tira de 4 frames escalada x2 (tamaños en las variables que
@@ -137,124 +167,165 @@
   animation: sprite-tira 0.8s steps(var(--frames)) infinite;
 }
 
-/* Edificio: el PNG es el tope; debajo, un cuerpo liso hasta el suelo
-   (la Fase B lo cambia por una franja repetida). */
+/* Edificio: el PNG es el edificio completo (--img-alto de alto) y se
+   dibuja arriba, en el borde del hueco. Si el edificio tiene que llegar
+   más abajo, obstacle.js agrega tramos (.obstacle__tramo): cada uno
+   muestra la franja de abajo del mismo PNG, y se alternan derechos y
+   espejados (--espejo). Un borde espejado coincide con el original, así
+   que no se ve la costura. */
 .obstacle__bottom {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   overflow: hidden;
-  background:
-    var(--img) no-repeat 0 0,
-    linear-gradient(var(--placa-borde), var(--placa-borde)) 0 var(--img-alto) / 100% 100% no-repeat;
+  background: var(--img) no-repeat 0 0;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 0 4px var(--primario));
+}
+
+/* La franja son las últimas --franja filas del PNG: se corre la imagen
+   hacia arriba lo que le falta para que esas filas queden a la vista. */
+.obstacle__tramo {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background: var(--img) no-repeat 0 calc(var(--franja) - var(--img-alto));
   image-rendering: pixelated;
 }
 
-/* Choque contra el par: tiembla (vista mínima). */
+.obstacle__tramo--espejo {
+  transform: scaleY(-1);
+}
+
+/* Choque contra el par: el edificio y la estructura tiemblan y el cartel
+   chispea (destella en blanco y cian, y su animación se acelera). */
 .obstacle.is-hit .obstacle__top,
 .obstacle.is-hit .obstacle__bottom {
   animation: temblor 0.1s linear infinite;
 }
 
 .obstacle.is-hit .obstacle__banner {
-  animation-duration: 0.2s;
+  animation: sprite-tira 0.2s steps(var(--frames)) infinite, chispa 0.1s steps(2) infinite;
+}
+
+@keyframes chispa {
+  from { filter: brightness(1); }
+  to   { filter: brightness(3) drop-shadow(0 0 6px var(--acento)); }
 }
 
 @keyframes temblor {
-  50% { translate: 3px 0; }
+  50% { translate: 6px 0; }
 }
 
 /* ---- Drone ----
-   drone.png: 4 frames de 55x52 (escala x1), en loop. */
+   drone.png: 4 frames de 55x52 mostrados a escala 0,65 (36x34), en loop.
+   Es chico a propósito: agarrarlo ralentiza el mundo, así que tiene que
+   costar. Además de la tira, se ladea de un lado al otro y late con un
+   resplandor cian (`rotate` y `filter`, que no pisan el transform del JS). */
 .drone {
   --frames: 4;
-  --frame-w: 55px;
-  background: url("../assets/game/sprites/drone.png") no-repeat 0 0 / 220px 52px;
+  --frame-w: 36px;
+  background: url("../assets/game/sprites/drone.png") no-repeat 0 0 / 144px 34px;
   image-rendering: pixelated;
-  animation: sprite-tira 0.4s steps(4) infinite;
+  animation:
+    sprite-tira 0.4s steps(4) infinite,
+    drone-ladeo 0.7s ease-in-out infinite alternate,
+    drone-brillo 0.5s ease-in-out infinite alternate;
 }
 
-/* Al chocarlo cambia a la tira de la explosión (6 frames) y la corre
-   una sola vez; game.js lo borra cuando termina (0,5 s). */
+@keyframes drone-ladeo {
+  from { rotate: -10deg; }
+  to   { rotate: 10deg; }
+}
+
+@keyframes drone-brillo {
+  from { filter: drop-shadow(0 0 2px var(--acento)); }
+  to   { filter: drop-shadow(0 0 9px var(--acento)) brightness(1.3); }
+}
+
+/* Al agarrarlo cambia a la tira de la explosión (6 frames), se agranda
+   y destella; la corre una sola vez y game.js lo borra cuando termina
+   (0,5 s). */
 .drone.is-exploding {
   --frames: 6;
   background-image: url("../assets/game/sprites/explosion.png");
-  background-size: 330px 52px;
-  animation: sprite-tira 0.5s steps(6) forwards;
+  background-size: 216px 34px;
+  animation: sprite-tira 0.5s steps(6) forwards, drone-estallido 0.5s ease-out forwards;
+}
+
+@keyframes drone-estallido {
+  from { scale: 1; filter: brightness(3); }
+  to   { scale: 2.2; filter: brightness(1); }
 }
 
 /* ---- Coleccionable ----
-   Todavía no hay sprite: el placeholder es un rombo celeste neón que
-   late. Para pasarlo a un spritesheet horizontal, agregarle a
-   .collectible__sprite la clase --sheet y definir --img, --frames,
-   --frame-w y --frame-h: la animación ya usa sprite-tira con
-   steps(var(--frames)), como el drone. */
+   moneda-chip.png: spritesheet de 6 frames (59x54 cada uno) de una
+   moneda hexagonal que gira, mostrada a escala 0,6: cada frame mide
+   35x32 y la tira entera 210x32. La corre sprite-tira con steps(), igual
+   que el drone. Para cambiar la imagen se tocan solo estas variables. */
 .collectible__sprite {
+  --frames: 6;
+  --frame-w: 35px;
   position: absolute;
-  inset: 4px;
-  background: var(--acento);
-  box-shadow: var(--glow-acento);
-  transform: rotate(45deg);
-  animation: latido 0.6s ease-in-out infinite alternate;
-}
-
-@keyframes latido {
-  from { transform: rotate(45deg) scale(0.85); }
-  to   { transform: rotate(45deg) scale(1.1); }
-}
-
-.collectible__sprite--sheet {
-  inset: 0;
+  top: 0;
+  left: -2px;
   width: var(--frame-w);
-  height: var(--frame-h);
-  background: var(--img) no-repeat 0 0 / calc(var(--frames) * var(--frame-w)) var(--frame-h);
-  box-shadow: none;
-  transform: none;
+  height: 32px;
+  background: url("../assets/game/sprites/moneda-chip.png") no-repeat 0 0 / calc(var(--frames) * var(--frame-w)) 32px;
   image-rendering: pixelated;
-  animation: sprite-tira 0.6s steps(var(--frames)) infinite;
+  animation: sprite-tira 0.6s steps(6) infinite;
 }
 
-/* Recogido: crece y se desvanece (0,4 s, después game.js lo borra). */
+/* Recogido: se congela, destella en blanco, crece y se desvanece (0,4 s,
+   después game.js lo borra). */
 .collectible.is-collected .collectible__sprite {
   animation: recogida 0.4s ease-out forwards;
 }
 
 @keyframes recogida {
-  to { transform: rotate(45deg) scale(2.5); opacity: 0; }
+  from { transform: scale(1); filter: brightness(3); opacity: 1; }
+  to   { transform: scale(2.6); filter: brightness(3); opacity: 0; }
 }
 
 /* "+3": sube y se desvanece (0,8 s). El span es el que se anima, porque
-   el transform de .float-text lo escribe el JS. */
+   el transform de .float-text lo escribe el JS. Grande, en amarillo con
+   borde oscuro para que se lea sobre cualquier fondo. */
 .float-text span {
   display: block;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 20px;
-  color: var(--acento);
+  font-size: 32px;
+  color: var(--foco);
+  text-shadow: 0 2px 0 var(--fondo), 2px 0 0 var(--fondo), -2px 0 0 var(--fondo), 0 -2px 0 var(--fondo);
   animation: flotar 0.8s ease-out forwards;
 }
 
 @keyframes flotar {
-  to { transform: translateY(-40px); opacity: 0; }
+  from { transform: translateY(0) scale(0.6); }
+  25%  { transform: translateY(-12px) scale(1.25); }
+  to   { transform: translateY(-50px) scale(1); opacity: 0; }
 }
 
 /* ---- HUD ----
-   Números en Roboto Flex con tabular-nums: todos los dígitos miden lo
-   mismo y el puntaje no "baila" al cambiar. */
+   Va afuera del área de juego, en una barra arriba y del mismo ancho
+   (960 px), para que no tape la acción. Números en Roboto Flex con
+   tabular-nums: todos los dígitos miden lo mismo y el puntaje no "baila"
+   al cambiar. */
 .hud {
-  position: absolute;
-  top: var(--espaciado-3);
-  left: var(--espaciado-3);
-  right: var(--espaciado-3);
-  z-index: 10;
+  box-sizing: border-box;
+  width: 960px;
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: var(--espaciado-6);
+  padding: var(--espaciado-2) var(--espaciado-4);
+  background: var(--superficie);
+  border: 1px solid var(--primario);
+  border-radius: var(--radio-md);
   font-family: var(--font-ui);
   font-weight: 600;
   color: var(--primario-c3);
-  pointer-events: none;
 }
 
 .hud__item {
@@ -262,6 +333,7 @@
 }
 
 .hud__numero {
+  font-size: 18px;
   font-variant-numeric: tabular-nums;
   color: var(--acento);
 }
@@ -275,6 +347,7 @@
   height: var(--espaciado-2);
   border: 1px solid var(--primario);
   border-radius: var(--radio-sm);
+  background: var(--placa);
   overflow: hidden;
 }
 
@@ -283,8 +356,10 @@
   display: block;
   height: 100%;
   background: var(--acento);
+  box-shadow: var(--glow-acento);
   transform: scaleX(0);
   transform-origin: left;
+  transition: transform var(--duracion-hover) ease-out;
 }
 
 /* ---- Moto (.player) ----
@@ -307,67 +382,79 @@
   to   { transform: translateY(4px); }
 }
 
-/* moto.png mira a la izquierda: scaleX(-1) la da vuelta. */
+/* Moto: spritesheet de 4 frames (moto-vuelo.png, 481x148 cada uno, ya
+   con la llama del propulsor adentro) animado con steps(), igual que el
+   drone. Se muestra a escala 0,216: cada frame mide 104x32 y la tira
+   entera 416x32. El PNG mira a la izquierda: scaleX(-1) la da vuelta y
+   la llama queda atrás. left:-30px alinea el cuerpo de la moto con la
+   caja de 74x48 de .player (la llama sobresale por la izquierda).
+   Para cambiar la imagen se tocan solo estas variables. */
 .player__sprite {
+  --frames: 4;
+  --frame-w: 104px;
   position: absolute;
-  inset: 0;
-  background: url("../assets/game/sprites/moto.png") no-repeat;
+  top: 8px;
+  left: -30px;
+  width: var(--frame-w);
+  height: 32px;
+  background: url("../assets/game/sprites/moto-vuelo.png") no-repeat 0 0 / calc(var(--frames) * var(--frame-w)) 32px;
   image-rendering: pixelated;
   transform: scaleX(-1);
+  transition: transform 0.25s ease-out;
+  animation: sprite-tira 0.4s steps(4) infinite;
 }
 
-/* Llama del propulsor: sale por atrás (a la izquierda) y parpadea
-   cambiando de largo. Con .is-boost se estira. Vista mínima (Fase A). */
-.player__flame {
-  position: absolute;
-  top: 30px;
-  left: -14px;
-  width: 20px;
-  height: 8px;
-  border-radius: var(--radio-sm);
-  background: linear-gradient(to left, var(--tablero-activo), var(--foco));
-  transform-origin: right center;
-  animation: llama 0.12s steps(2) infinite alternate;
+/* Squash & stretch de la moto en el impulso: se achica a lo largo y se
+   estira a lo alto (scaleX(-1) la sigue espejando). Entra rápido y
+   vuelve más lento. */
+.player.is-boost .player__sprite {
+  transform: scale(-0.86, 1.2);
+  transition-duration: 0.06s;
 }
 
-@keyframes llama {
-  from { transform: scaleX(0.6); }
-  to   { transform: scaleX(1.1); }
-}
-
-.player.is-boost .player__flame {
-  animation: none;
-  transform: scaleX(2.2);
-}
-
-/* Explosión del choque: explosion.png (6 frames de 55x52) escalada x2 y
-   centrada sobre la moto. Termina en -660px, que ya está fuera de la
-   tira: queda invisible sin tener que ocultarla. */
+/* Choque: moto-choque.png (6 frames de 174x138, mostrados a escala 0,6:
+   105x83). Es una secuencia de una sola vez: impacto, grieta, partida,
+   dispersión, restos y humo. Corre con steps(5) hasta el frame 6 y
+   queda ahí (forwards). Mientras dura, la moto de vuelo se esconde. */
 .player__explosion {
   --frames: 6;
-  --frame-w: 110px;
+  --frame-w: 105px;
   position: absolute;
-  top: -22px;
-  left: -9px;
-  width: 110px;
-  height: 104px;
-  background: url("../assets/game/sprites/explosion.png") no-repeat 0 0 / 660px 104px;
+  top: -26px;
+  left: -10px;
+  width: var(--frame-w);
+  height: 83px;
+  background: url("../assets/game/sprites/moto-choque.png") no-repeat 0 0 / calc(var(--frames) * var(--frame-w)) 83px;
   image-rendering: pixelated;
+  transform: scaleX(-1);
   opacity: 0;
 }
 
 .player.is-hit .player__explosion {
   opacity: 1;
-  animation: sprite-tira 0.6s steps(6) forwards;
+  animation: choque-tira 0.5s steps(5) forwards;
 }
 
-/* Invulnerable: parpadea. */
+.player.is-hit .player__sprite {
+  opacity: 0;
+}
+
+/* Como sprite-tira pero se detiene en el último frame (-5 anchos) en
+   vez de salirse de la tira. */
+@keyframes choque-tira {
+  from { background-position-x: 0; }
+  to   { background-position-x: calc((var(--frames) - 1) * var(--frame-w) * -1); }
+}
+
+/* Invulnerable: la moto parpadea entre brillante, con un halo cian, y
+   casi transparente; el halo la hace notar aunque esté sobre el edificio. */
 .player.is-invulnerable .player__body {
-  animation: vuelo 0.6s ease-in-out infinite alternate, parpadeo 0.15s steps(2) infinite;
+  animation: vuelo 0.6s ease-in-out infinite alternate, parpadeo 0.18s steps(2) infinite;
 }
 
 @keyframes parpadeo {
-  to { opacity: 0.2; }
+  from { opacity: 1; filter: drop-shadow(0 0 8px var(--acento)) brightness(1.5); }
+  to   { opacity: 0.25; filter: none; }
 }
 
 /* ---- Hitboxes (debug con H) ---- */
@@ -383,16 +470,40 @@
   display: block;
 }
 
-/* ---- Sacudón y pausa ---- */
+/* ---- Sacudón, flash y pausa ----
+   El sacudón mueve todo el área de juego con un temblor fuerte. El
+   flash es un velo rojo (--error) que aparece en el golpe y se
+   desvanece; usa ::after para no sumar un elemento al HTML. */
 .game.is-shaking {
   animation: sacudon 0.4s linear;
 }
 
 @keyframes sacudon {
-  20%  { transform: translate(-8px, 4px); }
-  40%  { transform: translate(8px, -4px); }
-  60%  { transform: translate(-6px, -2px); }
-  80%  { transform: translate(6px, 2px); }
+  10%  { transform: translate(-14px, 6px); }
+  25%  { transform: translate(12px, -8px); }
+  40%  { transform: translate(-10px, -6px); }
+  55%  { transform: translate(8px, 6px); }
+  70%  { transform: translate(-5px, 3px); }
+  85%  { transform: translate(3px, -2px); }
+}
+
+.game::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  background: var(--error);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.game.is-shaking::after {
+  animation: destello 0.4s ease-out;
+}
+
+@keyframes destello {
+  from { opacity: 0.55; }
+  to   { opacity: 0; }
 }
 
 /* En pausa se congela cualquier animación CSS de adentro. */
@@ -401,7 +512,9 @@
 }
 
 /* ---- Pantallas (carga, inicio, pausa, victoria, derrota) ----
-   Vista mínima de la Fase A: texto y botones sobre un velo. */
+   Cada pantalla es un velo sobre el juego con un panel en el medio. En
+   pausa, victoria y derrota (.screen--fin) el velo es suave: el juego se
+   sigue viendo detrás. */
 .screen {
   position: absolute;
   inset: 0;
@@ -418,14 +531,70 @@
   cursor: default;
 }
 
+.screen--fin {
+  background: var(--sombra-elevacion);
+}
+
+.screen__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-4);
+  padding: var(--espaciado-8);
+  background: var(--fondo-o1);
+  border: 2px solid var(--primario);
+  border-radius: var(--radio-xl);
+  box-shadow: var(--glow-acento);
+  animation: modal-pop var(--duracion-estado) var(--easing-rebote);
+}
+
+.screen__titulo {
+  margin: 0;
+  font-size: 40px;
+  line-height: 1.1;
+}
+
 .screen__texto {
   margin: 0;
   font-family: var(--font-ui);
 }
 
+.screen__score {
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--acento);
+}
+
 .screen__acciones {
   display: flex;
   gap: var(--espaciado-3);
+}
+
+/* Victoria: título cian con brillo. */
+.screen__titulo--victoria {
+  color: var(--acento);
+  text-shadow: var(--glow-acento);
+}
+
+/* Game over: título rojo con un glitch (copias cian y roja que se
+   desplazan por saltos) y el panel con borde y resplandor rojos. */
+.screen__panel--derrota {
+  border-color: var(--error);
+  box-shadow: 0 0 24px var(--resplandor-error);
+}
+
+.screen__titulo--derrota {
+  color: var(--error);
+  animation: glitch-titulo 1.2s steps(1, end) infinite;
+}
+
+@keyframes glitch-titulo {
+  0%   { text-shadow: 3px 0 var(--acento), -3px 0 var(--primario); }
+  8%   { text-shadow: -4px 0 var(--acento), 4px 0 var(--primario); }
+  16%  { text-shadow: none; }
+  70%  { text-shadow: 2px 0 var(--acento), -2px 0 var(--primario); }
+  78%  { text-shadow: none; }
 }
 
 /* ---- Movimiento reducido ----
@@ -434,16 +603,82 @@
    juego. */
 @media (prefers-reduced-motion: reduce) {
   .game.is-shaking,
+  .game.is-shaking::after,
   .obstacle.is-hit .obstacle__top,
   .obstacle.is-hit .obstacle__bottom,
   .player__body,
-  .player__flame,
-  .collectible__sprite {
+  .collectible__sprite,
+  .screen__panel,
+  .screen__titulo--derrota {
     animation: none;
+  }
+
+  .player__sprite,
+  .hud__progress-bar {
+    transition: none;
   }
 
   .player.is-invulnerable .player__body {
     animation: none;
     opacity: 0.5;
+    filter: drop-shadow(0 0 8px var(--acento));
   }
+
+  /* Los sprites siguen (son el juego); sin ladeo, brillo, destello ni escala. */
+  .drone {
+    animation: sprite-tira 0.4s steps(4) infinite;
+  }
+
+  .drone.is-exploding {
+    animation: sprite-tira 0.5s steps(6) forwards;
+  }
+
+  .obstacle.is-hit .obstacle__banner {
+    animation: sprite-tira 0.8s steps(var(--frames)) infinite;
+  }
+}
+
+/* ============================================================
+   Página (ficha, descripción, galería, créditos)
+   El layout de 2 columnas, la ficha, Ayuda y la galería son los de la
+   página del Peg (components.css / juego.css). Acá solo lo propio.
+   ============================================================ */
+
+/* La zona de juego ocupa las dos columnas del grid (fila 1). */
+.juego-layout--runner > .runner {
+  grid-column: 1 / -1;
+  padding-block: 0;
+}
+
+/* Miniatura de la ficha: la imagen de Neon Rider. */
+.ficha-juego__miniatura {
+  background-image: url("../assets/img/miniatura-neon-rider.png");
+}
+
+/* Créditos: lista simple debajo de la galería, mismo estilo de card. */
+.creditos {
+  padding: var(--espaciado-4);
+  border: 1px solid var(--primario-o1);
+  border-radius: var(--radio-xl);
+  background: var(--superficie);
+}
+
+.creditos__lista {
+  margin: 0;
+  padding-left: var(--espaciado-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--espaciado-2);
+}
+
+/* Barra de arriba (nombre + botón "?"), del mismo ancho que el HUD y el
+   juego. El botón y el diálogo reusan .peg__ayuda-btn y .peg-ayuda de
+   juego.css, para que sean idénticos a los del Peg. */
+.runner__barra {
+  box-sizing: border-box;
+  width: 960px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }

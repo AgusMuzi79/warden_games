@@ -24,8 +24,8 @@ export const JUEGO = {
 /** Velocidad del mundo. Todo lo que scrollea deriva de velocidadBase. */
 export const MUNDO = {
   velocidadBase: 220,        // px/s del suelo y de los obstáculos (factor 1)
-  factorRalentizado: 0.45,   // al chocar un drone la velocidad base baja a este factor
-  duracionRalentizado: 1.5,
+  factorRalentizado: 0.45,   // al agarrar un drone la velocidad base baja a este factor
+  duracionRalentizado: 3,
 };
 
 /**
@@ -44,8 +44,8 @@ export const CAPAS = [
 /** La moto. x es fijo (25 % del ancho); el mundo es el que se mueve. */
 export const JUGADOR = {
   x: 240,
-  ancho: 93,                // moto.png 93x60, escala x1
-  alto: 60,
+  ancho: 74,                // caja de la moto (el sprite moto-vuelo se ajusta a este ancho)
+  alto: 48,
   gravedad: 1500,
   impulso: 430,             // velocidad hacia arriba después de cada pulsación
   caidaMax: 620,            // tope de la velocidad de caída
@@ -53,7 +53,7 @@ export const JUGADOR = {
   rotacionMin: -25,
   rotacionMax: 55,
   // Hitbox más chica que el sprite, relativa a su esquina de arriba a la izquierda.
-  hitbox: { dx: 14, dy: 16, ancho: 64, alto: 30 },
+  hitbox: { dx: 11, dy: 13, ancho: 51, alto: 24 },
   duracionImpulso: 0.2,     // .is-boost
   duracionChoque: 0.6,      // .is-hit
   duracionInvulnerable: 1.5,
@@ -67,6 +67,7 @@ export const OBSTACULO = {
   margenArriba: 60,     // alto mínimo del cartel colgante
   margenAbajo: 80,      // alto mínimo del edificio
   primeraX: 1120,       // el primer par aparece fuera de pantalla, a la derecha
+  franjaEdificio: 24,   // alto de la franja del PNG que se repite (espejada) para alargar el edificio
   hitboxMargen: 10,     // achica las hitboxes a los costados
   hitboxMargenTope: 14, // el tope del edificio tiene antenas: la caja empieza más abajo
   duracionChoque: 0.5,  // .is-hit del obstáculo
@@ -89,24 +90,24 @@ export const OBSTACULO = {
 
 /** Drone: resta una vida y ralentiza el mundo. */
 export const DRONE = {
-  ancho: 55,             // un frame de drone.png
-  alto: 52,
+  ancho: 36,             // un frame de drone.png (55x52) a escala 0,65: chico, cuesta agarrarlo
+  alto: 34,
   probabilidad: 0.35,    // chance de que aparezca entre dos pares
   desdeObstaculo: 2,     // no aparece antes del 2º par (para arrancar tranquilo)
   desvio: 70,            // distancia vertical a la línea que une los dos huecos
   amplitud: 18,          // vaivén vertical
   frecuencia: 0.8,       // vaivenes por segundo
-  hitbox: { dx: 10, dy: 12, ancho: 35, alto: 26 },
+  hitbox: { dx: 7, dy: 8, ancho: 23, alto: 17 },
   duracionExplosion: 0.5,
 };
 
 /** Coleccionable: suma puntos. */
 export const COLECCIONABLE = {
-  lado: 24,
+  lado: 32,              // caja de la moneda (el sprite moneda-chip se muestra a 35x32)
   probabilidad: 0.4,     // chance de que aparezca en el hueco de un par
   desvioMax: 30,         // se corre un poco del centro del hueco
   puntos: 3,
-  hitbox: { dx: 2, dy: 2, ancho: 20, alto: 20 },
+  hitbox: { dx: 3, dy: 3, ancho: 26, alto: 26 },
   duracionRecogida: 0.4,
   duracionTexto: 0.8,
 };
@@ -127,7 +128,9 @@ export const IMAGENES = [
   `${ASSETS}bg/capa1-cielo.png`,
   `${ASSETS}bg/capa2-ciudad-lejana.png`,
   `${ASSETS}bg/capa3-edificios.png`,
-  `${ASSETS}sprites/moto.png`,
+  `${ASSETS}sprites/moto-vuelo.png`,
+  `${ASSETS}sprites/moto-choque.png`,
+  `${ASSETS}sprites/moneda-chip.png`,
   `${ASSETS}sprites/drone.png`,
   `${ASSETS}sprites/explosion.png`,
   ...OBSTACULO.edificios.map((edificio) => edificio.src),

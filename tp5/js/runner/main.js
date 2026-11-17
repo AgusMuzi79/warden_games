@@ -34,7 +34,7 @@ const juego = crearJuego({
   juego: areaJuego,
   capas: [...areaJuego.querySelectorAll('.layer')],
   mundo: areaJuego.querySelector('.world'),
-  hud: areaJuego.querySelector('.hud'),
+  hud: document.querySelector('.hud'),   // está afuera de #game, arriba
   jugador: areaJuego.querySelector('.player'),
   hitboxJugador: areaJuego.querySelector('.hitbox--player'),
 }, mostrarFin);
@@ -120,6 +120,10 @@ conectarEntrada(areaJuego, {
   alternarDebug: () => juego.alternarDebug(),
   pausar,
 });
+
+// La página (js/runner-pagina.js) avisa con este evento que se abrió la
+// ayuda: se pausa la partida y queda la pantalla de pausa para continuar.
+document.addEventListener('runner:pausar', pausar);
 
 // Precarga: hasta que no llegan todas las imágenes no se puede elegir modo.
 mostrarPantalla('carga');
