@@ -43,13 +43,16 @@ const juego = crearJuego({
  * Muestra una pantalla y oculta las demás. null las oculta todas.
  * El foco pasa al primer botón, para seguir con el teclado.
  * @param {string|null} nombre clave de `pantallas`
+ * @param {boolean} [enfocar=true] false al cargar la página: sin una acción
+ *   previa del usuario, el foco haría scroll hasta el juego y activaría la
+ *   animación de foco del primer botón. Con Tab se llega igual.
  */
-function mostrarPantalla(nombre) {
+function mostrarPantalla(nombre, enfocar = true) {
   for (const [clave, pantalla] of Object.entries(pantallas)) {
     if (pantalla) pantalla.hidden = clave !== nombre;
   }
   const boton = nombre ? pantallas[nombre]?.querySelector('button') : null;
-  if (boton) boton.focus();
+  if (boton && enfocar) boton.focus();
 }
 
 /**
@@ -131,5 +134,5 @@ precargar(IMAGENES, (porcentaje) => {
   porcentajeCarga.textContent = porcentaje;
 }).then((fallidas) => {
   if (fallidas.length) console.warn('No se pudieron cargar:', fallidas);
-  mostrarPantalla('inicio');
+  mostrarPantalla('inicio', false);
 });
