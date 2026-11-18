@@ -55,7 +55,7 @@ export const JUGADOR = {
   // Hitbox más chica que el sprite, relativa a su esquina de arriba a la izquierda.
   hitbox: { dx: 11, dy: 13, ancho: 51, alto: 24 },
   duracionImpulso: 0.2,     // .is-boost
-  duracionChoque: 0.6,      // .is-hit
+  duracionDanio: 0.4,       // .is-damaged (choque que no deja sin vidas)
   duracionInvulnerable: 1.5,
 };
 

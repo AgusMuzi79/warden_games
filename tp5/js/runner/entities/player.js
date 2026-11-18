@@ -19,6 +19,7 @@ export function crearJugador() {
     rotacion: 0,        // grados
     tiempoImpulso: 0,   // segundos que le quedan a .is-boost
     tiempoChoque: 0,    // segundos que le quedan a .is-hit
+    tiempoDanio: 0,     // segundos que le quedan a .is-damaged
     tiempoInvulnerable: 0,
   };
 }
@@ -64,6 +65,7 @@ export function actualizarJugador(jugador, dt) {
 export function descontarTiempos(jugador, dt) {
   jugador.tiempoImpulso = Math.max(0, jugador.tiempoImpulso - dt);
   jugador.tiempoChoque = Math.max(0, jugador.tiempoChoque - dt);
+  jugador.tiempoDanio = Math.max(0, jugador.tiempoDanio - dt);
   jugador.tiempoInvulnerable = Math.max(0, jugador.tiempoInvulnerable - dt);
 }
 
@@ -104,6 +106,7 @@ export function dibujarJugador(jugador, elemento, elementoHitbox) {
   elemento.style.transform = `translate3d(${jugador.x}px, ${jugador.y}px, 0) rotate(${jugador.rotacion}deg)`;
   elemento.classList.toggle('is-boost', jugador.tiempoImpulso > 0);
   elemento.classList.toggle('is-hit', jugador.tiempoChoque > 0);
+  elemento.classList.toggle('is-damaged', jugador.tiempoDanio > 0);
   elemento.classList.toggle('is-invulnerable', jugador.tiempoInvulnerable > 0);
   const caja = cajaJugador(jugador);
   elementoHitbox.style.transform = `translate3d(${caja.x}px, ${caja.y}px, 0)`;

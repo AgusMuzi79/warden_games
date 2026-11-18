@@ -61,11 +61,15 @@ El detalle de la implementación (fases, contrato DOM, valores de config) está 
   por sí solo. Pedido de Fran: que sea una ayuda difícil de atrapar.
 - **Descartado:** drone que resta vida (Fase A), que incumple ese criterio.
 
-### Fácil no destruye la moto
-- **Qué:** en Fácil el choque no activa `.is-hit` ni el temblor: la moto solo parpadea.
-  Normal y Difícil sí muestran la explosión y el temblor. Al morir, la moto destruida
-  queda a la vista (`tiempoChoque = Infinity`).
-- **Por qué:** en Fácil la moto es invencible; destruirla contradecía el modo.
+### La moto se destruye solo con la última vida
+- **Qué:** un choque que no deja sin vidas no activa `.is-hit`: la moto parpadea
+  (invulnerable) y, en Normal y Difícil, la pantalla tiembla y la moto muestra por
+  0,4 s los 2 primeros frames de la tira de choque (impacto y grieta, `.is-damaged`). La tira de la moto
+  destruida se ve solo al perder la última vida, y queda a la vista detrás del game over
+  (`tiempoChoque = Infinity`). En Fácil nunca se destruye ni tiembla.
+- **Por qué:** destruir la moto en cada choque decía "perdiste" cuando todavía quedaban
+  vidas (pedido de Agus). En Fácil la moto es invencible.
+- **Antes:** en Normal y Difícil cada choque mostraba la explosión entera (0,6 s).
 
 ### Cuerpo de los edificios con franjas espejadas
 - **Qué:** el cuerpo repite la franja de abajo del PNG, alternando normal y `scaleY(-1)`.

@@ -439,6 +439,25 @@
   opacity: 0;
 }
 
+/* Daño (choque que no deja sin vidas): solo los 2 primeros frames de la
+   misma tira, impacto y grieta, y vuelve la moto de vuelo. La tira entera
+   queda para la muerte (.is-hit). steps(1) cambia de frame de golpe en
+   cada keyframe: 0-50 % el frame 1, 50-100 % el frame 2. */
+.player.is-damaged .player__explosion {
+  opacity: 1;
+  animation: danio-tira 0.4s steps(1) forwards;
+}
+
+.player.is-damaged .player__sprite {
+  opacity: 0;
+}
+
+@keyframes danio-tira {
+  0%   { background-position-x: 0; }
+  50%  { background-position-x: calc(var(--frame-w) * -1); }
+  100% { background-position-x: calc(var(--frame-w) * -1); }
+}
+
 /* Como sprite-tira pero se detiene en el último frame (-5 anchos) en
    vez de salirse de la tira. */
 @keyframes choque-tira {

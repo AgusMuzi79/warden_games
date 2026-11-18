@@ -283,26 +283,26 @@ export function crearJuego(dom, alTerminar) {
   }
 
   /**
-   * Un choque que hace daño. En Normal y Difícil: explosión de la moto,
-   * sacudón y una vida menos. En Fácil (vidas infinitas) solo hay
-   * invulnerabilidad con parpadeo, sin explosión ni sacudón. Si
-   * quedan vidas, la moto queda invulnerable un rato y, si chocó contra el
-   * techo o el suelo, vuelve al centro para no volver a chocar enseguida.
+   * Un choque que hace daño: una vida menos. La moto solo se destruye del
+   * todo (tira de choque completa, .is-hit) con la última vida. Con vidas de
+   * sobra queda invulnerable y parpadea; en Normal y Difícil además muestra
+   * los primeros cuadros de la tira (.is-damaged) y hay sacudón. En Fácil
+   * (vidas infinitas) solo parpadea. Si chocó contra el techo o el suelo,
+   * vuelve al centro para no volver a chocar enseguida.
    * @param {boolean} fueBorde chocó contra el techo o el suelo
    */
   function recibirDanio(fueBorde) {
     const jugador = estado.jugador;
-    // En Fácil (vidas infinitas) no hay destrucción ni sacudón: la moto
-    // solo queda invulnerable y parpadea.
     if (estado.vidas !== Infinity) {
-      jugador.tiempoChoque = JUGADOR.duracionChoque;
       estado.tiempoSacudon = JUEGO.duracionSacudon;
+      jugador.tiempoDanio = JUGADOR.duracionDanio;
     }
     estado.vidas -= 1;  // Infinity - 1 sigue siendo Infinity
 
     if (estado.vidas <= 0) {
       jugador.vy = 0;
-      // Queda destruida (frame final de la tira de choque) detrás del game over.
+      jugador.tiempoDanio = 0;
+      // Se destruye y queda así (frame final de la tira) detrás del game over.
       jugador.tiempoChoque = Infinity;
       estado.fase = 'muriendo';
       estado.tiempoFin = JUEGO.esperaDerrota;

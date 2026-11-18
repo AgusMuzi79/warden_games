@@ -79,7 +79,8 @@ elemento del DOM y del arreglo cuando se termina el tiempo.
 | `.is-paused` | `#game` | `game.js` | pausa (P/Esc, o al perder el foco) | hasta reanudar. El CSS frena todas las animaciones |
 | `.is-debug` | `#game` | `game.js` | tecla H | hasta volver a apretar H. Muestra los `.hitbox` |
 | `.is-boost` | `.player` | `player.js` | cada impulso | `JUGADOR.duracionImpulso` (0,2 s); se reinicia con cada pulsación |
-| `.is-hit` | `.player` | `game.js` | choque (obstáculo, drone, techo o suelo) | `JUGADOR.duracionChoque` (0,6 s) |
+| `.is-hit` | `.player` | `game.js` | choque que deja sin vidas (obstáculo, techo o suelo) | hasta la próxima partida: la moto destruida queda detrás del game over |
+| `.is-damaged` | `.player` | `game.js` | choque con vidas de sobra, en Normal y Difícil | `JUGADOR.duracionDanio` (0,4 s): los 2 primeros frames de la tira de choque |
 | `.is-invulnerable` | `.player` | `game.js` | después de un choque | `JUGADOR.duracionInvulnerable` (1,5 s) |
 | `.is-hit` | `.obstacle` | `game.js` | la moto chocó ese obstáculo | `OBSTACULO.duracionChoque` (0,5 s) |
 | `.is-exploding` | `.drone` | `game.js` | la moto tocó el drone (no hace daño: solo ralentiza el mundo) | `DRONE.duracionExplosion` (0,5 s), después se borra |
