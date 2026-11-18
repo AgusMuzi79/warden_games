@@ -17,7 +17,8 @@ const TECLAS_PAUSA = ['KeyP', 'Escape'];
  *   alternarPausa: () => void,
  *   alternarDebug: () => void,
  *   pausar: () => void,
- * }} acciones impulsar devuelve true si se usó (había partida en curso)
+ *   reanudar: () => void,
+ * }} acciones reanudar no hace nada si la partida no está en pausa; impulsar devuelve true si se usó (había partida en curso)
  */
 export function conectarEntrada(areaJuego, acciones) {
   document.addEventListener('keydown', (evento) => {
@@ -30,9 +31,15 @@ export function conectarEntrada(areaJuego, acciones) {
     if (document.querySelector('dialog[open]')) return;
 
     if (TECLAS_IMPULSO.includes(evento.code)) {
-      // Solo se cancela el comportamiento normal (el espacio scrollea la
-      // página, o activa el botón que tiene el foco) si hubo impulso.
-      if (acciones.impulsar()) evento.preventDefault();
+      // El espacio sobre un botón con foco lo activa (por ejemplo
+      // "Continuar" en la pausa): eso es del botón, no del juego.
+      if (evento.code === 'Space' && evento.target instanceof Element
+        && evento.target.closest('button, a, summary')) return;
+      // En cualquier otro caso se cancela el scroll de la página, haya
+      // partida o no. Si no había partida en curso pero sí pausa, la misma
+      // tecla de subir la reanuda.
+      evento.preventDefault();
+      if (!acciones.impulsar()) acciones.reanudar();
     } else if (TECLAS_PAUSA.includes(evento.code)) {
       acciones.alternarPausa();
     } else if (evento.code === 'KeyH') {

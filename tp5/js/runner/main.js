@@ -122,6 +122,9 @@ conectarEntrada(areaJuego, {
   },
   alternarDebug: () => juego.alternarDebug(),
   pausar,
+  reanudar: () => {
+    if (juego.fase === 'pausa') reanudar();
+  },
 });
 
 // La página (js/runner-pagina.js) avisa con este evento que se abrió la
