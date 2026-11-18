@@ -123,7 +123,7 @@ visible a la vez.
 |---|---|---|
 | `#screen-loading` | al cargar, mientras se precargan las imágenes. `#loading-percent` muestra el % | — |
 | `#screen-start` | después de la carga y al elegir "Cambiar modo" | `data-mode="facil"`, `"normal"`, `"dificil"` |
-| `#screen-pause` | pausa | `data-action="resume"`, `data-action="menu"` |
+| `#screen-pause` | pausa | `data-action="resume"` (Continuar), `data-action="retry"` (Reiniciar), `data-action="menu"` (Cambiar modo) |
 | `#screen-win` | puntaje objetivo alcanzado | `data-action="retry"`, `data-action="menu"` |
 | `#screen-lose` | sin vidas (después de 1 s de explosión) | `data-action="retry"`, `data-action="menu"` |
 
