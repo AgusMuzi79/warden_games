@@ -120,6 +120,22 @@
               <button type="button" class="btn btn--primario" data-mode="normal">Normal (3 vidas)</button>
               <button type="button" class="btn btn--secundario" data-mode="infinito">Infinito (1 vida, sin meta)</button>
             </div>
+            <button type="button" class="btn btn--terciario" data-action="records" id="btn-records">
+              <i class="ph ph-trophy" aria-hidden="true"></i> Récords
+            </button>
+          </div>
+        </div>
+
+        <!-- Récords del modo Infinito, desde el inicio. La tabla la arma
+             main.js con lo guardado en localStorage (js/runner/records.js). -->
+        <div id="screen-records" class="screen" hidden>
+          <div class="screen__panel screen__panel--records">
+            <h2 class="screen__titulo">Récords</h2>
+            <p class="screen__texto">Los 10 mejores puntajes del modo Infinito.</p>
+            <div class="records" data-records></div>
+            <div class="screen__acciones">
+              <button type="button" class="btn btn--secundario" data-action="back">Volver</button>
+            </div>
           </div>
         </div>
 
@@ -146,12 +162,46 @@
           </div>
         </div>
 
+        <!-- Nuevo récord (solo Infinito): iniciales de 3 letras como en las
+             máquinas arcade. data-iniciales hace que input.js no tome las
+             teclas mientras esta pantalla está a la vista: las maneja main.js.
+             Cada casilla es un spinbutton (A = 0 ... Z = 25). -->
+        <div id="screen-initials" class="screen screen--fin" data-iniciales hidden>
+          <div class="screen__panel screen__panel--records">
+            <h2 class="screen__titulo screen__titulo--victoria">¡Nuevo récord!</h2>
+            <p class="screen__texto">Puntaje: <span class="screen__score">0</span></p>
+            <p class="screen__texto screen__texto--chico" id="iniciales-ayuda">Cargá tus iniciales: ↑ y ↓ cambian la letra, ← y → la casilla, Enter guarda.</p>
+            <div class="iniciales" role="group" aria-label="Tus iniciales" aria-describedby="iniciales-ayuda">
+              <div class="iniciales__casilla">
+                <button type="button" class="iniciales__flecha" data-letra="subir" data-casilla="0" aria-label="Letra siguiente en la inicial 1"><i class="ph ph-caret-up" aria-hidden="true"></i></button>
+                <span class="iniciales__letra" role="spinbutton" tabindex="0" data-autofocus aria-label="Inicial 1 de 3" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" aria-valuetext="A">A</span>
+                <button type="button" class="iniciales__flecha" data-letra="bajar" data-casilla="0" aria-label="Letra anterior en la inicial 1"><i class="ph ph-caret-down" aria-hidden="true"></i></button>
+              </div>
+              <div class="iniciales__casilla">
+                <button type="button" class="iniciales__flecha" data-letra="subir" data-casilla="1" aria-label="Letra siguiente en la inicial 2"><i class="ph ph-caret-up" aria-hidden="true"></i></button>
+                <span class="iniciales__letra" role="spinbutton" tabindex="0" aria-label="Inicial 2 de 3" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" aria-valuetext="A">A</span>
+                <button type="button" class="iniciales__flecha" data-letra="bajar" data-casilla="1" aria-label="Letra anterior en la inicial 2"><i class="ph ph-caret-down" aria-hidden="true"></i></button>
+              </div>
+              <div class="iniciales__casilla">
+                <button type="button" class="iniciales__flecha" data-letra="subir" data-casilla="2" aria-label="Letra siguiente en la inicial 3"><i class="ph ph-caret-up" aria-hidden="true"></i></button>
+                <span class="iniciales__letra" role="spinbutton" tabindex="0" aria-label="Inicial 3 de 3" aria-valuemin="0" aria-valuemax="25" aria-valuenow="0" aria-valuetext="A">A</span>
+                <button type="button" class="iniciales__flecha" data-letra="bajar" data-casilla="2" aria-label="Letra anterior en la inicial 3"><i class="ph ph-caret-down" aria-hidden="true"></i></button>
+              </div>
+            </div>
+            <div class="screen__acciones">
+              <button type="button" class="btn btn--primario" data-action="save-initials">Guardar</button>
+            </div>
+          </div>
+        </div>
+
         <!-- Game over: el juego queda visible detrás (con la moto destruida)
              y el panel ofrece seguir jugando o volver al inicio. -->
         <div id="screen-lose" class="screen screen--fin" hidden>
           <div class="screen__panel screen__panel--derrota">
             <h2 class="screen__titulo screen__titulo--derrota">Game over</h2>
             <p class="screen__texto">Sistema caído. Puntaje: <span class="screen__score">0</span></p>
+            <!-- Solo en Infinito: la tabla de récords, con el nuevo resaltado. -->
+            <div class="records" data-records hidden></div>
             <div class="screen__acciones">
               <button type="button" class="btn btn--primario" data-action="retry">Seguir jugando</button>
               <button type="button" class="btn btn--secundario" data-action="menu">Volver al inicio</button>

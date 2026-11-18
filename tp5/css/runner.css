@@ -616,6 +616,129 @@
   78%  { text-shadow: none; }
 }
 
+/* ---- Récords del modo Infinito ----
+   Panel compacto (menos padding y separación) para que la tabla de 10
+   filas entre en los 540 px del juego junto con el título y los botones.
+   La tabla usa tabular-nums: los puntajes quedan alineados. */
+.screen__panel--records {
+  gap: var(--espaciado-3);
+  padding: var(--espaciado-6) var(--espaciado-8);
+}
+
+.screen__panel--records .screen__titulo {
+  font-size: 32px;
+}
+
+.screen__texto--chico {
+  font-size: 14px;
+  color: var(--primario-c2);
+}
+
+.records__tabla {
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
+}
+
+.records__tabla th {
+  padding: 0 var(--espaciado-3) var(--espaciado-1);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--primario-c1);
+  border-bottom: 1px solid var(--primario);
+}
+
+.records__tabla td {
+  padding: 1px var(--espaciado-3);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+/* Iniciales con letras separadas, como en una máquina arcade. */
+.records__tabla td:nth-child(2) {
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.records__tabla td:last-child {
+  text-align: right;
+  color: var(--acento);
+}
+
+/* El récord recién guardado: fila resaltada en amarillo. */
+.records__fila--nueva td,
+.records__tabla .records__fila--nueva td:last-child {
+  background: var(--primario-o1);
+  color: var(--foco);
+  font-weight: 700;
+}
+
+.records__vacio {
+  margin: 0;
+  font-family: var(--font-ui);
+  color: var(--primario-c2);
+}
+
+/* ---- Carga de iniciales ----
+   Tres casillas, cada una con su flecha arriba y abajo (44 px, solo
+   ícono). La letra es Roboto Flex: Orbitron queda para los títulos. */
+.iniciales {
+  display: flex;
+  gap: var(--espaciado-4);
+}
+
+.iniciales__casilla {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--espaciado-1);
+}
+
+.iniciales__flecha {
+  appearance: none;
+  display: grid;
+  place-items: center;
+  width: var(--control-alto);
+  height: var(--control-alto);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--acento);
+  font-size: 24px;
+  cursor: pointer;
+  transition: background-color var(--duracion-rapida) ease-out;
+}
+
+.iniciales__flecha:hover {
+  background: var(--primario-o1);
+}
+
+.iniciales__letra {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 64px;
+  font-family: var(--font-ui);
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--primario-c3);
+  background: var(--placa);
+  border: 2px solid var(--primario);
+  border-radius: var(--radio-md);
+  cursor: default;
+}
+
+/* La casilla activa (con foco) se enciende en cian. */
+.iniciales__letra:focus-visible,
+.iniciales__letra:focus {
+  border-color: var(--acento);
+  color: var(--acento);
+  box-shadow: var(--glow-acento);
+}
+
 /* ---- Movimiento reducido ----
    Sin sacudón ni balanceo; la invulnerabilidad se muestra con opacidad
    fija en lugar de parpadeo. Los sprites y el scroll se quedan: son el
@@ -633,7 +756,8 @@
   }
 
   .player__sprite,
-  .hud__progress-bar {
+  .hud__progress-bar,
+  .iniciales__flecha {
     transition: none;
   }
 

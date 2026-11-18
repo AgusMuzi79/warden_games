@@ -29,6 +29,9 @@ export function conectarEntrada(areaJuego, acciones) {
     // Con un diálogo abierto (la ayuda), las teclas son del diálogo: Esc lo
     // cierra y la partida sigue en pausa hasta que se elija continuar.
     if (document.querySelector('dialog[open]')) return;
+    // Mientras se cargan las iniciales de un récord, las teclas (letras,
+    // flechas, Enter, Esc, H...) son de esa pantalla: las maneja main.js.
+    if (document.querySelector('[data-iniciales]:not([hidden])')) return;
 
     if (TECLAS_IMPULSO.includes(evento.code)) {
       // El espacio sobre un botón con foco lo activa (por ejemplo
