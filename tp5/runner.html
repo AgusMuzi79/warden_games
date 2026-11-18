@@ -118,7 +118,7 @@
             <div class="screen__acciones">
               <button type="button" class="btn btn--secundario" data-mode="facil">Fácil (invencible)</button>
               <button type="button" class="btn btn--primario" data-mode="normal">Normal (3 vidas)</button>
-              <button type="button" class="btn btn--secundario" data-mode="dificil">Difícil (1 vida)</button>
+              <button type="button" class="btn btn--secundario" data-mode="infinito">Infinito (1 vida, sin meta)</button>
             </div>
           </div>
         </div>
@@ -170,7 +170,7 @@
         <section class="sobre-juego" aria-labelledby="sobre-juego-titulo">
           <h2 id="sobre-juego-titulo">Sobre el juego</h2>
           <p>Neon Rider es un runner de motos voladoras en una ciudad cyberpunk de noche. Tu moto avanza sola y vos controlás la altura: tenés que pasar entre los edificios que suben desde abajo y los carteles gigantes que cuelgan de arriba, juntar chips que suman puntos y llegar a la meta.</p>
-          <p>Hay tres modos: Fácil, donde la moto es invencible y sirve para aprender el recorrido; Normal, con tres vidas; y Difícil, con una sola. Los drones que patrullan el cielo no te hacen daño: si los tocás, estallan y el mundo se ralentiza unos segundos para darte aire.</p>
+          <p>Hay tres modos: Fácil, donde la moto es invencible y sirve para aprender el recorrido; Normal, con tres vidas; e Infinito, con una sola vida y sin meta: corrés hasta chocar y, si tu puntaje entra entre los 10 mejores, lo firmás con tus iniciales, como en las máquinas arcade. Los drones que patrullan el cielo no te hacen daño: si los tocás, estallan y el mundo se ralentiza unos segundos para darte aire.</p>
         </section>
 
         <!-- Galería animada (flip 3D). El motor genérico es js/galeria.js; la
@@ -184,7 +184,7 @@
           <div class="galeria__visor">
             <div class="galeria__carta" id="galeria-carta">
               <div class="galeria__cara galeria__cara--a">
-                <img class="galeria__img" id="galeria-img-a" src="assets/img/inicio.jpg" alt="Pantalla de inicio de Neon Rider: elegís el modo Fácil, Normal o Difícil sobre la ciudad de fondo.">
+                <img class="galeria__img" id="galeria-img-a" src="assets/img/inicio.jpg" alt="Pantalla de inicio de Neon Rider: elegís el modo de juego sobre la ciudad de fondo.">
               </div>
               <div class="galeria__cara galeria__cara--b">
                 <img class="galeria__img" id="galeria-img-b" src="assets/img/partida-en-juego.jpg" alt="Partida en curso: la moto vuela entre un edificio y un cartel colgante, con el puntaje y las vidas arriba.">
@@ -242,7 +242,7 @@
 
           <details class="ayuda__item" open>
             <summary>Objetivo</summary>
-            <p>Llegar a la meta sin quedarte sin vidas. La barra de arriba muestra cuánto falta para llegar.</p>
+            <p>En Fácil y Normal, llegar a la meta sin quedarte sin vidas: la barra de arriba muestra cuánto falta. En Infinito no hay meta: sumá todos los puntos que puedas antes de chocar.</p>
           </details>
 
           <details class="ayuda__item">
@@ -252,7 +252,7 @@
 
           <details class="ayuda__item">
             <summary>Modos</summary>
-            <p>Fácil: la moto es invencible y nunca se destruye. Normal: tenés 3 vidas, y tras un choque quedás unos segundos parpadeando, sin poder chocar. Difícil: una sola vida.</p>
+            <p>Fácil: la moto es invencible y nunca se destruye. Normal: tenés 3 vidas, y tras un choque quedás unos segundos parpadeando, sin poder chocar. Infinito: una sola vida, huecos más cerrados y sin meta; los 10 mejores puntajes quedan en la tabla de récords.</p>
           </details>
 
           <details class="ayuda__item">
@@ -262,7 +262,7 @@
 
           <details class="ayuda__item">
             <summary>Cuándo termina</summary>
-            <p>Ganás al llegar a la meta. Perdés al quedarte sin vidas: ves el puntaje y podés seguir jugando o volver al inicio.</p>
+            <p>En Fácil y Normal ganás al llegar a la meta. Perdés al quedarte sin vidas: ves el puntaje y podés seguir jugando o volver al inicio. En Infinito la partida termina al chocar, y si hiciste un récord cargás tus iniciales.</p>
           </details>
 
           <ul class="ayuda__atajos">
@@ -363,7 +363,7 @@
                 <p class="resena__puntaje"><span aria-hidden="true"><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i><i class="ph ph-star resena__estrella"></i></span><span class="sr-only">Puntaje: 5 de 5</span></p>
               </div>
             </div>
-            <p class="resena__texto">Difícil con una sola vida es puro nervio. Adictivo.</p>
+            <p class="resena__texto">Infinito con una sola vida es puro nervio. Adictivo.</p>
             <div class="resena__acciones">
               <button type="button" class="resena__util">Útil (6)</button>
               <button type="button" class="resena__responder">Responder</button>

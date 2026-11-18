@@ -1,5 +1,6 @@
 // hud.js — Puntaje, vidas, modo y progreso
 //
+// En Infinito no hay meta, así que la barra de progreso se oculta.
 // Recibe datos del estado y los escribe en el HUD solo cuando cambian
 // (guarda el último valor dibujado): así no se toca el DOM en cada cuadro
 // si no hace falta.
@@ -9,7 +10,7 @@ import { JUEGO } from './config.js';
 /**
  * Crea el HUD.
  * @param {HTMLElement} raiz .hud (adentro están #score, #lives, #mode y #progress)
- * @returns {{ dibujar: (datos: { puntaje: number, vidas: number, modo: string }) => void }}
+ * @returns {{ dibujar: (datos: { puntaje: number, vidas: number, modo: string, conMeta: boolean }) => void }}
  */
 export function crearHud(raiz) {
   const puntaje = raiz.querySelector('#score');
@@ -20,14 +21,18 @@ export function crearHud(raiz) {
   progreso.setAttribute('aria-valuemax', JUEGO.puntajeObjetivo);
 
   // Últimos valores dibujados (null = todavía nada).
-  const ultimo = { puntaje: null, vidas: null, modo: null };
+  const ultimo = { puntaje: null, vidas: null, modo: null, conMeta: null };
 
   return {
     /**
      * Actualiza lo que haya cambiado.
-     * @param {{ puntaje: number, vidas: number, modo: string }} datos
+     * @param {{ puntaje: number, vidas: number, modo: string, conMeta: boolean }} datos
      */
     dibujar(datos) {
+      if (datos.conMeta !== ultimo.conMeta) {
+        ultimo.conMeta = datos.conMeta;
+        progreso.hidden = !datos.conMeta;
+      }
       if (datos.puntaje !== ultimo.puntaje) {
         ultimo.puntaje = datos.puntaje;
         puntaje.textContent = datos.puntaje;

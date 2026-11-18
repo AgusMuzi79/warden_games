@@ -15,7 +15,7 @@ export const JUEGO = {
   alto: 540,
   techo: 0,              // y del borde de arriba
   suelo: 448,            // y donde empieza la franja del suelo (540 - 92)
-  puntajeObjetivo: 50,   // se gana al llegar acá (los 3 modos)
+  puntajeObjetivo: 50,   // se gana al llegar acá (Fácil y Normal; Infinito no tiene meta)
   dtMax: 0.05,           // tope del dt: si la pestaña se congela, no "teletransporta"
   duracionSacudon: 0.4,  // .is-shaking del #game
   esperaDerrota: 1.0,    // la explosión se ve antes de mostrar la pantalla de derrota
@@ -114,13 +114,15 @@ export const COLECCIONABLE = {
 
 /**
  * Modos. vidas: Infinity en Fácil (invencible: choca y se ven las
- * animaciones, pero no pierde). La curva del hueco: arranca en huecoInicial
- * y baja huecoBaja px por obstáculo pasado, hasta huecoMin.
+ * animaciones, pero no pierde). conMeta: se gana al llegar a
+ * JUEGO.puntajeObjetivo; en Infinito es false y la partida solo termina al
+ * chocar (el puntaje va a la tabla de récords). La curva del hueco: arranca
+ * en huecoInicial y baja huecoBaja px por obstáculo pasado, hasta huecoMin.
  */
 export const MODOS = {
-  facil: { nombre: 'Fácil', vidas: Infinity, huecoInicial: 220, huecoBaja: 4, huecoMin: 130 },
-  normal: { nombre: 'Normal', vidas: 3, huecoInicial: 220, huecoBaja: 4, huecoMin: 130 },
-  dificil: { nombre: 'Difícil', vidas: 1, huecoInicial: 190, huecoBaja: 6, huecoMin: 130 },
+  facil: { nombre: 'Fácil', vidas: Infinity, conMeta: true, huecoInicial: 220, huecoBaja: 4, huecoMin: 130 },
+  normal: { nombre: 'Normal', vidas: 3, conMeta: true, huecoInicial: 220, huecoBaja: 4, huecoMin: 130 },
+  infinito: { nombre: 'Infinito', vidas: 1, conMeta: false, huecoInicial: 190, huecoBaja: 6, huecoMin: 130 },
 };
 
 /** Imágenes que se precargan antes de mostrar el selector de modo. */

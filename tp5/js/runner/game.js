@@ -76,7 +76,7 @@ export function crearJuego(dom, alTerminar) {
 
   /**
    * Arranca una partida nueva en el modo elegido.
-   * @param {string} claveModo 'facil' | 'normal' | 'dificil'
+   * @param {string} claveModo 'facil' | 'normal' | 'infinito'
    */
   function iniciarPartida(claveModo) {
     loop.detener();
@@ -136,7 +136,9 @@ export function crearJuego(dom, alTerminar) {
     contarPasados();
     revisarChoques();
     borrarTerminadas();
-    if (estado.fase === 'jugando' && estado.puntaje >= JUEGO.puntajeObjetivo) terminar('victoria');
+    // En Infinito no hay meta: solo se termina al chocar.
+    if (estado.fase === 'jugando' && MODOS[estado.modo].conMeta
+      && estado.puntaje >= JUEGO.puntajeObjetivo) terminar('victoria');
   }
 
   /**
@@ -285,7 +287,7 @@ export function crearJuego(dom, alTerminar) {
   /**
    * Un choque que hace daño: una vida menos. La moto solo se destruye del
    * todo (tira de choque completa, .is-hit) con la última vida. Con vidas de
-   * sobra queda invulnerable y parpadea; en Normal y Difícil además muestra
+   * sobra queda invulnerable y parpadea; en Normal además muestra
    * los primeros cuadros de la tira (.is-damaged) y hay sacudón. En Fácil
    * (vidas infinitas) solo parpadea. Si chocó contra el techo o el suelo,
    * vuelve al centro para no volver a chocar enseguida.
@@ -342,7 +344,8 @@ export function crearJuego(dom, alTerminar) {
     estado.coleccionables.forEach(dibujarColeccionable);
     dibujarJugador(estado.jugador, dom.jugador, dom.hitboxJugador);
     dom.juego.classList.toggle('is-shaking', estado.tiempoSacudon > 0);
-    hud.dibujar({ puntaje: estado.puntaje, vidas: estado.vidas, modo: MODOS[estado.modo].nombre });
+    const modo = MODOS[estado.modo];
+    hud.dibujar({ puntaje: estado.puntaje, vidas: estado.vidas, modo: modo.nombre, conMeta: modo.conMeta });
   }
 
   return {

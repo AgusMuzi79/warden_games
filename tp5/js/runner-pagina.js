@@ -6,7 +6,7 @@
 // Son de 1920x1080 (16:9), la proporción de la galería. Si alguna no carga,
 // la galería sigue girando igual (galeria.js).
 const FOTOS_GALERIA_RUNNER = [
-  { src: 'assets/img/inicio.jpg', alt: 'Pantalla de inicio de Neon Rider: elegís el modo Fácil, Normal o Difícil sobre la ciudad de fondo.' },
+  { src: 'assets/img/inicio.jpg', alt: 'Pantalla de inicio de Neon Rider: elegís el modo de juego sobre la ciudad de fondo.' },
   { src: 'assets/img/partida-en-juego.jpg', alt: 'Partida en curso: la moto vuela entre un edificio y un cartel colgante, con el puntaje y las vidas arriba.' },
   { src: 'assets/img/victoria.jpg', alt: 'Pantalla de victoria al llegar a la meta, con el puntaje final.' },
   { src: 'assets/img/game-over.jpg', alt: 'Pantalla de Game over con la moto destruida y las opciones para seguir jugando o volver al inicio.' },
