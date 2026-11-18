@@ -80,7 +80,7 @@ elemento del DOM y del arreglo cuando se termina el tiempo.
 | `.is-debug` | `#game` | `game.js` | tecla H | hasta volver a apretar H. Muestra los `.hitbox` |
 | `.is-boost` | `.player` | `player.js` | cada impulso | `JUGADOR.duracionImpulso` (0,2 s); se reinicia con cada pulsación |
 | `.is-hit` | `.player` | `game.js` | choque que deja sin vidas (obstáculo, techo o suelo) | hasta la próxima partida: la moto destruida queda detrás del game over |
-| `.is-damaged` | `.player` | `game.js` | choque con vidas de sobra, en Normal y Difícil | `JUGADOR.duracionDanio` (0,4 s): los 2 primeros frames de la tira de choque |
+| `.is-damaged` | `.player` | `game.js` | choque con vidas de sobra, en Normal | `JUGADOR.duracionDanio` (0,4 s): los 2 primeros frames de la tira de choque |
 | `.is-invulnerable` | `.player` | `game.js` | después de un choque | `JUGADOR.duracionInvulnerable` (1,5 s) |
 | `.is-hit` | `.obstacle` | `game.js` | la moto chocó ese obstáculo | `OBSTACULO.duracionChoque` (0,5 s) |
 | `.is-exploding` | `.drone` | `game.js` | la moto tocó el drone (no hace daño: solo ralentiza el mundo) | `DRONE.duracionExplosion` (0,5 s), después se borra |
@@ -122,15 +122,28 @@ visible a la vez.
 | Id | Cuándo se ve | Botones (`data-action` / `data-mode`) |
 |---|---|---|
 | `#screen-loading` | al cargar, mientras se precargan las imágenes. `#loading-percent` muestra el % | — |
-| `#screen-start` | después de la carga y al elegir "Cambiar modo" | `data-mode="facil"`, `"normal"`, `"dificil"` |
+| `#screen-start` | después de la carga y al elegir "Cambiar modo" | `data-mode="facil"`, `"normal"`, `"infinito"`; `data-action="records"` (`#btn-records`) |
+| `#screen-records` | al elegir "Récords" en el inicio | `data-action="back"` (Volver al inicio, con el foco en `#btn-records`) |
 | `#screen-pause` | pausa | `data-action="resume"` (Continuar), `data-action="retry"` (Reiniciar), `data-action="menu"` (Cambiar modo) |
-| `#screen-win` | puntaje objetivo alcanzado | `data-action="retry"`, `data-action="menu"` |
-| `#screen-lose` | sin vidas (después de 1 s de explosión) | `data-action="retry"`, `data-action="menu"` |
+| `#screen-win` | puntaje objetivo alcanzado (Fácil y Normal; Infinito no tiene meta) | `data-action="retry"`, `data-action="menu"` |
+| `#screen-initials` | Infinito: al chocar, si el puntaje entra en el top 10 | flechas `data-letra="subir"`/`"bajar"` + `data-casilla="0..2"`, `data-action="save-initials"` (Guardar) |
+| `#screen-lose` | sin vidas (después de 1 s de explosión; en Infinito, después de las iniciales si hubo récord) | `data-action="retry"`, `data-action="menu"` |
 
 Las pantallas llevan un `.screen__panel` adentro. Dentro de win y lose,
 `.screen__score` muestra el puntaje final. La derrota es "Game over": la escena
 queda visible detrás y el panel ofrece `data-action="retry"` (seguir jugando) y
 `data-action="menu"`.
+
+Récords (solo Infinito, `records.js`): `localStorage` `warden-neon-rider-records` =
+`{ records: [{ iniciales, puntaje }], ultimas }`, top 10 de mayor a menor (en un
+empate queda arriba el más viejo; entra solo un puntaje > 0). La tabla se dibuja en
+los `[data-records]` de `#screen-records` y `#screen-lose` (`.records__tabla`, el
+récord nuevo con `.records__fila--nueva`; sin récords, `.records__vacio`). En
+`#screen-lose` se ve solo en Infinito, y el panel suma `.screen__panel--records`
+(más compacto). Las casillas de las iniciales son `.iniciales__letra` con
+`role="spinbutton"` (`aria-valuenow` 0–25 y `aria-valuetext` con la letra); la
+primera lleva `data-autofocus`, que `mostrarPantalla()` enfoca antes que el primer
+botón.
 
 Cambios de la Fase B que tocan la lógica: el drone no resta vida (solo
 ralentiza `MUNDO.duracionRalentizado` s y explota); en Fácil la moto no
@@ -147,7 +160,7 @@ al juego. Los ids no cambian.
 | `#score` | puntaje (número) |
 | `#lives` (`.hud__vidas`) | un `<i class="ph ph-heart hud__vida">` por vida; en Fácil, un `<span class="hud__vida hud__vida--infinita">∞</span>`. `aria-label` con la cantidad |
 | `#mode` | nombre del modo |
-| `#progress` | `role="progressbar"` con `aria-valuenow`; la barra interna escala con `scaleX` |
+| `#progress` | `role="progressbar"` con `aria-valuenow`; la barra interna escala con `scaleX`. En Infinito (`conMeta: false`) lleva `hidden` |
 
 ## Entrada
 
@@ -157,3 +170,4 @@ al juego. Los ids no cambian.
 | P, Esc | pausa / reanudar |
 | H | mostrar u ocultar hitboxes |
 | Perder el foco de la pestaña | pausa automática |
+| En `#screen-initials` (`[data-iniciales]` visible) | `input.js` no toma ninguna tecla; las maneja `main.js`: ↑/↓ cambian la letra (Z↔A), ←/→ la casilla, una letra A–Z se escribe y avanza, Backspace vuelve, Enter guarda |

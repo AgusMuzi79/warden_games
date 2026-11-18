@@ -103,3 +103,34 @@ El detalle de la implementación (fases, contrato DOM, valores de config) está 
 - **Qué:** fondos, edificios y carteles: *Warped City* de ansimuz. Moto, chip, portada y
   capturas: generados con IA y retocados por el equipo.
 - **Pendiente:** verificar y escribir la licencia de Warped City.
+
+### Difícil pasa a ser Infinito
+- **Qué:** el tercer modo (`MODOS.infinito`) tiene 1 vida y los mismos huecos que tenía
+  Difícil (190 / 6 / 130), pero no tiene meta (`conMeta: false`): la partida solo termina
+  al chocar. El HUD oculta la barra de progreso, que no tiene a qué llegar.
+- **Por qué:** decisión de Agus. Con una sola vida y una meta de 50 puntos, el modo se
+  terminaba enseguida; sin meta, el puntaje pasa a ser el desafío y tiene sentido
+  guardarlo en una tabla.
+- **Descartado:** sumar un 4.º modo (más botones en el inicio para algo que ya cubría
+  Difícil).
+
+### Récords arcade con iniciales (solo Infinito)
+- **Qué:** `records.js` (sin DOM) guarda en `localStorage` (`warden-neon-rider-records`)
+  los 10 mejores puntajes de mayor a menor, cada uno con 3 iniciales A–Z, y las últimas
+  iniciales usadas. Al chocar, si el puntaje es mayor a 0 y entra en el top 10, aparece
+  "¡Nuevo récord!" con tres casillas: ↑/↓ cambian la letra, ←/→ la casilla, tipear una
+  letra la pone y avanza, Backspace vuelve y Enter guarda; con mouse, flechas por casilla
+  y "Guardar". Después, el game over muestra la tabla con el récord nuevo resaltado. El
+  inicio suma un botón "Récords".
+- **Por qué:** es como en las máquinas arcade, y 3 letras entran en la tabla sin cortar
+  nada. En un empate queda arriba el récord más viejo (el que llegó primero). Fácil y
+  Normal no guardan récords: Fácil no se puede perder y Normal termina en la meta, así
+  que los puntajes no se comparan con los de Infinito.
+- **Accesibilidad:** cada casilla es un `role="spinbutton"` con la letra en
+  `aria-valuetext`, y el foco arranca en la primera. Mientras la pantalla está a la
+  vista, `input.js` no toma las teclas (`[data-iniciales]`): si no, H prendería las
+  hitboxes y Esc intentaría pausar mientras se escribe.
+- **Si el storage falla** (bloqueado o con datos rotos), se ignora con `try/catch`: el
+  juego anda igual, sin récords guardados.
+- **Descartado:** un `<input>` de texto (no se siente arcade y hay que validar
+  caracteres) y guardar un nombre libre (no entra en la tabla del panel).

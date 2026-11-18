@@ -48,13 +48,13 @@ El juego se puede jugar de punta a punta en los 3 modos en `tp5/runner.html`.
 - No hizo falta adelantar nada de la Fase B para que funcione.
 
 ### Valores actuales de `config.js`
-- **Juego:** 960×540, suelo en y = 448, objetivo 50 puntos, `dtMax` 0,05, temblor 0,4 s y 1 s antes de mostrar la derrota.
+- **Juego:** 960×540, suelo en y = 448, objetivo 50 puntos (Fácil y Normal), `dtMax` 0,05, temblor 0,4 s y 1 s antes de mostrar la derrota.
 - **Mundo:** velocidad base 220 px/s; al chocar un drone baja a ×0,45 durante 1,5 s. Factores de capa 0,1 / 0,3 / 0,6 / 1, con tiles de 768 / 768 / 2018 / 64.
 - **Moto:** x 240, gravedad 1500, impulso 430, caída máxima 620, rotación de 0,07° por px/s (entre -25° y 55°), hitbox 14 / 16 / 64×30. Impulso 0,2 s, choque 0,6 s, invulnerabilidad 1,5 s.
 - **Obstáculos:** separación 280–420 px, salto del centro ±150, márgenes de 60 arriba y 80 abajo, primer par en x 1120, margen de hitbox de 10 (14 en el tope del edificio), reacción al choque 0,5 s.
 - **Drone:** aparece en el 35 % de los casos desde el 2.º par, corrido 70 px, vaivén de 18 px a 0,8 Hz, explosión de 0,5 s.
 - **Chip:** aparece en el 40 % de los casos, da +3, se recoge en 0,4 s y el "+3" dura 0,8 s.
-- **Modos (hueco inicial / baja por par / mínimo):** Fácil ∞ vidas, 220 / 4 / 130 · Normal 3 vidas, 220 / 4 / 130 · Difícil 1 vida, 190 / 6 / 130.
+- **Modos (hueco inicial / baja por par / mínimo):** Fácil ∞ vidas, 220 / 4 / 130 · Normal 3 vidas, 220 / 4 / 130 · Infinito 1 vida, 190 / 6 / 130, sin meta (`conMeta: false`): termina al chocar y guarda el top 10 de récords con iniciales (`records.js`).
 
 ### Criterios de aceptación al cerrar la Fase A
 - [x] Un solo `requestAnimationFrame` (`loop.js`) y ningún `setInterval` ni `setTimeout`.
@@ -64,7 +64,7 @@ El juego se puede jugar de punta a punta en los 3 modos en `tp5/runner.html`.
 - [x] Parallax de 4 capas con velocidades proporcionales; el suelo va a la velocidad de los obstáculos y acompaña la ralentización.
 - [x] 2 elementos animados con efectos distintos que no terminan el juego por sí solos (el chip todavía es provisorio).
 - [x] Separación horizontal variable, hueco que se achica y alturas variables.
-- [x] El puntaje decide el final; modos Fácil, Normal y Difícil.
+- [x] El puntaje decide el final; modos Fácil, Normal y Difícil (Difícil pasó a ser Infinito, ver más abajo).
 - [x] Hitboxes visibles con `H`.
 - [x] Lo que sale de pantalla se borra del DOM y del arreglo.
 - [x] Precarga antes de empezar.
@@ -100,3 +100,9 @@ Plan original (el detalle y los motivos están en `tp5/DECISIONES.md`):
 - Verificar la licencia de Warped City (ansimuz) y escribirla en los créditos.
 - Jugar los 3 modos completos y ajustar `config.js` si hace falta.
 - Torreta (`turret.png`) sin usar.
+
+## Modo Infinito y récords (2026-11-18)
+
+- Difícil pasa a ser **Infinito** (`MODOS.infinito`): 1 vida, los mismos huecos, sin meta. El HUD oculta la barra de progreso.
+- Récords arcade solo en Infinito: top 10 en `localStorage` (`warden-neon-rider-records`), iniciales de 3 letras A–Z, botón "Récords" en el inicio y tabla en el game over. Detalle en `tp5/DECISIONES.md` y `docs/tp5-contrato.md`.
+- La captura `inicio.jpg` de la galería todavía muestra el botón "Difícil": hay que rehacerla.
