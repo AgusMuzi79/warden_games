@@ -39,4 +39,5 @@ input, html, css, módulo nuevo).
 - T2 hecho: commit f2d8554 (`feat(tp5): récords arcade con iniciales en el modo Infinito`).
 - T3 hecho: commit de docs (ver `git log`), con este documento.
 - Verificado: `node --check` de los módulos tocados y script de Node sobre `records.js` (orden, top 10, empate, puntaje 0, JSON roto, storage que falla): OK.
-- Pendiente: prueba en Chrome (orquestador) y rehacer la captura `inicio.jpg` (muestra "Difícil").
+- Chrome (orquestador, 2026-11-18): Infinito con piloto automático llegó a 39 → `#screen-initials` con foco en la 1.ª letra; teclado real ↑ ↑ → g u = "CGU", sin scroll ni debug; Enter guarda y `#screen-lose` muestra la tabla con "(tu récord)"; tras recargar persiste; con 10 filas el panel mide 443 px (entra en 540). OK.
+- Pendiente: rehacer la captura `inicio.jpg` (muestra "Difícil").
