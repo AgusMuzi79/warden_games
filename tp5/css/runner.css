@@ -525,8 +525,10 @@
   to   { opacity: 0; }
 }
 
-/* En pausa se congela cualquier animación CSS de adentro. */
-.game.is-paused * {
+/* En pausa se congela cualquier animación CSS de adentro, menos las de
+   las pantallas: el panel entra con modal-pop (arranca en opacity 0) y,
+   congelado en su primer cuadro, la pantalla de pausa no se veía. */
+.game.is-paused :not(.screen, .screen *) {
   animation-play-state: paused;
 }
 

@@ -102,7 +102,12 @@ El detalle de la implementación (fases, contrato DOM, valores de config) está 
 ### Créditos
 - **Qué:** fondos, edificios y carteles: *Warped City* de ansimuz. Moto, chip, portada y
   capturas: generados con IA y retocados por el equipo.
-- **Pendiente:** verificar y escribir la licencia de Warped City.
+- **Licencia:** Warped City es CC0 1.0 (dominio público), según la página del pack
+  (https://ansimuz.itch.io/warped-city, sección "Asset license"). No pide atribución y
+  permite cualquier uso; lo nombramos igual en los créditos, con el link al pack y a la
+  licencia.
+- **Descartado:** no nombrarlo por ser CC0. Mostrar de dónde salen los fondos es lo
+  honesto, y en la defensa se puede explicar qué licencia tiene.
 
 ### Difícil pasa a ser Infinito
 - **Qué:** el tercer modo (`MODOS.infinito`) tiene 1 vida y los mismos huecos que tenía
@@ -134,3 +139,14 @@ El detalle de la implementación (fases, contrato DOM, valores de config) está 
   juego anda igual, sin récords guardados.
 - **Descartado:** un `<input>` de texto (no se siente arcade y hay que validar
   caracteres) y guardar un nombre libre (no entra en la tabla del panel).
+
+### La pantalla de pausa no se veía (bug corregido)
+- **Qué:** la regla que congela las animaciones en pausa pasó de `.game.is-paused *` a
+  `.game.is-paused :not(.screen, .screen *)` (`runner.css`).
+- **Por qué:** la pantalla de pausa vive dentro de `#game`, así que la regla vieja también
+  congelaba la animación de entrada del panel (`modal-pop`, que arranca en `opacity: 0`).
+  El panel quedaba quieto en su primer cuadro: invisible, aunque la pantalla estaba
+  abierta y los botones se podían usar con el teclado. Ahora se congela el juego (moto,
+  drones, carteles, parallax) y las pantallas animan normal, incluido el hover de sus botones.
+- **Descartado:** sacar la pantalla de pausa de `#game`. Cambia el HTML y el
+  posicionamiento de todas las pantallas para arreglar una sola regla de CSS.
