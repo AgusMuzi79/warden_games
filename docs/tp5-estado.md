@@ -97,7 +97,7 @@ Plan original (el detalle y los motivos están en `tp5/DECISIONES.md`):
 - `main.js` apunta a `.hud` fuera de `#game` y escucha el evento `runner:pausar` (lo dispara la ayuda).
 
 ### Pendientes
-- Verificar la licencia de Warped City (ansimuz) y escribirla en los créditos.
+- ✅ Licencia de Warped City verificada: CC0 1.0, escrita en los créditos.
 - Jugar los 3 modos completos y ajustar `config.js` si hace falta.
 - Torreta (`turret.png`) sin usar.
 
@@ -105,4 +105,4 @@ Plan original (el detalle y los motivos están en `tp5/DECISIONES.md`):
 
 - Difícil pasa a ser **Infinito** (`MODOS.infinito`): 1 vida, los mismos huecos, sin meta. El HUD oculta la barra de progreso.
 - Récords arcade solo en Infinito: top 10 en `localStorage` (`warden-neon-rider-records`), iniciales de 3 letras A–Z, botón "Récords" en el inicio y tabla en el game over. Detalle en `tp5/DECISIONES.md` y `docs/tp5-contrato.md`.
-- La captura `inicio.jpg` de la galería todavía muestra el botón "Difícil": hay que rehacerla.
+- ✅ La captura `inicio.jpg` de la galería se rehizo con el botón "Infinito" (1200×675, sacada en Chrome).
